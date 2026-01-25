@@ -1,6 +1,9 @@
 import React, { useState, useMemo } from 'react';
-// Importation directe pour éviter les conflits de minification en production
-import { Trophy, Star, Search, ShieldCheck, ChevronLeft, Globe, Lock, Info, Sparkles, ShieldQuestion, ArrowRight, Zap, CheckCircle2, Unlock, ShieldAlert, Eye, Code, Database, ListChecks, Download, Share2, Rocket } from 'lucide-react';
+import { 
+  Trophy, Star, Search, ShieldCheck, ChevronLeft, Globe, Lock, 
+  ShieldQuestion, ArrowRight, Code, Database, ListChecks, 
+  Download, Share2, Rocket, ShieldAlert, Unlock 
+} from 'lucide-react';
 
 // --- COMPOSANTS UI ---
 
@@ -242,5 +245,4 @@ const App = () => {
   );
 };
 
-// --- EXPORT PAR DÉFAUT (L'ENVIRONNEMENT GÈRE LE CREATE_ROOT) ---
 export default App;
