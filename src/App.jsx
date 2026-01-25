@@ -86,9 +86,9 @@ const App = () => {
     { id: 6, name: "France Identité", category: "Service Public", grade: "A", color: "bg-blue-800", icon: "🇫🇷", reason: "Hébergement sécurisé en France, code audité par l'ANSSI.", details: { infra: "France", code: "Souverain", data: "Identité sécurisée" } },
     { id: 7, name: "Instagram", category: "Réseaux Sociaux", grade: "D", color: "bg-pink-600", icon: "📸", reason: "Exploitation commerciale des données visuelles à des fins de ciblage publicitaire.", details: { infra: "USA", code: "Fermé", data: "Publicité ciblée" } },
     { id: 10, name: "Doctolib", category: "Santé", grade: "A", color: "bg-blue-500", icon: "🩺", reason: "Données de santé hautement protégées, hébergement HDS en Europe.", details: { infra: "Europe (HDS)", code: "Propriétaire", data: "Données de santé" } },
-    { id: 16, name: "Le Chat (Mistral)", category: "IA Française", grade: "A", color: "bg-orange-400", icon: "🐈", reason: "Alternative souveraine française respectant la confidentialité européenne.", details: { infra: "France/UE", code: "Ouvert/Audité", data: "Confidentialité UE" } },
-    { id: 1001, name: "Signal", category: "Messagerie Chiffrée", grade: "A", color: "bg-blue-600", icon: "💬", reason: "Fondation à but non lucratif, code 100% open-source.", details: { infra: "Distribué", code: "Open Source", data: "Zéro métadonnées" } },
-    { id: 1002, name: "Proton Mail", category: "Email Sécurisé", grade: "A", color: "bg-purple-700", icon: "📧", reason: "Juridiction Suisse, chiffrement zero-knowledge.", details: { infra: "Suisse", code: "Open Source", data: "Chiffré" } }
+    { id: 16, name: "Le Chat (Mistral)", category: "IA / Productivité", grade: "A", color: "bg-orange-400", icon: "🐈", reason: "Alternative souveraine française respectant la confidentialité européenne.", details: { infra: "France/UE", code: "Ouvert/Audité", data: "Confidentialité UE" } },
+    { id: 1001, name: "Signal", category: "Communication", grade: "A", color: "bg-blue-600", icon: "💬", reason: "Fondation à but non lucratif, code 100% open-source.", details: { infra: "Distribué", code: "Open Source", data: "Zéro métadonnées" } },
+    { id: 1002, name: "Proton Mail", category: "Communication", grade: "A", color: "bg-purple-700", icon: "📧", reason: "Juridiction Suisse, chiffrement zero-knowledge.", details: { infra: "Suisse", code: "Open Source", data: "Chiffré" } }
   ], []);
 
   const topApps = useMemo(() => allAppsData.filter(a => a.id < 100), [allAppsData]);
@@ -109,10 +109,16 @@ const App = () => {
     });
   };
 
+  // Trouver une alternative de grade A pour l'application sélectionnée
+  const suggestedAlternative = useMemo(() => {
+    if (!selectedApp || selectedApp.grade === 'A') return null;
+    return allAppsData.find(app => app.category === selectedApp.category && app.grade === 'A' && app.id !== selectedApp.id);
+  }, [selectedApp, allAppsData]);
+
   // Vue détaillée de l'appli
   if (selectedApp) {
     return (
-      <div className="min-h-screen bg-white font-sans text-slate-900 animate-in fade-in duration-300">
+      <div className="min-h-screen bg-white font-sans text-slate-900 animate-in fade-in duration-300 pb-20">
         <header className="px-4 py-6 flex items-center justify-between border-b border-slate-50 sticky top-0 bg-white z-50">
           <button onClick={() => setSelectedApp(null)} className="p-2 -ml-2 hover:bg-slate-50 rounded-full text-slate-400"><ChevronLeft size={24} /></button>
           <div className="flex flex-col items-center">
@@ -131,7 +137,30 @@ const App = () => {
             <ScoreIndicator grade={selectedApp.grade} size="large" />
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-6">
+            {/* Alternative Proposée (Nouveau) */}
+            {suggestedAlternative && (
+              <section className="bg-emerald-50 rounded-[2rem] p-6 border border-emerald-100 ring-2 ring-emerald-500/10">
+                <h3 className="flex items-center gap-2 font-black text-sm uppercase tracking-tight text-emerald-800 mb-4">
+                  <Sparkles size={18} className="text-emerald-600" /> Alternative proposée :
+                </h3>
+                <div 
+                  onClick={() => setSelectedApp(suggestedAlternative)}
+                  className="bg-white rounded-2xl border border-emerald-100 p-4 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all active:scale-[0.98]"
+                >
+                  <div className={`${suggestedAlternative.color} w-10 h-10 rounded-xl flex items-center justify-center text-xl text-white shadow-inner`}>
+                    {suggestedAlternative.icon}
+                  </div>
+                  <div className="flex-grow min-w-0">
+                    <h3 className="font-black text-sm truncate">{suggestedAlternative.name}</h3>
+                    <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Recommandé</p>
+                  </div>
+                  <div className="bg-[#006837] text-white w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm shadow-sm">A</div>
+                </div>
+                <p className="text-[10px] text-emerald-700/70 mt-3 font-bold text-center italic">Cette solution respecte les standards de souveraineté A.</p>
+              </section>
+            )}
+
             <section className="bg-slate-50 rounded-[2rem] p-6 border border-slate-100">
               <h3 className="flex items-center gap-2 font-black text-sm uppercase tracking-tight text-slate-800 mb-4">
                 <ShieldCheck size={18} className="text-indigo-600" /> Analyse du score
@@ -166,7 +195,7 @@ const App = () => {
             </div>
           </div>
 
-          <button onClick={() => setSelectedApp(null)} className="w-full mt-12 py-5 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl">
+          <button onClick={() => setSelectedApp(null)} className="w-full mt-10 py-5 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl">
             Fermer
           </button>
         </main>
