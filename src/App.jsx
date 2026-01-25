@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
-import { Trophy, Star, Search, ShieldCheck, ChevronLeft, Globe, Lock, Info, Sparkles, ShieldQuestion, ArrowRight, Zap, CheckCircle2, Unlock, ShieldAlert, Eye, Code, Database, ListChecks, Download, Share2, Rocket } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Trophy, Search, ShieldCheck, ChevronLeft, Globe, Lock, Info, Sparkles, ShieldQuestion, ArrowRight, Zap, CheckCircle2, Unlock, ShieldAlert, Eye, Code, Database, ListChecks, Download, Share2, Rocket, RefreshCw, TrendingUp, TrendingDown, Settings2, Trash2, HelpCircle, ArrowUpRight, PlusCircle, CheckCircle } from 'lucide-react';
 
-// Composant Logo inspiré de l'image utilisateur
+// Composant Logo
 const TrustiLogo = ({ className = "w-10 h-10" }) => (
   <div className={`relative flex items-center justify-center ${className}`}>
     <div className="absolute inset-0 flex items-center justify-center">
@@ -44,18 +44,13 @@ const ScoreIndicator = ({ grade, size = "small" }) => {
   }
 
   return (
-    <div className="flex items-center bg-slate-100 rounded-full p-0.5 h-8 w-32 relative overflow-hidden">
+    <div className="flex items-center bg-slate-100 rounded-full p-0.5 h-8 w-24 relative overflow-hidden">
       {grades.map((g) => (
         <div 
           key={g} 
           className={`flex-1 h-full flex items-center justify-center transition-all duration-300 ${grade === g ? colors[g] + ' text-white scale-110 z-10 rounded-full shadow-md' : 'text-slate-400'}`}
         >
           <span className="text-[10px] font-black">{g}</span>
-          {grade === g && (
-            <div className="ml-0.5 opacity-80">
-              {['A', 'B'].includes(g) ? <Lock size={8} /> : g === 'E' ? <Unlock size={8} /> : <Lock size={8} className="opacity-50" />}
-            </div>
-          )}
         </div>
       ))}
     </div>
@@ -65,39 +60,74 @@ const ScoreIndicator = ({ grade, size = "small" }) => {
 const App = () => {
   const [activeTab, setActiveTab] = useState("top"); 
   const [searchTerm, setSearchTerm] = useState("");
-  const [myApps, setMyApps] = useState(new Set());
+  const [myApps, setMyApps] = useState(new Set([1, 4, 8, 9])); // Par défaut quelques apps GAFAM
   const [showLegend, setShowLegend] = useState(false);
   const [selectedApp, setSelectedApp] = useState(null);
-  
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSync, setLastSync] = useState(new Date().toLocaleTimeString());
+  const [showMigrationGuide, setShowMigrationGuide] = useState(true);
+
+  // Simulation de base de données dynamique avec ajouts JustGeek
+  const [appsData, setAppsData] = useState([
+    // TOP APPS (GAFAM/Standards)
+    { id: 1, name: "ChatGPT", category: "IA / Productivité", grade: "B", color: "bg-slate-800", icon: "🤖", downloads: 500000000, trend: "up", reason: "Hébergé aux USA mais propose des options de confidentialité avancées.", details: { infra: "Hybride UE/USA", code: "Propriétaire", data: "Usage IA régulé" } },
+    { id: 2, name: "Temu", category: "E-commerce", grade: "E", color: "bg-orange-600", icon: "🛍️", downloads: 750000000, trend: "up", reason: "Collecte massive de données et opacité totale sur les métadonnées.", details: { infra: "Hors UE", code: "Fermé", data: "Collecte aggressive" } },
+    { id: 4, name: "TikTok", category: "Réseaux Sociaux", grade: "E", color: "bg-black", icon: "📱", downloads: 2000000000, trend: "down", reason: "Transfert de données vers des juridictions non-équivalentes RGPD.", details: { infra: "Hors UE", code: "Fermé", data: "Profilage massif" } },
+    { id: 5, name: "WhatsApp", category: "Communication", grade: "C", color: "bg-green-500", icon: "💬", downloads: 5000000000, trend: "stable", reason: "Chiffrement de bout en bout mais partage de métadonnées avec Meta.", details: { infra: "Hybride", code: "Mixte", data: "Métadonnées collectées" } },
+    { id: 7, name: "Instagram", category: "Réseaux Sociaux", grade: "D", color: "bg-pink-600", icon: "📸", downloads: 1500000000, trend: "stable", reason: "Exploitation commerciale des données visuelles pour ciblage publicitaire.", details: { infra: "USA", code: "Fermé", data: "Publicité ciblée" } },
+    { id: 8, name: "Google Chrome", category: "Navigateur", grade: "D", color: "bg-white", icon: "🌐", downloads: 4000000000, trend: "stable", reason: "Suivi intensif de l'historique et des habitudes par Google.", details: { infra: "USA", code: "Moteur libre / Enveloppe fermée", data: "Tracking" } },
+    { id: 9, name: "OneDrive", category: "Cloud / Stockage", grade: "D", color: "bg-blue-600", icon: "☁️", downloads: 1000000000, trend: "stable", reason: "Soumis au Cloud Act américain, lecture possible des fichiers.", details: { infra: "USA", code: "Propriétaire", data: "Analyse Cloud" } },
+    
+    // ALTERNATIVES SOUVERAINES (Inspirées de JustGeek & autres)
+    { id: 1001, name: "Signal", category: "Communication", grade: "A", color: "bg-blue-600", icon: "💬", downloads: 100000000, trend: "up", reason: "Fondation à but non lucratif, code 100% open-source.", details: { infra: "Distribué", code: "Open Source", data: "Zéro métadonnées" } },
+    { id: 1002, name: "Proton Mail", category: "Communication", grade: "A", color: "bg-purple-700", icon: "📧", downloads: 50000000, trend: "up", reason: "Juridiction Suisse, chiffrement zero-knowledge.", details: { infra: "Suisse", code: "Open Source", data: "Chiffré" } },
+    { id: 1003, name: "Brave", category: "Navigateur", grade: "A", color: "bg-orange-500", icon: "🦁", downloads: 60000000, trend: "up", reason: "Bloqueur natif de pubs et trackers. Respect strict de la vie privée.", details: { infra: "Local", code: "Open Source", data: "Anonymisé" } },
+    { id: 1004, name: "Qwant", category: "Moteur de recherche", grade: "A", color: "bg-blue-400", icon: "🔍", downloads: 10000000, trend: "up", reason: "Moteur français qui ne trace pas ses utilisateurs et respecte l'anonymat.", details: { infra: "France/UE", code: "Propriétaire/Audité", data: "Zéro Tracking" } },
+    { id: 1005, name: "DuckDuckGo", category: "Moteur de recherche", grade: "A", color: "bg-orange-400", icon: "🦆", downloads: 100000000, trend: "up", reason: "Ne stocke aucune information personnelle. Pas de bulles de filtrage.", details: { infra: "USA (Indépendant)", code: "Mixte", data: "Privé" } },
+    { id: 1006, name: "pCloud", category: "Cloud / Stockage", grade: "A", color: "bg-blue-500", icon: "💾", downloads: 20000000, trend: "up", reason: "Sécurisé, basé en Suisse. Option Crypto Pass pour chiffrement côté client.", details: { infra: "Suisse/UE", code: "Propriétaire", data: "Chiffrement client" } },
+    { id: 1007, name: "Infomaniak kDrive", category: "Cloud / Stockage", grade: "A", color: "bg-blue-800", icon: "🏔️", downloads: 5000000, trend: "up", reason: "Hébergement 100% suisse, écologique et indépendant des géants du Web.", details: { infra: "Suisse", code: "Audit régulier", data: "Respect RGPD+" } },
+    { id: 1008, name: "OnlyOffice", category: "Productivité", grade: "A", color: "bg-orange-600", icon: "📑", downloads: 10000000, trend: "up", reason: "Alternative complète à MS Office. Open source et compatible formats standard.", details: { infra: "UE", code: "Open Source", data: "Souple/Privé" } },
+    { id: 1009, name: "Bitwarden", category: "Sécurité", grade: "A", color: "bg-indigo-500", icon: "🔑", downloads: 15000000, trend: "up", reason: "Gestionnaire de mots de passe open source hautement sécurisé.", details: { infra: "Cloud/Auto-hébergé", code: "Open Source", data: "Zero Knowledge" } },
+    { id: 1010, name: "Mistral (Le Chat)", category: "IA / Productivité", grade: "A", color: "bg-orange-200", icon: "🐈", downloads: 2000000, trend: "up", reason: "IA Française performante, alternative directe à OpenAI.", details: { infra: "France", code: "Ouvert/Audité", data: "Confidentialité UE" } }
+  ]);
+
   const scoreData = {
-    A: { color: "bg-[#006837]", label: "Gold Standard", desc: "100 % européenne, open‑source, aucune collecte.", criteria: "• Serveurs UE.\n• Open-source.\n• Chiffrement total." },
-    B: { color: "bg-[#8dc63f]", label: "Fiable", desc: "Européenne, open‑source, collecte limitée.", criteria: "• Serveurs UE.\n• Majorité Open-source.\n• Collecte technique uniquement." },
-    C: { color: "bg-[#fbb03b]", label: "Modéré", desc: "Mixte UE, code partiellement ouvert.", criteria: "• Infrastructure hybride.\n• Code propriétaire audité.\n• Collecte fonctionnelle." },
-    D: { color: "bg-[#f7931e]", label: "Risqué", desc: "Hors UE, code fermé, collecte importante.", criteria: "• Hébergé hors UE.\n• Code fermé.\n• Profilage publicitaire." },
-    E: { color: "bg-[#c1272d]", label: "Alerte", desc: "Hors UE, source fermée, collecte opaque.", criteria: "• Totalement hors UE.\n• Aucune transparence.\n• Collecte massive." }
+    A: { color: "bg-[#006837]", label: "Gold Standard", desc: "100% européenne ou juridiction sûre, open-source, aucune collecte.", criteria: "• Serveurs UE/Suisse\n• Code ouvert\n• Chiffrement total" },
+    B: { color: "bg-[#8dc63f]", label: "Fiable", desc: "Européenne, open-source, collecte limitée.", criteria: "• Majorité UE\n• Code audité\n• Collecte technique" },
+    C: { color: "bg-[#fbb03b]", label: "Modéré", desc: "Mixte UE, code partiellement ouvert.", criteria: "• Hybride\n• Code propriétaire\n• Collecte fonctionnelle" },
+    D: { color: "bg-[#f7931e]", label: "Risqué", desc: "Hors UE, code fermé, collecte importante.", criteria: "• Hors UE\n• Code opaque\n• Profilage publicitaire" },
+    E: { color: "bg-[#c1272d]", label: "Alerte", desc: "Hors UE, source fermée, collecte opaque.", criteria: "• Juridiction inconnue\n• Aucun audit\n• Exploitation massive" }
   };
 
-  const allAppsData = useMemo(() => [
-    { id: 1, name: "ChatGPT", category: "IA / Productivité", grade: "B", color: "bg-slate-800", icon: "🤖", reason: "Hébergé par OpenAI (USA) mais propose des options de confidentialité avancées.", details: { infra: "Hybride UE/USA", code: "Propriétaire", data: "Usage IA régulé" } },
-    { id: 2, name: "Temu", category: "E-commerce", grade: "E", color: "bg-orange-600", icon: "🛍️", reason: "Collecte massive de données comportementales et opacité totale sur les métadonnées.", details: { infra: "Hors UE", code: "Fermé", data: "Collecte aggressive" } },
-    { id: 3, name: "Wero", category: "Finance / Paiement", grade: "A", color: "bg-indigo-600", icon: "💳", reason: "Solution européenne souveraine, conforme RGPD stricte, serveurs 100% européens.", details: { infra: "100% UE", code: "Audité", data: "Zéro revente" } },
-    { id: 4, name: "TikTok", category: "Réseaux Sociaux", grade: "E", color: "bg-black", icon: "📱", reason: "Transfert de données vers des juridictions non-équivalentes RGPD.", details: { infra: "Hors UE", code: "Fermé", data: "Profilage massif" } },
-    { id: 5, name: "WhatsApp", category: "Communication", grade: "C", color: "bg-green-500", icon: "💬", reason: "Chiffrement de bout en bout mais partage de métadonnées avec Meta.", details: { infra: "Hybride", code: "Mixte", data: "Métadonnées collectées" } },
-    { id: 6, name: "France Identité", category: "Service Public", grade: "A", color: "bg-blue-800", icon: "🇫🇷", reason: "Hébergement sécurisé en France, code audité par l'ANSSI.", details: { infra: "France", code: "Souverain", data: "Identité sécurisée" } },
-    { id: 7, name: "Instagram", category: "Réseaux Sociaux", grade: "D", color: "bg-pink-600", icon: "📸", reason: "Exploitation commerciale des données visuelles à des fins de ciblage publicitaire.", details: { infra: "USA", code: "Fermé", data: "Publicité ciblée" } },
-    { id: 10, name: "Doctolib", category: "Santé", grade: "A", color: "bg-blue-500", icon: "🩺", reason: "Données de santé hautement protégées, hébergement HDS en Europe.", details: { infra: "Europe (HDS)", code: "Propriétaire", data: "Données de santé" } },
-    { id: 16, name: "Le Chat (Mistral)", category: "IA / Productivité", grade: "A", color: "bg-orange-400", icon: "🐈", reason: "Alternative souveraine française respectant la confidentialité européenne.", details: { infra: "France/UE", code: "Ouvert/Audité", data: "Confidentialité UE" } },
-    { id: 1001, name: "Signal", category: "Communication", grade: "A", color: "bg-blue-600", icon: "💬", reason: "Fondation à but non lucratif, code 100% open-source.", details: { infra: "Distribué", code: "Open Source", data: "Zéro métadonnées" } },
-    { id: 1002, name: "Proton Mail", category: "Communication", grade: "A", color: "bg-purple-700", icon: "📧", reason: "Juridiction Suisse, chiffrement zero-knowledge.", details: { infra: "Suisse", code: "Open Source", data: "Chiffré" } }
-  ], []);
+  const formatDownloads = (num) => {
+    if (num >= 1000000000) return (num / 1000000000).toFixed(1) + 'B';
+    if (num >= 1000000) return (num / 1000000).toFixed(0) + 'M';
+    return num.toLocaleString();
+  };
 
-  const topApps = useMemo(() => allAppsData.filter(a => a.id < 100), [allAppsData]);
-  const altApps = useMemo(() => allAppsData.filter(a => a.id >= 1000), [allAppsData]);
+  const syncWithRepository = () => {
+    setIsSyncing(true);
+    setTimeout(() => {
+      setAppsData(prev => prev.map(app => ({
+        ...app,
+        downloads: app.downloads + Math.floor(Math.random() * 500000),
+        trend: Math.random() > 0.4 ? "up" : "down"
+      })));
+      setLastSync(new Date().toLocaleTimeString());
+      setIsSyncing(false);
+    }, 1200);
+  };
 
   const filteredApps = useMemo(() => {
-    let list = activeTab === "top" ? topApps : activeTab === "alt" ? altApps : allAppsData.filter(app => myApps.has(app.id));
+    let list = [...appsData];
+    list.sort((a, b) => b.downloads - a.downloads);
+
+    if (activeTab === "top") list = list.filter(a => a.id < 1000);
+    else if (activeTab === "alt") list = list.filter(a => a.id >= 1000);
+    else if (activeTab === "my_apps") list = list.filter(app => myApps.has(app.id));
+
     return list.filter(app => app.name.toLowerCase().includes(searchTerm.toLowerCase()));
-  }, [activeTab, topApps, altApps, allAppsData, myApps, searchTerm]);
+  }, [activeTab, appsData, myApps, searchTerm]);
 
   const toggleMyApp = (e, id) => {
     e.stopPropagation();
@@ -109,23 +139,27 @@ const App = () => {
     });
   };
 
-  // Trouver une alternative de grade A pour l'application sélectionnée
+  const getIdealAlternative = (category) => {
+    return appsData.find(app => app.category === category && app.grade === 'A');
+  };
+
   const suggestedAlternative = useMemo(() => {
     if (!selectedApp || selectedApp.grade === 'A') return null;
-    return allAppsData.find(app => app.category === selectedApp.category && app.grade === 'A' && app.id !== selectedApp.id);
-  }, [selectedApp, allAppsData]);
+    return getIdealAlternative(selectedApp.category);
+  }, [selectedApp, appsData]);
 
-  // Vue détaillée de l'appli
+  useEffect(() => {
+    if (activeTab === "my_apps") setShowMigrationGuide(true);
+  }, [activeTab]);
+
   if (selectedApp) {
     return (
       <div className="min-h-screen bg-white font-sans text-slate-900 animate-in fade-in duration-300 pb-20">
         <header className="px-4 py-6 flex items-center justify-between border-b border-slate-50 sticky top-0 bg-white z-50">
           <button onClick={() => setSelectedApp(null)} className="p-2 -ml-2 hover:bg-slate-50 rounded-full text-slate-400"><ChevronLeft size={24} /></button>
-          <div className="flex flex-col items-center">
-             <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Détails TrustiScore</div>
-          </div>
-          <button onClick={(e) => toggleMyApp(e, selectedApp.id)} className={`p-2 rounded-full ${myApps.has(selectedApp.id) ? 'text-pink-500' : 'text-slate-200'}`}>
-             <Star size={24} fill={myApps.has(selectedApp.id) ? "currentColor" : "none"} />
+          <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest text-center">Fiche Application</div>
+          <button onClick={(e) => toggleMyApp(e, selectedApp.id)} className={`p-2 rounded-full transition-all ${myApps.has(selectedApp.id) ? 'text-indigo-600 bg-indigo-50' : 'text-slate-200 hover:text-indigo-400'}`}>
+             {myApps.has(selectedApp.id) ? <CheckCircle size={24} /> : <PlusCircle size={24} />}
           </button>
         </header>
 
@@ -133,170 +167,45 @@ const App = () => {
           <div className="flex flex-col items-center mb-10">
             <div className={`${selectedApp.color} w-20 h-20 rounded-3xl flex items-center justify-center text-4xl text-white shadow-xl mb-6`}>{selectedApp.icon}</div>
             <h2 className="text-3xl font-black text-slate-900 mb-1">{selectedApp.name}</h2>
-            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-8">{selectedApp.category}</p>
+            <div className="flex items-center gap-2 mb-8">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{selectedApp.category}</p>
+                <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                <p className="text-xs font-black text-indigo-600">{formatDownloads(selectedApp.downloads)} dl.</p>
+            </div>
             <ScoreIndicator grade={selectedApp.grade} size="large" />
           </div>
 
           <div className="space-y-6">
-            {/* Alternative Proposée (Nouveau) */}
             {suggestedAlternative && (
-              <section className="bg-emerald-50 rounded-[2rem] p-6 border border-emerald-100 ring-2 ring-emerald-500/10">
+              <section className="bg-emerald-50 rounded-[2rem] p-6 border border-emerald-100 ring-4 ring-emerald-500/5">
                 <h3 className="flex items-center gap-2 font-black text-sm uppercase tracking-tight text-emerald-800 mb-4">
-                  <Sparkles size={18} className="text-emerald-600" /> Alternative proposée :
+                  <Sparkles size={18} className="text-emerald-600" /> Alternative recommandée :
                 </h3>
                 <div 
                   onClick={() => setSelectedApp(suggestedAlternative)}
-                  className="bg-white rounded-2xl border border-emerald-100 p-4 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all active:scale-[0.98]"
+                  className="bg-white rounded-2xl border border-emerald-100 p-4 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all"
                 >
-                  <div className={`${suggestedAlternative.color} w-10 h-10 rounded-xl flex items-center justify-center text-xl text-white shadow-inner`}>
+                  <div className={`${suggestedAlternative.color} w-10 h-10 rounded-xl flex items-center justify-center text-xl text-white`}>
                     {suggestedAlternative.icon}
                   </div>
                   <div className="flex-grow min-w-0">
                     <h3 className="font-black text-sm truncate">{suggestedAlternative.name}</h3>
-                    <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Recommandé</p>
+                    <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Souveraineté (Grade A)</p>
                   </div>
-                  <div className="bg-[#006837] text-white w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm shadow-sm">A</div>
+                  <div className="bg-[#006837] text-white px-3 py-1 rounded-lg font-black text-xs uppercase">Voir</div>
                 </div>
-                <p className="text-[10px] text-emerald-700/70 mt-3 font-bold text-center italic">Cette solution respecte les standards de souveraineté A.</p>
               </section>
             )}
 
             <section className="bg-slate-50 rounded-[2rem] p-6 border border-slate-100">
               <h3 className="flex items-center gap-2 font-black text-sm uppercase tracking-tight text-slate-800 mb-4">
-                <ShieldCheck size={18} className="text-indigo-600" /> Analyse du score
+                <ShieldCheck size={18} className="text-indigo-600" /> Analyse Trusti
               </h3>
-              <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                {selectedApp.reason}
-              </p>
+              <p className="text-sm text-slate-600 leading-relaxed font-medium">{selectedApp.reason}</p>
             </section>
-
-            <div className="grid grid-cols-1 gap-4">
-              <div className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100">
-                <div className="bg-blue-50 p-3 rounded-xl text-blue-600"><Globe size={20} /></div>
-                <div>
-                   <p className="text-[10px] font-black text-slate-400 uppercase">Infrastructure</p>
-                   <p className="text-sm font-bold text-slate-700">{selectedApp.details.infra}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100">
-                <div className="bg-purple-50 p-3 rounded-xl text-purple-600"><Code size={20} /></div>
-                <div>
-                   <p className="text-[10px] font-black text-slate-400 uppercase">Ouverture du code</p>
-                   <p className="text-sm font-bold text-slate-700">{selectedApp.details.code}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100">
-                <div className="bg-orange-50 p-3 rounded-xl text-orange-600"><Database size={20} /></div>
-                <div>
-                   <p className="text-[10px] font-black text-slate-400 uppercase">Données</p>
-                   <p className="text-sm font-bold text-slate-700">{selectedApp.details.data}</p>
-                </div>
-              </div>
-            </div>
           </div>
 
-          <button onClick={() => setSelectedApp(null)} className="w-full mt-10 py-5 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl">
-            Fermer
-          </button>
-        </main>
-      </div>
-    );
-  }
-
-  // Vue Procédure E vers A
-  if (activeTab === "guide_e_a") {
-    return (
-      <div className="min-h-screen bg-white font-sans text-slate-900 pb-24 animate-in slide-in-from-right duration-300">
-        <header className="px-4 py-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-50">
-          <button onClick={() => setActiveTab("my_apps")} className="p-2 -ml-2 hover:bg-slate-50 rounded-full text-slate-400"><ChevronLeft size={24} /></button>
-          <div className="flex flex-col items-center">
-            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600">Guide de Migration</span>
-          </div>
-          <div className="w-8" />
-        </header>
-        <main className="max-w-md mx-auto p-6">
-          <div className="mb-10 text-center">
-            <div className="flex items-center justify-center gap-4 mb-6">
-              <div className="bg-[#c1272d] text-white w-12 h-12 rounded-2xl flex items-center justify-center font-black text-xl">E</div>
-              <ArrowRight className="text-slate-300" />
-              <div className="bg-[#006837] text-white w-12 h-12 rounded-2xl flex items-center justify-center font-black text-xl">A</div>
-            </div>
-            <h2 className="text-3xl font-black text-slate-900 mb-2">Objectif Souveraineté</h2>
-            <p className="text-slate-500 font-medium text-sm">Comment quitter proprement les apps à risque.</p>
-          </div>
-
-          <div className="space-y-4">
-            {[
-              { step: "1", title: "Export des données", desc: "Utilisez les outils de 'Takeout' ou export CSV/JSON pour récupérer vos contacts, messages ou historiques.", icon: <Download size={20} /> },
-              { step: "2", title: "Installation de l'Alternative A", desc: "Installez l'appli recommandée (ex: Signal ou Proton) et vérifiez les réglages de confidentialité.", icon: <Rocket size={20} /> },
-              { step: "3", title: "Migration de l'entourage", desc: "Le plus dur ! Invitez vos contacts clés sur la nouvelle plateforme pour maintenir vos flux.", icon: <Share2 size={20} /> },
-              { step: "4", title: "Suppression du compte E", desc: "Ne désinstallez pas simplement. Supprimez votre compte et demandez l'effacement des données via le RGPD.", icon: <ShieldAlert size={20} /> }
-            ].map((item, idx) => (
-              <div key={idx} className="flex gap-4 p-5 bg-slate-50 rounded-3xl border border-slate-100">
-                <div className="flex-shrink-0 w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-indigo-600 font-black">
-                  {item.icon}
-                </div>
-                <div>
-                  <h4 className="font-black text-sm text-slate-800 mb-1">{item.step}. {item.title}</h4>
-                  <p className="text-xs text-slate-500 font-medium leading-relaxed">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8 p-6 bg-indigo-600 rounded-[2rem] text-white">
-            <h4 className="font-black text-sm uppercase mb-2">Besoin d'aide ?</h4>
-            <p className="text-xs text-indigo-100 font-medium mb-4">Nos guides détaillés par catégorie sont disponibles en ligne.</p>
-            <button className="w-full py-3 bg-white text-indigo-600 rounded-xl font-black text-[10px] uppercase tracking-wider">Accéder au wiki</button>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  // Vue Plan de Bascule
-  if (activeTab === "trustify") {
-    const appsToUpgrade = allAppsData.filter(app => myApps.has(app.id) && ["C", "D", "E"].includes(app.grade));
-    return (
-      <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-24 animate-in slide-in-from-bottom duration-500">
-        <header className="px-4 py-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-50">
-          <button onClick={() => setActiveTab("my_apps")} className="p-2 -ml-2 hover:bg-slate-50 rounded-full text-slate-400"><ChevronLeft size={24} /></button>
-          <div className="flex flex-col items-center">
-            <TrustiLogo className="w-8 h-8" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600">Trustification</span>
-          </div>
-          <div className="w-8" />
-        </header>
-        <main className="max-w-md mx-auto p-6">
-          <div className="mb-10 text-center">
-            <div className="w-16 h-16 bg-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-4 text-white shadow-lg">
-              <Zap size={32} fill="currentColor" />
-            </div>
-            <h2 className="text-3xl font-black text-slate-900 mb-2">Plan de Bascule</h2>
-            <p className="text-slate-500 font-medium text-sm">Conseils pour passer à des solutions souveraines.</p>
-          </div>
-          <div className="space-y-6">
-            {appsToUpgrade.length > 0 ? appsToUpgrade.map(app => (
-              <div key={app.id} className="bg-white rounded-[2rem] border border-slate-100 p-6 shadow-sm">
-                <div className="flex items-center gap-3 mb-4 pb-4 border-b border-slate-50">
-                  <span className="text-2xl">{app.icon}</span>
-                  <div className="flex-grow font-black text-slate-800">{app.name}</div>
-                  <div className="text-[9px] font-black uppercase text-orange-500">Risque {app.grade}</div>
-                </div>
-                <div className="bg-emerald-50 p-3 rounded-2xl border border-emerald-100 flex items-center justify-between">
-                    <span className="text-xs font-black text-emerald-900">Voir les alternatives A</span>
-                    <ArrowRight size={14} className="text-emerald-600" />
-                </div>
-              </div>
-            )) : (
-              <div className="text-center py-12 bg-white rounded-[2rem] border-2 border-dashed border-slate-100">
-                <CheckCircle2 size={40} className="mx-auto text-emerald-500 mb-4" />
-                <p className="font-black text-slate-800">Profil Trustifié à 100%</p>
-                <p className="text-xs text-slate-400 mt-1 uppercase font-bold tracking-widest">Aucune bascule nécessaire</p>
-              </div>
-            )}
-          </div>
-          <button onClick={() => setActiveTab("my_apps")} className="w-full mt-10 py-5 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest">Retour</button>
+          <button onClick={() => setSelectedApp(null)} className="w-full mt-10 py-5 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl">Retour</button>
         </main>
       </div>
     );
@@ -304,7 +213,7 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-24">
-      {/* Modal Légende */}
+      {/* MODAL LÉGENDE */}
       {showLegend && (
         <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-md flex items-end justify-center p-4" onClick={() => setShowLegend(false)}>
           <div className="bg-white w-full max-w-md rounded-[2.5rem] p-8 animate-in slide-in-from-bottom duration-300 shadow-2xl" onClick={e => e.stopPropagation()}>
@@ -316,11 +225,11 @@ const App = () => {
             <div className="space-y-4 overflow-y-auto max-h-[60vh] pr-2 custom-scrollbar">
               {Object.entries(scoreData).map(([grade, data]) => (
                 <div key={grade} className="flex gap-4 p-4 rounded-3xl border border-slate-100 bg-slate-50">
-                  <div className={`${data.color} w-12 h-14 flex-shrink-0 rounded-xl flex items-center justify-center font-black text-white shadow-sm ring-2 ring-white text-xl`}>{grade}</div>
+                  <div className={`${data.color} w-12 h-14 flex-shrink-0 rounded-xl flex items-center justify-center font-black text-white shadow-sm text-xl`}>{grade}</div>
                   <div className="flex-grow">
                     <h4 className="font-black text-sm text-slate-800 uppercase tracking-tight">{data.label}</h4>
                     <p className="text-[11px] text-slate-500 font-medium leading-snug mt-1">{data.desc}</p>
-                    <p className="text-[9px] text-slate-400 mt-2 font-bold italic">{data.criteria}</p>
+                    <p className="text-[9px] text-slate-400 mt-2 font-bold italic whitespace-pre-line">{data.criteria}</p>
                   </div>
                 </div>
               ))}
@@ -330,109 +239,228 @@ const App = () => {
       )}
 
       <header className="bg-white border-b border-slate-100 sticky top-0 z-30 shadow-sm">
-        <div className="max-w-md mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-slate-50 p-1 rounded-full border border-slate-100"><TrustiLogo className="w-10 h-10" /></div>
-            <div>
-              <h1 className="text-lg font-black tracking-tight text-slate-900 leading-none">TrustiScore</h1>
-              <span className="text-[8px] font-black uppercase text-indigo-500 tracking-widest">Souveraineté Numérique</span>
+        <div className="max-w-md mx-auto px-4 py-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <TrustiLogo className="w-9 h-9" />
+              <div>
+                <h1 className="text-md font-black tracking-tight text-slate-900 leading-none">TrustiScore</h1>
+                <span className="text-[8px] font-black uppercase text-indigo-500 tracking-widest">Live Repository</span>
+              </div>
             </div>
+            <button 
+              onClick={syncWithRepository} 
+              disabled={isSyncing}
+              className={`flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-full transition-all ${isSyncing ? 'opacity-50' : 'active:scale-95'}`}
+            >
+              <RefreshCw size={14} className={isSyncing ? 'animate-spin' : ''} />
+              <span className="text-[10px] font-black uppercase tracking-wider">{isSyncing ? 'Sync...' : 'Sync Data'}</span>
+            </button>
           </div>
+          
           <button 
             onClick={() => setShowLegend(true)} 
-            className="flex items-center gap-2 bg-indigo-50 text-indigo-600 px-3 py-2 rounded-full border border-indigo-100 hover:bg-indigo-600 hover:text-white transition-all"
+            className="w-full flex items-center justify-center gap-2 bg-indigo-50 text-indigo-600 py-3 rounded-xl border border-indigo-100 hover:bg-indigo-100 transition-all group"
           >
-            <ShieldQuestion size={16} />
-            <span className="text-[9px] font-black uppercase tracking-wider">Comprendre le score</span>
+            <ShieldQuestion size={18} className="group-hover:rotate-12 transition-transform" />
+            <span className="text-[10px] font-black uppercase tracking-wider">Comment lire les scores ?</span>
           </button>
         </div>
       </header>
 
       <main className="max-w-md mx-auto p-4">
-        {activeTab === "my_apps" && (
-          <div className="grid grid-cols-1 gap-3 mb-8">
-            <button 
-              onClick={() => setActiveTab("trustify")} 
-              className="w-full p-5 bg-gradient-to-br from-indigo-600 to-indigo-700 text-white rounded-[2rem] shadow-xl flex items-center justify-between group active:scale-[0.98] transition-all"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center"><Zap size={20} fill="currentColor" /></div>
-                <div className="text-left">
-                  <p className="font-black text-sm uppercase tracking-wider">Plan de Bascule</p>
-                  <p className="text-[10px] font-medium text-indigo-100">Conseils personnalisés</p>
+        {activeTab === "my_apps" ? (
+          <div className="animate-in fade-in duration-500">
+            {showMigrationGuide ? (
+              <div className="space-y-6">
+                <div className="bg-gradient-to-br from-indigo-600 to-indigo-900 rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden">
+                  <div className="relative z-10">
+                    <span className="bg-white/20 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-4 inline-block">Méthodologie</span>
+                    <h2 className="text-3xl font-black mb-3 leading-tight tracking-tight italic">Audit de Migration</h2>
+                    <p className="text-indigo-100 text-sm font-medium opacity-90 leading-relaxed">
+                      La souveraineté numérique n'est pas une contrainte, c'est une liberté. Suivez notre protocole pour assainir votre smartphone.
+                    </p>
+                  </div>
+                  <Zap className="absolute -right-4 -bottom-4 text-white/10 w-40 h-40" />
                 </div>
-              </div>
-              <ArrowRight size={20} />
-            </button>
 
-            <button 
-              onClick={() => setActiveTab("guide_e_a")} 
-              className="w-full p-5 bg-white border border-slate-100 text-slate-800 rounded-[2rem] shadow-sm flex items-center justify-between group active:scale-[0.98] transition-all"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600"><ListChecks size={20} /></div>
-                <div className="text-left">
-                  <p className="font-black text-sm uppercase tracking-wider">Procédure E → A</p>
-                  <p className="text-[10px] font-medium text-slate-400">Guide de migration universel</p>
+                <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
+                  <h3 className="flex items-center gap-2 font-black text-xs uppercase tracking-widest text-slate-400 mb-8">
+                    <Settings2 size={16} /> Protocole de Migration
+                  </h3>
+                  
+                  <div className="space-y-8 relative">
+                    <div className="absolute left-[15px] top-4 bottom-4 w-0.5 bg-slate-100" />
+                    {[
+                      { step: "01", title: "L'Audit de Risque", desc: "Listez vos applications actuelles. Repérez celles qui ont un Grade D ou E (souvent les GAFAM).", icon: <Search size={16}/>, color: "bg-rose-100 text-rose-600" },
+                      { step: "02", title: "Le Choix Souverain", desc: "Consultez l'onglet 'Alternatives'. Pour chaque app E, il existe souvent un Grade A (ex: Wero pour PayPal, Signal pour WhatsApp).", icon: <Sparkles size={16}/>, color: "bg-amber-100 text-amber-600" },
+                      { step: "03", title: "La Migration", desc: "Transférez vos données, prévenez vos proches, et osez la désinstallation définitive.", icon: <ArrowUpRight size={16}/>, color: "bg-emerald-100 text-emerald-600" }
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-start gap-5 relative z-10">
+                        <div className={`w-8 h-8 rounded-full ${item.color} flex items-center justify-center font-black text-[11px] border-2 border-white shadow-sm`}>{item.step}</div>
+                        <div>
+                          <h4 className="font-black text-sm text-slate-800 flex items-center gap-2 mb-1">{item.title}</h4>
+                          <p className="text-xs text-slate-500 font-medium leading-relaxed">{item.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button 
+                    onClick={() => setShowMigrationGuide(false)}
+                    className="w-full mt-10 py-5 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
+                  >
+                    Démarrer mon audit <ArrowRight size={16} />
+                  </button>
                 </div>
               </div>
-              <ArrowRight size={20} className="text-slate-300" />
-            </button>
+            ) : (
+              <div>
+                <div className="flex items-center gap-4 mb-6">
+                  <button onClick={() => setShowMigrationGuide(true)} className="p-2 bg-white border border-slate-100 rounded-xl text-slate-400 hover:text-indigo-600 transition-all">
+                    <ChevronLeft size={20} />
+                  </button>
+                  <h2 className="text-xl font-black text-slate-900 tracking-tight">Cible de Migration</h2>
+                </div>
+
+                <div className="flex items-center justify-between mb-4 px-2">
+                    <h3 className="font-black text-[10px] uppercase tracking-widest text-slate-400">Applications à remplacer ({myApps.size})</h3>
+                    {myApps.size > 0 && <button onClick={() => setMyApps(new Set())} className="text-[10px] font-black text-rose-500 uppercase flex items-center gap-1 hover:bg-rose-50 px-2 py-1 rounded-lg transition-all"><Trash2 size={12}/> Vider</button>}
+                </div>
+
+                <div className="space-y-4">
+                  {filteredApps.map((app) => {
+                    const idealAlt = getIdealAlternative(app.category);
+                    return (
+                      <div key={app.id} className="space-y-2">
+                        {/* Carte App Risquée */}
+                        <div onClick={() => setSelectedApp(app)} className="bg-white rounded-t-2xl border-x border-t border-slate-100 p-4 flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-all relative z-10">
+                          <div className={`${app.color} w-10 h-10 rounded-xl flex items-center justify-center text-xl text-white shadow-inner`}>{app.icon}</div>
+                          <div className="flex-grow min-w-0">
+                            <h3 className="font-black text-sm truncate">{app.name}</h3>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{app.category}</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <ScoreIndicator grade={app.grade} />
+                            <button onClick={(e) => toggleMyApp(e, app.id)} className="p-2 text-rose-500 hover:bg-rose-50 rounded-full transition-all">
+                                <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Rendu de l'Alternative Idéale liée */}
+                        {idealAlt && (
+                          <div 
+                            onClick={() => setSelectedApp(idealAlt)}
+                            className="bg-emerald-50 rounded-b-2xl border-x border-b border-emerald-100 p-3 flex items-center justify-between cursor-pointer hover:bg-emerald-100 transition-all animate-in slide-in-from-top-2"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="bg-white p-1 rounded-full shadow-sm">
+                                <ArrowRight size={14} className="text-emerald-500" />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-black text-emerald-800">Alternative :</span>
+                                <div className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-lg border border-emerald-200">
+                                  <span className="text-sm">{idealAlt.icon}</span>
+                                  <span className="text-[11px] font-bold text-emerald-700">{idealAlt.name}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="bg-[#006837] text-white px-2 py-0.5 rounded-md font-black text-[9px] uppercase">Grade A</div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  
+                  {myApps.size === 0 && (
+                    <div className="bg-white border-2 border-dashed border-slate-100 rounded-[2rem] p-12 text-center">
+                      <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-200">
+                        <Search size={32} />
+                      </div>
+                      <p className="text-slate-400 font-bold text-sm">Votre audit est vide.<br/>Sélectionnez des apps à remplacer.</p>
+                      <button onClick={() => setActiveTab("top")} className="mt-4 text-indigo-600 font-black text-xs uppercase tracking-widest">Explorer</button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div>
+            <div className="flex justify-between items-center mb-4 px-1">
+                <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                    <Globe size={12} /> {activeTab === "top" ? "Référentiel Mondial" : "Pépites Souveraines"}
+                </div>
+                <div className="text-[9px] font-bold text-slate-400 uppercase">MAJ: {lastSync}</div>
+            </div>
+
+            <div className="relative mb-6">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+              <input 
+                type="text" 
+                placeholder="Chercher une application..." 
+                className="w-full pl-11 pr-4 py-4 bg-white border border-slate-100 rounded-2xl shadow-sm outline-none font-bold text-sm focus:ring-2 focus:ring-indigo-100 transition-all"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-3">
+              {filteredApps.length > 0 ? filteredApps.map((app, index) => (
+                <div key={app.id} onClick={() => setSelectedApp(app)} className="bg-white rounded-2xl border border-slate-100 p-4 flex items-center gap-3 cursor-pointer hover:shadow-md transition-all active:scale-[0.98]">
+                  <div className="text-[10px] font-black text-slate-300 w-4">{index + 1}</div>
+                  <div className={`${app.color} w-10 h-10 rounded-xl flex items-center justify-center text-xl text-white shadow-inner`}>{app.icon}</div>
+                  <div className="flex-grow min-w-0">
+                    <div className="flex items-center gap-1.5">
+                        <h3 className="font-black text-sm truncate">{app.name}</h3>
+                        {app.trend === "up" ? <TrendingUp size={12} className="text-emerald-500" /> : <TrendingDown size={12} className="text-rose-400" />}
+                    </div>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{app.category}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <ScoreIndicator grade={app.grade} />
+                    <button 
+                      onClick={(e) => toggleMyApp(e, app.id)} 
+                      className={`p-2 rounded-full transition-all ${myApps.has(app.id) ? 'bg-indigo-100 text-indigo-600 scale-110 shadow-sm' : 'text-slate-200 hover:text-indigo-400 hover:bg-slate-50'}`}
+                      title={myApps.has(app.id) ? "Retirer de la sélection" : "Ajouter à ma cible de remplacement"}
+                    >
+                        {myApps.has(app.id) ? <CheckCircle size={20} /> : <PlusCircle size={20} />}
+                    </button>
+                  </div>
+                </div>
+              )) : (
+                <div className="py-20 text-center">
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+                    <Search size={32} />
+                  </div>
+                  <p className="text-slate-400 font-bold text-sm">Aucune application trouvée</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
-
-        <div className="relative mb-6">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
-          <input 
-            type="text" 
-            placeholder="Rechercher une application..." 
-            className="w-full pl-11 pr-4 py-4 bg-white border border-slate-100 rounded-2xl shadow-sm outline-none font-bold text-sm focus:ring-2 focus:ring-indigo-100 transition-all"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-
-        <div className="space-y-3">
-          {filteredApps.length > 0 ? filteredApps.map((app) => (
-            <div key={app.id} onClick={() => setSelectedApp(app)} className="bg-white rounded-2xl border border-slate-100 p-4 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all active:scale-[0.99]">
-              <div className={`${app.color} w-10 h-10 rounded-xl flex items-center justify-center text-xl text-white shadow-inner`}>{app.icon}</div>
-              <div className="flex-grow min-w-0">
-                <h3 className="font-black text-sm truncate">{app.name}</h3>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{app.category}</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <ScoreIndicator grade={app.grade} />
-                <button onClick={(e) => toggleMyApp(e, app.id)} className={`p-2 rounded-full transition-all ${myApps.has(app.id) ? 'bg-pink-50 text-pink-500 scale-110' : 'text-slate-200 hover:text-pink-300'}`}>
-                    <Star size={20} fill={myApps.has(app.id) ? "currentColor" : "none"} />
-                </button>
-              </div>
-            </div>
-          )) : (
-            <div className="text-center py-20 text-slate-300">
-               <Info size={40} className="mx-auto mb-4 opacity-20" />
-               <p className="font-black uppercase text-[10px] tracking-widest">Aucune application trouvée</p>
-            </div>
-          )}
-        </div>
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 py-4 px-6 max-w-md mx-auto flex justify-around z-40 rounded-t-3xl shadow-lg">
-        <button onClick={() => {setActiveTab("top"); setSelectedApp(null);}} className={`flex flex-col items-center gap-1 transition-all ${activeTab === "top" ? "text-blue-600 scale-110" : "text-slate-300"}`}>
-          <Trophy size={24} strokeWidth={activeTab === "top" ? 3 : 2} />
-          <span className="text-[8px] font-black uppercase tracking-widest">Market</span>
+      {/* NAVIGATION BASSE */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 py-4 px-6 max-w-md mx-auto flex justify-around z-40 rounded-t-[2.5rem] shadow-2xl">
+        <button onClick={() => setActiveTab("top")} className={`flex flex-col items-center gap-1 transition-all ${activeTab === "top" ? "text-slate-900 scale-110" : "text-slate-300"}`}>
+          <Trophy size={24} strokeWidth={3} />
+          <span className="text-[8px] font-black uppercase tracking-widest">Classement</span>
         </button>
-        <button onClick={() => {setActiveTab("alt"); setSelectedApp(null);}} className={`flex flex-col items-center gap-1 transition-all ${activeTab === "alt" ? "text-emerald-600 scale-110" : "text-slate-300"}`}>
-          <Globe size={24} strokeWidth={activeTab === "alt" ? 3 : 2} />
+        <button onClick={() => setActiveTab("alt")} className={`flex flex-col items-center gap-1 transition-all ${activeTab === "alt" ? "text-emerald-600 scale-110" : "text-slate-300"}`}>
+          <Globe size={24} strokeWidth={3} />
           <span className="text-[8px] font-black uppercase tracking-widest">Alternatives</span>
         </button>
-        <button onClick={() => {setActiveTab("my_apps"); setSelectedApp(null);}} className={`flex flex-col items-center gap-1 transition-all ${activeTab === "my_apps" || activeTab === "trustify" || activeTab === "guide_e_a" ? "text-pink-600 scale-110" : "text-slate-300"}`}>
+        <button onClick={() => setActiveTab("my_apps")} className={`flex flex-col items-center gap-1 transition-all ${activeTab === "my_apps" ? "text-indigo-600 scale-110" : "text-slate-300"}`}>
           <div className="relative">
-            <Star size={24} strokeWidth={activeTab === "my_apps" || activeTab === "trustify" || activeTab === "guide_e_a" ? 3 : 2} />
-            {myApps.size > 0 && <span className="absolute -top-1 -right-2 bg-pink-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">{myApps.size}</span>}
+            <Zap size={24} strokeWidth={3} />
+            {myApps.size > 0 && <span className="absolute -top-1 -right-2 bg-amber-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">{myApps.size}</span>}
           </div>
-          <span className="text-[8px] font-black uppercase tracking-widest">Mes apps</span>
+          <span className="text-[8px] font-black uppercase tracking-widest">Audit</span>
         </button>
       </nav>
+
       <style dangerouslySetInnerHTML={{ __html: `
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
