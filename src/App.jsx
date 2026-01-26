@@ -32,6 +32,8 @@ const App = () => {
     customMigrations,
     selectedApp,
     filteredApps,
+    isLoadingTopApps,
+    lastUpdate,
     setActiveTab,
     setSearchTerm,
     toggleMyApp,
@@ -78,12 +80,22 @@ const App = () => {
         {/* Titre pour l'onglet Classement */}
         {activeTab === TABS.TOP && (
           <div className="mb-6 text-center">
-            <p className="text-xs font-black uppercase tracking-widest text-slate-400">
-              Classement France
-            </p>
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <p className="text-xs font-black uppercase tracking-widest text-slate-400">
+                Classement France
+              </p>
+              {isLoadingTopApps && (
+                <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
+              )}
+            </div>
             <p className="text-[11px] text-slate-400 mt-1">
-              Applications les plus utilisées en France
+              Applications les plus téléchargées en France
             </p>
+            {lastUpdate && (
+              <p className="text-[10px] text-slate-300 mt-1">
+                Dernière mise à jour: {lastUpdate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+              </p>
+            )}
           </div>
         )}
 
