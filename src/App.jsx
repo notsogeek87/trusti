@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Trophy, Search, ShieldCheck, ChevronLeft, Globe, Lock, Info, Sparkles, ShieldQuestion, ArrowRight, Zap, CheckCircle2, Unlock, ShieldAlert, Eye, Code, Database, ListChecks, Download, Share2, Rocket, RefreshCw, TrendingUp, TrendingDown, Settings2, Trash2, HelpCircle, ArrowUpRight, PlusCircle, CheckCircle } from 'lucide-react';
 
+//test commit
 // Composant Logo
 const TrustiLogo = ({ className = "w-10 h-10" }) => (
   <div className={`relative flex items-center justify-center ${className}`}>
