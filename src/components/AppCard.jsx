@@ -23,8 +23,18 @@ const AppCard = ({
       className="bg-white rounded-2xl border border-slate-100 p-4 flex flex-col gap-3 cursor-pointer hover:shadow-md hover:border-indigo-100 transition-all group"
     >
       <div className="flex items-center gap-3">
-        <div className={`${app.color} w-10 h-10 rounded-xl flex items-center justify-center text-xl text-white shadow-inner transition-transform group-hover:scale-105`}>
-          {app.icon}
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
+          {app.icon && app.icon.startsWith('http') ? (
+            <img 
+              src={app.icon} 
+              alt={app.name} 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className={`${app.color} w-full h-full flex items-center justify-center text-xl text-white`}>
+              {app.icon}
+            </div>
+          )}
         </div>
         
         <div className="flex-grow min-w-0">
