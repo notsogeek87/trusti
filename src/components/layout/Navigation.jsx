@@ -48,7 +48,7 @@ const Navigation = ({ activeTab, onTabChange, myAppsCount }) => {
         }`}
       >
         <Globe size={24} />
-        <span className="text-[8px] font-black uppercase tracking-widest">App Trusti</span>
+        <span className="text-[8px] font-black uppercase tracking-widest">TrustiApps</span>
       </button>
     </nav>
   );

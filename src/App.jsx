@@ -142,7 +142,7 @@ const App = () => {
           </div>
         )}
 
-        {/* Bouton Partager pour App Trusti */}
+        {/* Bouton Partager pour TrustiApps */}
         {activeTab === TABS.ALTERNATIVES && (
           <div className="mb-6 text-center">
             <div className="flex items-center justify-center gap-2 mb-1">

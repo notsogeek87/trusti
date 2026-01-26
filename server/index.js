@@ -140,35 +140,56 @@ app.get('/api/top-apps', async (req, res) => {
 // TRUSTI APPS (siksik.org list)
 // ==============================
 
-// Helper: Obtenir l'URL de l'icône officielle
-const getOfficialIcon = (packageName) => {
-  // URLs personnalisées pour les apps populaires avec sources fiables
-  const customIcons = {
-    // Multimédia
-    'org.videolan.vlc': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/VLC_Icon.svg/240px-VLC_Icon.svg.png',
-    'org.schabi.newpipe': 'https://raw.githubusercontent.com/TeamNewPipe/NewPipe/dev/assets/new_pipe_icon_5.png',
-    'de.danoeh.antennapod': 'https://raw.githubusercontent.com/AntennaPod/AntennaPod/develop/images/antenna.png',
-    
-    // Communication
-    'org.thoughtcrime.securesms': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Signal-Logo.svg/240px-Signal-Logo.svg.png',
-    'org.telegram.messenger': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/240px-Telegram_logo.svg.png',
-    'com.fsck.k9': 'https://raw.githubusercontent.com/thundernest/k-9/main/art/icon.svg',
-    'eu.faircode.email': 'https://raw.githubusercontent.com/M66B/FairEmail/master/app/src/main/ic_launcher-playstore.png',
-    
-    // Calendrier
-    'ws.xsoh.etar': 'https://raw.githubusercontent.com/Etar-Group/Etar-Calendar/master/metadata/en-US/images/icon.png',
-    
-    // Sécurité
-    'eu.faircode.netguard': 'https://raw.githubusercontent.com/M66B/NetGuard/master/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png',
-    'io.ente.auth': 'https://ente.io/images/logo.png'
-  };
+// Cache pour les icônes
+const iconCache = {};
 
-  // Si icône personnalisée disponible
-  if (customIcons[packageName]) {
-    return customIcons[packageName];
+// URLs personnalisées fiables pour les apps populaires
+const CUSTOM_ICONS = {
+  // Multimédia
+  'org.videolan.vlc': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/VLC_Icon.svg/240px-VLC_Icon.svg.png',
+  'org.schabi.newpipe': 'https://raw.githubusercontent.com/TeamNewPipe/NewPipe/dev/assets/new_pipe_icon_5.png',
+  'de.danoeh.antennapod': 'https://raw.githubusercontent.com/AntennaPod/AntennaPod/develop/images/antenna.png',
+  
+  // Communication
+  'org.thoughtcrime.securesms': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Signal-Logo.svg/240px-Signal-Logo.svg.png',
+  'org.telegram.messenger': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/240px-Telegram_logo.svg.png',
+  'com.fsck.k9': 'https://raw.githubusercontent.com/thundernest/k-9/main/art/icon.svg',
+  'eu.faircode.email': 'https://raw.githubusercontent.com/M66B/FairEmail/master/app/src/main/ic_launcher-playstore.png',
+  
+  // Calendrier
+  'ws.xsoh.etar': 'https://raw.githubusercontent.com/Etar-Group/Etar-Calendar/master/metadata/en-US/images/icon.png',
+  
+  // Sécurité
+  'eu.faircode.netguard': 'https://raw.githubusercontent.com/M66B/NetGuard/master/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png',
+  'io.ente.auth': 'https://ente.io/images/logo.png'
+};
+
+// Helper: Obtenir l'URL de l'icône (URLs personnalisées d'abord, puis Play Store)
+const getAppIcon = async (packageName) => {
+  // Vérifier le cache
+  if (iconCache[packageName]) {
+    return iconCache[packageName];
   }
 
-  // Pour les autres, utiliser un emoji basé sur la catégorie
+  // 1. Priorité : icônes personnalisées fiables
+  if (CUSTOM_ICONS[packageName]) {
+    iconCache[packageName] = CUSTOM_ICONS[packageName];
+    return CUSTOM_ICONS[packageName];
+  }
+
+  // 2. Fallback : essayer Play Store
+  try {
+    const appInfo = await gplay.app({ appId: packageName });
+    if (appInfo && appInfo.icon) {
+      iconCache[packageName] = appInfo.icon;
+      return appInfo.icon;
+    }
+  } catch (error) {
+    // App probablement pas sur Play Store (F-Droid uniquement)
+  }
+
+  // 3. Dernier recours : emoji
+  iconCache[packageName] = '📱';
   return '📱';
 };
 
@@ -279,8 +300,9 @@ const getCategoryIcon = (category) => {
 // API endpoint to fetch privacy-friendly apps from siksik.org list
 app.get('/api/trusti-apps', async (req, res) => {
   try {
-    const mappedApps = RECOMMENDED_APPS.map((app) => {
+    const mappedApps = await Promise.all(RECOMMENDED_APPS.map(async (app) => {
       const grade = calculateTrustiGrade(app.category);
+      const icon = await getAppIcon(app.package);
       
       return {
         id: app.package,
@@ -288,7 +310,7 @@ app.get('/api/trusti-apps', async (req, res) => {
         category: app.category,
         grade: grade,
         reason: getTrustiReason(grade),
-        icon: getOfficialIcon(app.package),
+        icon: icon,
         downloads: 'Recommandé siksik.org',
         developer: 'Open Source',
         alternative: null,
@@ -306,7 +328,7 @@ app.get('/api/trusti-apps', async (req, res) => {
         isOpenSource: true,
         source: 'siksik'
       };
-    });
+    }));
 
     // Trier : apps avec logos officiels en premier, puis par grade
     const sortedApps = mappedApps.sort((a, b) => {
