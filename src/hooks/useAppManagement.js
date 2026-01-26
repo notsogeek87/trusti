@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { APPS_DATA } from '../constants/appsData';
 import { TABS } from '../constants/tabs';
-import { fetchTopAppsInFrance, setupAutoRefresh } from '../utils/apiService';
+import { fetchTopAppsInFrance, fetchTrustiApps, setupAutoRefresh } from '../utils/apiService';
 
 /**
  * Hook personnalisé pour gérer l'état des applications
@@ -15,7 +15,10 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
   const [customMigrations, setCustomMigrations] = useState(new Map());
   const [selectedApp, setSelectedApp] = useState(null);
   const [topApps, setTopApps] = useState([]);
-  const [isLoadingTopApps, setIsLoadingTopApps] = useState(false);
+  const [trustiApps, setTrustiApps] = useState([]);
+  const [isLoadingTopApps, setIsLoadingTopApps] = useState(true);
+  const [isLoadingTrustiApps, setIsLoadingTrustiApps] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -62,7 +65,6 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
   // Charger les données du top au montage du composant
   useEffect(() => {
     const loadTopApps = async () => {
-      setIsLoadingTopApps(true);
       try {
         const data = await fetchTopAppsInFrance();
         setTopApps(data);
@@ -87,6 +89,32 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     return cleanup;
   }, []);
 
+  // Charger les TrustiApps au montage
+  useEffect(() => {
+    const loadTrustiApps = async () => {
+      try {
+        const data = await fetchTrustiApps();
+        setTrustiApps(data);
+      } catch (error) {
+        console.error('Erreur lors du chargement des TrustiApps:', error);
+        // En cas d'erreur, utiliser les données statiques
+        setTrustiApps(APPS_DATA.filter(a => a.id >= 1000));
+      } finally {
+        setIsLoadingTrustiApps(false);
+      }
+    };
+
+    loadTrustiApps();
+  }, []);
+
+  // Détecter quand le chargement initial est terminé
+  useEffect(() => {
+    if (!isLoadingTopApps && !isLoadingTrustiApps) {
+      // Attendre un peu pour une transition fluide
+      setTimeout(() => setIsInitialLoading(false), 300);
+    }
+  }, [isLoadingTopApps, isLoadingTrustiApps]);
+
   // Filtrer les applications selon l'onglet actif et la recherche
   const filteredApps = useMemo(() => {
     let list = [...APPS_DATA];
@@ -95,17 +123,18 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
       // Utiliser les données live si disponibles, sinon les données statiques
       list = topApps.length > 0 ? topApps : APPS_DATA.filter(a => a.id < 1000);
     } else if (activeTab === TABS.ALTERNATIVES) {
-      list = list.filter(a => a.id >= 1000);
+      // Utiliser les TrustiApps (F-Droid + Exodus)
+      list = trustiApps.length > 0 ? trustiApps : APPS_DATA.filter(a => a.id >= 1000);
     } else if (activeTab === TABS.MY_APPS) {
-      // Combiner les apps statiques ET les apps du top (Play Store)
-      const allApps = [...APPS_DATA, ...topApps];
+      // Combiner les apps statiques ET les apps du top (Play Store) ET TrustiApps
+      const allApps = [...APPS_DATA, ...topApps, ...trustiApps];
       list = allApps.filter(app => myApps.has(app.id));
     }
     
     return list.filter(app => 
       app.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [activeTab, myApps, searchTerm, topApps]);
+  }, [activeTab, myApps, searchTerm, topApps, trustiApps]);
 
   // Ajouter/retirer une app de "Mes Apps"
   const toggleMyApp = (e, id) => {
@@ -149,7 +178,10 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     customMigrations,
     selectedApp,
     topApps,
+    trustiApps,
     isLoadingTopApps,
+    isLoadingTrustiApps,
+    isInitialLoading,
     lastUpdate,
     filteredApps,
     

@@ -30,6 +30,28 @@ export const fetchTopAppsInFrance = async () => {
 };
 
 /**
+ * Fetch TrustiApps (apps respectueuses de la vie privée)
+ * Source: F-Droid + Exodus Privacy
+ */
+export const fetchTrustiApps = async () => {
+  try {
+    const response = await fetch(`${API_URL}/trusti-apps`);
+    const data = await response.json();
+    
+    if (data.success && data.apps.length > 0) {
+      return data.apps;
+    }
+    
+    // Return fallback data if no apps received
+    return APPS_DATA.filter(a => a.id >= 1000);
+  } catch (error) {
+    console.error('Error fetching trusti apps from backend:', error);
+    // Return fallback data in case of error
+    return APPS_DATA.filter(a => a.id >= 1000);
+  }
+};
+
+/**
  * Rafraîchit les données périodiquement
  */
 export const setupAutoRefresh = (callback, intervalMinutes = 60) => {

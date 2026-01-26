@@ -46,7 +46,10 @@ const App = () => {
     selectedApp,
     filteredApps,
     topApps,
+    trustiApps,
     isLoadingTopApps,
+    isLoadingTrustiApps,
+    isInitialLoading,
     lastUpdate,
     setActiveTab,
     setSearchTerm,
@@ -85,6 +88,24 @@ const App = () => {
   // Vue principale
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-24">
+      {/* Écran de chargement initial */}
+      {isInitialLoading && (
+        <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
+          <div className="text-center">
+            <div className="mb-6">
+              <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <span className="text-4xl">🔒</span>
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">TrustiScore</h2>
+            <p className="text-slate-500 mb-6">Chargement des applications...</p>
+            <div className="flex items-center justify-center gap-2">
+              <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-200 border-t-blue-600"></div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <Header 
         showExplainer={showExplainer} 
         onToggleExplainer={() => setShowExplainer(!showExplainer)}
@@ -121,17 +142,30 @@ const App = () => {
 
         {/* Bouton Partager pour App Trusti */}
         {activeTab === TABS.ALTERNATIVES && (
-          <ShareButton
-            title="Partager mes TrustiApp"
-            description={`${filteredApps.filter(a => myApps.has(a.id)).length} app${filteredApps.filter(a => myApps.has(a.id)).length > 1 ? 's' : ''}`}
-            onShare={() => setShowTrustiShareModal(true)}
-            disabled={filteredApps.filter(a => myApps.has(a.id)).length === 0}
-            bgColor="bg-emerald-50"
-            borderColor="border-emerald-200"
-            textColor="text-emerald-900"
-            subtextColor="text-emerald-700"
-            buttonColor="bg-emerald-600 hover:bg-emerald-700"
-          />
+          <div className="mb-6 text-center">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <p className="text-xs font-black uppercase tracking-widest text-slate-400">
+                TrustiApps - F-Droid
+              </p>
+              {isLoadingTrustiApps && (
+                <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
+              )}
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Apps open source respectueuses de la vie privée
+            </p>
+            <ShareButton
+              title="Partager mes TrustiApp"
+              description={`${filteredApps.filter(a => myApps.has(a.id)).length} app${filteredApps.filter(a => myApps.has(a.id)).length > 1 ? 's' : ''}`}
+              onShare={() => setShowTrustiShareModal(true)}
+              disabled={filteredApps.filter(a => myApps.has(a.id)).length === 0}
+              bgColor="bg-emerald-50"
+              borderColor="border-emerald-200"
+              textColor="text-emerald-900"
+              subtextColor="text-emerald-700"
+              buttonColor="bg-emerald-600 hover:bg-emerald-700"
+            />
+          </div>
         )}
 
         {/* Bouton Partager pour Mes Apps */}
@@ -174,7 +208,7 @@ const App = () => {
         <ShareModal
           migratedApps={migratedApps}
           customMigrations={customMigrations}
-          topApps={topApps}
+          topApps={[...topApps, ...trustiApps]}
           onClose={() => setShowShareModal(false)}
         />
       )}
@@ -183,7 +217,7 @@ const App = () => {
       {showTrustiShareModal && (
         <TrustiShareModal
           selectedApps={filteredApps.filter(a => myApps.has(a.id))}
-          topApps={topApps}
+          topApps={[...topApps, ...trustiApps]}
           onClose={() => setShowTrustiShareModal(false)}
         />
       )}
@@ -195,6 +229,7 @@ const App = () => {
           currentSelection={customMigrations.get(showMigrationSelector)}
           onSelect={(altName) => setCustomMigration(showMigrationSelector, altName)}
           onClose={() => setShowMigrationSelector(null)}
+          allApps={trustiApps}
         />
       )}
 

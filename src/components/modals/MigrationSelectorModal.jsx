@@ -10,11 +10,15 @@ const MigrationSelectorModal = ({
   currentAppId, 
   currentSelection,
   onSelect, 
-  onClose 
+  onClose,
+  allApps = [] // Apps à jour (trustiApps uniquement)
 }) => {
-  const currentApp = APPS_DATA.find(a => a.id === currentAppId);
-  const alternativesA = APPS_DATA.filter(a => a.grade === "A");
-  const alternativesB = APPS_DATA.filter(a => a.grade === "B");
+  // Utiliser uniquement les TrustiApps (apps recommandées par siksik.org)
+  const availableApps = allApps.length > 0 ? allApps : APPS_DATA.filter(a => a.id >= 1000);
+  
+  const currentApp = [...APPS_DATA, ...allApps].find(a => a.id === currentAppId);
+  const alternativesA = availableApps.filter(a => a.grade === "A");
+  const alternativesB = availableApps.filter(a => a.grade === "B");
   const allAlternatives = [...alternativesA, ...alternativesB];
 
   return (
@@ -48,9 +52,28 @@ const MigrationSelectorModal = ({
                       : 'border-slate-100 bg-slate-50 hover:border-emerald-200'
                   }`}
                 >
-                  <div className={`${alt.color} w-10 h-10 rounded-lg flex items-center justify-center text-lg text-white shrink-0`}>
-                    {alt.icon}
-                  </div>
+                  {/* Icône ou image */}
+                  {alt.icon && alt.icon.startsWith('http') ? (
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-white border border-slate-200">
+                      <img 
+                        src={alt.icon} 
+                        alt={alt.name}
+                        className="w-8 h-8 rounded-md"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                      <div className="hidden w-8 h-8 items-center justify-center text-lg">
+                        📱
+                      </div>
+                    </div>
+                  ) : (
+                    <div className={`${alt.color || 'bg-slate-500'} w-10 h-10 rounded-lg flex items-center justify-center text-lg text-white shrink-0`}>
+                      {alt.icon || '📱'}
+                    </div>
+                  )}
+                  
                   <div className="flex-grow text-left min-w-0">
                     <p className="font-black text-sm text-slate-900">{alt.name}</p>
                     <p className="text-xs text-slate-500">{alt.category}</p>

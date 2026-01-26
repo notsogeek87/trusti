@@ -1,144 +1,6 @@
-import express from 'express';
-import cors from 'cors';
-import gplay from 'google-play-scraper';
-
-const app = express();
-const PORT = 3001;
-
-// Enable CORS for frontend
-app.use(cors());
-app.use(express.json());
-
-// ======================
-// TOP APPS (Google Play)
-// ======================
-
-// Helper function to calculate grade for Google Play apps
-const calculatePlayStoreGrade = (app) => {
-  let score = 0;
-  
-  if (app.free) score += 20;
-  if (app.adSupported === false) score += 30;
-  if (app.containsAds === false) score += 30;
-  if (app.offersIAP === false) score += 20;
-  
-  if (score >= 90) return 'A';
-  if (score >= 70) return 'B';
-  if (score >= 50) return 'C';
-  if (score >= 30) return 'D';
-  return 'E';
-};
-
-// Helper function to generate reason for Play Store
-const generatePlayStoreReason = (grade) => {
-  const reasons = {
-    'A': 'Application gratuite sans publicité ni achats intégrés. Excellente protection de la vie privée.',
-    'B': 'Peu de données collectées, bonne protection de la vie privée.',
-    'C': 'Collecte modérée de données. Protection moyenne de la vie privée.',
-    'D': 'Collecte importante de données. Protection limitée de la vie privée.',
-    'E': 'Collecte excessive de données. Faible protection de la vie privée.'
-  };
-  return reasons[grade] || 'Données non disponibles';
-};
-
-// Helper function to get Play Store category color
-const getPlayStoreCategoryColor = (category) => {
-  const categoryMap = {
-    'SOCIAL': 'blue',
-    'COMMUNICATION': 'green',
-    'GAME': 'purple',
-    'PRODUCTIVITY': 'orange',
-    'TOOLS': 'gray',
-    'ENTERTAINMENT': 'pink',
-    'FINANCE': 'yellow',
-    'SHOPPING': 'red'
-  };
-  return categoryMap[category] || 'gray';
-};
-
-// Helper function to get Play Store category icon
-const getPlayStoreCategoryIcon = (category) => {
-  const iconMap = {
-    'SOCIAL': 'Users',
-    'COMMUNICATION': 'MessageCircle',
-    'GAME': 'Gamepad2',
-    'PRODUCTIVITY': 'Briefcase',
-    'TOOLS': 'Wrench',
-    'ENTERTAINMENT': 'Film',
-    'FINANCE': 'DollarSign',
-    'SHOPPING': 'ShoppingBag'
-  };
-  return iconMap[category] || 'Package';
-};
-
-// Helper function to find alternative
-const findAlternative = (appId) => {
-  const alternatives = {
-    'com.facebook.katana': 'Mastodon',
-    'com.whatsapp': 'Signal',
-    'com.instagram.android': 'Pixelfed',
-    'com.twitter.android': 'Mastodon',
-    'com.google.android.apps.maps': 'OsmAnd',
-    'com.spotify.music': 'VLC',
-  };
-  return alternatives[appId] || null;
-};
-
-// API endpoint to fetch top apps from Google Play
-app.get('/api/top-apps', async (req, res) => {
-  try {
-    const apps = await gplay.list({
-      collection: gplay.collection.TOP_FREE,
-      category: gplay.category.APPLICATION,
-      num: 20,
-      country: 'fr',
-      lang: 'fr',
-      fullDetail: true
-    });
-
-    const mappedApps = apps.map((app, index) => {
-      const grade = calculatePlayStoreGrade(app);
-      return {
-        id: app.appId,
-        name: app.title,
-        category: app.genre || 'Application',
-        grade: grade,
-        reason: generatePlayStoreReason(grade),
-        icon: app.icon,
-        downloads: app.installs || 'Non spécifié',
-        developer: app.developer,
-        alternative: findAlternative(app.appId),
-        categoryColor: getPlayStoreCategoryColor(app.genreId),
-        categoryIcon: getPlayStoreCategoryIcon(app.genreId),
-        score: app.score,
-        free: app.free,
-        price: app.price || 0,
-        adSupported: app.adSupported,
-        containsAds: app.containsAds,
-        offersIAP: app.offersIAP,
-        url: app.url,
-        description: app.description
-      };
-    });
-
-    res.json({
-      success: true,
-      apps: mappedApps,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    console.error('Error fetching apps:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      apps: []
-    });
-  }
-});
-
-// ==============================
-// TRUSTI APPS (siksik.org list)
-// ==============================
+// Vercel Serverless Function - TrustiApps
+// Liste d'applications recommandées par siksik.org
+// Source: https://siksik.org/applications-alternatives-pour-android-plus-respectueuses-de-la-vie-privee/
 
 // Helper: Obtenir l'URL de l'icône officielle
 const getOfficialIcon = (packageName) => {
@@ -172,8 +34,7 @@ const getOfficialIcon = (packageName) => {
   return '📱';
 };
 
-// Liste d'applications recommandées par siksik.org
-// Source: https://siksik.org/applications-alternatives-pour-android-plus-respectueuses-de-la-vie-privee/
+// Liste d'applications recommandées (toutes open source et respectueuses de la vie privée)
 const RECOMMENDED_APPS = [
   // Edition, prise de notes, dessin
   { name: 'Simplenotes', package: 'com.automattic.simplenote', category: 'Productivité', description: 'Prise de notes simple et synchronisée' },
@@ -181,6 +42,8 @@ const RECOMMENDED_APPS = [
   { name: 'Collabora Office', package: 'com.collabora.libreoffice', category: 'Productivité', description: 'Suite bureautique complète (fichiers, tableur, classeur)' },
   { name: 'Simple Draw Pro', package: 'com.simplemobiletools.draw.pro', category: 'Créativité', description: 'Application pour dessiner et annoter rapidement' },
   { name: 'MuPDF viewer', package: 'com.artifex.mupdf.viewer.app', category: 'Productivité', description: 'Lecteur de fichiers PDF léger et rapide' },
+  
+  // Agenda
   { name: 'Etar', package: 'ws.xsoh.etar', category: 'Productivité', description: 'Agenda open source et respectueux de la vie privée' },
   
   // Images, photos, vidéos, audio
@@ -200,17 +63,23 @@ const RECOMMENDED_APPS = [
   { name: 'Telegram', package: 'org.telegram.messenger', category: 'Communication', description: 'Messagerie rapide et sécurisée' },
   { name: 'Session', package: 'network.loki.messenger', category: 'Communication', description: 'Messagerie anonyme et décentralisée' },
   { name: 'SimpleX Chat', package: 'chat.simplex.app', category: 'Communication', description: 'Messagerie privée sans identifiant' },
+  
+  // Email
   { name: 'FairEmail', package: 'eu.faircode.email', category: 'Communication', description: 'Client email respectueux de la vie privée' },
   { name: 'K9-Mail', package: 'com.fsck.k9', category: 'Communication', description: 'Client email open source' },
   { name: 'Tuta Mail', package: 'de.tutao.tutanota', category: 'Communication', description: 'Email chiffré de bout en bout' },
   
-  // Utilitaires
+  // Réveil
   { name: 'Alarm Klock', package: 'com.angrydoughnuts.android.alarmclock', category: 'Outils', description: 'Application réveil et alarme' },
+  
+  // Utilitaires
   { name: 'Simple File Manager Pro', package: 'com.simplemobiletools.filemanager.pro', category: 'Outils', description: 'Gestionnaire de fichiers simple' },
   { name: 'Unit Converter Ultimate', package: 'com.physphil.android.unitconverterultimate', category: 'Outils', description: 'Convertisseur d\'unités très complet' },
   { name: 'Flashlight', package: 'com.simplemobiletools.flashlight', category: 'Outils', description: 'Lampe de poche simple' },
   { name: 'Red Moon', package: 'com.jmstudios.redmoon', category: 'Santé', description: 'Filtre anti lumière bleue' },
   { name: 'QR Scanner', package: 'com.secuso.privacyFriendlyCodeScanner', category: 'Outils', description: 'Scanner de codes QR' },
+  
+  // Clavier
   { name: 'OpenBoard', package: 'org.dslul.openboard.inputmethod.latin', category: 'Outils', description: 'Clavier multi-langues open source' },
   
   // Navigation
@@ -226,21 +95,23 @@ const RECOMMENDED_APPS = [
   { name: 'NetGuard', package: 'eu.faircode.netguard', category: 'Sécurité', description: 'Firewall et bloqueur de publicités' }
 ];
 
-// Helper function to calculate TrustiScore
+// Helper: Calculer le grade (toutes ces apps sont recommandées donc A ou B)
 const calculateTrustiGrade = (category) => {
+  // Les apps de sécurité et communication chiffrée ont un A
   if (category === 'Sécurité' || category === 'Communication') return 'A';
+  // Les autres apps recommandées ont un B
   return 'B';
 };
 
-// Helper function to get reason for TrustiScore
-const getTrustiReason = (grade) => {
+// Helper: Générer la raison du grade
+const generateReason = (grade, category) => {
   if (grade === 'A') {
     return 'Application recommandée par siksik.org. Open source, sans tracker, protection maximale de la vie privée.';
   }
   return 'Application recommandée par siksik.org. Open source et respectueuse de votre vie privée.';
 };
 
-// Helper function to get category color
+// Helper: Obtenir la couleur de catégorie
 const getCategoryColor = (category) => {
   const colorMap = {
     'Communication': 'green',
@@ -258,7 +129,7 @@ const getCategoryColor = (category) => {
   return colorMap[category] || 'gray';
 };
 
-// Helper function to get category icon
+// Helper: Obtenir l'icône de catégorie
 const getCategoryIcon = (category) => {
   const iconMap = {
     'Communication': 'MessageCircle',
@@ -276,9 +147,20 @@ const getCategoryIcon = (category) => {
   return iconMap[category] || 'Package';
 };
 
-// API endpoint to fetch privacy-friendly apps from siksik.org list
-app.get('/api/trusti-apps', async (req, res) => {
+export default async function handler(req, res) {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
   try {
+    // Mapper les apps recommandées à notre format
     const mappedApps = RECOMMENDED_APPS.map((app) => {
       const grade = calculateTrustiGrade(app.category);
       
@@ -287,7 +169,7 @@ app.get('/api/trusti-apps', async (req, res) => {
         name: app.name,
         category: app.category,
         grade: grade,
-        reason: getTrustiReason(grade),
+        reason: generateReason(grade, app.category),
         icon: getOfficialIcon(app.package),
         downloads: 'Recommandé siksik.org',
         developer: 'Open Source',
@@ -340,13 +222,4 @@ app.get('/api/trusti-apps', async (req, res) => {
       apps: []
     });
   }
-});
-
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-app.listen(PORT, () => {
-  console.log(`🚀 TrustiScore API running on http://localhost:${PORT}`);
-});
+}
