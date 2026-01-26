@@ -1,6 +1,5 @@
 import React from 'react';
 import { HelpCircle, LogOut, User, RotateCcw } from 'lucide-react';
-import TrustiLogo from '../ui/TrustiLogo';
 
 /**
  * Header de l'application
@@ -8,10 +7,14 @@ import TrustiLogo from '../ui/TrustiLogo';
 const Header = ({ showExplainer, onToggleExplainer, currentUser, onLogout, onLogin, onResetUserData }) => {
   return (
     <header className="bg-white border-b border-slate-100 sticky top-0 z-30 shadow-sm">
-      <div className="max-w-md mx-auto px-4 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <TrustiLogo className="w-9 h-9" />
-          <h1 className="text-md font-black tracking-tight text-slate-900 leading-none">
+      <div className="max-w-md mx-auto px-4 py-1.5 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <img 
+            src="/assets/logo.png" 
+            alt="TrustiScore" 
+            className="w-8"
+          />
+          <h1 className="text-sm font-black tracking-tight text-slate-900 leading-none">
             TrustiScore
           </h1>
         </div>

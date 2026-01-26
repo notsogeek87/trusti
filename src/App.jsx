@@ -93,9 +93,11 @@ const App = () => {
         <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
           <div className="text-center">
             <div className="mb-6">
-              <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-4xl">🔒</span>
-              </div>
+              <img 
+                src="/assets/logo.png" 
+                alt="TrustiScore Logo" 
+                className="w-48 mx-auto"
+              />
             </div>
             <h2 className="text-2xl font-bold text-slate-800 mb-2">TrustiScore</h2>
             <p className="text-slate-500 mb-6">Chargement des applications...</p>
