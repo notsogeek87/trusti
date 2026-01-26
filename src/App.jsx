@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAppManagement } from './hooks/useAppManagement';
 import { useModals } from './hooks/useModals';
+import { useAuth } from './hooks/useAuth';
 import { TABS } from './constants/tabs';
 
 // Layout
@@ -18,12 +19,24 @@ import AppDetailModal from './components/modals/AppDetailModal';
 import ShareModal from './components/modals/ShareModal';
 import TrustiShareModal from './components/modals/TrustiShareModal';
 import MigrationSelectorModal from './components/modals/MigrationSelectorModal';
+import LoginModal from './components/modals/LoginModal';
 
 /**
  * Composant principal de l'application TrustiScore
  */
 const App = () => {
-  // Gestion de l'état des applications
+  // Gestion de l'authentification
+  const {
+    currentUser,
+    isLoading: isAuthLoading,
+    login,
+    logout,
+    getUserData,
+    saveUserData,
+    resetUserData
+  } = useAuth();
+
+  // Gestion de l'état des applications (avec sauvegarde utilisateur)
   const {
     activeTab,
     searchTerm,
@@ -32,6 +45,7 @@ const App = () => {
     customMigrations,
     selectedApp,
     filteredApps,
+    topApps,
     isLoadingTopApps,
     lastUpdate,
     setActiveTab,
@@ -40,7 +54,7 @@ const App = () => {
     toggleMigrate,
     setCustomMigration,
     setSelectedApp,
-  } = useAppManagement();
+  } = useAppManagement(currentUser, saveUserData, getUserData);
 
   // Gestion des modales
   const {
@@ -52,6 +66,8 @@ const App = () => {
     setShowTrustiShareModal,
     showMigrationSelector,
     setShowMigrationSelector,
+    showLoginModal,
+    setShowLoginModal,
   } = useModals();
 
   // Affichage du détail d'une application
@@ -71,7 +87,11 @@ const App = () => {
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-24">
       <Header 
         showExplainer={showExplainer} 
-        onToggleExplainer={() => setShowExplainer(!showExplainer)} 
+        onToggleExplainer={() => setShowExplainer(!showExplainer)}
+        currentUser={currentUser}
+        onLogout={logout}
+        onLogin={() => setShowLoginModal(true)}
+        onResetUserData={resetUserData}
       />
 
       <main className="max-w-md mx-auto p-4">
@@ -154,6 +174,7 @@ const App = () => {
         <ShareModal
           migratedApps={migratedApps}
           customMigrations={customMigrations}
+          topApps={topApps}
           onClose={() => setShowShareModal(false)}
         />
       )}
@@ -162,6 +183,7 @@ const App = () => {
       {showTrustiShareModal && (
         <TrustiShareModal
           selectedApps={filteredApps.filter(a => myApps.has(a.id))}
+          topApps={topApps}
           onClose={() => setShowTrustiShareModal(false)}
         />
       )}
@@ -175,6 +197,13 @@ const App = () => {
           onClose={() => setShowMigrationSelector(null)}
         />
       )}
+
+      {/* Modal de connexion */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLogin={login}
+      />
 
       <style>{`
         @keyframes pulse-subtle {

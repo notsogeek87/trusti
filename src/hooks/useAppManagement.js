@@ -5,19 +5,59 @@ import { fetchTopAppsInFrance, setupAutoRefresh } from '../utils/apiService';
 
 /**
  * Hook personnalisé pour gérer l'état des applications
+ * Maintenant avec support de la sauvegarde par utilisateur
  */
-export const useAppManagement = () => {
+export const useAppManagement = (currentUser, saveUserData, getUserData) => {
   const [activeTab, setActiveTab] = useState(TABS.TOP);
   const [searchTerm, setSearchTerm] = useState("");
-  const [myApps, setMyApps] = useState(new Set([1, 4, 8, 9]));
-  const [migratedApps, setMigratedApps] = useState(new Set([1]));
-  const [customMigrations, setCustomMigrations] = useState(
-    new Map([[1, "Mistral (Le Chat)"], [8, "Firefox"]])
-  );
+  const [myApps, setMyApps] = useState(new Set());
+  const [migratedApps, setMigratedApps] = useState(new Set());
+  const [customMigrations, setCustomMigrations] = useState(new Map());
   const [selectedApp, setSelectedApp] = useState(null);
   const [topApps, setTopApps] = useState([]);
   const [isLoadingTopApps, setIsLoadingTopApps] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Charger les données de l'utilisateur connecté
+  useEffect(() => {
+    setIsInitialized(false); // Réinitialiser avant de charger
+    
+    if (currentUser && getUserData) {
+      const userData = getUserData('apps');
+      if (userData) {
+        // Utilisateur existant avec des données sauvegardées
+        setMyApps(new Set(userData.myApps || []));
+        setMigratedApps(new Set(userData.migratedApps || []));
+        setCustomMigrations(new Map(userData.customMigrations || []));
+      } else {
+        // Nouvel utilisateur : état vide
+        setMyApps(new Set());
+        setMigratedApps(new Set());
+        setCustomMigrations(new Map());
+      }
+    } else {
+      // Mode démo (non connecté) : données d'exemple
+      setMyApps(new Set([1, 4, 8, 9]));
+      setMigratedApps(new Set([1]));
+      setCustomMigrations(new Map([[1, "Mistral (Le Chat)"], [8, "Firefox"]]));
+    }
+    
+    // Petite temporisation pour s'assurer que les states sont bien définis
+    setTimeout(() => setIsInitialized(true), 100);
+  }, [currentUser, getUserData]);
+
+  // Sauvegarder les données quand elles changent (mais pas au premier chargement)
+  useEffect(() => {
+    if (isInitialized && currentUser && saveUserData) {
+      saveUserData('apps', {
+        myApps: Array.from(myApps),
+        migratedApps: Array.from(migratedApps),
+        customMigrations: Array.from(customMigrations.entries())
+      });
+    }
+  }, [myApps, migratedApps, customMigrations]);
+  // Note: On ne met pas saveUserData et currentUser dans les dépendances pour éviter la boucle
 
   // Charger les données du top au montage du composant
   useEffect(() => {
@@ -57,7 +97,9 @@ export const useAppManagement = () => {
     } else if (activeTab === TABS.ALTERNATIVES) {
       list = list.filter(a => a.id >= 1000);
     } else if (activeTab === TABS.MY_APPS) {
-      list = list.filter(app => myApps.has(app.id));
+      // Combiner les apps statiques ET les apps du top (Play Store)
+      const allApps = [...APPS_DATA, ...topApps];
+      list = allApps.filter(app => myApps.has(app.id));
     }
     
     return list.filter(app => 
@@ -106,6 +148,7 @@ export const useAppManagement = () => {
     migratedApps,
     customMigrations,
     selectedApp,
+    topApps,
     isLoadingTopApps,
     lastUpdate,
     filteredApps,

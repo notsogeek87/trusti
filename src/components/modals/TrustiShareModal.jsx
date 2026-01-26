@@ -41,8 +41,18 @@ const TrustiShareModal = ({ selectedApps, onClose }) => {
                 {selectedApps.map(app => (
                   <div key={app.id} className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
                     <div className="flex items-center gap-3">
-                      <div className={`${app.color} w-10 h-10 rounded-lg flex items-center justify-center text-lg text-white`}>
-                        {app.icon}
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
+                        {app.icon && app.icon.startsWith('http') ? (
+                          <img 
+                            src={app.icon} 
+                            alt={app.name} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className={`${app.color} w-full h-full flex items-center justify-center text-lg text-white`}>
+                            {app.icon}
+                          </div>
+                        )}
                       </div>
                       <div className="flex-grow">
                         <p className="font-black text-sm text-slate-900">{app.name}</p>

@@ -7,13 +7,16 @@ import { shareText, copyToClipboard } from '../../utils/shareUtils';
 /**
  * Modal de partage des migrations
  */
-const ShareModal = ({ migratedApps, customMigrations, onClose }) => {
+const ShareModal = ({ migratedApps, customMigrations, topApps = [], onClose }) => {
+  // Combiner les apps statiques et du Play Store
+  const allApps = [...APPS_DATA, ...topApps];
+  
   const migratedList = Array.from(migratedApps).map(id => {
-    const app = APPS_DATA.find(a => a.id === id);
+    const app = allApps.find(a => a.id === id);
     const customAlt = customMigrations.get(id);
     const altApp = customAlt 
-      ? APPS_DATA.find(a => a.name === customAlt) 
-      : (app?.alternative ? APPS_DATA.find(a => a.name === app.alternative) : null);
+      ? allApps.find(a => a.name === customAlt) 
+      : (app?.alternative ? allApps.find(a => a.name === app.alternative) : null);
     
     return { app, customAlt, altApp };
   }).filter(({ app }) => app);
@@ -55,8 +58,18 @@ const ShareModal = ({ migratedApps, customMigrations, onClose }) => {
                 {migratedList.map(({ app, customAlt, altApp }) => (
                   <div key={app.id} className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className={`${app.color} w-10 h-10 rounded-lg flex items-center justify-center text-lg text-white`}>
-                        {app.icon}
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
+                        {app.icon && app.icon.startsWith('http') ? (
+                          <img 
+                            src={app.icon} 
+                            alt={app.name} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className={`${app.color} w-full h-full flex items-center justify-center text-lg text-white`}>
+                            {app.icon}
+                          </div>
+                        )}
                       </div>
                       <div className="flex-grow">
                         <p className="font-black text-sm text-slate-900">{app.name}</p>
@@ -72,8 +85,18 @@ const ShareModal = ({ migratedApps, customMigrations, onClose }) => {
                     </div>
                     
                     <div className="flex items-center gap-3">
-                      <div className={`${altApp?.color || 'bg-emerald-500'} w-10 h-10 rounded-lg flex items-center justify-center text-lg text-white`}>
-                        {altApp?.icon || app.altIcon}
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
+                        {altApp?.icon && altApp.icon.startsWith('http') ? (
+                          <img 
+                            src={altApp.icon} 
+                            alt={customAlt || app.alternative} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className={`${altApp?.color || 'bg-emerald-500'} w-full h-full flex items-center justify-center text-lg text-white`}>
+                            {altApp?.icon || app.altIcon}
+                          </div>
+                        )}
                       </div>
                       <div className="flex-grow">
                         <p className="font-black text-sm text-slate-900">{customAlt || app.alternative}</p>
