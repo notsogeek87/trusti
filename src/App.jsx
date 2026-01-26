@@ -71,9 +71,12 @@ const App = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [myApps, setMyApps] = useState(new Set([1, 4, 8, 9]));
   const [migratedApps, setMigratedApps] = useState(new Set([1]));
+  const [customMigrations, setCustomMigrations] = useState(new Map([[1, "Mistral (Le Chat)"], [8, "Firefox"]]));
   const [selectedApp, setSelectedApp] = useState(null);
   const [showExplainer, setShowExplainer] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showTrustiShareModal, setShowTrustiShareModal] = useState(false);
+  const [showMigrationSelector, setShowMigrationSelector] = useState(null);
 
   const [appsData] = useState([
     { id: 1, name: "ChatGPT", category: "IA / Productivité", grade: "B", color: "bg-slate-800", icon: "🤖", reason: "Hébergé aux USA mais propose des options de confidentialité avancées.", alternative: "Mistral (Le Chat)", altIcon: "🐈" },
@@ -81,11 +84,12 @@ const App = () => {
     { id: 4, name: "TikTok", category: "Réseaux Sociaux", grade: "E", color: "bg-black", icon: "📱", reason: "Transfert de données vers des juridictions non-équivalentes RGPD.", alternative: "Mastodon", altIcon: "🐘" },
     { id: 5, name: "WhatsApp", category: "Communication", grade: "C", color: "bg-green-500", icon: "💬", reason: "Chiffrement de bout en bout mais partage de métadonnées avec Meta.", alternative: "Signal", altIcon: "🔵" },
     { id: 7, name: "Instagram", category: "Réseaux Sociaux", grade: "D", color: "bg-pink-600", icon: "📸", reason: "Exploitation commerciale des données visuelles pour ciblage publicitaire.", alternative: "Pixelfed", altIcon: "🖼️" },
-    { id: 8, name: "Google Chrome", category: "Navigateur", grade: "D", color: "bg-white", icon: "🌐", reason: "Suivi intensif de l'historique et des habitudes par Google.", alternative: "Brave", altIcon: "🦁" },
+    { id: 8, name: "Google Chrome", category: "Navigateur", grade: "D", color: "bg-white", icon: "🌐", reason: "Suivi intensif de l'historique et des habitudes par Google.", alternative: "Firefox", altIcon: "🦊" },
     { id: 9, name: "OneDrive", category: "Cloud / Stockage", grade: "D", color: "bg-blue-600", icon: "☁️", reason: "Soumis au Cloud Act américain, lecture possible des fichiers.", alternative: "Proton Drive", altIcon: "🧬" },
     { id: 1001, name: "Signal", category: "Communication", grade: "A", color: "bg-blue-600", icon: "💬", reason: "Fondation à but non lucratif, code 100% open-source." },
     { id: 1002, name: "Proton Mail", category: "Communication", grade: "A", color: "bg-purple-700", icon: "📧", reason: "Juridiction Suisse, chiffrement zero-knowledge." },
     { id: 1003, name: "Brave", category: "Navigateur", grade: "A", color: "bg-orange-500", icon: "🦁", reason: "Bloqueur natif de pubs et trackers. Respect strict de la vie privée." },
+    { id: 1004, name: "Firefox", category: "Navigateur", grade: "A", color: "bg-orange-600", icon: "🦊", reason: "Navigateur open-source centré sur la vie privée. Protection forte contre le suivi." },
     { id: 1010, name: "Mistral (Le Chat)", category: "IA / Productivité", grade: "A", color: "bg-orange-200", icon: "🐈", reason: "IA Française performante, alternative directe à OpenAI." }
   ]);
 
@@ -188,11 +192,28 @@ const App = () => {
           </div>
         )}
 
+        {/* Bouton Partager pour App Trusti */}
+        {activeTab === "alt" && (
+          <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center justify-between">
+            <div>
+              <h3 className="font-black text-sm text-emerald-900">Partager mes TrustiApp</h3>
+              <p className="text-xs text-emerald-700 mt-1">{filteredApps.filter(a => myApps.has(a.id)).length} app{filteredApps.filter(a => myApps.has(a.id)).length > 1 ? 's' : ''}</p>
+            </div>
+            <button 
+              onClick={() => setShowTrustiShareModal(true)}
+              disabled={filteredApps.filter(a => myApps.has(a.id)).length === 0}
+              className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors"
+            >
+              Partager
+            </button>
+          </div>
+        )}
+
         {/* Bouton Partager pour Mes Apps */}
         {activeTab === "my_apps" && myApps.size > 0 && (
           <div className="mb-6 bg-indigo-50 border border-indigo-200 rounded-2xl p-4 flex items-center justify-between">
             <div>
-              <h3 className="font-black text-sm text-indigo-900">Partager votre profil</h3>
+              <h3 className="font-black text-sm text-indigo-900">Partager ma migration</h3>
               <p className="text-xs text-indigo-700 mt-1">{myApps.size} app{myApps.size > 1 ? 's' : ''} ({migratedApps.size} migré{migratedApps.size > 1 ? 's' : ''})</p>
             </div>
             <button 
@@ -224,7 +245,8 @@ const App = () => {
                     <div className="space-y-3">
                       {Array.from(migratedApps).map(id => {
                         const app = appsData.find(a => a.id === id);
-                        const altApp = app?.alternative ? appsData.find(a => a.name === app.alternative) : null;
+                        const customAlt = customMigrations.get(id);
+                        const altApp = customAlt ? appsData.find(a => a.name === customAlt) : (app?.alternative ? appsData.find(a => a.name === app.alternative) : null);
                         return app ? (
                           <div key={id} className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
                             <div className="flex items-center gap-3 mb-3">
@@ -233,6 +255,7 @@ const App = () => {
                                 <p className="font-black text-sm text-slate-900">{app.name}</p>
                                 <p className="text-xs text-slate-500">{app.category}</p>
                               </div>
+                              <ScoreIndicator grade={app.grade} />
                             </div>
                             
                             <div className="flex items-center justify-center mb-3">
@@ -243,8 +266,8 @@ const App = () => {
                             
                             <div className="flex items-center gap-3">
                               <div className={`${altApp?.color || 'bg-emerald-500'} w-10 h-10 rounded-lg flex items-center justify-center text-lg text-white`}>{altApp?.icon || app.altIcon}</div>
-                              <div>
-                                <p className="font-black text-sm text-slate-900">{app.alternative}</p>
+                              <div className="flex-grow">
+                                <p className="font-black text-sm text-slate-900">{customAlt || app.alternative}</p>
                                 {altApp && <p className="text-xs text-emerald-600">{altApp.category}</p>}
                               </div>
                               {altApp && <ScoreIndicator grade={altApp.grade} />}
@@ -260,7 +283,8 @@ const App = () => {
                         onClick={() => {
                           const migratedList = Array.from(migratedApps).map(id => {
                             const app = appsData.find(a => a.id === id);
-                            return `${app?.name} → ${app?.alternative}`;
+                            const customAlt = customMigrations.get(id);
+                            return `${app?.name} → ${customAlt || app?.alternative}`;
                           }).filter(Boolean).join('\n• ');
                           const shareText = `✅ Mes migrations TrustiScore:\n\n• ${migratedList}`;
                           
@@ -281,7 +305,8 @@ const App = () => {
                         onClick={() => {
                           const migratedList = Array.from(migratedApps).map(id => {
                             const app = appsData.find(a => a.id === id);
-                            return `${app?.name} → ${app?.alternative}`;
+                            const customAlt = customMigrations.get(id);
+                            return `${app?.name} → ${customAlt || app?.alternative}`;
                           }).filter(Boolean).join('\n• ');
                           const shareText = `✅ Mes migrations TrustiScore:\n\n• ${migratedList}`;
                           navigator.clipboard.writeText(shareText).then(() => alert('Copié dans le presse-papiers ✓'));
@@ -413,16 +438,31 @@ const App = () => {
                 </div>
               </div>
               
-              {activeTab === "my_apps" && app.grade !== "A" && app.alternative && (
+              {activeTab === "my_apps" && app.grade !== "A" && (
                 <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex items-center justify-between animate-pulse-subtle">
-                  <div className="flex items-center gap-3">
-                    <Sparkles size={14} className="text-emerald-600" />
-                    <div className="flex items-center gap-2">
-                       <div className="w-6 h-6 bg-white rounded flex items-center justify-center text-xs shadow-sm border border-emerald-100">{app.altIcon}</div>
-                       <span className="text-[10px] font-black text-emerald-800 uppercase tracking-tight">Migrer vers : {app.alternative}</span>
+                  <div className="flex items-center gap-3 flex-grow min-w-0">
+                    <Sparkles size={14} className="text-emerald-600 shrink-0" />
+                    <div className="flex-grow">
+                      <p className="text-[10px] font-black text-emerald-800 uppercase tracking-tight">Migrer vers :</p>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowMigrationSelector(app.id);
+                        }}
+                        className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline mt-1"
+                      >
+                        {customMigrations.has(app.id) ? (
+                          <span>
+                            {customMigrations.get(app.id)} 
+                            <span className="text-[8px] ml-1 opacity-70">(cliquez pour changer)</span>
+                          </span>
+                        ) : (
+                          <span>Sélectionner une alternative ▼</span>
+                        )}
+                      </button>
                     </div>
                   </div>
-                  <div className="bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase shrink-0">Grade A</div>
+                  <div className="bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase shrink-0 ml-2">Grade A/B</div>
                 </div>
               )}
             </div>
@@ -448,6 +488,156 @@ const App = () => {
           <span className="text-[8px] font-black uppercase tracking-widest">App Trusti</span>
         </button>
       </nav>
+
+        {/* Modal Sélecteur d'Alternative */}
+        {showMigrationSelector && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl max-h-[80vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between">
+                <h2 className="text-lg font-black text-slate-900">Choisir une alternative</h2>
+                <button onClick={() => setShowMigrationSelector(null)} className="p-2 text-slate-400 hover:text-slate-600">
+                  <X size={24} />
+                </button>
+              </div>
+              
+              <div className="p-6">
+                {(() => {
+                  const currentApp = appsData.find(a => a.id === showMigrationSelector);
+                  const alternativesA = appsData.filter(a => a.grade === "A");
+                  const alternativesB = appsData.filter(a => a.grade === "B");
+                  const allAlternatives = [...alternativesA, ...alternativesB];
+                  
+                  return (
+                    <div className="space-y-4">
+                      <p className="text-sm text-slate-600 font-medium">
+                        Sélectionnez une alternative pour remplacer <span className="font-black text-slate-900">{currentApp?.name}</span>
+                      </p>
+                      
+                      <div className="space-y-2">
+                        {allAlternatives.map(alt => (
+                          <button
+                            key={alt.id}
+                            onClick={() => {
+                              setCustomMigrations(prev => new Map(prev).set(showMigrationSelector, alt.name));
+                              setShowMigrationSelector(null);
+                            }}
+                            className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-3 ${
+                              customMigrations.get(showMigrationSelector) === alt.name
+                                ? 'border-emerald-500 bg-emerald-50'
+                                : 'border-slate-100 bg-slate-50 hover:border-emerald-200'
+                            }`}
+                          >
+                            <div className={`${alt.color} w-10 h-10 rounded-lg flex items-center justify-center text-lg text-white shrink-0`}>
+                              {alt.icon}
+                            </div>
+                            <div className="flex-grow text-left min-w-0">
+                              <p className="font-black text-sm text-slate-900">{alt.name}</p>
+                              <p className="text-xs text-slate-500">{alt.category}</p>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <ScoreIndicator grade={alt.grade} />
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      
+                      <button
+                        onClick={() => setShowMigrationSelector(null)}
+                        className="w-full mt-6 bg-slate-100 hover:bg-slate-200 text-slate-900 py-3 rounded-xl font-bold text-sm transition-colors"
+                      >
+                        Fermer
+                      </button>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Partage TrustiApp */}
+        {showTrustiShareModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl max-h-[80vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between">
+                <h2 className="text-xl font-black text-slate-900">Mes TrustiApp</h2>
+                <button onClick={() => setShowTrustiShareModal(false)} className="p-2 text-slate-400 hover:text-slate-600">
+                  <X size={24} />
+                </button>
+              </div>
+              
+              <div className="p-6">
+                {(() => {
+                  const selectedTrustiApps = filteredApps.filter(a => myApps.has(a.id));
+                  return selectedTrustiApps.length > 0 ? (
+                    <div className="space-y-4">
+                      <h3 className="font-black text-sm uppercase tracking-widest text-emerald-800 mb-4 flex items-center gap-2">
+                        <span className="text-lg">⭐</span> {selectedTrustiApps.length} app{selectedTrustiApps.length > 1 ? 's' : ''} sélectionnée{selectedTrustiApps.length > 1 ? 's' : ''}
+                      </h3>
+                      <div className="space-y-3">
+                        {selectedTrustiApps.map(app => (
+                          <div key={app.id} className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
+                            <div className="flex items-center gap-3">
+                              <div className={`${app.color} w-10 h-10 rounded-lg flex items-center justify-center text-lg text-white`}>{app.icon}</div>
+                              <div className="flex-grow">
+                                <p className="font-black text-sm text-slate-900">{app.name}</p>
+                                <p className="text-xs text-slate-500">{app.category}</p>
+                              </div>
+                              <ScoreIndicator grade={app.grade} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Boutons d'Action */}
+                      <div className="border-t border-slate-100 mt-6 pt-6 space-y-2">
+                        <button 
+                          onClick={() => {
+                            const appsList = selectedTrustiApps.map(a => `${a.name} (Grade ${a.grade})`).join('\n• ');
+                            const shareText = `⭐ Mes TrustiApp:\n\n• ${appsList}`;
+                            
+                            if (navigator.share) {
+                              navigator.share({
+                                title: 'Mes TrustiApp',
+                                text: shareText
+                              }).catch(err => console.log('Partage annulé'));
+                            } else {
+                              navigator.clipboard.writeText(shareText).then(() => alert('Copié dans le presse-papiers ✓'));
+                            }
+                          }}
+                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
+                        >
+                          <span>🔗</span> Partager
+                        </button>
+                        <button 
+                          onClick={() => {
+                            const appsList = selectedTrustiApps.map(a => `${a.name} (Grade ${a.grade})`).join('\n• ');
+                            const shareText = `⭐ Mes TrustiApp:\n\n• ${appsList}`;
+                            navigator.clipboard.writeText(shareText).then(() => alert('Copié dans le presse-papiers ✓'));
+                          }}
+                          className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 py-3 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
+                        >
+                          <span>📋</span> Copier
+                        </button>
+                        <button 
+                          onClick={() => setShowTrustiShareModal(false)}
+                          className="w-full bg-slate-50 hover:bg-slate-100 text-slate-900 py-3 rounded-xl font-bold text-sm transition-colors"
+                        >
+                          Fermer
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-slate-500 font-medium">Aucune app sélectionnée</p>
+                      <p className="text-xs text-slate-400 mt-2">Cliquez sur le + pour ajouter des apps</p>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+        )}
 
       <style>{`
         @keyframes pulse-subtle {
