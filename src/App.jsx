@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppManagement } from './hooks/useAppManagement';
 import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
@@ -13,6 +13,7 @@ import SearchBar from './components/ui/SearchBar';
 import ExplainerPanel from './components/ExplainerPanel';
 import AppsList from './components/AppsList';
 import ShareButton from './components/ShareButton';
+import LandingPage from './components/LandingPage';
 
 // Modals
 import AppDetailModal from './components/modals/AppDetailModal';
@@ -35,6 +36,43 @@ const App = () => {
     saveUserData,
     resetUserData
   } = useAuth();
+
+  // État pour la landing page
+  // - Si non connecté : toujours afficher la landing page
+  // - Si connecté : afficher seulement la première fois
+  const [showLandingPage, setShowLandingPage] = useState(false);
+  const [hasCheckedLandingPage, setHasCheckedLandingPage] = useState(false);
+
+  // Mettre à jour la landing page quand l'état de connexion change
+  useEffect(() => {
+    // Ne vérifier qu'une seule fois au chargement ou lors du changement de connexion
+    if (!hasCheckedLandingPage) {
+      if (!currentUser) {
+        // Si pas connecté, toujours afficher la landing page
+        setShowLandingPage(true);
+      } else {
+        // Si connecté, vérifier si déjà visité
+        const hasVisited = localStorage.getItem('trusti_has_visited');
+        setShowLandingPage(!hasVisited);
+      }
+      setHasCheckedLandingPage(true);
+    }
+  }, [currentUser, hasCheckedLandingPage]);
+
+  // Réinitialiser la vérification quand l'utilisateur se déconnecte
+  useEffect(() => {
+    if (!currentUser) {
+      setHasCheckedLandingPage(false);
+    }
+  }, [currentUser]);
+
+  const handleCloseLandingPage = () => {
+    if (currentUser) {
+      // Sauvegarder uniquement si connecté
+      localStorage.setItem('trusti_has_visited', 'true');
+    }
+    setShowLandingPage(false);
+  };
 
   // Gestion de l'état des applications (avec sauvegarde utilisateur)
   const {
@@ -72,6 +110,11 @@ const App = () => {
     showLoginModal,
     setShowLoginModal,
   } = useModals();
+
+  // Afficher la landing page en premier si c'est la première visite
+  if (showLandingPage) {
+    return <LandingPage onClose={handleCloseLandingPage} />;
+  }
 
   // Affichage du détail d'une application
   if (selectedApp) {
