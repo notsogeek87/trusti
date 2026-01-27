@@ -127,7 +127,7 @@ app.get('/api/top-apps', async (req, res) => {
     const apps = await gplay.list({
       collection: gplay.collection.TOP_FREE,
       category: gplay.category.APPLICATION,
-      num: 20,
+      num: 50,
       country: 'fr',
       lang: 'fr',
       fullDetail: true
