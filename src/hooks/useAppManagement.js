@@ -40,10 +40,10 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
         setCustomMigrations(new Map());
       }
     } else {
-      // Mode démo (non connecté) : données d'exemple
-      setMyApps(new Set([1, 4, 8, 9]));
-      setMigratedApps(new Set([1]));
-      setCustomMigrations(new Map([[1, "Mistral (Le Chat)"], [8, "Firefox"]]));
+      // Mode non connecté : liste vide
+      setMyApps(new Set());
+      setMigratedApps(new Set());
+      setCustomMigrations(new Map());
     }
     
     // Petite temporisation pour s'assurer que les states sont bien définis
@@ -93,18 +93,35 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
   useEffect(() => {
     const loadTrustiApps = async () => {
       try {
-        const data = await fetchTrustiApps();
-        setTrustiApps(data);
+        // Charger UNIQUEMENT les TrustiApps ajoutées par l'admin
+        const API_URL = import.meta.env.PROD 
+          ? '/api'
+          : 'http://localhost:3001/api';
+        
+        const customResponse = await fetch(`${API_URL}/custom-trusti-apps`);
+        const customData = await customResponse.json();
+        const customAppsArray = customData.success ? customData.apps : [];
+        
+        setTrustiApps(customAppsArray);
       } catch (error) {
         console.error('Erreur lors du chargement des TrustiApps:', error);
-        // En cas d'erreur, utiliser les données statiques
-        setTrustiApps(APPS_DATA.filter(a => a.id >= 1000));
+        // En cas d'erreur, liste vide
+        setTrustiApps([]);
       } finally {
         setIsLoadingTrustiApps(false);
       }
     };
 
     loadTrustiApps();
+    
+    // Recharger régulièrement pour détecter les modifications par l'admin
+    const intervalId = setInterval(() => {
+      loadTrustiApps();
+    }, 10000); // Vérifier toutes les 10 secondes
+    
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
   // Détecter quand le chargement initial est terminé
@@ -123,12 +140,20 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
       // Utiliser les données live si disponibles, sinon les données statiques
       list = topApps.length > 0 ? topApps : APPS_DATA.filter(a => a.id < 1000);
     } else if (activeTab === TABS.ALTERNATIVES) {
-      // Utiliser les TrustiApps (F-Droid + Exodus)
-      list = trustiApps.length > 0 ? trustiApps : APPS_DATA.filter(a => a.id >= 1000);
+      // Afficher UNIQUEMENT les TrustiApps ajoutées par l'admin (triées alphabétiquement)
+      list = [...trustiApps].sort((a, b) => a.name.localeCompare(b.name));
     } else if (activeTab === TABS.MY_APPS) {
       // Combiner les apps statiques ET les apps du top (Play Store) ET TrustiApps
       const allApps = [...APPS_DATA, ...topApps, ...trustiApps];
-      list = allApps.filter(app => myApps.has(app.id));
+      
+      // Créer un Map pour dédupliquer par ID (le dernier gagne)
+      const appsById = new Map();
+      allApps.forEach(app => {
+        appsById.set(app.id, app);
+      });
+      
+      // Filtrer uniquement les apps dans myApps
+      list = Array.from(appsById.values()).filter(app => myApps.has(app.id));
     }
     
     return list.filter(app => 

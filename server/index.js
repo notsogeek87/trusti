@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import gplay from 'google-play-scraper';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 const PORT = 3001;
@@ -8,6 +11,40 @@ const PORT = 3001;
 // Enable CORS for frontend
 app.use(cors());
 app.use(express.json());
+
+// Configuration des chemins pour ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const DATA_FILE = path.join(__dirname, 'data', 'custom-trusti-apps.json');
+
+// Créer le dossier data s'il n'existe pas
+if (!fs.existsSync(path.join(__dirname, 'data'))) {
+  fs.mkdirSync(path.join(__dirname, 'data'));
+}
+
+// Helper: Lire les apps personnalisées
+const readCustomApps = () => {
+  try {
+    if (fs.existsSync(DATA_FILE)) {
+      const data = fs.readFileSync(DATA_FILE, 'utf8');
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error('Error reading custom apps:', error);
+  }
+  return [];
+};
+
+// Helper: Écrire les apps personnalisées
+const writeCustomApps = (apps) => {
+  try {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(apps, null, 2), 'utf8');
+    return true;
+  } catch (error) {
+    console.error('Error writing custom apps:', error);
+    return false;
+  }
+};
 
 // ======================
 // TOP APPS (Google Play)
@@ -364,11 +401,105 @@ app.get('/api/trusti-apps', async (req, res) => {
   }
 });
 
+// ======================
+// CUSTOM TRUSTI APPS
+// ======================
+
+// GET: Récupérer les apps personnalisées
+app.get('/api/custom-trusti-apps', (req, res) => {
+  try {
+    const apps = readCustomApps();
+    res.json({
+      success: true,
+      apps: apps
+    });
+  } catch (error) {
+    console.error('Error fetching custom apps:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      apps: []
+    });
+  }
+});
+
+// POST: Sauvegarder les apps personnalisées (bulk save)
+app.post('/api/custom-trusti-apps', (req, res) => {
+  try {
+    const { apps } = req.body;
+    
+    if (!Array.isArray(apps)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Apps must be an array'
+      });
+    }
+
+    const success = writeCustomApps(apps);
+    
+    if (success) {
+      res.json({
+        success: true,
+        message: 'Custom apps saved successfully',
+        apps: apps
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to save apps'
+      });
+    }
+  } catch (error) {
+    console.error('Error saving custom apps:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// DELETE: Supprimer une app personnalisée
+app.delete('/api/custom-trusti-apps/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: 'App ID is required'
+      });
+    }
+
+    const apps = readCustomApps();
+    const filteredApps = apps.filter(app => app.id !== parseInt(id));
+    const success = writeCustomApps(filteredApps);
+    
+    if (success) {
+      res.json({
+        success: true,
+        message: 'App deleted successfully',
+        apps: filteredApps
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to delete app'
+      });
+    }
+  } catch (error) {
+    console.error('Error deleting custom app:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 TrustiScore API running on http://localhost:${PORT}`);
+  console.log(`TrustiScore API running on http://localhost:${PORT}`);
 });

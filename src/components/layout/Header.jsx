@@ -1,10 +1,10 @@
 import React from 'react';
-import { HelpCircle, LogOut, User, RotateCcw } from 'lucide-react';
+import { HelpCircle, LogOut, User, RotateCcw, Settings } from 'lucide-react';
 
 /**
  * Header de l'application
  */
-const Header = ({ showExplainer, onToggleExplainer, currentUser, onLogout, onLogin, onResetUserData }) => {
+const Header = ({ showExplainer, onToggleExplainer, currentUser, onLogout, onLogin, onResetUserData, onOpenAdmin }) => {
   return (
     <header className="bg-white border-b border-slate-100 sticky top-0 z-30 shadow-sm">
       <div className="max-w-md mx-auto px-4 py-1.5 flex items-center justify-between">
@@ -27,6 +27,15 @@ const Header = ({ showExplainer, onToggleExplainer, currentUser, onLogout, onLog
                 <User size={14} />
                 <span className="text-xs font-bold">{currentUser}</span>
               </div>
+              {currentUser === 'admin0614' && (
+                <button
+                  onClick={onOpenAdmin}
+                  className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all"
+                  title="Administration TrustiApps"
+                >
+                  <Settings size={18} />
+                </button>
+              )}
               <button
                 onClick={onResetUserData}
                 className="p-2 text-slate-300 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-all"

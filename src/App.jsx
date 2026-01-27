@@ -22,6 +22,7 @@ import ShareModal from './components/modals/ShareModal';
 import TrustiShareModal from './components/modals/TrustiShareModal';
 import MigrationSelectorModal from './components/modals/MigrationSelectorModal';
 import LoginModal from './components/modals/LoginModal';
+import AdminTrustiAppsModal from './components/modals/AdminTrustiAppsModal';
 
 /**
  * Composant principal de l'application TrustiScore
@@ -112,6 +113,9 @@ const App = () => {
     setShowLoginModal,
   } = useModals();
 
+  // Modal admin
+  const [showAdminModal, setShowAdminModal] = useState(false);
+
   // Afficher la landing page en premier si c'est la première visite
   if (showLandingPage) {
     return <LandingPage onClose={handleCloseLandingPage} />;
@@ -159,6 +163,7 @@ const App = () => {
         onLogout={logout}
         onLogin={() => setShowLoginModal(true)}
         onResetUserData={resetUserData}
+        onOpenAdmin={() => setShowAdminModal(true)}
       />
 
       <main className="max-w-md mx-auto p-4">
@@ -299,6 +304,19 @@ const App = () => {
         onClose={() => setShowLoginModal(false)}
         onLogin={login}
       />
+
+      {/* Modal d'administration TrustiApps */}
+      {showAdminModal && (
+        <AdminTrustiAppsModal
+          onClose={() => {
+            setShowAdminModal(false);
+            // Forcer le rechargement des TrustiApps pour que tout le monde voit les changements
+            window.location.reload();
+          }}
+          onSave={(apps) => {
+          }}
+        />
+      )}
 
       <style>{`
         @keyframes pulse-subtle {
