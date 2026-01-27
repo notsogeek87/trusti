@@ -12,6 +12,7 @@ const API_URL = import.meta.env.PROD
  */
 const AdminTrustiAppsModal = ({ onClose, onSave }) => {
   const [apps, setApps] = useState([]);
+  const [playStoreApps, setPlayStoreApps] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -20,7 +21,8 @@ const AdminTrustiAppsModal = ({ onClose, onSave }) => {
     logo: '',
     grade: 'A',
     category: 'Application',
-    description: ''
+    description: '',
+    replacesAppId: null
   });
 
   const [isAdding, setIsAdding] = useState(false);
@@ -28,7 +30,22 @@ const AdminTrustiAppsModal = ({ onClose, onSave }) => {
   // Charger les apps depuis l'API au montage
   useEffect(() => {
     loadApps();
+    loadPlayStoreApps();
   }, []);
+
+  const loadPlayStoreApps = async () => {
+    try {
+      const response = await fetch(`${API_URL}/top-apps`);
+      const data = await response.json();
+      console.log('Play Store apps loaded:', data);
+      if (data.success && data.apps) {
+        setPlayStoreApps(data.apps);
+        console.log('Play Store apps set:', data.apps.length);
+      }
+    } catch (error) {
+      console.error('Error loading Play Store apps:', error);
+    }
+  };
 
   const loadApps = async () => {
     try {
@@ -60,7 +77,8 @@ const AdminTrustiAppsModal = ({ onClose, onSave }) => {
       grade: editingApp.grade,
       category: editingApp.category || 'Application',
       color: getGradeColor(editingApp.grade),
-      reason: editingApp.description || 'Application respectueuse de la vie privée'
+      reason: editingApp.description || 'Application respectueuse de la vie privée',
+      replacesAppId: editingApp.replacesAppId || null
     };
 
     let updatedApps;
@@ -91,7 +109,8 @@ const AdminTrustiAppsModal = ({ onClose, onSave }) => {
           logo: '',
           grade: 'A',
           category: 'Application',
-          description: ''
+          description: '',
+          replacesAppId: null
         });
         setIsAdding(false);
       } else {
@@ -146,7 +165,8 @@ const AdminTrustiAppsModal = ({ onClose, onSave }) => {
       logo: app.icon,
       grade: app.grade,
       category: app.category,
-      description: app.reason
+      description: app.reason,
+      replacesAppId: app.replacesAppId || null
     });
     setIsAdding(true);
   };
@@ -273,6 +293,35 @@ const AdminTrustiAppsModal = ({ onClose, onSave }) => {
                     placeholder="Communication, Sécurité..."
                     className="w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none"
                   />
+                </div>
+
+                {/* Application à remplacer (Play Store) */}
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                    Remplace l'application (optionnel)
+                    <span className="text-xs text-slate-500 ml-2">
+                      ({playStoreApps.length} apps disponibles)
+                    </span>
+                  </label>
+                  <select
+                    value={editingApp.replacesAppId || ''}
+                    onChange={(e) => {
+                      const value = e.target.value || null;
+                      console.log('Selected app ID:', value);
+                      setEditingApp({...editingApp, replacesAppId: value});
+                    }}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none"
+                  >
+                    <option value="">Aucune sélection</option>
+                    {playStoreApps.map(app => (
+                      <option key={app.id} value={app.id}>
+                        {app.name} (Note: {app.grade})
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Cette TrustiApp sera proposée en migration pour l'app sélectionnée
+                  </p>
                 </div>
 
                 {/* Description */}

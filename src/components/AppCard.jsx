@@ -87,7 +87,16 @@ const AppCard = ({
       {activeTab === TABS.MY_APPS && app.grade !== "A" && (
         <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex items-center justify-between animate-pulse-subtle">
           <div className="flex items-center gap-3 flex-grow min-w-0">
-            <Sparkles size={14} className="text-emerald-600 shrink-0" />
+            {app.altIcon && (
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-white border border-emerald-200">
+                {app.altIcon.startsWith('http') ? (
+                  <img src={app.altIcon} alt="Alternative" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-lg">{app.altIcon}</span>
+                )}
+              </div>
+            )}
+            {!app.altIcon && <Sparkles size={14} className="text-emerald-600 shrink-0" />}
             <div className="flex-grow">
               <p className="text-[10px] font-black text-emerald-800 uppercase tracking-tight">
                 Migrer vers :
@@ -99,7 +108,12 @@ const AppCard = ({
                 }}
                 className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline mt-1"
               >
-                {customMigration ? (
+                {app.alternative ? (
+                  <span>
+                    {app.alternative}
+                    <span className="text-[8px] ml-1 opacity-70">⭐ Recommandé</span>
+                  </span>
+                ) : customMigration ? (
                   <span>
                     {customMigration} 
                     <span className="text-[8px] ml-1 opacity-70">(cliquez pour changer)</span>

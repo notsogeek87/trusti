@@ -6,7 +6,8 @@
     "grade": "B",
     "category": "Application",
     "color": "bg-[#8dc63f]",
-    "reason": "Application respectueuse de la vie privée"
+    "reason": "Application respectueuse de la vie privée",
+    "replacesAppId": "com.whatsapp"
   },
   {
     "id": 1769540682080,
@@ -15,7 +16,8 @@
     "grade": "B",
     "category": "Application",
     "color": "bg-[#8dc63f]",
-    "reason": "Application respectueuse de la vie privée"
+    "reason": "Application respectueuse de la vie privée",
+    "replacesAppId": "com.openai.chatgpt"
   },
   {
     "id": 1769541460710,
@@ -25,5 +27,15 @@
     "category": "Application",
     "color": "bg-[#8dc63f]",
     "reason": "Application respectueuse de la vie privée"
+  },
+  {
+    "id": 1769543537349,
+    "name": "Pixelfed",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fseeklogo.com%2Fimages%2FP%2Fpixelfed-logo-2923677F2A-seeklogo.com.png&f=1&nofb=1&ipt=387248f3d7ee13a1f8f1ba449b14336da3dd227ab08ec42e8344fc73ab316ae8",
+    "grade": "A",
+    "category": "Application",
+    "color": "bg-[#006837]",
+    "reason": "Application respectueuse de la vie privée",
+    "replacesAppId": "com.instagram.android"
   }
 ]

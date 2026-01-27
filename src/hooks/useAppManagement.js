@@ -152,8 +152,21 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
         appsById.set(app.id, app);
       });
       
-      // Filtrer uniquement les apps dans myApps
-      list = Array.from(appsById.values()).filter(app => myApps.has(app.id));
+      // Filtrer uniquement les apps dans myApps et ajouter les alternatives
+      list = Array.from(appsById.values())
+        .filter(app => myApps.has(app.id))
+        .map(app => {
+          // Chercher si une TrustiApp remplace cette app
+          const replacement = trustiApps.find(ta => ta.replacesAppId === app.id);
+          if (replacement) {
+            return {
+              ...app,
+              alternative: replacement.name,
+              altIcon: replacement.icon
+            };
+          }
+          return app;
+        });
     }
     
     return list.filter(app => 
