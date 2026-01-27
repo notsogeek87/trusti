@@ -26,24 +26,24 @@ const LandingPage = ({ onClose }) => {
             </div>
             
             <h2 className="text-3xl font-black mb-4 text-white leading-tight">
-              Reprenez le contrôle de votre vie privée numérique
+              Reprenez votre souveraineté numérique européenne
             </h2>
             
             <p className="text-base leading-relaxed text-slate-400 font-medium mb-8">
               TrustiScore évalue la confiance que vous pouvez accorder à vos applications. 
-              Découvrez quelles apps respectent vraiment votre <span className="text-white font-bold">vie privée</span> et 
-              votre <span className="text-white font-bold">souveraineté numérique</span>.
+              Découvrez quelles apps respectent vraiment votre <span className="text-white font-bold">souveraineté numérique</span> et 
+              protègent votre <span className="text-white font-bold">vie privée</span>.
             </p>
 
             {/* Fonctionnalités clés */}
             <div className="grid gap-4 mb-10 text-left">
               <div className="flex items-start gap-3">
-                <div className="bg-indigo-600 rounded-lg p-2 shrink-0">
-                  <Eye size={20} className="text-white" />
+                <div className="bg-blue-600 rounded-lg p-2 shrink-0">
+                  <Globe size={20} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="text-white font-bold text-sm mb-1">Évaluations transparentes</h3>
-                  <p className="text-slate-400 text-xs">Scores basés sur 12 critères objectifs</p>
+                  <h3 className="text-white font-bold text-sm mb-1">Souveraineté européenne</h3>
+                  <p className="text-slate-400 text-xs">Données hébergées en Europe, conformité RGPD</p>
                 </div>
               </div>
 
@@ -53,17 +53,17 @@ const LandingPage = ({ onClose }) => {
                 </div>
                 <div>
                   <h3 className="text-white font-bold text-sm mb-1">Vie privée protégée</h3>
-                  <p className="text-slate-400 text-xs">RGPD, Open Source, Localisation des données</p>
+                  <p className="text-slate-400 text-xs">Protection contre le Cloud Act et surveillance</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="bg-purple-600 rounded-lg p-2 shrink-0">
-                  <Globe size={20} className="text-white" />
+                <div className="bg-indigo-600 rounded-lg p-2 shrink-0">
+                  <Eye size={20} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="text-white font-bold text-sm mb-1">Alternatives respectueuses</h3>
-                  <p className="text-slate-400 text-xs">Découvrez des apps qui vous respectent</p>
+                  <h3 className="text-white font-bold text-sm mb-1">Évaluations transparentes</h3>
+                  <p className="text-slate-400 text-xs">Scores basés sur 12 critères objectifs</p>
                 </div>
               </div>
             </div>

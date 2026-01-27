@@ -3,6 +3,7 @@ import { useAppManagement } from './hooks/useAppManagement';
 import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
 import { TABS } from './constants/tabs';
+import { Info } from 'lucide-react';
 
 // Layout
 import Header from './components/layout/Header';
@@ -170,6 +171,20 @@ const App = () => {
               <p className="text-xs font-black uppercase tracking-widest text-slate-400">
                 Classement France
               </p>
+              {/* Tooltip Google Play Store */}
+              <div className="group relative">
+                <Info size={14} className="text-slate-400 cursor-help" />
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 hidden group-hover:block w-64 z-50">
+                  <div className="bg-slate-800 text-white text-xs rounded-xl px-4 py-3 shadow-xl border border-slate-700">
+                    {/* Flèche pointant vers le haut */}
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[6px] border-b-slate-800"></div>
+                    <p className="font-semibold mb-1">📊 Google Play Store</p>
+                    <p className="text-slate-300 text-[11px] leading-relaxed">
+                      Ce classement représente les applications les plus téléchargées sur le Google Play Store en France.
+                    </p>
+                  </div>
+                </div>
+              </div>
               {isLoadingTopApps && (
                 <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
               )}
