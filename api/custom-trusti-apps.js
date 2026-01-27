@@ -39,10 +39,7 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  try {
-    if (req.method === 'GET') {
-      // Récupérer toutes les apps personnalisées
-      const apps = readCustomApps();
+  try {readCustomApps();
       return res.status(200).json({
         success: true,
         apps: apps
@@ -89,7 +86,10 @@ export default async function handler(req, res) {
 
       const apps = readCustomApps();
       const filteredApps = apps.filter(app => app.id !== id);
-      const success = writeCustomApps(filteredApps);
+      const success =
+      const apps = await readCustomApps();
+      const filteredApps = apps.filter(app => app.id !== id);
+      const success = await writeCustomApps(filteredApps);
       
       if (success) {
         return res.status(200).json({

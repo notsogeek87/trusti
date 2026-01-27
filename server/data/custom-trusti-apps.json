@@ -16,5 +16,14 @@
     "category": "Application",
     "color": "bg-[#8dc63f]",
     "reason": "Application respectueuse de la vie privée"
+  },
+  {
+    "id": 1769541460710,
+    "name": "Proton Mail",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fseeklogo.com%2Fimages%2FP%2Fproton-mail-logo-31D8CDC79E-seeklogo.com.png&f=1&nofb=1&ipt=106bc755ecb8db82d10c82a431601be647a9313cf446c2a8471452897870225f",
+    "grade": "B",
+    "category": "Application",
+    "color": "bg-[#8dc63f]",
+    "reason": "Application respectueuse de la vie privée"
   }
 ]
