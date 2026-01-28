@@ -7,6 +7,25 @@
   .animate-pulse-subtle {
     animation: pulse-subtle 3s infinite ease-in-out;
   }
+  
+  /* Scrollbar personnalisée pour les fonds sombres */
+  .scrollbar-custom-dark::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .scrollbar-custom-dark::-webkit-scrollbar-track {
+    background: rgba(30, 41, 59, 0.5);
+    border-radius: 10px;
+  }
+  
+  .scrollbar-custom-dark::-webkit-scrollbar-thumb {
+    background: rgb(51, 65, 85);
+    border-radius: 10px;
+  }
+  
+  .scrollbar-custom-dark::-webkit-scrollbar-thumb:hover {
+    background: rgb(71, 85, 105);
+  }
 }
 
 @keyframes pulse-subtle {

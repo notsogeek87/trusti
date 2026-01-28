@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, ArrowRight, Lock, Globe, Eye, CheckCircle } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Lock, Globe, Eye, CheckCircle, BookOpen } from 'lucide-react';
 import { GRADE_INFO } from '../constants/grades';
 
 /**
@@ -96,6 +96,17 @@ const LandingPage = ({ onClose }) => {
               Commencer l'exploration
               <ArrowRight size={20} />
             </button>
+
+            <a
+              href="https://trusti-score.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full mt-4 bg-slate-800 hover:bg-slate-700 border-2 border-indigo-500/30 hover:border-indigo-500 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 group"
+            >
+              <BookOpen size={20} className="text-indigo-400 group-hover:text-indigo-300" />
+              En savoir plus sur le TrustiScore
+              <ArrowRight size={18} className="text-indigo-400 group-hover:text-indigo-300 group-hover:translate-x-1 transition-transform" />
+            </a>
 
             <p className="text-[10px] text-slate-500 mt-6 italic">
               Basé sur 12 critères : RGPD, Cloud Act, Open Source, Localisation des données, et plus encore.
