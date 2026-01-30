@@ -11,22 +11,9 @@ const LandingPage = ({ onClose }) => {
       <div className="min-h-screen flex flex-col">
         {/* Hero Section */}
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 text-center">
-          <div className="mb-8 animate-in zoom-in duration-500">
-            <img 
-              src="/assets/logo.png" 
-              alt="TrustiScore Logo" 
-              className="w-40 mx-auto mb-6"
-            />
-          </div>
-
-          <div className="max-w-md animate-in slide-in-from-bottom duration-700 delay-200">
-            <div className="flex items-center justify-center gap-2 mb-4 text-indigo-400">
-              <ShieldCheck size={24} />
-              <h1 className="font-black text-sm uppercase tracking-widest">TrustiScore</h1>
-            </div>
-
-            {/* Vidéo d'explication */}
-            <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl border-2 border-indigo-500/30 bg-slate-800/50 backdrop-blur-sm">
+          {/* Vidéo d'explication */}
+          <div className="mb-8 max-w-2xl w-full animate-in zoom-in duration-500">
+            <div className="rounded-2xl overflow-hidden shadow-2xl border-2 border-indigo-500/30 bg-slate-800/50 backdrop-blur-sm">
               <video 
                 className="w-full h-auto"
                 controls
@@ -36,6 +23,13 @@ const LandingPage = ({ onClose }) => {
                 <source src="/assets/intro.mp4" type="video/mp4" />
                 Votre navigateur ne supporte pas la lecture de vidéos.
               </video>
+            </div>
+          </div>
+
+          <div className="max-w-md animate-in slide-in-from-bottom duration-700 delay-300">
+            <div className="flex items-center justify-center gap-2 mb-4 text-indigo-400">
+              <ShieldCheck size={24} />
+              <h1 className="font-black text-sm uppercase tracking-widest">TrustiScore</h1>
             </div>
             
             <h2 className="text-3xl font-black mb-4 text-white leading-tight">
