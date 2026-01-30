@@ -8,7 +8,7 @@ import { fetchTopAppsInFrance, fetchTrustiApps, setupAutoRefresh } from '../util
  * Maintenant avec support de la sauvegarde par utilisateur
  */
 export const useAppManagement = (currentUser, saveUserData, getUserData) => {
-  const [activeTab, setActiveTab] = useState(TABS.TOP);
+  const [activeTab, setActiveTab] = useState(TABS.SELECTION);
   const [searchTerm, setSearchTerm] = useState("");
   const [myApps, setMyApps] = useState(new Set());
   const [migratedApps, setMigratedApps] = useState(new Set());
@@ -16,8 +16,10 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
   const [selectedApp, setSelectedApp] = useState(null);
   const [topApps, setTopApps] = useState([]);
   const [trustiApps, setTrustiApps] = useState([]);
+  const [starApps, setStarApps] = useState([]);
   const [isLoadingTopApps, setIsLoadingTopApps] = useState(true);
   const [isLoadingTrustiApps, setIsLoadingTrustiApps] = useState(true);
+  const [isLoadingStarApps, setIsLoadingStarApps] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -26,7 +28,10 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
   const appsWithTrustiApp = useMemo(() => {
     const idsSet = new Set();
     trustiApps.forEach(ta => {
-      if (ta.replacesAppId) {
+      // Support de l'ancien format (replacesAppId) et du nouveau (replacesAppIds)
+      if (ta.replacesAppIds && Array.isArray(ta.replacesAppIds)) {
+        ta.replacesAppIds.forEach(id => idsSet.add(id));
+      } else if (ta.replacesAppId) {
         idsSet.add(ta.replacesAppId);
       }
     });
@@ -78,7 +83,12 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     const loadTopApps = async () => {
       try {
         const data = await fetchTopAppsInFrance();
-        setTopApps(data);
+        // Normaliser les IDs en strings pour la cohérence
+        const normalizedData = data.map(app => ({
+          ...app,
+          id: String(app.id)
+        }));
+        setTopApps(normalizedData);
         setLastUpdate(new Date());
       } catch (error) {
         console.error('Erreur lors du chargement des top apps:', error);
@@ -93,7 +103,12 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
 
     // Configurer le rafraîchissement automatique toutes les heures
     const cleanup = setupAutoRefresh((data) => {
-      setTopApps(data);
+      // Normaliser les IDs en strings pour la cohérence
+      const normalizedData = data.map(app => ({
+        ...app,
+        id: String(app.id)
+      }));
+      setTopApps(normalizedData);
       setLastUpdate(new Date());
     }, 60);
 
@@ -113,7 +128,15 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
         const customData = await customResponse.json();
         const customAppsArray = customData.success ? customData.apps : [];
         
-        setTrustiApps(customAppsArray);
+        // Normaliser les IDs en strings pour la cohérence
+        const normalizedApps = customAppsArray.map(app => ({
+          ...app,
+          id: String(app.id),
+          replacesAppId: app.replacesAppId ? String(app.replacesAppId) : undefined,
+          replacesAppIds: app.replacesAppIds ? app.replacesAppIds.map(id => String(id)) : undefined
+        }));
+        
+        setTrustiApps(normalizedApps);
       } catch (error) {
         console.error('Erreur lors du chargement des TrustiApps:', error);
         // En cas d'erreur, liste vide
@@ -135,27 +158,69 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     };
   }, []);
 
+  // Charger les StarApps au montage
+  useEffect(() => {
+    const loadStarApps = async () => {
+      try {
+        const API_URL = import.meta.env.PROD 
+          ? '/api'
+          : 'http://localhost:3001/api';
+        
+        const response = await fetch(`${API_URL}/star-apps`);
+        const data = await response.json();
+        const appsArray = data.success ? data.apps : [];
+        
+        // Normaliser les IDs en strings pour la cohérence
+        const normalizedApps = appsArray.map(app => ({
+          ...app,
+          id: String(app.id)
+        }));
+        
+        setStarApps(normalizedApps);
+      } catch (error) {
+        console.error('Erreur lors du chargement des StarApps:', error);
+        setStarApps([]);
+      } finally {
+        setIsLoadingStarApps(false);
+      }
+    };
+
+    loadStarApps();
+    
+    // Recharger régulièrement pour détecter les modifications par l'admin
+    const intervalId = setInterval(() => {
+      loadStarApps();
+    }, 10000); // Vérifier toutes les 10 secondes
+    
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
   // Détecter quand le chargement initial est terminé
   useEffect(() => {
-    if (!isLoadingTopApps && !isLoadingTrustiApps) {
+    if (!isLoadingTopApps && !isLoadingTrustiApps && !isLoadingStarApps) {
       // Attendre un peu pour une transition fluide
       setTimeout(() => setIsInitialLoading(false), 300);
     }
-  }, [isLoadingTopApps, isLoadingTrustiApps]);
+  }, [isLoadingTopApps, isLoadingTrustiApps, isLoadingStarApps]);
 
   // Filtrer les applications selon l'onglet actif et la recherche
   const filteredApps = useMemo(() => {
     let list = [...APPS_DATA];
     
-    if (activeTab === TABS.TOP) {
+    if (activeTab === TABS.SELECTION) {
+      // Afficher UNIQUEMENT les StarApps ajoutées par l'admin (triées alphabétiquement)
+      list = [...starApps].sort((a, b) => a.name.localeCompare(b.name));
+    } else if (activeTab === TABS.TOP) {
       // Utiliser les données live si disponibles, sinon les données statiques
       list = topApps.length > 0 ? topApps : APPS_DATA.filter(a => a.id < 1000);
     } else if (activeTab === TABS.ALTERNATIVES) {
       // Afficher UNIQUEMENT les TrustiApps ajoutées par l'admin (triées alphabétiquement)
       list = [...trustiApps].sort((a, b) => a.name.localeCompare(b.name));
     } else if (activeTab === TABS.MY_APPS) {
-      // Combiner les apps statiques ET les apps du top (Play Store) ET TrustiApps
-      const allApps = [...APPS_DATA, ...topApps, ...trustiApps];
+      // Combiner les apps statiques ET les apps du top (Play Store) ET TrustiApps ET StarApps
+      const allApps = [...APPS_DATA, ...topApps, ...trustiApps, ...starApps];
       
       // Créer un Map pour dédupliquer par ID (le dernier gagne)
       const appsById = new Map();
@@ -167,15 +232,28 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
       list = Array.from(appsById.values())
         .filter(app => myApps.has(app.id))
         .map(app => {
-          // Chercher si une TrustiApp remplace cette app
-          const replacement = trustiApps.find(ta => ta.replacesAppId === app.id);
+          // Chercher si une TrustiApp remplace cette app (support ancien et nouveau format)
+          const replacement = trustiApps.find(ta => {
+            console.log('Checking replacement for app:', app.id, 'Type:', typeof app.id);
+            console.log('TrustiApp:', ta.name, 'replacesAppIds:', ta.replacesAppIds, 'replacesAppId:', ta.replacesAppId);
+            if (ta.replacesAppIds && Array.isArray(ta.replacesAppIds)) {
+              const found = ta.replacesAppIds.includes(app.id);
+              console.log('Array check result:', found);
+              return found;
+            }
+            const found = ta.replacesAppId === app.id;
+            console.log('Single check result:', found);
+            return found;
+          });
           if (replacement) {
+            console.log('✅ Found replacement for', app.name, ':', replacement.name);
             return {
               ...app,
               alternative: replacement.name,
               altIcon: replacement.icon
             };
           }
+          console.log('❌ No replacement found for', app.name);
           return app;
         });
     }
@@ -183,7 +261,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     return list.filter(app => 
       app.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [activeTab, myApps, searchTerm, topApps, trustiApps]);
+  }, [activeTab, myApps, searchTerm, topApps, trustiApps, starApps]);
 
   // Ajouter/retirer une app de "Mes Apps"
   const toggleMyApp = (e, id) => {
@@ -228,8 +306,10 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     selectedApp,
     topApps,
     trustiApps,
+    starApps,
     isLoadingTopApps,
     isLoadingTrustiApps,
+    isLoadingStarApps,
     isInitialLoading,
     lastUpdate,
     filteredApps,

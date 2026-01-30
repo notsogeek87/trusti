@@ -16,6 +16,7 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DATA_FILE = path.join(__dirname, 'data', 'custom-trusti-apps.json');
+const STAR_APPS_FILE = path.join(__dirname, 'data', 'star-apps.json');
 
 // Créer le dossier data s'il n'existe pas
 if (!fs.existsSync(path.join(__dirname, 'data'))) {
@@ -488,6 +489,117 @@ app.delete('/api/custom-trusti-apps/:id', (req, res) => {
     }
   } catch (error) {
     console.error('Error deleting custom app:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// ==============================
+// STAR APPS (Sélection Admin)
+// ==============================
+
+// Helper: Lire les StarApps
+const readStarApps = () => {
+  try {
+    if (fs.existsSync(STAR_APPS_FILE)) {
+      const data = fs.readFileSync(STAR_APPS_FILE, 'utf8');
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error('Error reading star apps:', error);
+  }
+  return [];
+};
+
+// Helper: Écrire les StarApps
+const writeStarApps = (apps) => {
+  try {
+    fs.writeFileSync(STAR_APPS_FILE, JSON.stringify(apps, null, 2), 'utf8');
+    return true;
+  } catch (error) {
+    console.error('Error writing star apps:', error);
+    return false;
+  }
+};
+
+// GET Star Apps
+app.get('/api/star-apps', (req, res) => {
+  try {
+    const apps = readStarApps();
+    res.json({
+      success: true,
+      apps: apps
+    });
+  } catch (error) {
+    console.error('Error getting star apps:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      apps: []
+    });
+  }
+});
+
+// POST Star Apps (create/update)
+app.post('/api/star-apps', (req, res) => {
+  try {
+    const { apps } = req.body;
+    
+    if (!Array.isArray(apps)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Apps must be an array'
+      });
+    }
+
+    const success = writeStarApps(apps);
+    
+    if (success) {
+      res.json({
+        success: true,
+        message: 'Star apps saved successfully',
+        apps: readStarApps()
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to save star apps'
+      });
+    }
+  } catch (error) {
+    console.error('Error saving star apps:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// DELETE Star App
+app.delete('/api/star-apps/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const apps = readStarApps();
+    const filteredApps = apps.filter(app => app.id !== id);
+    
+    const success = writeStarApps(filteredApps);
+    
+    if (success) {
+      res.json({
+        success: true,
+        message: 'Star app deleted successfully',
+        apps: filteredApps
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to delete star app'
+      });
+    }
+  } catch (error) {
+    console.error('Error deleting star app:', error);
     res.status(500).json({
       success: false,
       error: error.message

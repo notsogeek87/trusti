@@ -10,9 +10,10 @@ const API_URL = import.meta.env.PROD
 /**
  * Modal d'administration pour gérer les TrustiApps
  */
-const AdminTrustiAppsModal = ({ onClose, onSave }) => {
+const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
   const [apps, setApps] = useState([]);
   const [playStoreApps, setPlayStoreApps] = useState([]);
+  const [starApps, setStarApps] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -22,7 +23,7 @@ const AdminTrustiAppsModal = ({ onClose, onSave }) => {
     grade: 'A',
     category: 'Application',
     description: '',
-    replacesAppId: null
+    replacesAppIds: [] // Changé en array pour sélection multiple
   });
 
   const [isAdding, setIsAdding] = useState(false);
@@ -31,6 +32,7 @@ const AdminTrustiAppsModal = ({ onClose, onSave }) => {
   useEffect(() => {
     loadApps();
     loadPlayStoreApps();
+    loadStarApps();
   }, []);
 
   const loadPlayStoreApps = async () => {
@@ -39,11 +41,35 @@ const AdminTrustiAppsModal = ({ onClose, onSave }) => {
       const data = await response.json();
       console.log('Play Store apps loaded:', data);
       if (data.success && data.apps) {
-        setPlayStoreApps(data.apps);
-        console.log('Play Store apps set:', data.apps.length);
+        // Normaliser les IDs en strings
+        const normalizedApps = data.apps.map(app => ({
+          ...app,
+          id: String(app.id)
+        }));
+        setPlayStoreApps(normalizedApps);
+        console.log('Play Store apps set:', normalizedApps.length);
       }
     } catch (error) {
       console.error('Error loading Play Store apps:', error);
+    }
+  };
+
+  const loadStarApps = async () => {
+    try {
+      const response = await fetch(`${API_URL}/star-apps`);
+      const data = await response.json();
+      console.log('Star apps loaded:', data);
+      if (data.success && data.apps) {
+        // Normaliser les IDs en strings
+        const normalizedApps = data.apps.map(app => ({
+          ...app,
+          id: String(app.id)
+        }));
+        setStarApps(normalizedApps);
+        console.log('Star apps set:', normalizedApps.length);
+      }
+    } catch (error) {
+      console.error('Error loading Star apps:', error);
     }
   };
 
@@ -78,7 +104,7 @@ const AdminTrustiAppsModal = ({ onClose, onSave }) => {
       category: editingApp.category || 'Application',
       color: getGradeColor(editingApp.grade),
       reason: editingApp.description || 'Application respectueuse de la vie privée',
-      replacesAppId: editingApp.replacesAppId || null
+      replacesAppIds: editingApp.replacesAppIds || [] // Array d'IDs
     };
 
     let updatedApps;
@@ -110,7 +136,7 @@ const AdminTrustiAppsModal = ({ onClose, onSave }) => {
           grade: 'A',
           category: 'Application',
           description: '',
-          replacesAppId: null
+          replacesAppIds: []
         });
         setIsAdding(false);
       } else {
@@ -159,6 +185,10 @@ const AdminTrustiAppsModal = ({ onClose, onSave }) => {
 
   // Éditer une application
   const handleEditApp = (app) => {
+    // Normaliser les IDs en strings pour la cohérence
+    let replacesAppIds = app.replacesAppIds || (app.replacesAppId ? [app.replacesAppId] : []);
+    replacesAppIds = replacesAppIds.map(id => String(id));
+    
     setEditingApp({
       id: app.id,
       name: app.name,
@@ -166,7 +196,7 @@ const AdminTrustiAppsModal = ({ onClose, onSave }) => {
       grade: app.grade,
       category: app.category,
       description: app.reason,
-      replacesAppId: app.replacesAppId || null
+      replacesAppIds
     });
     setIsAdding(true);
   };
@@ -177,41 +207,33 @@ const AdminTrustiAppsModal = ({ onClose, onSave }) => {
     return gradeInfo ? gradeInfo.bgColor.replace('bg-', 'bg-') : 'bg-slate-500';
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 relative shrink-0">
-          <button 
-            onClick={onClose} 
-            className="absolute top-6 right-6 text-white/80 hover:text-white transition-colors"
-            disabled={isSaving}
-          >
-            <X size={24}/>
-          </button>
-          <h2 className="text-2xl font-black mb-2">Administration TrustiApps</h2>
-          <p className="text-sm text-white/80">Gérez les applications recommandées</p>
+  const innerContent = (
+    <>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600"></div>
         </div>
+      ) : (
+        <>
+          {/* Explication */}
+          <div className="mb-6 bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4">
+            <p className="text-sm text-emerald-800 font-medium">
+              🌍 Les <strong>TrustiApps</strong> sont des alternatives respectueuses de la vie privée. 
+              Elles peuvent remplacer des applications du Play Store et apparaissent dans l'onglet "TrustiApps".
+            </p>
+          </div>
 
-        {/* Content avec scroll limité */}
-        <div className="flex-1 overflow-y-auto p-6 min-h-0">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600"></div>
-            </div>
-          ) : (
-            <>
-              {/* Bouton Ajouter */}
-              {!isAdding && (
-                <button
-                  onClick={() => setIsAdding(true)}
-                  disabled={isSaving}
-                  className="w-full mb-6 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 border-2 border-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Plus size={20} />
-                  Ajouter une TrustiApp
-                </button>
-              )}
+          {/* Bouton Ajouter */}
+          {!isAdding && (
+            <button
+              onClick={() => setIsAdding(true)}
+              disabled={isSaving}
+              className="w-full mb-6 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 border-2 border-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Plus size={20} />
+              Ajouter une TrustiApp
+            </button>
+          )}
 
           {/* Formulaire d'ajout/édition */}
           {isAdding && (
@@ -295,32 +317,95 @@ const AdminTrustiAppsModal = ({ onClose, onSave }) => {
                   />
                 </div>
 
-                {/* Application à remplacer (Play Store) */}
+                {/* Applications à remplacer (Play Store ou StarApp) - Multi-sélection */}
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">
-                    Remplace l'application (optionnel)
+                    Remplace les applications (optionnel)
                     <span className="text-xs text-slate-500 ml-2">
-                      ({playStoreApps.length} apps disponibles)
+                      ({playStoreApps.length + starApps.length} apps disponibles)
                     </span>
                   </label>
+                  
+                  {/* Liste des apps sélectionnées */}
+                  {editingApp.replacesAppIds.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {editingApp.replacesAppIds.map(appId => {
+                        const app = [...playStoreApps, ...starApps].find(a => a.id === appId);
+                        return app ? (
+                          <div key={appId} className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm">
+                            <span>{app.name}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingApp({
+                                  ...editingApp,
+                                  replacesAppIds: editingApp.replacesAppIds.filter(id => id !== appId)
+                                });
+                              }}
+                              className="hover:text-indigo-900"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ) : null;
+                      })}
+                    </div>
+                  )}
+                  
                   <select
-                    value={editingApp.replacesAppId || ''}
+                    value=""
                     onChange={(e) => {
-                      const value = e.target.value || null;
-                      console.log('Selected app ID:', value);
-                      setEditingApp({...editingApp, replacesAppId: value});
+                      const value = e.target.value;
+                      console.log('Selected value:', value, 'Type:', typeof value);
+                      console.log('Current replacesAppIds:', editingApp.replacesAppIds);
+                      console.log('All playStoreApps IDs:', playStoreApps.map(a => ({id: a.id, type: typeof a.id})));
+                      console.log('All starApps IDs:', starApps.map(a => ({id: a.id, type: typeof a.id})));
+                      if (value && !editingApp.replacesAppIds.includes(value)) {
+                        console.log('Adding app to selection');
+                        setEditingApp({
+                          ...editingApp,
+                          replacesAppIds: [...editingApp.replacesAppIds, value]
+                        });
+                      } else {
+                        console.log('App already selected or no value');
+                      }
                     }}
                     className="w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none"
                   >
-                    <option value="">Aucune sélection</option>
-                    {playStoreApps.map(app => (
-                      <option key={app.id} value={app.id}>
-                        {app.name} (Note: {app.grade})
-                      </option>
-                    ))}
+                    <option value="">Ajouter une app à remplacer...</option>
+                    
+                    {/* Apps du Play Store */}
+                    {playStoreApps.length > 0 && (
+                      <optgroup label="📊 Classement Play Store">
+                        {playStoreApps.map(app => (
+                          <option 
+                            key={app.id} 
+                            value={app.id}
+                            disabled={editingApp.replacesAppIds.includes(app.id)}
+                          >
+                            {app.name} (Note: {app.grade})
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
+                    
+                    {/* StarApps */}
+                    {starApps.length > 0 && (
+                      <optgroup label="⭐ StarApps (Sélection)">
+                        {starApps.map(app => (
+                          <option 
+                            key={app.id} 
+                            value={app.id}
+                            disabled={editingApp.replacesAppIds.includes(app.id)}
+                          >
+                            {app.name} (Note: {app.grade})
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
                   </select>
                   <p className="text-xs text-slate-500 mt-1">
-                    Cette TrustiApp sera proposée en migration pour l'app sélectionnée
+                    Cette TrustiApp sera proposée en migration pour les apps sélectionnées
                   </p>
                 </div>
 
@@ -423,8 +508,39 @@ const AdminTrustiAppsModal = ({ onClose, onSave }) => {
               ))
             )}
           </div>
-            </>
-          )}
+        </>
+      )}
+    </>
+  );
+
+  // Si c'est embedded dans AdminAppsModal, retourner seulement le contenu interne
+  if (isEmbedded) {
+    return (
+      <div className="p-6">
+        {innerContent}
+      </div>
+    );
+  }
+
+  // Sinon, retourner le modal complet (pour compatibilité)
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6 relative shrink-0">
+          <button 
+            onClick={onClose} 
+            className="absolute top-6 right-6 text-white/80 hover:text-white transition-colors"
+            disabled={isSaving}
+          >
+            <X size={24}/>
+          </button>
+          <h2 className="text-2xl font-black mb-2">Administration TrustiApps</h2>
+          <p className="text-sm text-white/80">Gérez les applications recommandées</p>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6 min-h-0">
+          {innerContent}
         </div>
 
         {/* Footer */}
@@ -434,7 +550,7 @@ const AdminTrustiAppsModal = ({ onClose, onSave }) => {
             className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2"
           >
             <X size={20} />
-            Annuler
+            Fermer
           </button>
         </div>
       </div>

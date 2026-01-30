@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1769803097037,
+    "name": "GMail",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstatic.vecteezy.com%2Fti%2Fvecteur-libre%2Fp3%2F13948544-logo-gmail-sur-fond-blanc-transparent-gratuit-vectoriel.jpg&f=1&nofb=1&ipt=a2a4ff6d1cbc41a5fc1ee99572567b05cad34b1e6a5f58127df8c7a0bb3cf9ec",
+    "grade": "D",
+    "category": "Application",
+    "color": "bg-[#f7931e]",
+    "reason": "Application sélectionnée par l'équipe"
+  },
+  {
+    "id": 1769804868717,
+    "name": "Google Password",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.ARgvFo9U6vQl8TRgjmDqFAHaHa%3Fpid%3DApi&f=1&ipt=d6b4488d3ddafa014ce5c19405a4ba2f7c67fa50dac9585362ec9e7dd2f4413b&ipo=images",
+    "grade": "D",
+    "category": "Application",
+    "color": "bg-[#f7931e]",
+    "reason": "Application sélectionnée par l'équipe"
+  }
+]

@@ -22,7 +22,7 @@ import ShareModal from './components/modals/ShareModal';
 import TrustiShareModal from './components/modals/TrustiShareModal';
 import MigrationSelectorModal from './components/modals/MigrationSelectorModal';
 import LoginModal from './components/modals/LoginModal';
-import AdminTrustiAppsModal from './components/modals/AdminTrustiAppsModal';
+import AdminAppsModal from './components/modals/AdminAppsModal';
 
 /**
  * Composant principal de l'application TrustiScore
@@ -90,8 +90,10 @@ const App = () => {
     filteredApps,
     topApps,
     trustiApps,
+    starApps,
     isLoadingTopApps,
     isLoadingTrustiApps,
+    isLoadingStarApps,
     isInitialLoading,
     lastUpdate,
     setActiveTab,
@@ -133,6 +135,7 @@ const App = () => {
         isInMyApps={myApps.has(selectedApp.id)}
         onToggleMyApp={toggleMyApp}
         onClose={() => setSelectedApp(null)}
+        trustiApps={trustiApps}
       />
     );
   }
@@ -172,6 +175,23 @@ const App = () => {
 
       <main className="max-w-md mx-auto p-4">
         <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+
+        {/* Titre pour l'onglet Sélection */}
+        {activeTab === TABS.SELECTION && (
+          <div className="mb-6 text-center">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <p className="text-xs font-black uppercase tracking-widest text-slate-400">
+                Les Grands Classiques
+              </p>
+              {isLoadingStarApps && (
+                <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
+              )}
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">
+              {starApps.length} app{starApps.length > 1 ? 's' : ''} sélectionnée{starApps.length > 1 ? 's' : ''} par l'équipe
+            </p>
+          </div>
+        )}
 
         {/* Titre pour l'onglet Classement */}
         {activeTab === TABS.TOP && (
@@ -331,15 +351,13 @@ const App = () => {
         onLogin={login}
       />
 
-      {/* Modal d'administration TrustiApps */}
+      {/* Modal d'administration Apps (TrustiApps et StarApps) */}
       {showAdminModal && (
-        <AdminTrustiAppsModal
+        <AdminAppsModal
           onClose={() => {
             setShowAdminModal(false);
-            // Forcer le rechargement des TrustiApps pour que tout le monde voit les changements
+            // Forcer le rechargement pour que tout le monde voit les changements
             window.location.reload();
-          }}
-          onSave={(apps) => {
           }}
         />
       )}

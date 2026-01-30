@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, Globe, Zap } from 'lucide-react';
+import { Trophy, Globe, Zap, Star } from 'lucide-react';
 import { TABS } from '../../constants/tabs';
 
 /**
@@ -8,6 +8,18 @@ import { TABS } from '../../constants/tabs';
 const Navigation = ({ activeTab, onTabChange, myAppsCount }) => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 py-4 px-6 max-w-md mx-auto flex justify-around z-40 rounded-t-[2.5rem] shadow-2xl">
+      <button 
+        onClick={() => onTabChange(TABS.SELECTION)} 
+        className={`flex flex-col items-center gap-1 transition-colors ${
+          activeTab === TABS.SELECTION 
+            ? "text-purple-600" 
+            : "text-slate-300 hover:text-purple-400"
+        }`}
+      >
+        <Star size={24} />
+        <span className="text-[8px] font-black uppercase tracking-widest">Sélection</span>
+      </button>
+      
       <button 
         onClick={() => onTabChange(TABS.TOP)} 
         className={`flex flex-col items-center gap-1 transition-colors ${

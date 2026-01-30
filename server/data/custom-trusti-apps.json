@@ -26,7 +26,10 @@
     "grade": "B",
     "category": "Application",
     "color": "bg-[#8dc63f]",
-    "reason": "Application respectueuse de la vie privée"
+    "reason": "Application respectueuse de la vie privée",
+    "replacesAppIds": [
+      "1769803097037"
+    ]
   },
   {
     "id": 1769543537349,
@@ -37,5 +40,29 @@
     "color": "bg-[#006837]",
     "reason": "Application respectueuse de la vie privée",
     "replacesAppId": "com.instagram.android"
+  },
+  {
+    "id": 1769804133553,
+    "name": "Infomaniak",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.me-R6L2tk1FuJGKdyLUcIwHaHa%3Fpid%3DApi&f=1&ipt=78b16c1ccab178bfb19a95680eaf1481fe6c0654610c42ef5a5ec848c8365011",
+    "grade": "A",
+    "category": "Application",
+    "color": "bg-[#006837]",
+    "reason": "Application respectueuse de la vie privée",
+    "replacesAppIds": [
+      "1769803097037"
+    ]
+  },
+  {
+    "id": 1769804898711,
+    "name": "Bitwarden",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse3.mm.bing.net%2Fth%2Fid%2FOIP.EA6-IBpEMGul9ECVCp7cswHaHa%3Fpid%3DApi&f=1&ipt=bc4d811b9c747b4221270b8f8ec251024bfd1b0322ee0b6727c5e2d7952d567a&ipo=images",
+    "grade": "A",
+    "category": "Application",
+    "color": "bg-[#006837]",
+    "reason": "Application respectueuse de la vie privée",
+    "replacesAppIds": [
+      "1769804868717"
+    ]
   }
 ]
