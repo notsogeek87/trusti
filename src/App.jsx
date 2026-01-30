@@ -3,7 +3,7 @@ import { useAppManagement } from './hooks/useAppManagement';
 import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
 import { TABS } from './constants/tabs';
-import { Info } from 'lucide-react';
+import { Info, Sparkles } from 'lucide-react';
 
 // Layout
 import Header from './components/layout/Header';
@@ -190,6 +190,14 @@ const App = () => {
             <p className="text-[11px] text-slate-400 mt-1">
               {starApps.length} app{starApps.length > 1 ? 's' : ''} sélectionnée{starApps.length > 1 ? 's' : ''} par l'équipe
             </p>
+            {/* Message incitatif */}
+            <div className="mt-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-3 border border-purple-100">
+              <p className="text-xs text-purple-700 font-bold flex items-center justify-center gap-2">
+                <Sparkles size={14} className="animate-pulse" />
+                Clique sur une app pour voir ses alternatives !
+                <Sparkles size={14} className="animate-pulse" />
+              </p>
+            </div>
           </div>
         )}
 

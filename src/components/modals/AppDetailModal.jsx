@@ -65,35 +65,52 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, trustiApps = 
           <p className="text-sm text-slate-600 leading-relaxed font-medium">{app.reason}</p>
         </div>
 
-        {/* Liste des alternatives */}
+        {/* Badge incitatif pour les alternatives */}
         {alternatives.length > 0 && (
-          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-[2rem] p-6 border border-indigo-100 mb-6">
-            <h3 className="font-black text-sm uppercase tracking-tight text-slate-800 mb-4 flex items-center gap-2">
-              <ArrowRight size={18} className="text-indigo-600" /> Alternatives recommandées
-            </h3>
-            <div className="space-y-3">
-              {alternatives.map(alt => (
-                <div key={alt.id} className="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
-                    {alt.icon && alt.icon.startsWith('http') ? (
-                      <img 
-                        src={alt.icon} 
-                        alt={alt.name} 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className={`${alt.color || 'bg-slate-500'} w-full h-full flex items-center justify-center text-xl text-white`}>
-                        {alt.icon}
-                      </div>
-                    )}
+          <div className="mb-4 relative">
+            <div className="absolute -top-2 -right-2 z-10">
+              <div className="bg-gradient-to-r from-pink-500 to-purple-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-lg animate-bounce">
+                {alternatives.length} alternative{alternatives.length > 1 ? 's' : ''} disponible{alternatives.length > 1 ? 's' : ''} !
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-[2rem] p-6 border-2 border-indigo-200 shadow-lg relative overflow-hidden">
+              {/* Effet de brillance animé */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 animate-shimmer"></div>
+              
+              <div className="relative">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-black text-sm uppercase tracking-tight text-slate-800 flex items-center gap-2">
+                    <ArrowRight size={18} className="text-indigo-600 animate-pulse" /> Alternatives recommandées
+                  </h3>
+                  <div className="bg-emerald-100 text-emerald-700 text-xs font-black px-2 py-1 rounded-full">
+                    Meilleures notes
                   </div>
-                  <div className="flex-grow">
-                    <h4 className="font-black text-sm text-slate-900">{alt.name}</h4>
-                    <p className="text-xs text-slate-500">{alt.reason}</p>
-                  </div>
-                  <ScoreIndicator grade={alt.grade} />
                 </div>
-              ))}
+                <div className="space-y-3">
+                  {alternatives.map(alt => (
+                    <div key={alt.id} className="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.02] cursor-pointer">
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
+                        {alt.icon && alt.icon.startsWith('http') ? (
+                          <img 
+                            src={alt.icon} 
+                            alt={alt.name} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className={`${alt.color || 'bg-slate-500'} w-full h-full flex items-center justify-center text-xl text-white`}>
+                            {alt.icon}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-grow">
+                        <h4 className="font-black text-sm text-slate-900">{alt.name}</h4>
+                        <p className="text-xs text-slate-500">{alt.reason}</p>
+                      </div>
+                      <ScoreIndicator grade={alt.grade} />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}

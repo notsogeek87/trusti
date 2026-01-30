@@ -8,6 +8,10 @@
     animation: pulse-subtle 3s infinite ease-in-out;
   }
   
+  .animate-shimmer {
+    animation: shimmer 2s infinite linear;
+  }
+  
   /* Scrollbar personnalisée pour les fonds sombres */
   .scrollbar-custom-dark::-webkit-scrollbar {
     width: 8px;
@@ -31,4 +35,9 @@
 @keyframes pulse-subtle {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.85; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }

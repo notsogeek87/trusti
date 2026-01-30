@@ -16,5 +16,59 @@
     "category": "Application",
     "color": "bg-[#f7931e]",
     "reason": "Application sélectionnée par l'équipe"
+  },
+  {
+    "id": 1769805162254,
+    "name": "Google Keep",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse3.mm.bing.net%2Fth%2Fid%2FOIP.5YGYfi2vD8daz6TSuvEO6wHaKI%3Fpid%3DApi&f=1&ipt=defada21bb10e005922d341c78b236efe71947656448318a3b81b5b9e064e80f&ipo=images",
+    "grade": "D",
+    "category": "Application",
+    "color": "bg-[#f7931e]",
+    "reason": "Application sélectionnée par l'équipe"
+  },
+  {
+    "id": 1769805287786,
+    "name": "Google Tasks",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.mm.bing.net%2Fth%2Fid%2FOIP.OZbKMNXjReLOUstMDffc4QHaEK%3Fpid%3DApi&f=1&ipt=1d5f2753928af7d3adc48994479c4c65e8cc866318e9046782771f41c58e473d&ipo=images",
+    "grade": "D",
+    "category": "Application",
+    "color": "bg-[#f7931e]",
+    "reason": "Application sélectionnée par l'équipe"
+  },
+  {
+    "id": 1769805620267,
+    "name": "ChatGPT",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.JX5IS3q1aA_zGw7TkD3CkQHaHg%3Fpid%3DApi&f=1&ipt=50987da5d31382d1ca015d1326604faba485639fc1e32362d5ee941b35c266cf&ipo=images",
+    "grade": "C",
+    "category": "Application",
+    "color": "bg-[#fbb03b]",
+    "reason": "Application sélectionnée par l'équipe"
+  },
+  {
+    "id": 1769805693753,
+    "name": "Google Photos",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.mm.bing.net%2Fth%2Fid%2FOIP.gkT2d4Cgi4rrMWk1TykPQAHaHa%3Fpid%3DApi&f=1&ipt=9bff3e1ab94b2814a18c84d30c7dc652cf59846c9dceac1fb912b2ae2769e643&ipo=images",
+    "grade": "D",
+    "category": "Application",
+    "color": "bg-[#f7931e]",
+    "reason": "Application sélectionnée par l'équipe"
+  },
+  {
+    "id": 1769805796367,
+    "name": "Google Drive",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.explicit.bing.net%2Fth%2Fid%2FOIP.TQl3rhGtNi2Xryfd3kn9tgHaGo%3Fpid%3DApi&f=1&ipt=7d2b260ec40188962d42c3f1a2fe7091d5d775a11606798d738503a596862494&ipo=images",
+    "grade": "D",
+    "category": "Application",
+    "color": "bg-[#f7931e]",
+    "reason": "Application sélectionnée par l'équipe"
+  },
+  {
+    "id": 1769805919501,
+    "name": "Google.com",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.HgH-NjiOdFOrkmwjsZCCfAHaHl%3Fpid%3DApi&f=1&ipt=64a4204253b320cf52a1ca246ed9e31a8140379b16a9d9582984041de8038c78&ipo=images",
+    "grade": "D",
+    "category": "Application",
+    "color": "bg-[#f7931e]",
+    "reason": "Application sélectionnée par l'équipe"
   }
 ]

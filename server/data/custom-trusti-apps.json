@@ -17,7 +17,10 @@
     "category": "Application",
     "color": "bg-[#8dc63f]",
     "reason": "Application respectueuse de la vie privée",
-    "replacesAppId": "com.openai.chatgpt"
+    "replacesAppIds": [
+      "com.openai.chatgpt",
+      "1769805620267"
+    ]
   },
   {
     "id": 1769541460710,
@@ -63,6 +66,90 @@
     "reason": "Application respectueuse de la vie privée",
     "replacesAppIds": [
       "1769804868717"
+    ]
+  },
+  {
+    "id": 1769805192806,
+    "name": "SimpleNote",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.explicit.bing.net%2Fth%2Fid%2FOIP.TPx3sZs6nT0BxnFuNjOMRgHaHa%3Fpid%3DApi&f=1&ipt=35ccd8b270a9be4125281286f0d818f4ba9d9bda8150865b4a3dc28232cec014&ipo=images",
+    "grade": "A",
+    "category": "Application",
+    "color": "bg-[#006837]",
+    "reason": "Application respectueuse de la vie privée",
+    "replacesAppIds": [
+      "1769805162254"
+    ]
+  },
+  {
+    "id": 1769805353743,
+    "name": "Tasks.org",
+    "icon": "https://tasks.org/img/logo.svg",
+    "grade": "A",
+    "category": "Application",
+    "color": "bg-[#006837]",
+    "reason": "Application respectueuse de la vie privée",
+    "replacesAppIds": [
+      "1769805287786"
+    ]
+  },
+  {
+    "id": 1769805734714,
+    "name": "Ente Photos",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse3.mm.bing.net%2Fth%2Fid%2FOIP.7zKngYWLEiK8BRKv555l_wAAAA%3Fpid%3DApi&f=1&ipt=5dd64c5bc9b2927a708aa4b954bddc339fa22796d8236240587a542f5e782615&ipo=images",
+    "grade": "A",
+    "category": "Application",
+    "color": "bg-[#006837]",
+    "reason": "Application respectueuse de la vie privée",
+    "replacesAppIds": [
+      "1769805693753"
+    ]
+  },
+  {
+    "id": 1769805814704,
+    "name": "KDrive",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.mm.bing.net%2Fth%2Fid%2FOIP.Rsn0y973x-pGAoiA3QpZqAAAAA%3Fpid%3DApi&f=1&ipt=6ae69f19d690da108dc16894f0d5d5e7adfb9f83facd5ef2edf5eaa5c3846dcd&ipo=images",
+    "grade": "A",
+    "category": "Application",
+    "color": "bg-[#006837]",
+    "reason": "Application respectueuse de la vie privée",
+    "replacesAppIds": [
+      "1769805796367"
+    ]
+  },
+  {
+    "id": 1769805847727,
+    "name": "PCloud",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.VMZO1E05hHNk1JngaX8nowHaHa%3Fpid%3DApi&f=1&ipt=6dca4308ecc49ea9647595a40cd07b2b466d1395d5eb23726686920181b0bc0c&ipo=images",
+    "grade": "B",
+    "category": "Application",
+    "color": "bg-[#8dc63f]",
+    "reason": "Application respectueuse de la vie privée",
+    "replacesAppIds": [
+      "1769805796367"
+    ]
+  },
+  {
+    "id": 1769805966477,
+    "name": "DuckDuckGo",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.fPC22fh6T4qUFC8a72sm2QHaHY%3Fpid%3DApi&f=1&ipt=4cca4e47d49217bb224f15cfeb87d8f92ebdc107456b74f8ed887ffbb8d3ad63&ipo=images",
+    "grade": "A",
+    "category": "Application",
+    "color": "bg-[#006837]",
+    "reason": "Application respectueuse de la vie privée",
+    "replacesAppIds": [
+      "1769805919501"
+    ]
+  },
+  {
+    "id": 1769805998640,
+    "name": "Startpage",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.YOvLb2z0juxu-fMioGnVlAAAAA%3Fpid%3DApi&f=1&ipt=5da37cd34184da68c6ce4e38d5d2f34d79d21fcb1ca378f9880f244380bc8a08&ipo=images",
+    "grade": "B",
+    "category": "Application",
+    "color": "bg-[#8dc63f]",
+    "reason": "Application respectueuse de la vie privée",
+    "replacesAppIds": [
+      "1769805919501"
     ]
   }
 ]
