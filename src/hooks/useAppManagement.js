@@ -21,6 +21,17 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Set des IDs d'apps qui ont une TrustiApp associée
+  const appsWithTrustiApp = useMemo(() => {
+    const idsSet = new Set();
+    trustiApps.forEach(ta => {
+      if (ta.replacesAppId) {
+        idsSet.add(ta.replacesAppId);
+      }
+    });
+    return idsSet;
+  }, [trustiApps]);
 
   // Charger les données de l'utilisateur connecté
   useEffect(() => {
@@ -222,6 +233,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     isInitialLoading,
     lastUpdate,
     filteredApps,
+    appsWithTrustiApp,
     
     // Actions
     setActiveTab,

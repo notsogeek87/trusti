@@ -44,6 +44,9 @@ const App = () => {
   // - Si connecté : afficher seulement la première fois
   const [showLandingPage, setShowLandingPage] = useState(false);
   const [hasCheckedLandingPage, setHasCheckedLandingPage] = useState(false);
+  
+  // Filtre pour les apps avec TrustiApp associée (actif par défaut)
+  const [showOnlyWithTrustiApp, setShowOnlyWithTrustiApp] = useState(true);
 
   // Mettre à jour la landing page quand l'état de connexion change
   useEffect(() => {
@@ -97,6 +100,7 @@ const App = () => {
     toggleMigrate,
     setCustomMigration,
     setSelectedApp,
+    appsWithTrustiApp,
   } = useAppManagement(currentUser, saveUserData, getUserData);
 
   // Gestion des modales
@@ -171,13 +175,14 @@ const App = () => {
 
         {/* Titre pour l'onglet Classement */}
         {activeTab === TABS.TOP && (
-          <div className="mb-6 text-center">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <p className="text-xs font-black uppercase tracking-widest text-slate-400">
-                Classement France
-              </p>
-              {/* Tooltip Google Play Store */}
-              <div className="group relative">
+          <div className="mb-6">
+            <div className="text-center mb-4">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <p className="text-xs font-black uppercase tracking-widest text-slate-400">
+                  Classement France
+                </p>
+                {/* Tooltip Google Play Store */}
+                <div className="group relative">
                 <Info size={14} className="text-slate-400 cursor-help" />
                 <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 hidden group-hover:block w-64 z-50">
                   <div className="bg-slate-800 text-white text-xs rounded-xl px-4 py-3 shadow-xl border border-slate-700">
@@ -197,11 +202,30 @@ const App = () => {
             <p className="text-[11px] text-slate-400 mt-1">
               Applications les plus téléchargées en France
             </p>
-            {lastUpdate && (
-              <p className="text-[10px] text-slate-300 mt-1">
-                Dernière mise à jour: {lastUpdate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-              </p>
-            )}
+              {lastUpdate && (
+                <p className="text-[10px] text-slate-300 mt-1">
+                  Dernière mise à jour: {lastUpdate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              )}
+            </div>
+            
+            {/* Filtre TrustiApp */}
+            <div className="flex items-center justify-center gap-3 bg-white rounded-2xl border border-slate-100 p-3 shadow-sm">
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input 
+                  type="checkbox" 
+                  checked={showOnlyWithTrustiApp}
+                  onChange={(e) => setShowOnlyWithTrustiApp(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                />
+                <span className="text-xs font-bold text-slate-700 group-hover:text-emerald-600 transition-colors">
+                  Uniquement les apps avec TrustiApp
+                </span>
+              </label>
+              <div className="bg-emerald-50 text-emerald-700 text-[10px] font-black px-2 py-1 rounded-lg">
+                {appsWithTrustiApp.size} apps
+              </div>
+            </div>
           </div>
         )}
 
@@ -249,7 +273,9 @@ const App = () => {
 
         {/* Liste des applications */}
         <AppsList
-          apps={filteredApps}
+          apps={activeTab === TABS.TOP && showOnlyWithTrustiApp 
+            ? filteredApps.filter(app => appsWithTrustiApp.has(app.id))
+            : filteredApps}
           activeTab={activeTab}
           myApps={myApps}
           migratedApps={migratedApps}
