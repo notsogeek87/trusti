@@ -24,6 +24,19 @@ const LandingPage = ({ onClose }) => {
               <ShieldCheck size={24} />
               <h1 className="font-black text-sm uppercase tracking-widest">TrustiScore</h1>
             </div>
+
+            {/* Vidéo d'explication */}
+            <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl border-2 border-indigo-500/30 bg-slate-800/50 backdrop-blur-sm">
+              <video 
+                className="w-full h-auto"
+                controls
+                preload="metadata"
+                poster="/assets/logo.png"
+              >
+                <source src="/assets/intro.mp4" type="video/mp4" />
+                Votre navigateur ne supporte pas la lecture de vidéos.
+              </video>
+            </div>
             
             <h2 className="text-3xl font-black mb-4 text-white leading-tight">
               Reprenez votre souveraineté numérique européenne
