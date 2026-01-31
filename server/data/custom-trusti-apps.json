@@ -231,5 +231,21 @@
     "playStoreUrl": "",
     "appleStoreUrl": "",
     "fDroidUrl": "https://f-droid.org/fr/packages/com.github.libretube/"
+  },
+  {
+    "id": 1769882128466,
+    "name": "Roole Maps",
+    "icon": "https://play-lh.googleusercontent.com/3sPPeGJ3NVFakEEVZWsMLyMGmDArPElcGFafQqeyMLQ23YsjKYnx0DmdAe-CWCAiUg=s96",
+    "grade": "B",
+    "category": "Application",
+    "color": "bg-[#8dc63f]",
+    "reason": "Application respectueuse de la vie privée",
+    "replacesAppIds": [
+      "1769882091205"
+    ],
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.roole.roolemap",
+    "appleStoreUrl": "https://apps.apple.com/fr/app/roole-map-borne-navigation/id1621923838",
+    "fDroidUrl": "",
+    "websiteUrl": ""
   }
 ]

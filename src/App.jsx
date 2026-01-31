@@ -247,7 +247,7 @@ const App = () => {
                   className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                 />
                 <span className="text-xs font-bold text-slate-700 group-hover:text-emerald-600 transition-colors">
-                  Uniquement les apps avec TrustiApp
+                  Uniquement les apps avec Alternatives
                 </span>
               </label>
               <div className="bg-emerald-50 text-emerald-700 text-[10px] font-black px-2 py-1 rounded-lg">

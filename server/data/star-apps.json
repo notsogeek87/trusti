@@ -124,5 +124,14 @@
     "category": "Application",
     "color": "bg-[#f7931e]",
     "reason": "Application sélectionnée par l'équipe"
+  },
+  {
+    "id": 1769882091205,
+    "name": "Google Maps",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.6Sy3oQw7865LXHFunysiYwHaKo%3Fpid%3DApi&f=1&ipt=06017f79ef398ed988e29e90685ee47037dffdb78a3bf461d97d7118498c13c0&ipo=images",
+    "grade": "D",
+    "category": "Application",
+    "color": "bg-[#f7931e]",
+    "reason": "Application sélectionnée par l'équipe"
   }
 ]
