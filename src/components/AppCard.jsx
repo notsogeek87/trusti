@@ -131,7 +131,7 @@ const AppCard = ({
       )}
       
       {/* Liens de téléchargement pour les Alternatives */}
-      {activeTab === TABS.ALTERNATIVES && (app.playStoreUrl || app.appleStoreUrl) && (
+      {activeTab === TABS.ALTERNATIVES && (app.playStoreUrl || app.appleStoreUrl || app.fDroidUrl || app.websiteUrl) && (
         <div className="flex gap-2 pt-2 border-t border-slate-100">
           {app.playStoreUrl && (
             <a
@@ -155,6 +155,30 @@ const AppCard = ({
             >
               <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.jhRunii665tZxgBO17E0OwHaHa%3Fpid%3DApi&f=1&ipt=b405abc4f0e4ab24a5fd3be09175722438e0f888eb681770c42d8f1462036efb&ipo=images" alt="App Store" className="w-4 h-4" />
               App Store
+            </a>
+          )}
+          {app.fDroidUrl && (
+            <a
+              href={app.fDroidUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="flex-1 flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs py-2 px-3 rounded-xl transition-all border border-blue-200"
+            >
+              <img src="https://f-droid.org/assets/favicon.ico" alt="F-Droid" className="w-4 h-4" />
+              F-Droid
+            </a>
+          )}
+          {app.websiteUrl && (
+            <a
+              href={app.websiteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="flex-1 flex items-center justify-center gap-2 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs py-2 px-3 rounded-xl transition-all border border-purple-200"
+            >
+              <span className="text-base">🌐</span>
+              Site Web
             </a>
           )}
         </div>

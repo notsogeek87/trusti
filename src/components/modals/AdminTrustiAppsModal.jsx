@@ -25,7 +25,9 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
     description: '',
     replacesAppIds: [], // Changé en array pour sélection multiple
     playStoreUrl: '',
-    appleStoreUrl: ''
+    appleStoreUrl: '',
+    fDroidUrl: '',
+    websiteUrl: ''
   });
 
   const [isAdding, setIsAdding] = useState(false);
@@ -108,7 +110,9 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
       reason: editingApp.description || 'Application respectueuse de la vie privée',
       replacesAppIds: editingApp.replacesAppIds || [], // Array d'IDs
       playStoreUrl: editingApp.playStoreUrl || '',
-      appleStoreUrl: editingApp.appleStoreUrl || ''
+      appleStoreUrl: editingApp.appleStoreUrl || '',
+      fDroidUrl: editingApp.fDroidUrl || '',
+      websiteUrl: editingApp.websiteUrl || ''
     };
 
     let updatedApps;
@@ -202,7 +206,9 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
       description: app.reason,
       replacesAppIds,
       playStoreUrl: app.playStoreUrl || '',
-      appleStoreUrl: app.appleStoreUrl || ''
+      appleStoreUrl: app.appleStoreUrl || '',
+      fDroidUrl: app.fDroidUrl || '',
+      websiteUrl: app.websiteUrl || ''
     });
     setIsAdding(true);
   };
@@ -457,6 +463,34 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
                   />
                 </div>
 
+                {/* Lien F-Droid */}
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                    Lien F-Droid (optionnel)
+                  </label>
+                  <input
+                    type="url"
+                    value={editingApp.fDroidUrl}
+                    onChange={(e) => setEditingApp({...editingApp, fDroidUrl: e.target.value})}
+                    placeholder="https://f-droid.org/packages/..."
+                    className="w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+
+                {/* Lien Site Web */}
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                    Lien Site Web (optionnel)
+                  </label>
+                  <input
+                    type="url"
+                    value={editingApp.websiteUrl}
+                    onChange={(e) => setEditingApp({...editingApp, websiteUrl: e.target.value})}
+                    placeholder="https://example.com"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+
                   {/* Boutons */}
                   <div className="flex gap-3 pt-4">
                     <button
@@ -477,7 +511,7 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
                     <button
                       type="button"
                       onClick={() => {
-                        setEditingApp({name: '', logo: '', grade: 'A', category: 'Application', description: '', replacesAppIds: [], playStoreUrl: '', appleStoreUrl: ''});
+                        setEditingApp({name: '', logo: '', grade: 'A', category: 'Application', description: '', replacesAppIds: [], playStoreUrl: '', appleStoreUrl: '', fDroidUrl: '', websiteUrl: ''});
                         setIsAdding(false);
                       }}
                       disabled={isSaving}

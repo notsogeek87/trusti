@@ -165,7 +165,11 @@
     "reason": "Application respectueuse de la vie privée",
     "replacesAppIds": [
       "1769805919501"
-    ]
+    ],
+    "playStoreUrl": "",
+    "appleStoreUrl": "",
+    "fDroidUrl": "",
+    "websiteUrl": "https://duckduckgo.com/"
   },
   {
     "id": 1769805998640,
@@ -177,7 +181,11 @@
     "reason": "Application respectueuse de la vie privée",
     "replacesAppIds": [
       "1769805919501"
-    ]
+    ],
+    "playStoreUrl": "",
+    "appleStoreUrl": "",
+    "fDroidUrl": "",
+    "websiteUrl": "https://www.startpage.com/fr/"
   },
   {
     "id": 1769878402340,
@@ -219,6 +227,9 @@
     "reason": "Application respectueuse de la vie privée",
     "replacesAppIds": [
       "1769878590420"
-    ]
+    ],
+    "playStoreUrl": "",
+    "appleStoreUrl": "",
+    "fDroidUrl": "https://f-droid.org/fr/packages/com.github.libretube/"
   }
 ]
