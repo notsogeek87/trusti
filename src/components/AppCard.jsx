@@ -1,5 +1,5 @@
 import React from 'react';
-import { PlusCircle, CheckCircle, CheckCircle2, Trash2, Sparkles } from 'lucide-react';
+import { PlusCircle, CheckCircle, CheckCircle2, Trash2, Sparkles, ExternalLink } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
 import { TABS } from '../constants/tabs';
 
@@ -127,6 +127,36 @@ const AppCard = ({
           <div className="bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase shrink-0 ml-2">
             Grade A/B
           </div>
+        </div>
+      )}
+      
+      {/* Liens de téléchargement pour les Alternatives */}
+      {activeTab === TABS.ALTERNATIVES && (app.playStoreUrl || app.appleStoreUrl) && (
+        <div className="flex gap-2 pt-2 border-t border-slate-100">
+          {app.playStoreUrl && (
+            <a
+              href={app.playStoreUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="flex-1 flex items-center justify-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs py-2 px-3 rounded-xl transition-all border border-emerald-200"
+            >
+              <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.5MxY8CYsuOK6daH6aocNLAHaIe%3Fpid%3DApi&f=1&ipt=423621f87e3335ef5aa176e8f68343d5e008b4674699573ed4712e0d066a903b&ipo=images" alt="Play Store" className="w-4 h-4" />
+              Play Store
+            </a>
+          )}
+          {app.appleStoreUrl && (
+            <a
+              href={app.appleStoreUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="flex-1 flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs py-2 px-3 rounded-xl transition-all border border-slate-200"
+            >
+              <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.jhRunii665tZxgBO17E0OwHaHa%3Fpid%3DApi&f=1&ipt=b405abc4f0e4ab24a5fd3be09175722438e0f888eb681770c42d8f1462036efb&ipo=images" alt="App Store" className="w-4 h-4" />
+              App Store
+            </a>
+          )}
         </div>
       )}
     </div>

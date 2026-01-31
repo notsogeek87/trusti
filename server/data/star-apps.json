@@ -115,5 +115,14 @@
     "category": "Application",
     "color": "bg-[#f7931e]",
     "reason": "Application sélectionnée par l'équipe"
+  },
+  {
+    "id": 1769879213451,
+    "name": "Whatsapp",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse3.mm.bing.net%2Fth%2Fid%2FOIP.XIpUoBRFXY_-v2TiT8jlvQHaHa%3Fpid%3DApi&f=1&ipt=1f3424577eae9959792e2cf28446e2bd1e5236e0674de55eaf87f32ea9cf6ac1&ipo=images",
+    "grade": "D",
+    "category": "Application",
+    "color": "bg-[#f7931e]",
+    "reason": "Application sélectionnée par l'équipe"
   }
 ]

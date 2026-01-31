@@ -7,7 +7,12 @@
     "category": "Application",
     "color": "bg-[#8dc63f]",
     "reason": "Application respectueuse de la vie privée",
-    "replacesAppId": "com.whatsapp"
+    "replacesAppIds": [
+      "com.whatsapp",
+      "1769879213451"
+    ],
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=org.thoughtcrime.securesms&hl=fr",
+    "appleStoreUrl": "https://apps.apple.com/fr/app/signal-messagerie-priv%C3%A9e/id874139669"
   },
   {
     "id": 1769540682080,
@@ -20,7 +25,9 @@
     "replacesAppIds": [
       "com.openai.chatgpt",
       "1769805620267"
-    ]
+    ],
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=me.proton.android.lumo",
+    "appleStoreUrl": "https://apps.apple.com/fr/app/lumo-by-proton/id6746714949"
   },
   {
     "id": 1769541460710,
@@ -32,7 +39,9 @@
     "reason": "Application respectueuse de la vie privée",
     "replacesAppIds": [
       "1769803097037"
-    ]
+    ],
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=ch.protonmail.android",
+    "appleStoreUrl": "https://apps.apple.com/fr/app/proton-mail-email-chiffr%C3%A9/id979659905"
   },
   {
     "id": 1769543537349,
@@ -42,19 +51,25 @@
     "category": "Application",
     "color": "bg-[#006837]",
     "reason": "Application respectueuse de la vie privée",
-    "replacesAppId": "com.instagram.android"
+    "replacesAppIds": [
+      "com.instagram.android"
+    ],
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.pixelfed",
+    "appleStoreUrl": "https://apps.apple.com/fr/app/pixelfed/id1632519816"
   },
   {
     "id": 1769804133553,
     "name": "Infomaniak",
-    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.me-R6L2tk1FuJGKdyLUcIwHaHa%3Fpid%3DApi&f=1&ipt=78b16c1ccab178bfb19a95680eaf1481fe6c0654610c42ef5a5ec848c8365011",
+    "icon": "https://play-lh.googleusercontent.com/yrIHkBec0OPYkJtXTA5Zzn-x2-2_aXOLXhjzaE9ZVUz3OUCldfyPbfcjgt4pbdiF4p8=w480-h960",
     "grade": "A",
     "category": "Application",
     "color": "bg-[#006837]",
     "reason": "Application respectueuse de la vie privée",
     "replacesAppIds": [
       "1769803097037"
-    ]
+    ],
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.infomaniak.mail",
+    "appleStoreUrl": "https://apps.apple.com/fr/app/infomaniak-mail/id1622596573"
   },
   {
     "id": 1769804898711,
@@ -66,7 +81,9 @@
     "reason": "Application respectueuse de la vie privée",
     "replacesAppIds": [
       "1769804868717"
-    ]
+    ],
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.x8bit.bitwarden",
+    "appleStoreUrl": "https://apps.apple.com/fr/app/bitwarden/id1137397744"
   },
   {
     "id": 1769805192806,
@@ -78,7 +95,9 @@
     "reason": "Application respectueuse de la vie privée",
     "replacesAppIds": [
       "1769805162254"
-    ]
+    ],
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.automattic.simplenote",
+    "appleStoreUrl": "https://apps.apple.com/fr/app/simplenote/id289429962"
   },
   {
     "id": 1769805353743,
@@ -90,7 +109,9 @@
     "reason": "Application respectueuse de la vie privée",
     "replacesAppIds": [
       "1769805287786"
-    ]
+    ],
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=org.tasks",
+    "appleStoreUrl": ""
   },
   {
     "id": 1769805734714,
@@ -102,7 +123,9 @@
     "reason": "Application respectueuse de la vie privée",
     "replacesAppIds": [
       "1769805693753"
-    ]
+    ],
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=io.ente.photos",
+    "appleStoreUrl": "https://apps.apple.com/fr/app/ente-photos/id1542026904"
   },
   {
     "id": 1769805814704,
@@ -114,7 +137,9 @@
     "reason": "Application respectueuse de la vie privée",
     "replacesAppIds": [
       "1769805796367"
-    ]
+    ],
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.infomaniak.drive",
+    "appleStoreUrl": "https://apps.apple.com/fr/app/infomaniak-kdrive/id1482778676"
   },
   {
     "id": 1769805847727,
@@ -126,7 +151,9 @@
     "reason": "Application respectueuse de la vie privée",
     "replacesAppIds": [
       "1769805796367"
-    ]
+    ],
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.pcloud.pcloud",
+    "appleStoreUrl": "https://apps.apple.com/fr/app/pcloud-cloud-storage/id692002098"
   },
   {
     "id": 1769805966477,
@@ -155,7 +182,7 @@
   {
     "id": 1769878402340,
     "name": "Curve Pay",
-    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.hfIx3wRxC712GWbHuFwiSwAAAA%3Fpid%3DApi&f=1&ipt=1f5adfd8f1659b35a6b9b6e96ad7c6354e9c179e0619db03090d9ecc1ff867c1&ipo=images",
+    "icon": "https://play-lh.googleusercontent.com/ZsFXbe409JDktkEozWP5UCsZYrtV1gIcrrsKAFhB1ul5_zozPIb7M2LsMUu5fBsCT90=w480-h960",
     "grade": "C",
     "category": "Application",
     "color": "bg-[#fbb03b]",
@@ -163,7 +190,9 @@
     "replacesAppIds": [
       "1769878297790",
       "1769878336878"
-    ]
+    ],
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.imaginecurve.curve.prd",
+    "appleStoreUrl": "https://apps.apple.com/fr/app/curve-pay-wallet-pour-cartes/id1049397112"
   },
   {
     "id": 1769878523579,
@@ -176,7 +205,9 @@
     "replacesAppIds": [
       "1769878470016",
       "1769878491778"
-    ]
+    ],
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=deezer.android.app",
+    "appleStoreUrl": "https://apps.apple.com/fr/app/deezer-musique-podcast/id292738169"
   },
   {
     "id": 1769878626276,

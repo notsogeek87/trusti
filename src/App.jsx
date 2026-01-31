@@ -262,14 +262,14 @@ const App = () => {
           <div className="mb-6 text-center">
             <div className="flex items-center justify-center gap-2 mb-1">
               <p className="text-xs font-black uppercase tracking-widest text-slate-400">
-                Alternatives - F-Droid
+                Alternatives
               </p>
               {isLoadingTrustiApps && (
                 <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
               )}
             </div>
             <p className="text-[11px] text-slate-400 mt-1">
-              Apps open source respectueuses de la vie privée
+              Apps européennes et même parfois open source !
             </p>
             <ShareButton
               title="Partager mes TrustiApp"

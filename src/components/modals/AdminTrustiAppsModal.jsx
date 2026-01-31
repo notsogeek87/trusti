@@ -23,7 +23,9 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
     grade: 'A',
     category: 'Application',
     description: '',
-    replacesAppIds: [] // Changé en array pour sélection multiple
+    replacesAppIds: [], // Changé en array pour sélection multiple
+    playStoreUrl: '',
+    appleStoreUrl: ''
   });
 
   const [isAdding, setIsAdding] = useState(false);
@@ -104,7 +106,9 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
       category: editingApp.category || 'Application',
       color: getGradeColor(editingApp.grade),
       reason: editingApp.description || 'Application respectueuse de la vie privée',
-      replacesAppIds: editingApp.replacesAppIds || [] // Array d'IDs
+      replacesAppIds: editingApp.replacesAppIds || [], // Array d'IDs
+      playStoreUrl: editingApp.playStoreUrl || '',
+      appleStoreUrl: editingApp.appleStoreUrl || ''
     };
 
     let updatedApps;
@@ -196,7 +200,9 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
       grade: app.grade,
       category: app.category,
       description: app.reason,
-      replacesAppIds
+      replacesAppIds,
+      playStoreUrl: app.playStoreUrl || '',
+      appleStoreUrl: app.appleStoreUrl || ''
     });
     setIsAdding(true);
   };
@@ -423,6 +429,34 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
                   />
                 </div>
 
+                {/* Lien Play Store */}
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                    Lien Play Store (optionnel)
+                  </label>
+                  <input
+                    type="url"
+                    value={editingApp.playStoreUrl}
+                    onChange={(e) => setEditingApp({...editingApp, playStoreUrl: e.target.value})}
+                    placeholder="https://play.google.com/store/apps/details?id=..."
+                    className="w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+
+                {/* Lien Apple Store */}
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                    Lien Apple Store (optionnel)
+                  </label>
+                  <input
+                    type="url"
+                    value={editingApp.appleStoreUrl}
+                    onChange={(e) => setEditingApp({...editingApp, appleStoreUrl: e.target.value})}
+                    placeholder="https://apps.apple.com/app/..."
+                    className="w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+
                   {/* Boutons */}
                   <div className="flex gap-3 pt-4">
                     <button
@@ -443,7 +477,7 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
                     <button
                       type="button"
                       onClick={() => {
-                        setEditingApp({name: '', logo: '', grade: 'A', category: 'Application', description: ''});
+                        setEditingApp({name: '', logo: '', grade: 'A', category: 'Application', description: '', replacesAppIds: [], playStoreUrl: '', appleStoreUrl: ''});
                         setIsAdding(false);
                       }}
                       disabled={isSaving}

@@ -105,6 +105,35 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, trustiApps = 
                       <div className="flex-grow">
                         <h4 className="font-black text-sm text-slate-900">{alt.name}</h4>
                         <p className="text-xs text-slate-500">{alt.reason}</p>
+                        {/* Liens de téléchargement */}
+                        {(alt.playStoreUrl || alt.appleStoreUrl) && (
+                          <div className="flex gap-2 mt-2">
+                            {alt.playStoreUrl && (
+                              <a
+                                href={alt.playStoreUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-[10px] py-1 px-2 rounded-lg transition-all border border-emerald-200"
+                              >
+                                <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.5MxY8CYsuOK6daH6aocNLAHaIe%3Fpid%3DApi&f=1&ipt=423621f87e3335ef5aa176e8f68343d5e008b4674699573ed4712e0d066a903b&ipo=images" alt="Play Store" className="w-3 h-3" />
+                                Play
+                              </a>
+                            )}
+                            {alt.appleStoreUrl && (
+                              <a
+                                href={alt.appleStoreUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="flex items-center gap-1 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-[10px] py-1 px-2 rounded-lg transition-all border border-slate-200"
+                              >
+                                <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.jhRunii665tZxgBO17E0OwHaHa%3Fpid%3DApi&f=1&ipt=b405abc4f0e4ab24a5fd3be09175722438e0f888eb681770c42d8f1462036efb&ipo=images" alt="App Store" className="w-3 h-3" />
+                                Apple
+                              </a>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <ScoreIndicator grade={alt.grade} />
                     </div>
