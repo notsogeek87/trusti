@@ -181,7 +181,7 @@ const App = () => {
           <div className="mb-6 text-center">
             <div className="flex items-center justify-center gap-2 mb-1">
               <p className="text-xs font-black uppercase tracking-widest text-slate-400">
-                Les Grands Classiques
+                Remplacez les applications les plus utilisées
               </p>
               {isLoadingStarApps && (
                 <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
@@ -257,12 +257,12 @@ const App = () => {
           </div>
         )}
 
-        {/* Bouton Partager pour TrustiApps */}
+        {/* Bouton Partager pour Alternatives */}
         {activeTab === TABS.ALTERNATIVES && (
           <div className="mb-6 text-center">
             <div className="flex items-center justify-center gap-2 mb-1">
               <p className="text-xs font-black uppercase tracking-widest text-slate-400">
-                TrustiApps - F-Droid
+                Alternatives - F-Droid
               </p>
               {isLoadingTrustiApps && (
                 <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>

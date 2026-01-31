@@ -31,7 +31,7 @@ const Header = ({ showExplainer, onToggleExplainer, currentUser, onLogout, onLog
                 <button
                   onClick={onOpenAdmin}
                   className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all"
-                  title="Administration TrustiApps"
+                  title="Administration Alternatives"
                 >
                   <Settings size={18} />
                 </button>

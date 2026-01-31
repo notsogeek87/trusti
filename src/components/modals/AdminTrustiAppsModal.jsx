@@ -218,8 +218,8 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
           {/* Explication */}
           <div className="mb-6 bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4">
             <p className="text-sm text-emerald-800 font-medium">
-              🌍 Les <strong>TrustiApps</strong> sont des alternatives respectueuses de la vie privée. 
-              Elles peuvent remplacer des applications du Play Store et apparaissent dans l'onglet "TrustiApps".
+              🌍 Les <strong>Alternatives</strong> sont des alternatives respectueuses de la vie privée. 
+              Elles peuvent remplacer des applications du Play Store et apparaissent dans l'onglet "Alternatives".
             </p>
           </div>
 
@@ -535,7 +535,7 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
           >
             <X size={24}/>
           </button>
-          <h2 className="text-2xl font-black mb-2">Administration TrustiApps</h2>
+          <h2 className="text-2xl font-black mb-2">Administration Alternatives</h2>
           <p className="text-sm text-white/80">Gérez les applications recommandées</p>
         </div>
 

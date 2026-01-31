@@ -21,6 +21,18 @@ const Navigation = ({ activeTab, onTabChange, myAppsCount }) => {
       </button>
       
       <button 
+        onClick={() => onTabChange(TABS.ALTERNATIVES)} 
+        className={`flex flex-col items-center gap-1 transition-colors ${
+          activeTab === TABS.ALTERNATIVES 
+            ? "text-emerald-600" 
+            : "text-slate-300 hover:text-emerald-400"
+        }`}
+      >
+        <Globe size={24} />
+        <span className="text-[8px] font-black uppercase tracking-widest">Alternatives</span>
+      </button>
+      
+      <button 
         onClick={() => onTabChange(TABS.TOP)} 
         className={`flex flex-col items-center gap-1 transition-colors ${
           activeTab === TABS.TOP 
@@ -29,7 +41,7 @@ const Navigation = ({ activeTab, onTabChange, myAppsCount }) => {
         }`}
       >
         <Trophy size={24} />
-        <span className="text-[8px] font-black uppercase tracking-widest">Classement</span>
+        <span className="text-[8px] font-black uppercase tracking-widest">Play Store</span>
       </button>
       
       <button 
@@ -49,18 +61,6 @@ const Navigation = ({ activeTab, onTabChange, myAppsCount }) => {
           )}
         </div>
         <span className="text-[8px] font-black uppercase tracking-widest">Mes Apps</span>
-      </button>
-      
-      <button 
-        onClick={() => onTabChange(TABS.ALTERNATIVES)} 
-        className={`flex flex-col items-center gap-1 transition-colors ${
-          activeTab === TABS.ALTERNATIVES 
-            ? "text-emerald-600" 
-            : "text-slate-300 hover:text-emerald-400"
-        }`}
-      >
-        <Globe size={24} />
-        <span className="text-[8px] font-black uppercase tracking-widest">TrustiApps</span>
       </button>
     </nav>
   );

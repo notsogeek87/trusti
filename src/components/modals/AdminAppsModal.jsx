@@ -44,7 +44,7 @@ const AdminAppsModal = ({ onClose }) => {
               }`}
             >
               <Globe size={20} />
-              TrustiApps
+              Alternatives
             </button>
           </div>
         </div>
