@@ -70,5 +70,50 @@
     "category": "Application",
     "color": "bg-[#f7931e]",
     "reason": "Application sélectionnée par l'équipe"
+  },
+  {
+    "id": 1769878297790,
+    "name": "Apple Pay",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.pT_Zxt2n9MJFh74snnY0eQHaHa%3Fpid%3DApi&f=1&ipt=fbbbae1e93ebba5d536f814a9428920ffcf03dc2fde171b5c5fd7bc523c0d176&ipo=images",
+    "grade": "D",
+    "category": "Application",
+    "color": "bg-[#f7931e]",
+    "reason": "Application sélectionnée par l'équipe"
+  },
+  {
+    "id": 1769878336878,
+    "name": "Google Wallet",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.mm.bing.net%2Fth%2Fid%2FOIP.GHPMAcQ_UAyMv0AMDgeTbwHaHa%3Fpid%3DApi&f=1&ipt=22c8d01b76907fde21362bd0d7416d5dd94cfe54089f42f1255be039c9ae5cfc&ipo=images",
+    "grade": "D",
+    "category": "Application",
+    "color": "bg-[#f7931e]",
+    "reason": "Application sélectionnée par l'équipe"
+  },
+  {
+    "id": 1769878470016,
+    "name": "Apple Music",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.wz2TXIwMfzdIdxiv5IomlgHaHa%3Fpid%3DApi&f=1&ipt=8289586e1027fab37074d0f4b25a5a0f27e7352fc59cc47b1555cc8fb7fd7680&ipo=images",
+    "grade": "D",
+    "category": "Application",
+    "color": "bg-[#f7931e]",
+    "reason": "Application sélectionnée par l'équipe"
+  },
+  {
+    "id": 1769878491778,
+    "name": "Youtube Music",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.AzHiiRXXtfWM3MXVcXFwIwHaHa%3Fpid%3DApi&f=1&ipt=e4659bce30dd6dcbd94c02cc53a3da137bcd3722f8cbd8ffec5a90004962b290&ipo=images",
+    "grade": "D",
+    "category": "Application",
+    "color": "bg-[#f7931e]",
+    "reason": "Application sélectionnée par l'équipe"
+  },
+  {
+    "id": 1769878590420,
+    "name": "Youtube",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.mm.bing.net%2Fth%2Fid%2FOIP.VNnU-Z4m125quk879joB1QHaHa%3Fpid%3DApi&f=1&ipt=8f8da583ac4fbecb6fdc12b8d26b6a9d937009ac3ec3d413419c3c019ef216de&ipo=images",
+    "grade": "D",
+    "category": "Application",
+    "color": "bg-[#f7931e]",
+    "reason": "Application sélectionnée par l'équipe"
   }
 ]

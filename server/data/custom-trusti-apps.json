@@ -151,5 +151,43 @@
     "replacesAppIds": [
       "1769805919501"
     ]
+  },
+  {
+    "id": 1769878402340,
+    "name": "Curve Pay",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.hfIx3wRxC712GWbHuFwiSwAAAA%3Fpid%3DApi&f=1&ipt=1f5adfd8f1659b35a6b9b6e96ad7c6354e9c179e0619db03090d9ecc1ff867c1&ipo=images",
+    "grade": "C",
+    "category": "Application",
+    "color": "bg-[#fbb03b]",
+    "reason": "Application respectueuse de la vie privée",
+    "replacesAppIds": [
+      "1769878297790",
+      "1769878336878"
+    ]
+  },
+  {
+    "id": 1769878523579,
+    "name": "Deezer",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.otOGgbNs9Bsp78FnPlBkDAHaHa%3Fpid%3DApi&f=1&ipt=11afc9a103691a79373031f2c8e74ebdebe7f3dafd1dad59ee1d8800267f59fe&ipo=images",
+    "grade": "B",
+    "category": "Application",
+    "color": "bg-[#8dc63f]",
+    "reason": "Application respectueuse de la vie privée",
+    "replacesAppIds": [
+      "1769878470016",
+      "1769878491778"
+    ]
+  },
+  {
+    "id": 1769878626276,
+    "name": "Libretube",
+    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.HxuitGh3LTjRLidhgzYBXAAAAA%3Fpid%3DApi&f=1&ipt=17ee7f6ffbac24aa77654e3d2d0af212a0b424e4d8ddb8de5e9521f9e3e2caee&ipo=images",
+    "grade": "A",
+    "category": "Application",
+    "color": "bg-[#006837]",
+    "reason": "Application respectueuse de la vie privée",
+    "replacesAppIds": [
+      "1769878590420"
+    ]
   }
 ]
