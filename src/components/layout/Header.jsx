@@ -25,9 +25,9 @@ const Header = ({ currentUser, onLogout, onLogin, onResetUserData, onOpenAdmin, 
             <div className="flex items-center gap-2">
               <div className="bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full flex items-center gap-2">
                 <User size={14} />
-                <span className="text-xs font-bold">{currentUser}</span>
+                <span className="text-xs font-bold">{currentUser.email || currentUser}</span>
               </div>
-              {currentUser === 'admin0614' && (
+              {(currentUser.email || currentUser) === 'admin0614' && (
                 <button
                   onClick={onOpenAdmin}
                   className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all"
