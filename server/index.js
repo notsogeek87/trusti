@@ -1,3 +1,7 @@
+import * as dotenv from 'dotenv';
+// Charger les variables d'environnement EN PREMIER
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import gplay from 'google-play-scraper';
@@ -6,10 +10,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dbService from './database/service-postgres.js';
 import authRouter from '../api/auth.js';
-import * as dotenv from 'dotenv';
-
-// Charger les variables d'environnement
-dotenv.config();
 
 const app = express();
 const PORT = 3001;
