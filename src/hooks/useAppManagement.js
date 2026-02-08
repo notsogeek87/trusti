@@ -156,11 +156,27 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     let list = [...APPS_DATA];
     
     if (activeTab === TABS.SELECTION) {
-      // Afficher UNIQUEMENT les StarApps ajoutées par l'admin (triées alphabétiquement)
-      list = [...starApps].sort((a, b) => a.name.localeCompare(b.name));
+      // Afficher UNIQUEMENT les apps avec TrustiScore D ou E (triées alphabétiquement)
+      // On combine APPS_DATA + starApps pour avoir toutes les apps possibles
+      const allApps = [...APPS_DATA, ...starApps];
+      const appsById = new Map();
+      allApps.forEach(app => {
+        appsById.set(app.id, app);
+      });
+      list = Array.from(appsById.values())
+        .filter(app => app.grade === 'D' || app.grade === 'E')
+        .sort((a, b) => a.name.localeCompare(b.name));
     } else if (activeTab === TABS.ALTERNATIVES) {
-      // Afficher UNIQUEMENT les TrustiApps ajoutées par l'admin (triées alphabétiquement)
-      list = [...trustiApps].sort((a, b) => a.name.localeCompare(b.name));
+      // Afficher UNIQUEMENT les apps avec TrustiScore A, B ou C (triées alphabétiquement)
+      // On combine APPS_DATA + trustiApps pour avoir toutes les alternatives possibles
+      const allApps = [...APPS_DATA, ...trustiApps];
+      const appsById = new Map();
+      allApps.forEach(app => {
+        appsById.set(app.id, app);
+      });
+      list = Array.from(appsById.values())
+        .filter(app => app.grade === 'A' || app.grade === 'B' || app.grade === 'C')
+        .sort((a, b) => a.name.localeCompare(b.name));
     } else if (activeTab === TABS.MY_APPS) {
       // Combiner les apps statiques ET TrustiApps ET StarApps
       const allApps = [...APPS_DATA, ...trustiApps, ...starApps];
