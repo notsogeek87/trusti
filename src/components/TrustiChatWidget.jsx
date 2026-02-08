@@ -13,7 +13,6 @@ const TrustiChatWidget = ({ onOpenLandingPage }) => {
       subtext: 'Je peux t\'aider à comprendre les TrustiScores et à choisir les meilleures applications pour ta vie privée.'
     }
   ]);
-  const [showQuickReplies, setShowQuickReplies] = useState(true);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -34,7 +33,6 @@ const TrustiChatWidget = ({ onOpenLandingPage }) => {
     // Ajouter la réponse du bot après un court délai
     setTimeout(() => {
       addMessage('bot', answer, subtext);
-      setShowQuickReplies(false);
     }, 500);
   };
 
@@ -131,13 +129,12 @@ const TrustiChatWidget = ({ onOpenLandingPage }) => {
               </div>
             ))}
 
-            {/* Suggestions rapides - affichées seulement au début */}
-            {showQuickReplies && (
-              <div className="mt-6 space-y-2 animate-slide-up">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">
-                  Questions fréquentes :
-                </p>
-                <button 
+            {/* Suggestions rapides */}
+            <div className="mt-6 space-y-2">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">
+                Questions fréquentes :
+              </p>
+              <button 
                   onClick={() => {
                     setIsOpen(false);
                     if (onOpenLandingPage) onOpenLandingPage();
@@ -177,7 +174,6 @@ const TrustiChatWidget = ({ onOpenLandingPage }) => {
                   📧 Contacter l'équipe Trusti
                 </button>
               </div>
-            )}
             
             {/* Élément invisible pour auto-scroll */}
             <div ref={messagesEndRef} />
