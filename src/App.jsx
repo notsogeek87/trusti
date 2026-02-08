@@ -15,6 +15,7 @@ import ExplainerPanel from './components/ExplainerPanel';
 import AppsList from './components/AppsList';
 import ShareButton from './components/ShareButton';
 import LandingPage from './components/LandingPage';
+import VerifyAuth from './components/VerifyAuth';
 
 // Modals
 import AppDetailModal from './components/modals/AppDetailModal';
@@ -28,6 +29,9 @@ import AdminAppsModal from './components/modals/AdminAppsModal';
  * Composant principal de l'application TrustiScore
  */
 const App = () => {
+  // Vérifier si on est en mode vérification de token
+  const urlParams = new URLSearchParams(window.location.search);
+  const isVerifying = urlParams.has('token');
   // Gestion de l'authentification
   const {
     currentUser,
@@ -137,6 +141,14 @@ const App = () => {
   // Vue principale
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-24">
+      {/* Mode vérification de token */}
+      {isVerifying && (
+        <VerifyAuth onLogin={login} />
+      )}
+
+      {/* Interface normale (masquée pendant la vérification) */}
+      {!isVerifying && (
+        <>
       {/* Écran de chargement initial */}
       {isInitialLoading && (
         <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
@@ -305,7 +317,6 @@ const App = () => {
       <LoginModal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
-        onLogin={login}
       />
 
       {/* Modal d'administration Apps (TrustiApps et StarApps) */}
@@ -317,6 +328,10 @@ const App = () => {
             window.location.reload();
           }}
         />
+      )}
+
+      {/* Fermeture du fragment pour l'interface normale */}
+      </>
       )}
 
       <style>{`

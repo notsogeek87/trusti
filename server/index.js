@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dbService from './database/service-postgres.js';
+import authRouter from '../api/auth.js';
 import * as dotenv from 'dotenv';
 
 // Charger les variables d'environnement
@@ -16,6 +17,9 @@ const PORT = 3001;
 // Enable CORS for frontend
 app.use(cors());
 app.use(express.json());
+
+// Routes d'authentification
+app.use('/api/auth', authRouter);
 
 // Configuration des chemins pour ES modules
 const __filename = fileURLToPath(import.meta.url);

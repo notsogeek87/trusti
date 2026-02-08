@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 /**
- * Hook pour gérer l'authentification utilisateur (localStorage)
+ * Hook pour gérer l'authentification utilisateur (localStorage + Magic Link)
  */
 export const useAuth = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -11,17 +11,24 @@ export const useAuth = () => {
   useEffect(() => {
     const storedUser = localStorage.getItem('trusti_current_user');
     if (storedUser) {
-      setCurrentUser(storedUser);
+      try {
+        const userData = JSON.parse(storedUser);
+        setCurrentUser(userData);
+      } catch {
+        // Ancien format (pseudonyme simple), on le garde pour backward compatibility
+        setCurrentUser({ email: storedUser, legacy: true });
+      }
     }
     setIsLoading(false);
   }, []);
 
-  // Connexion / Inscription
-  const login = useCallback((username) => {
-    const trimmedUsername = username.trim();
-    if (trimmedUsername) {
-      localStorage.setItem('trusti_current_user', trimmedUsername);
-      setCurrentUser(trimmedUsername);
+  // Connexion avec email (Magic Link)
+  const login = useCallback((email) => {
+    const trimmedEmail = email.trim().toLowerCase();
+    if (trimmedEmail && trimmedEmail.includes('@')) {
+      const userData = { email: trimmedEmail, loginAt: Date.now() };
+      localStorage.setItem('trusti_current_user', JSON.stringify(userData));
+      setCurrentUser(userData);
       return true;
     }
     return false;
@@ -36,7 +43,8 @@ export const useAuth = () => {
   // Récupérer les données de l'utilisateur
   const getUserData = useCallback((key) => {
     if (!currentUser) return null;
-    const userDataKey = `trusti_${currentUser}_${key}`;
+    const userEmail = currentUser.email || currentUser;
+    const userDataKey = `trusti_${userEmail}_${key}`;
     const data = localStorage.getItem(userDataKey);
     return data ? JSON.parse(data) : null;
   }, [currentUser]);
@@ -44,14 +52,16 @@ export const useAuth = () => {
   // Sauvegarder les données de l'utilisateur
   const saveUserData = useCallback((key, data) => {
     if (!currentUser) return;
-    const userDataKey = `trusti_${currentUser}_${key}`;
+    const userEmail = currentUser.email || currentUser;
+    const userDataKey = `trusti_${userEmail}_${key}`;
     localStorage.setItem(userDataKey, JSON.stringify(data));
   }, [currentUser]);
 
   // Réinitialiser toutes les données de l'utilisateur
   const resetUserData = useCallback(() => {
     if (!currentUser) return;
-    const userDataKey = `trusti_${currentUser}_apps`;
+    const userEmail = currentUser.email || currentUser;
+    const userDataKey = `trusti_${userEmail}_apps`;
     localStorage.removeItem(userDataKey);
     // Forcer un rechargement en changeant l'utilisateur temporairement
     const user = currentUser;
