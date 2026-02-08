@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { CheckCircle, X, AlertCircle } from 'lucide-react';
 
 // Détection de l'environnement
@@ -13,8 +13,13 @@ const VerifyAuth = ({ onLogin }) => {
   const [status, setStatus] = useState('verifying'); // 'verifying' | 'success' | 'error'
   const [error, setError] = useState('');
   const [email, setEmail] = useState('');
+  const hasVerified = useRef(false); // Flag pour éviter les doubles appels
 
   useEffect(() => {
+    // Si déjà vérifié, ne rien faire
+    if (hasVerified.current) return;
+    hasVerified.current = true;
+
     const verifyToken = async () => {
       // Récupérer le token depuis l'URL
       const urlParams = new URLSearchParams(window.location.search);
@@ -58,7 +63,7 @@ const VerifyAuth = ({ onLogin }) => {
     };
 
     verifyToken();
-  }, [onLogin]);
+  }, []); // Pas de dépendances pour n'exécuter qu'une fois
 
   if (status === 'verifying') {
     return (
