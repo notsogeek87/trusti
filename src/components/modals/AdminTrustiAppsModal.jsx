@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Save, Trash2, Upload } from 'lucide-react';
 import { GRADE_INFO } from '../../constants/grades';
+import { CATEGORIES } from '../../constants/categories';
 
 // Détection de l'environnement
 const API_URL = import.meta.env.PROD 
@@ -311,16 +312,18 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
 
                 {/* Catégorie */}
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
-                    Catégorie
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Catégorie *
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={editingApp.category}
                     onChange={(e) => setEditingApp({...editingApp, category: e.target.value})}
-                    placeholder="Communication, Sécurité..."
-                    className="w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none"
-                  />
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:border-indigo-500 focus:outline-none bg-white"
+                  >
+                    {CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
                 </div>
 
                 {/* Applications à remplacer (Play Store ou StarApp) - Multi-sélection */}
