@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CheckCircle, X, AlertCircle } from 'lucide-react';
 
 // Détection de l'environnement
