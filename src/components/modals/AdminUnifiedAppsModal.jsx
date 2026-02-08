@@ -25,7 +25,6 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
     category: 'Application',
     description: '',
     playStoreUrl: '',
-    appleStoreUrl: '',
     fDroidUrl: '',
     websiteUrl: ''
   });
@@ -93,6 +92,13 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
     const endpoint = isABC ? 'custom-trusti-apps' : 'star-apps';
     const appType = isABC ? 'trusti' : 'star';
 
+    // Construire l'URL Play Store si c'est juste un package name
+    let playStoreUrl = editingApp.playStoreUrl || '';
+    if (playStoreUrl && !playStoreUrl.startsWith('http')) {
+      // Si ça ne commence pas par http, c'est un package name
+      playStoreUrl = `https://play.google.com/store/apps/details?id=${playStoreUrl}`;
+    }
+
     const newApp = {
       id: editingApp.id || String(Date.now() + (isABC ? 2000 : 5000)),
       name: editingApp.name,
@@ -107,8 +113,8 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
 
     // Ajouter les champs optionnels pour les TrustiApps (ABC)
     if (isABC) {
-      newApp.playStoreUrl = editingApp.playStoreUrl || '';
-      newApp.appleStoreUrl = editingApp.appleStoreUrl || '';
+      newApp.playStoreUrl = playStoreUrl;
+      newApp.appleStoreUrl = ''; // Sera généré automatiquement par le backend
       newApp.githubUrl = editingApp.fDroidUrl || '';
       newApp.website = editingApp.websiteUrl || '';
     }
@@ -137,7 +143,6 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
           category: 'Application',
           description: '',
           playStoreUrl: '',
-          appleStoreUrl: '',
           fDroidUrl: '',
           websiteUrl: ''
         });
@@ -186,6 +191,13 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
 
   // Éditer une application
   const handleEditApp = (app) => {
+    // Extraire le package name depuis l'URL Play Store si c'est une URL complète
+    let playStoreValue = app.playStoreUrl || '';
+    const packageMatch = playStoreValue.match(/id=([a-zA-Z0-9._]+)/);
+    if (packageMatch) {
+      playStoreValue = packageMatch[1]; // Afficher juste le package name
+    }
+    
     setEditingApp({
       id: app.id,
       name: app.name,
@@ -193,8 +205,7 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
       grade: app.grade,
       category: app.category,
       description: app.reason,
-      playStoreUrl: app.playStoreUrl || '',
-      appleStoreUrl: app.appleStoreUrl || '',
+      playStoreUrl: playStoreValue,
       fDroidUrl: app.fDroidUrl || '',
       websiteUrl: app.websiteUrl || ''
     });
@@ -397,31 +408,21 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
                   {showAdvancedFields && (
                     <>
                       {/* Lien Play Store */}
+                      {/* Package Name Android */}
                       <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                          Lien Play Store (optionnel)
+                          Package Name Android (optionnel)
                         </label>
                         <input
-                          type="url"
+                          type="text"
                           value={editingApp.playStoreUrl}
                           onChange={(e) => setEditingApp({...editingApp, playStoreUrl: e.target.value})}
-                          placeholder="https://play.google.com/store/apps/details?id=..."
+                          placeholder="com.example.app"
                           className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:border-indigo-500 focus:outline-none"
                         />
-                      </div>
-
-                      {/* Lien Apple Store */}
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                          Lien Apple Store (optionnel)
-                        </label>
-                        <input
-                          type="url"
-                          value={editingApp.appleStoreUrl}
-                          onChange={(e) => setEditingApp({...editingApp, appleStoreUrl: e.target.value})}
-                          placeholder="https://apps.apple.com/app/..."
-                          className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:border-indigo-500 focus:outline-none"
-                        />
+                        <p className="mt-1 text-xs text-slate-500">
+                          Les liens Play Store et App Store seront générés automatiquement depuis ce package name
+                        </p>
                       </div>
 
                       {/* Lien F-Droid */}
@@ -485,7 +486,6 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
                             category: 'Application', 
                             description: '', 
                             playStoreUrl: '', 
-                            appleStoreUrl: '', 
                             fDroidUrl: '', 
                             websiteUrl: ''
                           });

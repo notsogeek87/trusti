@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft, CheckCircle, PlusCircle, ShieldCheck, ArrowRight } from 'lucide-react';
+import { ChevronLeft, CheckCircle, PlusCircle, ShieldCheck, ArrowRight, Calendar } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 
 /**
@@ -21,6 +21,21 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, trustiApps = 
     }
     return false;
   });
+
+  // Formater la date de mise à jour
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Non disponible';
+    try {
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat('fr-FR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      }).format(date);
+    } catch {
+      return 'Non disponible';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 pb-20">
@@ -64,6 +79,14 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, trustiApps = 
           </div>
           <h2 className="text-3xl font-black text-slate-900 mb-1">{app.name}</h2>
           <ScoreIndicator grade={app.grade} size="large" />
+          
+          {/* Date de mise à jour du TrustiScore */}
+          {app.updatedAt && (
+            <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
+              <Calendar size={14} />
+              <span>Mis à jour le {formatDate(app.updatedAt)}</span>
+            </div>
+          )}
         </div>
         
         <div className="bg-slate-50 rounded-[2rem] p-6 border border-slate-100 mb-6">

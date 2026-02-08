@@ -2,6 +2,7 @@
  * Service de base de données PostgreSQL via Neon pour Vercel
  */
 import { neon } from '@neondatabase/serverless';
+import gplay from 'google-play-scraper';
 
 // Charger .env en développement local
 if (process.env.NODE_ENV !== 'production') {
@@ -15,6 +16,157 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Initialiser la connexion Neon
 const sql = neon(process.env.DATABASE_URL);
+
+// Cache pour les icônes
+const iconCache = {};
+
+/**
+ * Helper: Extraire le package ID depuis une URL Play Store
+ */
+function extractPackageId(playStoreUrl) {
+  if (!playStoreUrl) return null;
+  const match = playStoreUrl.match(/id=([a-zA-Z0-9._]+)/);
+  return match ? match[1] : null;
+}
+
+/**
+ * Helper: Vérifier si une URL d'image est valide
+ */
+async function isValidImageUrl(url) {
+  try {
+    const response = await fetch(url, { method: 'HEAD', timeout: 3000 });
+    return response.ok && response.headers.get('content-type')?.startsWith('image/');
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Helper: Obtenir l'icône depuis F-Droid
+ */
+async function getFDroidIcon(packageName) {
+  const patterns = [
+    `https://f-droid.org/repo/icons-640/${packageName}.png`,
+    `https://f-droid.org/repo/${packageName}/en-US/icon.png`,
+    `https://f-droid.org/assets/${packageName}.png`
+  ];
+
+  for (const url of patterns) {
+    if (await isValidImageUrl(url)) {
+      return url;
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * Helper: Vérifier si l'app existe sur F-Droid et obtenir le lien
+ */
+async function getFDroidUrl(packageName) {
+  if (!packageName) return null;
+  
+  try {
+    const fdroidPageUrl = `https://f-droid.org/packages/${packageName}`;
+    const response = await fetch(fdroidPageUrl, { method: 'HEAD', timeout: 3000 });
+    
+    if (response.ok) {
+      return fdroidPageUrl;
+    }
+  } catch {
+    // App pas sur F-Droid
+  }
+  
+  return null;
+}
+
+/**
+ * Helper: Récupérer l'icône dynamiquement (Play Store puis F-Droid)
+ */
+async function getAppIcon(playStoreUrl, currentIcon) {
+  // Si pas de playStoreUrl, garder l'icône actuelle
+  if (!playStoreUrl) return currentIcon;
+
+  // Extraire le package ID
+  const packageName = extractPackageId(playStoreUrl);
+  if (!packageName) return currentIcon;
+
+  // Vérifier le cache
+  if (iconCache[packageName]) {
+    return iconCache[packageName];
+  }
+
+  // 1. Essayer Play Store
+  try {
+    const appInfo = await gplay.app({ appId: packageName });
+    if (appInfo && appInfo.icon) {
+      iconCache[packageName] = appInfo.icon;
+      return appInfo.icon;
+    }
+  } catch (error) {
+    // App probablement pas sur Play Store
+  }
+
+  // 2. Essayer F-Droid
+  try {
+    const fdroidIcon = await getFDroidIcon(packageName);
+    if (fdroidIcon) {
+      iconCache[packageName] = fdroidIcon;
+      return fdroidIcon;
+    }
+  } catch (error) {
+    // App probablement pas sur F-Droid non plus
+  }
+
+  // 3. Garder l'icône actuelle
+  return currentIcon;
+}
+
+/**
+ * Helper: Récupérer les informations complètes depuis Play Store
+ */
+async function getPlayStoreInfo(playStoreUrl) {
+  if (!playStoreUrl) return null;
+  
+  const packageName = extractPackageId(playStoreUrl);
+  if (!packageName) return null;
+
+  try {
+    const appInfo = await gplay.app({ appId: packageName });
+    return appInfo;
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
+ * Helper: Construire l'URL Play Store depuis un package name
+ */
+function buildPlayStoreUrl(packageName) {
+  if (!packageName) return null;
+  return `https://play.google.com/store/apps/details?id=${packageName}`;
+}
+
+/**
+ * Helper: Rechercher l'app sur l'App Store iTunes
+ */
+async function searchAppStore(appName) {
+  if (!appName) return null;
+  
+  try {
+    const searchUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(appName)}&entity=software&limit=1`;
+    const response = await fetch(searchUrl);
+    const data = await response.json();
+    
+    if (data.results && data.results.length > 0) {
+      return data.results[0].trackViewUrl;
+    }
+  } catch (error) {
+    // Recherche échouée
+  }
+  
+  return null;
+}
 
 /**
  * Créer les tables si elles n'existent pas
@@ -505,17 +657,45 @@ async function formatAppFromDB(app) {
   // Charger les relations
   const relations = await getAppRelations(app.id);
   
+  // Récupérer l'icône dynamiquement depuis Play Store / F-Droid
+  let icon = await getAppIcon(app.play_store_url, app.icon);
+  
+  // Récupérer les infos depuis Play Store si disponible
+  let playStoreUrl = app.play_store_url;
+  let appleStoreUrl = app.apple_store_url;
+  let fDroidUrl = null;
+  
+  const packageName = extractPackageId(playStoreUrl);
+  
+  if (playStoreUrl) {
+    if (packageName && !playStoreUrl.startsWith('https://play.google.com')) {
+      // Construire une URL Play Store valide si nécessaire
+      playStoreUrl = buildPlayStoreUrl(packageName);
+    }
+  }
+  
+  // Si pas d'URL App Store, essayer de la trouver automatiquement
+  if (!appleStoreUrl && app.name) {
+    appleStoreUrl = await searchAppStore(app.name);
+  }
+  
+  // Pour les TrustiApps (A/B/C), vérifier si l'app existe sur F-Droid
+  if (appType === 'trusti' && packageName) {
+    fDroidUrl = await getFDroidUrl(packageName);
+  }
+  
   return {
     id: app.id,
     name: app.name,
     trustiScore: trustiScore,
     grade: app.grade,
     category: app.category,
-    icon: app.icon,
+    icon: icon, // Icône récupérée dynamiquement
     color: app.color,
     reason: app.reason,
-    playStoreUrl: app.play_store_url,
-    appleStoreUrl: app.apple_store_url,
+    playStoreUrl: playStoreUrl, // URL Play Store vérifiée/construite
+    appleStoreUrl: appleStoreUrl, // URL App Store (existante ou recherchée)
+    fDroidUrl: fDroidUrl, // URL F-Droid (uniquement pour TrustiApps A/B/C)
     githubUrl: app.github_url,
     otherStoreUrl: app.other_store_url,
     website: app.website,
