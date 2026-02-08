@@ -10,11 +10,15 @@
     "db:init": "node server/database/migrate-json.js",
     "db:migrate-to-postgres": "node server/database/migrate-to-postgres.js",
     "db:backup": "node -e \"import('./server/database/db.js').then(m => m.backup())\"",
+    "check:resend": "node check-resend-config.js",
+    "check:brevo": "node check-brevo-config.js",
+    "test:email": "node check-brevo-config.js",
     "build": "vite build",
     "preview": "vite preview",
     "vercel-build": "vite build"
   },
   "dependencies": {
+    "@getbrevo/brevo": "^3.0.1",
     "@neondatabase/serverless": "^1.0.2",
     "cors": "^2.8.6",
     "dotenv": "^17.2.4",
