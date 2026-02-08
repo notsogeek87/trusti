@@ -10,7 +10,7 @@ const sql = neon(process.env.DATABASE_URL);
 const categoriesMapping = {
   // TrustiApps (Alternatives)
   'Signal': 'Messagerie',
-  'Lumo AI': 'Productivité',
+  'Lumo AI': 'IA',
   'Proton Mail': 'Email',
   'Pixelfed': 'Réseaux sociaux',
   'Infomaniak': 'Email',
@@ -34,7 +34,8 @@ const categoriesMapping = {
   'Google Password': 'Sécurité',
   'Google Keep': 'Productivité',
   'Google Tasks': 'Productivité',
-  'ChatGPT': 'Productivité',
+  'ChatGPT': 'IA',
+  'Gemini': 'IA',
   'Google Photos': 'Photo',
   'Google Drive': 'Stockage Cloud',
   'Google.com': 'Navigation',
