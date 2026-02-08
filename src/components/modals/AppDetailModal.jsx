@@ -5,13 +5,21 @@ import ScoreIndicator from '../ui/ScoreIndicator';
 /**
  * Modal des détails d'une application
  */
-const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, trustiApps = [] }) => {
+const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, trustiApps = [], starApps = [] }) => {
   // Trouver les alternatives (TrustiApps qui remplacent cette app)
   const alternatives = trustiApps.filter(ta => {
     if (ta.replacesAppIds && Array.isArray(ta.replacesAppIds)) {
       return ta.replacesAppIds.includes(String(app.id));
     }
     return ta.replacesAppId === String(app.id);
+  });
+  
+  // Trouver les Star Apps que cette Trusti App remplace
+  const replacedApps = starApps.filter(sa => {
+    if (app.replacesAppIds && Array.isArray(app.replacesAppIds)) {
+      return app.replacesAppIds.includes(String(sa.id));
+    }
+    return false;
   });
 
   return (
@@ -163,6 +171,46 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, trustiApps = 
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Section pour les apps remplacées (quand on affiche une Trusti App) */}
+        {replacedApps.length > 0 && (
+          <div className="mb-4">
+            <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-[2rem] p-6 border-2 border-orange-200 shadow-lg">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-black text-sm uppercase tracking-tight text-slate-800 flex items-center gap-2">
+                  <ShieldCheck size={18} className="text-orange-600" /> Remplace
+                </h3>
+                <div className="bg-orange-100 text-orange-700 text-xs font-black px-2 py-1 rounded-full">
+                  {replacedApps.length} app{replacedApps.length > 1 ? 's' : ''} à éviter
+                </div>
+              </div>
+              <div className="space-y-3">
+                {replacedApps.map(replaced => (
+                  <div key={replaced.id} className="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
+                      {replaced.icon && replaced.icon.startsWith('http') ? (
+                        <img 
+                          src={replaced.icon} 
+                          alt={replaced.name} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className={`${replaced.color || 'bg-slate-500'} w-full h-full flex items-center justify-center text-xl text-white`}>
+                          {replaced.icon}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-grow">
+                      <h4 className="font-black text-sm text-slate-900">{replaced.name}</h4>
+                      <p className="text-xs text-slate-500 line-clamp-2">{replaced.reason}</p>
+                    </div>
+                    <ScoreIndicator grade={replaced.grade} />
+                  </div>
+                ))}
               </div>
             </div>
           </div>

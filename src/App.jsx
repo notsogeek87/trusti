@@ -136,6 +136,7 @@ const App = () => {
         onToggleMyApp={toggleMyApp}
         onClose={() => setSelectedApp(null)}
         trustiApps={trustiApps}
+        starApps={starApps}
       />
     );
   }
