@@ -26,7 +26,8 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
     description: '',
     playStoreUrl: '',
     fDroidUrl: '',
-    websiteUrl: ''
+    websiteUrl: '',
+    permissions: ''
   });
 
   const [isAdding, setIsAdding] = useState(false);
@@ -99,6 +100,14 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
       playStoreUrl = `https://play.google.com/store/apps/details?id=${playStoreUrl}`;
     }
 
+    // Parser les permissions (séparées par des virgules, retours à la ligne ou points-virgules)
+    const permissions = editingApp.permissions
+      ? editingApp.permissions
+          .split(/[,;\n]+/)
+          .map(p => p.trim())
+          .filter(p => p.length > 0)
+      : [];
+
     const newApp = {
       id: editingApp.id || String(Date.now() + (isABC ? 2000 : 5000)),
       name: editingApp.name,
@@ -108,7 +117,8 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
       category: editingApp.category || 'Application',
       color: getGradeColor(editingApp.grade),
       reason: editingApp.description || (isABC ? 'Application respectueuse de la vie privée' : 'Application sélectionnée par l\'équipe'),
-      appType
+      appType,
+      permissions: permissions
     };
 
     // Ajouter les champs optionnels pour les TrustiApps (ABC)
@@ -144,7 +154,8 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
           description: '',
           playStoreUrl: '',
           fDroidUrl: '',
-          websiteUrl: ''
+          websiteUrl: '',
+          permissions: ''
         });
         setIsAdding(false);
       } else {
@@ -198,6 +209,11 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
       playStoreValue = packageMatch[1]; // Afficher juste le package name
     }
     
+    // Convertir les permissions (array) en string pour l'édition
+    const permissionsString = app.permissions && Array.isArray(app.permissions)
+      ? app.permissions.join(', ')
+      : '';
+    
     setEditingApp({
       id: app.id,
       name: app.name,
@@ -207,7 +223,8 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
       description: app.reason,
       playStoreUrl: playStoreValue,
       fDroidUrl: app.fDroidUrl || '',
-      websiteUrl: app.websiteUrl || ''
+      websiteUrl: app.websiteUrl || '',
+      permissions: permissionsString
     });
     setIsAdding(true);
   };
@@ -404,6 +421,23 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
                     />
                   </div>
 
+                  {/* Permissions */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                      Permissions Android (optionnel)
+                    </label>
+                    <textarea
+                      value={editingApp.permissions}
+                      onChange={(e) => setEditingApp({...editingApp, permissions: e.target.value})}
+                      placeholder="Localisation, Appareil photo, Microphone, Contacts..."
+                      rows="3"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:border-indigo-500 focus:outline-none resize-none"
+                    />
+                    <p className="mt-1 text-xs text-slate-500">
+                      Séparez les permissions par des virgules. Ex: Localisation précise, Appareil photo, Microphone
+                    </p>
+                  </div>
+
                   {/* Champs supplémentaires pour les alternatives (ABC) */}
                   {showAdvancedFields && (
                     <>
@@ -487,7 +521,8 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
                             description: '', 
                             playStoreUrl: '', 
                             fDroidUrl: '', 
-                            websiteUrl: ''
+                            websiteUrl: '',
+                            permissions: ''
                           });
                           setIsAdding(false);
                         }}

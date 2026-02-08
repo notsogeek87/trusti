@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft, CheckCircle, PlusCircle, ShieldCheck, ArrowRight, Calendar } from 'lucide-react';
+import { ChevronLeft, CheckCircle, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 
 /**
@@ -35,6 +35,40 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, trustiApps = 
     } catch {
       return 'Non disponible';
     }
+  };
+
+  // Traduire/formater les noms de permissions
+  const formatPermissionName = (permission) => {
+    // Mapper les permissions Android communes vers du texte français
+    const permissionMap = {
+      'ACCESS_FINE_LOCATION': 'Localisation précise',
+      'ACCESS_COARSE_LOCATION': 'Localisation approximative',
+      'CAMERA': 'Appareil photo',
+      'RECORD_AUDIO': 'Microphone',
+      'READ_CONTACTS': 'Lecture des contacts',
+      'WRITE_CONTACTS': 'Modification des contacts',
+      'READ_CALENDAR': 'Lecture du calendrier',
+      'WRITE_CALENDAR': 'Modification du calendrier',
+      'READ_SMS': 'Lecture des SMS',
+      'SEND_SMS': 'Envoi de SMS',
+      'READ_PHONE_STATE': 'État du téléphone',
+      'CALL_PHONE': 'Passer des appels',
+      'READ_CALL_LOG': 'Historique des appels',
+      'WRITE_CALL_LOG': 'Modification de l\'historique d\'appels',
+      'READ_EXTERNAL_STORAGE': 'Lecture du stockage',
+      'WRITE_EXTERNAL_STORAGE': 'Écriture sur le stockage',
+      'INTERNET': 'Accès Internet',
+      'ACCESS_NETWORK_STATE': 'État du réseau',
+      'ACCESS_WIFI_STATE': 'État du Wi-Fi',
+      'BLUETOOTH': 'Bluetooth',
+      'VIBRATE': 'Vibration',
+      'WAKE_LOCK': 'Empêcher la mise en veille',
+      'GET_ACCOUNTS': 'Comptes sur l\'appareil',
+      'USE_FINGERPRINT': 'Empreinte digitale',
+      'BODY_SENSORS': 'Capteurs corporels'
+    };
+    
+    return permissionMap[permission] || permission.replace(/_/g, ' ').toLowerCase();
   };
 
   return (
@@ -95,6 +129,23 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, trustiApps = 
           </h3>
           <p className="text-sm text-slate-600 leading-relaxed font-medium">{app.reason}</p>
         </div>
+
+        {/* Permissions Android */}
+        {app.permissions && app.permissions.length > 0 && (
+          <div className="bg-slate-50 rounded-[2rem] p-6 border border-slate-100 mb-6">
+            <h3 className="font-black text-sm uppercase tracking-tight text-slate-800 mb-4 flex items-center gap-2">
+              <Shield size={18} className="text-orange-600" /> Permissions demandées
+            </h3>
+            <div className="grid grid-cols-1 gap-2">
+              {app.permissions.map((permission, index) => (
+                <div key={index} className="flex items-center gap-2 text-xs text-slate-600 bg-white rounded-lg px-3 py-2 border border-slate-200">
+                  <div className="w-1.5 h-1.5 rounded-full bg-orange-400"></div>
+                  <span className="font-medium">{formatPermissionName(permission)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Badge incitatif pour les alternatives */}
         {alternatives.length > 0 && (
