@@ -16,6 +16,7 @@ import AppsList from './components/AppsList';
 import ShareButton from './components/ShareButton';
 import LandingPage from './components/LandingPage';
 import VerifyAuth from './components/VerifyAuth';
+import TrustiChatWidget from './components/TrustiChatWidget';
 
 // Modals
 import AppDetailModal from './components/modals/AppDetailModal';
@@ -342,6 +343,9 @@ const App = () => {
       {/* Fermeture du fragment pour l'interface normale */}
       </>
       )}
+
+      {/* Widget de chat Trusti (visible partout sauf pendant la vérification du token) */}
+      {!isVerifying && <TrustiChatWidget />}
 
       <style>{`
         @keyframes pulse-subtle {
