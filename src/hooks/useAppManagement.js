@@ -39,8 +39,8 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
         setCustomMigrations(new Map());
       }
     } else {
-      // Mode non connecté : ajouter ChatGPT et Instagram par défaut pour la démo
-      setMyApps(new Set(['com.openai.chatgpt', 'com.instagram.android']));
+      // Mode non connecté : état vide
+      setMyApps(new Set());
       setMigratedApps(new Set());
       setCustomMigrations(new Map());
     }
