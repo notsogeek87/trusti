@@ -13,8 +13,6 @@ const API_URL = import.meta.env.PROD
  */
 const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
   const [apps, setApps] = useState([]);
-  const [playStoreApps, setPlayStoreApps] = useState([]);
-  const [starApps, setStarApps] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -24,7 +22,6 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
     grade: 'A',
     category: 'Application',
     description: '',
-    replacesAppIds: [], // Changé en array pour sélection multiple
     playStoreUrl: '',
     appleStoreUrl: '',
     fDroidUrl: '',
@@ -36,47 +33,9 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
   // Charger les apps depuis l'API au montage
   useEffect(() => {
     loadApps();
-    loadPlayStoreApps();
-    loadStarApps();
   }, []);
 
-  const loadPlayStoreApps = async () => {
-    try {
-      const response = await fetch(`${API_URL}/top-apps`);
-      const data = await response.json();
-      console.log('Play Store apps loaded:', data);
-      if (data.success && data.apps) {
-        // Normaliser les IDs en strings
-        const normalizedApps = data.apps.map(app => ({
-          ...app,
-          id: String(app.id)
-        }));
-        setPlayStoreApps(normalizedApps);
-        console.log('Play Store apps set:', normalizedApps.length);
-      }
-    } catch (error) {
-      console.error('Error loading Play Store apps:', error);
-    }
-  };
 
-  const loadStarApps = async () => {
-    try {
-      const response = await fetch(`${API_URL}/star-apps`);
-      const data = await response.json();
-      console.log('Star apps loaded:', data);
-      if (data.success && data.apps) {
-        // Normaliser les IDs en strings
-        const normalizedApps = data.apps.map(app => ({
-          ...app,
-          id: String(app.id)
-        }));
-        setStarApps(normalizedApps);
-        console.log('Star apps set:', normalizedApps.length);
-      }
-    } catch (error) {
-      console.error('Error loading Star apps:', error);
-    }
-  };
 
   const loadApps = async () => {
     try {
@@ -110,7 +69,6 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
       category: editingApp.category || 'Application',
       color: getGradeColor(editingApp.grade),
       reason: editingApp.description || 'Application respectueuse de la vie privée',
-      replacesAppIds: editingApp.replacesAppIds || [], // Array d'IDs
       playStoreUrl: editingApp.playStoreUrl || '',
       appleStoreUrl: editingApp.appleStoreUrl || '',
       githubUrl: editingApp.fDroidUrl || '',
@@ -138,8 +96,7 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
           logo: '',
           grade: 'A',
           category: 'Application',
-          description: '',
-          replacesAppIds: []
+          description: ''
         });
         setIsAdding(false);
       } else {
@@ -186,10 +143,6 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
 
   // Éditer une application
   const handleEditApp = (app) => {
-    // Normaliser les IDs en strings pour la cohérence
-    let replacesAppIds = app.replacesAppIds || (app.replacesAppId ? [app.replacesAppId] : []);
-    replacesAppIds = replacesAppIds.map(id => String(id));
-    
     setEditingApp({
       id: app.id,
       name: app.name,
@@ -197,7 +150,6 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
       grade: app.grade,
       category: app.category,
       description: app.reason,
-      replacesAppIds,
       playStoreUrl: app.playStoreUrl || '',
       appleStoreUrl: app.appleStoreUrl || '',
       fDroidUrl: app.fDroidUrl || '',
@@ -326,98 +278,6 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
                   </select>
                 </div>
 
-                {/* Applications à remplacer (Play Store ou StarApp) - Multi-sélection */}
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
-                    Remplace les applications (optionnel)
-                    <span className="text-xs text-slate-500 ml-2">
-                      ({playStoreApps.length + starApps.length} apps disponibles)
-                    </span>
-                  </label>
-                  
-                  {/* Liste des apps sélectionnées */}
-                  {editingApp.replacesAppIds.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {editingApp.replacesAppIds.map(appId => {
-                        const app = [...playStoreApps, ...starApps].find(a => a.id === appId);
-                        return app ? (
-                          <div key={appId} className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm">
-                            <span>{app.name}</span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setEditingApp({
-                                  ...editingApp,
-                                  replacesAppIds: editingApp.replacesAppIds.filter(id => id !== appId)
-                                });
-                              }}
-                              className="hover:text-indigo-900"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ) : null;
-                      })}
-                    </div>
-                  )}
-                  
-                  <select
-                    value=""
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      console.log('Selected value:', value, 'Type:', typeof value);
-                      console.log('Current replacesAppIds:', editingApp.replacesAppIds);
-                      console.log('All playStoreApps IDs:', playStoreApps.map(a => ({id: a.id, type: typeof a.id})));
-                      console.log('All starApps IDs:', starApps.map(a => ({id: a.id, type: typeof a.id})));
-                      if (value && !editingApp.replacesAppIds.includes(value)) {
-                        console.log('Adding app to selection');
-                        setEditingApp({
-                          ...editingApp,
-                          replacesAppIds: [...editingApp.replacesAppIds, value]
-                        });
-                      } else {
-                        console.log('App already selected or no value');
-                      }
-                    }}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-indigo-500 focus:outline-none"
-                  >
-                    <option value="">Ajouter une app à remplacer...</option>
-                    
-                    {/* Apps du Play Store */}
-                    {playStoreApps.length > 0 && (
-                      <optgroup label="📊 Classement Play Store">
-                        {playStoreApps.map(app => (
-                          <option 
-                            key={app.id} 
-                            value={app.id}
-                            disabled={editingApp.replacesAppIds.includes(app.id)}
-                          >
-                            {app.name} (Note: {app.grade})
-                          </option>
-                        ))}
-                      </optgroup>
-                    )}
-                    
-                    {/* StarApps */}
-                    {starApps.length > 0 && (
-                      <optgroup label="⭐ StarApps (Sélection)">
-                        {starApps.map(app => (
-                          <option 
-                            key={app.id} 
-                            value={app.id}
-                            disabled={editingApp.replacesAppIds.includes(app.id)}
-                          >
-                            {app.name} (Note: {app.grade})
-                          </option>
-                        ))}
-                      </optgroup>
-                    )}
-                  </select>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Cette TrustiApp sera proposée en migration pour les apps sélectionnées
-                  </p>
-                </div>
-
                 {/* Description */}
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">
@@ -508,7 +368,7 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
                     <button
                       type="button"
                       onClick={() => {
-                        setEditingApp({name: '', logo: '', grade: 'A', category: 'Application', description: '', replacesAppIds: [], playStoreUrl: '', appleStoreUrl: '', fDroidUrl: '', websiteUrl: ''});
+                        setEditingApp({name: '', logo: '', grade: 'A', category: 'Application', description: '', playStoreUrl: '', appleStoreUrl: '', fDroidUrl: '', websiteUrl: ''});
                         setIsAdding(false);
                       }}
                       disabled={isSaving}

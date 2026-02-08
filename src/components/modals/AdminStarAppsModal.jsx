@@ -63,7 +63,6 @@ const AdminStarAppsModal = ({ onClose, isEmbedded = false }) => {
       category: editingApp.category || 'Application',
       color: getGradeColor(editingApp.grade),
       reason: editingApp.description || 'Application sélectionnée par l\'équipe',
-      alternativeAppIds: editingApp.alternativeAppIds || [],
       appType: 'star'
     };
 

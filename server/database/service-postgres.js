@@ -427,24 +427,55 @@ async function deleteRelations(appId) {
 /**
  * Obtenir les relations d'une app
  */
+/**
+ * Obtenir les relations automatiques d'une application basées sur la catégorie et le trustiScore
+ * - TrustiApps (A/B/C) remplacent les StarApps (D/E) de même catégorie
+ * - StarApps (D/E) ont comme alternatives les TrustiApps (A/B/C) de même catégorie
+ */
 async function getAppRelations(appId) {
   try {
-    const relations = await sql`
-      SELECT related_app_id, relation_type
-      FROM app_relations
-      WHERE app_id = ${appId}
+    // Récupérer l'app courante pour connaître sa catégorie et son trustiScore
+    const apps = await sql`
+      SELECT trusti_score, category 
+      FROM applications 
+      WHERE id = ${appId}
     `;
+    
+    if (apps.length === 0) {
+      return { alternativeAppIds: [], replacesAppIds: [] };
+    }
+    
+    const currentApp = apps[0];
+    const currentScore = currentApp.trusti_score;
+    const currentCategory = currentApp.category;
+    const currentType = calculateAppType(currentScore);
     
     const alternativeAppIds = [];
     const replacesAppIds = [];
     
-    relations.forEach(rel => {
-      if (rel.relation_type === 'alternative') {
-        alternativeAppIds.push(rel.related_app_id);
-      } else if (rel.relation_type === 'replaces') {
-        replacesAppIds.push(rel.related_app_id);
-      }
-    });
+    // Si c'est une TrustiApp (A/B/C), elle remplace les StarApps (D/E) de même catégorie
+    if (currentType === 'trusti') {
+      const starApps = await sql`
+        SELECT id 
+        FROM applications 
+        WHERE category = ${currentCategory}
+        AND trusti_score IN ('D', 'E')
+        AND id != ${appId}
+      `;
+      replacesAppIds.push(...starApps.map(app => app.id));
+    }
+    
+    // Si c'est une StarApp (D/E), ses alternatives sont les TrustiApps (A/B/C) de même catégorie
+    if (currentType === 'star') {
+      const trustiApps = await sql`
+        SELECT id 
+        FROM applications 
+        WHERE category = ${currentCategory}
+        AND trusti_score IN ('A', 'B', 'C')
+        AND id != ${appId}
+      `;
+      alternativeAppIds.push(...trustiApps.map(app => app.id));
+    }
     
     return { alternativeAppIds, replacesAppIds };
   } catch (error) {
