@@ -6,7 +6,7 @@ export const APPS_DATA = [
   { 
     id: 1, 
     name: "ChatGPT", 
-    category: "IA / Productivité", 
+    category: "IA", 
     grade: "B", 
     color: "bg-slate-800", 
     icon: "🤖", 

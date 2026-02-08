@@ -3,6 +3,7 @@
  */
 export const CATEGORIES = [
   'Application',
+  'IA',
   'Communication',
   'Messagerie',
   'Email',
