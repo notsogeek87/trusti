@@ -309,18 +309,21 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
                       />
                     </div>
 
-                  {/* Logo (URL ou emoji) */}
+                  {/* Logo de secours (si Play Store échoue) */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      Logo (URL ou emoji)
+                      Logo de secours (si non trouvé automatiquement)
                     </label>
                     <input
                       type="text"
                       value={editingApp.logo}
                       onChange={(e) => setEditingApp({...editingApp, logo: e.target.value})}
-                      placeholder={isABC ? "🔒 ou https://..." : "⭐ ou https://..."}
+                      placeholder="URL https://... ou emoji 📱"
                       className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:border-indigo-500 focus:outline-none"
                     />
+                    <p className="mt-1 text-xs text-slate-500">
+                      Le logo sera récupéré automatiquement depuis le Play Store. Cette URL n'est utilisée qu'en cas d'échec.
+                    </p>
                     {editingApp.logo && (
                       <div className="mt-2 text-2xl">
                         {editingApp.logo.startsWith('http') ? (
