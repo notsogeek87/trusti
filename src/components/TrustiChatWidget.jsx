@@ -4,7 +4,7 @@ import { X, MessageCircle } from 'lucide-react';
 /**
  * Widget de chat Trusti flottant en bas à droite
  */
-const TrustiChatWidget = () => {
+const TrustiChatWidget = ({ onOpenLandingPage }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -13,7 +13,7 @@ const TrustiChatWidget = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 group"
+          className="fixed bottom-24 md:bottom-6 right-6 z-50 group"
           aria-label="Ouvrir l'assistant Trusti"
         >
           {/* Container avec animation de rebond */}
@@ -43,7 +43,7 @@ const TrustiChatWidget = () => {
 
       {/* Panel de chat ouvert */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-96 h-[500px] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden border-4 border-indigo-100 animate-slide-up">
+        <div className="fixed bottom-24 md:bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)] h-[500px] max-h-[calc(100vh-10rem)] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden border-4 border-indigo-100 animate-slide-up">
           {/* Header */}
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -95,7 +95,13 @@ const TrustiChatWidget = () => {
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">
                 Questions fréquentes :
               </p>
-              <button className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300">
+              <button 
+                onClick={() => {
+                  setIsOpen(false);
+                  if (onOpenLandingPage) onOpenLandingPage();
+                }}
+                className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300"
+              >
                 🤔 Comment fonctionne le TrustiScore ?
               </button>
               <button className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300">

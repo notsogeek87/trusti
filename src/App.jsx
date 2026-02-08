@@ -46,17 +46,15 @@ const App = () => {
   } = useAuth();
 
   // État pour la landing page
-  // La landing page s'affiche UNIQUEMENT quand l'utilisateur n'est pas connecté
+  // La landing page ne s'affiche plus automatiquement, seulement sur demande
   const [showLandingPage, setShowLandingPage] = useState(false);
-
-  // Mettre à jour la landing page quand l'état de connexion change
-  useEffect(() => {
-    // Afficher la landing page seulement si non connecté
-    setShowLandingPage(!currentUser);
-  }, [currentUser]);
 
   const handleCloseLandingPage = () => {
     setShowLandingPage(false);
+  };
+
+  const handleOpenLandingPage = () => {
+    setShowLandingPage(true);
   };
 
   // Gestion de l'état des applications (avec sauvegarde utilisateur)
@@ -345,7 +343,7 @@ const App = () => {
       )}
 
       {/* Widget de chat Trusti (visible partout sauf pendant la vérification du token) */}
-      {!isVerifying && <TrustiChatWidget />}
+      {!isVerifying && <TrustiChatWidget onOpenLandingPage={handleOpenLandingPage} />}
 
       <style>{`
         @keyframes pulse-subtle {
