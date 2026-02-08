@@ -34,7 +34,7 @@ const LoginModal = ({ isOpen, onClose }) => {
     setError('');
 
     try {
-      const response = await fetch(`${API_URL}/auth/send-magic-link`, {
+      const response = await fetch(`${API_URL}/send-magic-link`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim().toLowerCase() })

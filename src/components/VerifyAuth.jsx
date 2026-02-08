@@ -27,7 +27,7 @@ const VerifyAuth = ({ onLogin }) => {
       }
 
       try {
-        const response = await fetch(`${API_URL}/auth/verify-token?token=${token}`);
+        const response = await fetch(`${API_URL}/verify-token?token=${token}`);
         const data = await response.json();
 
         if (data.success) {
