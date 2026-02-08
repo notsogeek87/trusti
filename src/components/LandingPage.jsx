@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, ArrowRight, Lock, Globe, Eye, CheckCircle, BookOpen } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Lock, Globe, Eye, CheckCircle, BookOpen, X } from 'lucide-react';
 import { GRADE_INFO } from '../constants/grades';
 
 /**
@@ -8,6 +8,15 @@ import { GRADE_INFO } from '../constants/grades';
 const LandingPage = ({ onClose }) => {
   return (
     <div className="fixed inset-0 z-50 bg-slate-900 overflow-y-auto">
+      {/* Bouton fermer */}
+      <button
+        onClick={onClose}
+        className="fixed top-4 right-4 z-50 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-all text-white"
+        aria-label="Fermer"
+      >
+        <X size={24} />
+      </button>
+      
       <div className="min-h-screen flex flex-col">
         {/* Hero Section */}
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 text-center">

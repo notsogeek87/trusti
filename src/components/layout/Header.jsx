@@ -4,7 +4,7 @@ import { HelpCircle, LogOut, User, RotateCcw, Settings } from 'lucide-react';
 /**
  * Header de l'application
  */
-const Header = ({ showExplainer, onToggleExplainer, currentUser, onLogout, onLogin, onResetUserData, onOpenAdmin }) => {
+const Header = ({ currentUser, onLogout, onLogin, onResetUserData, onOpenAdmin, onShowLandingPage }) => {
   return (
     <header className="bg-white border-b border-slate-100 sticky top-0 z-30 shadow-sm">
       <div className="max-w-md mx-auto px-4 py-1.5 flex items-center justify-between">
@@ -62,22 +62,14 @@ const Header = ({ showExplainer, onToggleExplainer, currentUser, onLogout, onLog
           )}
           
           {/* Bouton d'aide */}
-          <div className="relative">
-            {!showExplainer && (
-              <span className="absolute inset-0 rounded-full bg-indigo-400 animate-ping opacity-25"></span>
-            )}
-            <button 
-              onClick={onToggleExplainer} 
-              className={`relative p-2.5 rounded-full transition-all duration-300 shadow-sm ${
-                showExplainer 
-                  ? 'bg-indigo-600 text-white scale-90' 
-                  : 'bg-indigo-500 text-white hover:bg-indigo-600'
-              }`}
-              aria-label="Aide et explications"
-            >
-              <HelpCircle size={22} className={!showExplainer ? "animate-pulse" : ""} />
-            </button>
-          </div>
+          <button 
+            onClick={onShowLandingPage} 
+            className="p-2.5 rounded-full transition-all duration-300 shadow-sm bg-indigo-500 text-white hover:bg-indigo-600"
+            aria-label="Aide et explications"
+            title="À propos de TrustiScore"
+          >
+            <HelpCircle size={22} />
+          </button>
         </div>
       </div>
     </header>

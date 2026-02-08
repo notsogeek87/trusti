@@ -158,13 +158,12 @@ const App = () => {
       )}
       
       <Header 
-        showExplainer={showExplainer} 
-        onToggleExplainer={() => setShowExplainer(!showExplainer)}
         currentUser={currentUser}
         onLogout={logout}
         onLogin={() => setShowLoginModal(true)}
         onResetUserData={resetUserData}
         onOpenAdmin={() => setShowAdminModal(true)}
+        onShowLandingPage={() => setShowLandingPage(true)}
       />
 
       <main className="max-w-md mx-auto p-4">
