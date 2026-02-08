@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X, MessageCircle } from 'lucide-react';
 
 /**
@@ -6,6 +6,37 @@ import { X, MessageCircle } from 'lucide-react';
  */
 const TrustiChatWidget = ({ onOpenLandingPage }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([
+    {
+      type: 'bot',
+      text: '👋 Salut ! Je suis l\'assistant Trusti !',
+      subtext: 'Je peux t\'aider à comprendre les TrustiScores et à choisir les meilleures applications pour ta vie privée.'
+    }
+  ]);
+  const [showQuickReplies, setShowQuickReplies] = useState(true);
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const addMessage = (type, text, subtext = '') => {
+    setMessages(prev => [...prev, { type, text, subtext }]);
+  };
+
+  const handleQuickReply = (question, answer, subtext = '') => {
+    // Ajouter la question de l'utilisateur
+    addMessage('user', question);
+    // Ajouter la réponse du bot après un court délai
+    setTimeout(() => {
+      addMessage('bot', answer, subtext);
+      setShowQuickReplies(false);
+    }, 500);
+  };
 
   return (
     <>
@@ -71,49 +102,85 @@ const TrustiChatWidget = ({ onOpenLandingPage }) => {
 
           {/* Corps du chat */}
           <div className="flex-1 overflow-y-auto p-6 bg-slate-50">
-            {/* Message de bienvenue */}
-            <div className="flex gap-3 mb-4">
-              <img
-                src="/assets/trusti-gif.gif"
-                alt="Trusti"
-                className="w-10 h-10 rounded-full shrink-0"
-              />
-              <div className="flex-1">
-                <div className="bg-white rounded-2xl rounded-tl-none px-4 py-3 shadow-sm">
-                  <p className="text-sm text-slate-800 font-medium mb-2">
-                    👋 Salut ! Je suis l'assistant Trusti !
-                  </p>
-                  <p className="text-xs text-slate-600">
-                    Je peux t'aider à comprendre les TrustiScores et à choisir les meilleures applications pour ta vie privée.
-                  </p>
+            {/* Messages */}
+            {messages.map((message, index) => (
+              <div key={index} className={`flex gap-3 mb-4 ${message.type === 'user' ? 'justify-end' : ''}`}>
+                {message.type === 'bot' && (
+                  <img
+                    src="/assets/trusti-gif.gif"
+                    alt="Trusti"
+                    className="w-10 h-10 rounded-full shrink-0"
+                  />
+                )}
+                <div className={`flex-1 ${message.type === 'user' ? 'max-w-[80%]' : ''}`}>
+                  <div className={`rounded-2xl px-4 py-3 shadow-sm ${
+                    message.type === 'bot' 
+                      ? 'bg-white rounded-tl-none' 
+                      : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-tr-none ml-auto'
+                  }`}>
+                    <p className={`text-sm font-medium ${message.type === 'bot' ? 'text-slate-800 mb-2' : 'text-white'}`}>
+                      {message.text}
+                    </p>
+                    {message.subtext && (
+                      <p className="text-xs text-slate-600 mt-2 whitespace-pre-line">
+                        {message.subtext}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
 
-            {/* Suggestions rapides */}
-            <div className="mt-6 space-y-2">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">
-                Questions fréquentes :
-              </p>
-              <button 
-                onClick={() => {
-                  setIsOpen(false);
-                  if (onOpenLandingPage) onOpenLandingPage();
-                }}
-                className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300"
-              >
-                🤔 Comment fonctionne le TrustiScore ?
-              </button>
-              <button className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300">
-                🔍 Comment trouver une alternative ?
-              </button>
-              <button className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300">
-                📱 Quelle différence entre A, B, C ?
-              </button>
-              <button className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300">
-                📧 Contacter l'équipe Trusti
-              </button>
-            </div>
+            {/* Suggestions rapides - affichées seulement au début */}
+            {showQuickReplies && (
+              <div className="mt-6 space-y-2 animate-slide-up">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">
+                  Questions fréquentes :
+                </p>
+                <button 
+                  onClick={() => {
+                    setIsOpen(false);
+                    if (onOpenLandingPage) onOpenLandingPage();
+                  }}
+                  className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300"
+                >
+                  🤔 Comment fonctionne le TrustiScore ?
+                </button>
+                <button 
+                  onClick={() => handleQuickReply(
+                    '🔍 Comment trouver une alternative ?',
+                    'C\'est simple ! Pour trouver une alternative plus respectueuse de ta vie privée :',
+                    '1️⃣ Clique sur une app avec une note D ou E\n2️⃣ Consulte la section "Alternatives recommandées"\n3️⃣ Tu y trouveras des apps notées A, B ou C qui font la même chose !\n\n💡 Les alternatives sont automatiquement proposées selon la catégorie de l\'app.'
+                  )}
+                  className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300"
+                >
+                  🔍 Comment trouver une alternative ?
+                </button>
+                <button 
+                  onClick={() => handleQuickReply(
+                    '📱 Quelle différence entre A, B, C ?',
+                    'Le TrustiScore va de A à E pour évaluer le respect de ta vie privée :',
+                    '🌟 A = Excellent - Parfait pour ta vie privée\n✅ B = Très bien - Fortement recommandé\n👍 C = Bien - Un bon choix\n⚠️ D = Moyen - Attention aux données\n❌ E = À éviter - Risques importants\n\nLes apps A, B et C sont nos "TrustiApps" recommandées !'
+                  )}
+                  className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300"
+                >
+                  📱 Quelle différence entre A, B, C ?
+                </button>
+                <button 
+                  onClick={() => handleQuickReply(
+                    '📧 Contacter l\'équipe Trusti',
+                    'Tu peux nous contacter pour toute question, suggestion ou signalement :',
+                    '📧 Email : contact@trusti.app\n🌐 Site : https://trusti.app\n💬 Nous répondons généralement sous 24h !\n\nN\'hésite pas à nous faire part de tes retours, ils nous aident à améliorer Trusti pour tout le monde ! 🚀'
+                  )}
+                  className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300"
+                >
+                  📧 Contacter l'équipe Trusti
+                </button>
+              </div>
+            )}
+            
+            {/* Élément invisible pour auto-scroll */}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Zone de saisie */}
