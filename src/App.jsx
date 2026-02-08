@@ -44,39 +44,16 @@ const App = () => {
   } = useAuth();
 
   // État pour la landing page
-  // - Si non connecté : toujours afficher la landing page
-  // - Si connecté : afficher seulement la première fois
+  // La landing page s'affiche UNIQUEMENT quand l'utilisateur n'est pas connecté
   const [showLandingPage, setShowLandingPage] = useState(false);
-  const [hasCheckedLandingPage, setHasCheckedLandingPage] = useState(false);
 
   // Mettre à jour la landing page quand l'état de connexion change
   useEffect(() => {
-    // Ne vérifier qu'une seule fois au chargement ou lors du changement de connexion
-    if (!hasCheckedLandingPage) {
-      if (!currentUser) {
-        // Si pas connecté, toujours afficher la landing page
-        setShowLandingPage(true);
-      } else {
-        // Si connecté, vérifier si déjà visité
-        const hasVisited = localStorage.getItem('trusti_has_visited');
-        setShowLandingPage(!hasVisited);
-      }
-      setHasCheckedLandingPage(true);
-    }
-  }, [currentUser, hasCheckedLandingPage]);
-
-  // Réinitialiser la vérification quand l'utilisateur se déconnecte
-  useEffect(() => {
-    if (!currentUser) {
-      setHasCheckedLandingPage(false);
-    }
+    // Afficher la landing page seulement si non connecté
+    setShowLandingPage(!currentUser);
   }, [currentUser]);
 
   const handleCloseLandingPage = () => {
-    if (currentUser) {
-      // Sauvegarder uniquement si connecté
-      localStorage.setItem('trusti_has_visited', 'true');
-    }
     setShowLandingPage(false);
   };
 
