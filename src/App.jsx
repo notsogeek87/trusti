@@ -194,7 +194,7 @@ const App = () => {
           </div>
         )}
 
-        {/* Bouton Partager pour Alternatives */}
+        {/* En-tête pour Alternatives */}
         {activeTab === TABS.ALTERNATIVES && (
           <div className="mb-6 text-center">
             <div className="flex items-center justify-center gap-2 mb-1">
@@ -208,11 +208,34 @@ const App = () => {
             <p className="text-[11px] text-slate-400 mt-1">
               Apps européennes et même parfois open source !
             </p>
+          </div>
+        )}
+
+        {/* Boutons Partager pour Mes Apps */}
+        {activeTab === TABS.MY_APPS && myApps.size > 0 && (
+          <div className="space-y-3">
+            <ShareButton
+              title="Partager ma migration"
+              description={`${myApps.size} app${myApps.size > 1 ? 's' : ''} (${migratedApps.size} migré${migratedApps.size > 1 ? 's' : ''})`}
+              onShare={() => setShowShareModal(true)}
+            />
             <ShareButton
               title="Partager mes TrustiApp"
-              description={`${filteredApps.filter(a => myApps.has(a.id)).length} app${filteredApps.filter(a => myApps.has(a.id)).length > 1 ? 's' : ''}`}
+              description={`${Array.from(myApps).filter(id => {
+                const allApps = [...trustiApps, ...starApps];
+                const app = allApps.find(a => a.id === id);
+                return app && (app.grade === 'A' || app.grade === 'B' || app.grade === 'C');
+              }).length} app${Array.from(myApps).filter(id => {
+                const allApps = [...trustiApps, ...starApps];
+                const app = allApps.find(a => a.id === id);
+                return app && (app.grade === 'A' || app.grade === 'B' || app.grade === 'C');
+              }).length > 1 ? 's' : ''}`}
               onShare={() => setShowTrustiShareModal(true)}
-              disabled={filteredApps.filter(a => myApps.has(a.id)).length === 0}
+              disabled={Array.from(myApps).filter(id => {
+                const allApps = [...trustiApps, ...starApps];
+                const app = allApps.find(a => a.id === id);
+                return app && (app.grade === 'A' || app.grade === 'B' || app.grade === 'C');
+              }).length === 0}
               bgColor="bg-emerald-50"
               borderColor="border-emerald-200"
               textColor="text-emerald-900"
@@ -220,15 +243,6 @@ const App = () => {
               buttonColor="bg-emerald-600 hover:bg-emerald-700"
             />
           </div>
-        )}
-
-        {/* Bouton Partager pour Mes Apps */}
-        {activeTab === TABS.MY_APPS && myApps.size > 0 && (
-          <ShareButton
-            title="Partager ma migration"
-            description={`${myApps.size} app${myApps.size > 1 ? 's' : ''} (${migratedApps.size} migré${migratedApps.size > 1 ? 's' : ''})`}
-            onShare={() => setShowShareModal(true)}
-          />
         )}
 
         {/* Panneau explicatif */}
