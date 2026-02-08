@@ -16,8 +16,8 @@ const Header = ({
 }) => {
   return (
     <header className="bg-white border-b border-slate-100 sticky top-0 z-30 shadow-sm">
-      <div className="max-w-md mx-auto px-4 py-1.5 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="max-w-md mx-auto px-4 py-1.5 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <img 
             src="/assets/logo.png" 
             alt="TrustiScore" 
@@ -28,13 +28,13 @@ const Header = ({
           </h1>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink min-w-0">
           {/* Utilisateur connecté */}
           {currentUser ? (
             <div className="flex items-center gap-2">
-              <div className="bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full flex items-center gap-2">
-                <User size={14} />
-                <span className="text-xs font-bold">{currentUser.email || currentUser}</span>
+              <div className="bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full flex items-center gap-2 max-w-[140px]">
+                <User size={14} className="flex-shrink-0" />
+                <span className="text-xs font-bold truncate">{currentUser.email || currentUser}</span>
               </div>
               
               {/* Bouton Lock ou Settings selon déverrouillage admin */}

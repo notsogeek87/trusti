@@ -7,14 +7,42 @@ import gplay from 'google-play-scraper';
 // Cache pour les icônes
 const iconCache = {};
 
-// Helper: Obtenir l'URL de l'icône depuis le Play Store
+// Helper: Vérifier si une URL d'image est valide
+const isValidImageUrl = async (url) => {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok && response.headers.get('content-type')?.startsWith('image/');
+  } catch {
+    return false;
+  }
+};
+
+// Helper: Obtenir l'URL de l'icône depuis F-Droid
+const getFDroidIcon = async (packageName) => {
+  // Pattern 1: Icône haute résolution (640px)
+  const patterns = [
+    `https://f-droid.org/repo/icons-640/${packageName}.png`,
+    `https://f-droid.org/repo/${packageName}/en-US/icon.png`,
+    `https://f-droid.org/assets/${packageName}.png`
+  ];
+
+  for (const url of patterns) {
+    if (await isValidImageUrl(url)) {
+      return url;
+    }
+  }
+  
+  return null;
+};
+
+// Helper: Obtenir l'URL de l'icône (Play Store puis F-Droid)
 const getAppIcon = async (packageName) => {
   // Vérifier le cache
   if (iconCache[packageName]) {
     return iconCache[packageName];
   }
 
-  // Récupérer depuis Play Store
+  // 1. Essayer Play Store
   try {
     const appInfo = await gplay.app({ appId: packageName });
     if (appInfo && appInfo.icon) {
@@ -22,10 +50,21 @@ const getAppIcon = async (packageName) => {
       return appInfo.icon;
     }
   } catch (error) {
-    // App probablement pas sur Play Store (F-Droid uniquement)
+    // App probablement pas sur Play Store
   }
 
-  // Dernier recours : emoji
+  // 2. Essayer F-Droid
+  try {
+    const fdroidIcon = await getFDroidIcon(packageName);
+    if (fdroidIcon) {
+      iconCache[packageName] = fdroidIcon;
+      return fdroidIcon;
+    }
+  } catch (error) {
+    // App probablement pas sur F-Droid non plus
+  }
+
+  // 3. Dernier recours : emoji
   iconCache[packageName] = '📱';
   return '📱';
 };
