@@ -675,7 +675,14 @@ async function formatAppFromDB(app) {
   }
   
   // Si pas d'URL App Store, essayer de la trouver automatiquement
-  if (!appleStoreUrl && app.name) {
+  // Exception : ne pas chercher pour les apps F-Droid uniquement (com.github.*, etc.)
+  const isFDroidOnly = packageName && (
+    packageName.startsWith('com.github.') || 
+    packageName.startsWith('org.fdroid.') ||
+    packageName.startsWith('io.github.')
+  );
+  
+  if (!appleStoreUrl && app.name && !isFDroidOnly) {
     appleStoreUrl = await searchAppStore(app.name);
   }
   
