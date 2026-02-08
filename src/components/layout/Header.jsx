@@ -1,10 +1,19 @@
 import React from 'react';
-import { HelpCircle, LogOut, User, RotateCcw, Settings } from 'lucide-react';
+import { HelpCircle, LogOut, User, RotateCcw, Settings, Lock } from 'lucide-react';
 
 /**
  * Header de l'application
  */
-const Header = ({ currentUser, onLogout, onLogin, onResetUserData, onOpenAdmin, onShowLandingPage }) => {
+const Header = ({ 
+  currentUser, 
+  onLogout, 
+  onLogin, 
+  onResetUserData, 
+  onOpenAdmin, 
+  onShowLandingPage,
+  isAdminUnlocked,
+  onRequestAdminUnlock
+}) => {
   return (
     <header className="bg-white border-b border-slate-100 sticky top-0 z-30 shadow-sm">
       <div className="max-w-md mx-auto px-4 py-1.5 flex items-center justify-between">
@@ -27,7 +36,9 @@ const Header = ({ currentUser, onLogout, onLogin, onResetUserData, onOpenAdmin, 
                 <User size={14} />
                 <span className="text-xs font-bold">{currentUser.email || currentUser}</span>
               </div>
-              {(currentUser.email || currentUser) === 'admin0614' && (
+              
+              {/* Bouton Lock ou Settings selon déverrouillage admin */}
+              {isAdminUnlocked ? (
                 <button
                   onClick={onOpenAdmin}
                   className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all"
@@ -35,7 +46,16 @@ const Header = ({ currentUser, onLogout, onLogin, onResetUserData, onOpenAdmin, 
                 >
                   <Settings size={18} />
                 </button>
+              ) : (
+                <button
+                  onClick={onRequestAdminUnlock}
+                  className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-all"
+                  title="Déverrouiller l'administration"
+                >
+                  <Lock size={18} />
+                </button>
               )}
+              
               <button
                 onClick={onResetUserData}
                 className="p-2 text-slate-300 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-all"

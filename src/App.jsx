@@ -24,6 +24,7 @@ import TrustiShareModal from './components/modals/TrustiShareModal';
 import MigrationSelectorModal from './components/modals/MigrationSelectorModal';
 import LoginModal from './components/modals/LoginModal';
 import AdminAppsModal from './components/modals/AdminAppsModal';
+import PinModal from './components/modals/PinModal';
 
 /**
  * Composant principal de l'application TrustiScore
@@ -96,6 +97,28 @@ const App = () => {
   // Modal admin
   const [showAdminModal, setShowAdminModal] = useState(false);
 
+  // État de déverrouillage admin (code PIN)
+  const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
+  const [showPinModal, setShowPinModal] = useState(false);
+
+  // Charger l'état de déverrouillage admin au changement d'utilisateur
+  useEffect(() => {
+    if (currentUser && getUserData) {
+      const adminUnlocked = getUserData('admin_unlocked');
+      setIsAdminUnlocked(!!adminUnlocked);
+    } else {
+      setIsAdminUnlocked(false);
+    }
+  }, [currentUser, getUserData]);
+
+  // Gérer le déverrouillage admin
+  const handleUnlockAdmin = () => {
+    setIsAdminUnlocked(true);
+    if (saveUserData) {
+      saveUserData('admin_unlocked', true);
+    }
+  };
+
   // Afficher la landing page en premier si c'est la première visite
   if (showLandingPage) {
     return <LandingPage onClose={handleCloseLandingPage} />;
@@ -153,6 +176,8 @@ const App = () => {
         onResetUserData={resetUserData}
         onOpenAdmin={() => setShowAdminModal(true)}
         onShowLandingPage={() => setShowLandingPage(true)}
+        isAdminUnlocked={isAdminUnlocked}
+        onRequestAdminUnlock={() => setShowPinModal(true)}
       />
 
       <main className="max-w-md mx-auto p-4">
@@ -294,6 +319,13 @@ const App = () => {
       <LoginModal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
+      />
+
+      {/* Modal de code PIN admin */}
+      <PinModal
+        isOpen={showPinModal}
+        onClose={() => setShowPinModal(false)}
+        onSuccess={handleUnlockAdmin}
       />
 
       {/* Modal d'administration Apps (TrustiApps et StarApps) */}
