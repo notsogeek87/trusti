@@ -3,6 +3,16 @@
  */
 import { neon } from '@neondatabase/serverless';
 
+// Charger .env en développement local
+if (process.env.NODE_ENV !== 'production') {
+  try {
+    const dotenv = await import('dotenv');
+    dotenv.config();
+  } catch (e) {
+    // dotenv peut ne pas être installé en production
+  }
+}
+
 // Initialiser la connexion Neon
 const sql = neon(process.env.DATABASE_URL);
 
@@ -73,7 +83,7 @@ export async function getAllApps() {
       SELECT * FROM applications
       ORDER BY name ASC
     `;
-    return apps.map(formatAppFromDB);
+    return Promise.all(apps.map(app => formatAppFromDB(app)));
   } catch (error) {
     console.error('Error getting all apps:', error);
     throw error;
@@ -113,7 +123,7 @@ export async function getAppsByType(appType) {
       `;
     }
     
-    return apps.map(formatAppFromDB);
+    return Promise.all(apps.map(app => formatAppFromDB(app)));
   } catch (error) {
     console.error('Error getting apps by type:', error);
     throw error;
@@ -132,7 +142,7 @@ export async function getAppById(id) {
     `;
     
     if (apps.length === 0) return null;
-    return formatAppFromDB(apps[0]);
+    return await formatAppFromDB(apps[0]);
   } catch (error) {
     console.error('Error getting app by id:', error);
     throw error;
@@ -178,7 +188,7 @@ export async function createApp(appData) {
       await addRelations(id, appData.replacesAppIds, 'replaces');
     }
     
-    return formatAppFromDB(apps[0]);
+    return await formatAppFromDB(apps[0]);
   } catch (error) {
     console.error('Error creating app:', error);
     throw error;
@@ -231,7 +241,7 @@ export async function updateApp(id, appData) {
       await addRelations(id, appData.replacesAppIds, 'replaces');
     }
     
-    return formatAppFromDB(apps[0]);
+    return await formatAppFromDB(apps[0]);
   } catch (error) {
     console.error('Error updating app:', error);
     throw error;
@@ -304,7 +314,7 @@ export async function searchApps(query, filters = {}) {
       ORDER BY name ASC
     `;
     
-    return apps.map(formatAppFromDB);
+    return Promise.all(apps.map(app => formatAppFromDB(app)));
   } catch (error) {
     console.error('Error searching apps:', error);
     throw error;
@@ -429,9 +439,12 @@ function calculateAppType(trustiScore) {
 /**
  * Formater une application depuis la DB
  */
-function formatAppFromDB(app) {
+async function formatAppFromDB(app) {
   const trustiScore = app.trusti_score;
   const appType = app.app_type || calculateAppType(trustiScore);
+  
+  // Charger les relations
+  const relations = await getAppRelations(app.id);
   
   return {
     id: app.id,
@@ -457,6 +470,8 @@ function formatAppFromDB(app) {
     privacyFeatures: typeof app.privacy_features === 'string' 
       ? JSON.parse(app.privacy_features) 
       : app.privacy_features,
+    alternativeAppIds: relations.alternativeAppIds,
+    replacesAppIds: relations.replacesAppIds,
     createdAt: app.created_at,
     updatedAt: app.updated_at
   };
