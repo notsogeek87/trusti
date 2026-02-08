@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { APPS_DATA } from '../constants/appsData';
 import { TABS } from '../constants/tabs';
-import { fetchTopAppsInFrance, fetchTrustiApps, setupAutoRefresh } from '../utils/apiService';
+import { fetchTrustiApps } from '../utils/apiService';
 
 /**
  * Hook personnalisé pour gérer l'état des applications
@@ -14,29 +14,12 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
   const [migratedApps, setMigratedApps] = useState(new Set());
   const [customMigrations, setCustomMigrations] = useState(new Map());
   const [selectedApp, setSelectedApp] = useState(null);
-  const [topApps, setTopApps] = useState([]);
   const [trustiApps, setTrustiApps] = useState([]);
   const [starApps, setStarApps] = useState([]);
-  const [isLoadingTopApps, setIsLoadingTopApps] = useState(true);
   const [isLoadingTrustiApps, setIsLoadingTrustiApps] = useState(true);
   const [isLoadingStarApps, setIsLoadingStarApps] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [lastUpdate, setLastUpdate] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  
-  // Set des IDs d'apps qui ont une TrustiApp associée
-  const appsWithTrustiApp = useMemo(() => {
-    const idsSet = new Set();
-    trustiApps.forEach(ta => {
-      // Support de l'ancien format (replacesAppId) et du nouveau (replacesAppIds)
-      if (ta.replacesAppIds && Array.isArray(ta.replacesAppIds)) {
-        ta.replacesAppIds.forEach(id => idsSet.add(id));
-      } else if (ta.replacesAppId) {
-        idsSet.add(ta.replacesAppId);
-      }
-    });
-    return idsSet;
-  }, [trustiApps]);
 
   // Charger les données de l'utilisateur connecté
   useEffect(() => {
@@ -77,43 +60,6 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     }
   }, [myApps, migratedApps, customMigrations]);
   // Note: On ne met pas saveUserData et currentUser dans les dépendances pour éviter la boucle
-
-  // Charger les données du top au montage du composant
-  useEffect(() => {
-    const loadTopApps = async () => {
-      try {
-        const data = await fetchTopAppsInFrance();
-        // Normaliser les IDs en strings pour la cohérence
-        const normalizedData = data.map(app => ({
-          ...app,
-          id: String(app.id)
-        }));
-        setTopApps(normalizedData);
-        setLastUpdate(new Date());
-      } catch (error) {
-        console.error('Erreur lors du chargement des top apps:', error);
-        // En cas d'erreur, utiliser les données statiques
-        setTopApps(APPS_DATA.filter(a => a.id < 1000));
-      } finally {
-        setIsLoadingTopApps(false);
-      }
-    };
-
-    loadTopApps();
-
-    // Configurer le rafraîchissement automatique toutes les heures
-    const cleanup = setupAutoRefresh((data) => {
-      // Normaliser les IDs en strings pour la cohérence
-      const normalizedData = data.map(app => ({
-        ...app,
-        id: String(app.id)
-      }));
-      setTopApps(normalizedData);
-      setLastUpdate(new Date());
-    }, 60);
-
-    return cleanup;
-  }, []);
 
   // Charger les TrustiApps au montage
   useEffect(() => {
@@ -199,11 +145,11 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
 
   // Détecter quand le chargement initial est terminé
   useEffect(() => {
-    if (!isLoadingTopApps && !isLoadingTrustiApps && !isLoadingStarApps) {
+    if (!isLoadingTrustiApps && !isLoadingStarApps) {
       // Attendre un peu pour une transition fluide
       setTimeout(() => setIsInitialLoading(false), 300);
     }
-  }, [isLoadingTopApps, isLoadingTrustiApps, isLoadingStarApps]);
+  }, [isLoadingTrustiApps, isLoadingStarApps]);
 
   // Filtrer les applications selon l'onglet actif et la recherche
   const filteredApps = useMemo(() => {
@@ -212,15 +158,12 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     if (activeTab === TABS.SELECTION) {
       // Afficher UNIQUEMENT les StarApps ajoutées par l'admin (triées alphabétiquement)
       list = [...starApps].sort((a, b) => a.name.localeCompare(b.name));
-    } else if (activeTab === TABS.TOP) {
-      // Utiliser les données live si disponibles, sinon les données statiques
-      list = topApps.length > 0 ? topApps : APPS_DATA.filter(a => a.id < 1000);
     } else if (activeTab === TABS.ALTERNATIVES) {
       // Afficher UNIQUEMENT les TrustiApps ajoutées par l'admin (triées alphabétiquement)
       list = [...trustiApps].sort((a, b) => a.name.localeCompare(b.name));
     } else if (activeTab === TABS.MY_APPS) {
-      // Combiner les apps statiques ET les apps du top (Play Store) ET TrustiApps ET StarApps
-      const allApps = [...APPS_DATA, ...topApps, ...trustiApps, ...starApps];
+      // Combiner les apps statiques ET TrustiApps ET StarApps
+      const allApps = [...APPS_DATA, ...trustiApps, ...starApps];
       
       // Créer un Map pour dédupliquer par ID (le dernier gagne)
       const appsById = new Map();
@@ -261,7 +204,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     return list.filter(app => 
       app.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [activeTab, myApps, searchTerm, topApps, trustiApps, starApps]);
+  }, [activeTab, myApps, searchTerm, trustiApps, starApps]);
 
   // Ajouter/retirer une app de "Mes Apps"
   const toggleMyApp = (e, id) => {
@@ -304,16 +247,12 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     migratedApps,
     customMigrations,
     selectedApp,
-    topApps,
     trustiApps,
     starApps,
-    isLoadingTopApps,
     isLoadingTrustiApps,
     isLoadingStarApps,
     isInitialLoading,
-    lastUpdate,
     filteredApps,
-    appsWithTrustiApp,
     
     // Actions
     setActiveTab,

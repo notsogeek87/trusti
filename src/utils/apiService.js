@@ -30,28 +30,6 @@ const normalizeApp = (appData) => {
 };
 
 /**
- * Fetch top apps from backend API
- */
-export const fetchTopAppsInFrance = async () => {
-  try {
-    const response = await fetch(`${API_URL}/top-apps`);
-    const data = await response.json();
-    
-    if (data.success && data.apps.length > 0) {
-      // Normaliser les données avec le nouveau modèle
-      return data.apps.map(normalizeApp);
-    }
-    
-    // Return fallback data if no apps received
-    return APPS_DATA.map(normalizeApp);
-  } catch (error) {
-    console.error('Error fetching top apps from backend:', error);
-    // Return fallback data in case of error
-    return APPS_DATA.map(normalizeApp);
-  }
-};
-
-/**
  * Fetch TrustiApps (apps respectueuses de la vie privée)
  * Source: F-Droid + Exodus Privacy
  */
@@ -72,16 +50,4 @@ export const fetchTrustiApps = async () => {
     // Return fallback data in case of error
     return APPS_DATA.filter(a => a.id >= 1000).map(normalizeApp);
   }
-};
-
-/**
- * Rafraîchit les données périodiquement
- */
-export const setupAutoRefresh = (callback, intervalMinutes = 60) => {
-  const intervalId = setInterval(async () => {
-    const data = await fetchTopAppsInFrance();
-    callback(data);
-  }, intervalMinutes * 60 * 1000);
-  
-  return () => clearInterval(intervalId);
 };
