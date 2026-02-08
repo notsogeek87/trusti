@@ -371,9 +371,18 @@ export async function getStats() {
 async function addRelations(appId, relatedIds, relationType) {
   for (const relatedId of relatedIds) {
     try {
+      // Ajouter la relation principale
       await sql`
         INSERT INTO app_relations (app_id, related_app_id, relation_type)
         VALUES (${appId}, ${relatedId}, ${relationType})
+        ON CONFLICT (app_id, related_app_id, relation_type) DO NOTHING
+      `;
+      
+      // Ajouter la relation inverse
+      const inverseType = relationType === 'alternative' ? 'replaces' : 'alternative';
+      await sql`
+        INSERT INTO app_relations (app_id, related_app_id, relation_type)
+        VALUES (${relatedId}, ${appId}, ${inverseType})
         ON CONFLICT (app_id, related_app_id, relation_type) DO NOTHING
       `;
     } catch (error) {
@@ -383,14 +392,33 @@ async function addRelations(appId, relatedIds, relationType) {
 }
 
 /**
- * Supprimer les relations d'une app
+ * Supprimer les relations d'une app (et leurs inverses)
  */
 async function deleteRelations(appId) {
   try {
+    // Récupérer les relations existantes pour supprimer les inverses
+    const existingRelations = await sql`
+      SELECT related_app_id, relation_type
+      FROM app_relations
+      WHERE app_id = ${appId}
+    `;
+    
+    // Supprimer les relations directes
     await sql`
       DELETE FROM app_relations
       WHERE app_id = ${appId}
     `;
+    
+    // Supprimer les relations inverses correspondantes
+    for (const rel of existingRelations) {
+      const inverseType = rel.relation_type === 'alternative' ? 'replaces' : 'alternative';
+      await sql`
+        DELETE FROM app_relations
+        WHERE app_id = ${rel.related_app_id}
+          AND related_app_id = ${appId}
+          AND relation_type = ${inverseType}
+      `;
+    }
   } catch (error) {
     console.error('Error deleting relations:', error);
   }

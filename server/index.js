@@ -4,7 +4,11 @@ import gplay from 'google-play-scraper';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import dbService from './database/service-json.js';
+import dbService from './database/service-postgres.js';
+import * as dotenv from 'dotenv';
+
+// Charger les variables d'environnement
+dotenv.config();
 
 const app = express();
 const PORT = 3001;
@@ -408,9 +412,9 @@ app.get('/api/trusti-apps', async (req, res) => {
 // ======================
 
 // GET: Récupérer les apps personnalisées
-app.get('/api/custom-trusti-apps', (req, res) => {
+app.get('/api/custom-trusti-apps', async (req, res) => {
   try {
-    const apps = dbService.getAppsByType('trusti');
+    const apps = await dbService.getAppsByType('trusti');
     res.json({
       success: true,
       apps: apps
@@ -426,10 +430,10 @@ app.get('/api/custom-trusti-apps', (req, res) => {
 });
 
 // POST: Créer une nouvelle app personnalisée
-app.post('/api/custom-trusti-apps', (req, res) => {
+app.post('/api/custom-trusti-apps', async (req, res) => {
   try {
     const appData = { ...req.body, appType: 'trusti' };
-    const newApp = dbService.createApp(appData);
+    const newApp = await dbService.createApp(appData);
     
     res.json({
       success: true,
@@ -446,11 +450,18 @@ app.post('/api/custom-trusti-apps', (req, res) => {
 });
 
 // PUT: Mettre à jour une app personnalisée
-app.put('/api/custom-trusti-apps/:id', (req, res) => {
+app.put('/api/custom-trusti-apps', async (req, res) => {
   try {
-    const { id } = req.params;
-    const appData = { ...req.body, appType: 'trusti' };
-    const updatedApp = dbService.updateApp(id, appData);
+    const { id, ...appData } = req.body;
+    
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: 'App ID is required'
+      });
+    }
+    
+    const updatedApp = await dbService.updateApp(id, { ...appData, appType: 'trusti' });
     
     if (updatedApp) {
       res.json({
@@ -474,9 +485,9 @@ app.put('/api/custom-trusti-apps/:id', (req, res) => {
 });
 
 // DELETE: Supprimer une app personnalisée
-app.delete('/api/custom-trusti-apps/:id', (req, res) => {
+app.delete('/api/custom-trusti-apps', async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.query;
     
     if (!id) {
       return res.status(400).json({
@@ -485,7 +496,7 @@ app.delete('/api/custom-trusti-apps/:id', (req, res) => {
       });
     }
 
-    const success = dbService.deleteApp(id);
+    const success = await dbService.deleteApp(id);
     
     if (success) {
       res.json({
@@ -536,9 +547,9 @@ const writeStarApps = (apps) => {
 };
 
 // GET Star Apps
-app.get('/api/star-apps', (req, res) => {
+app.get('/api/star-apps', async (req, res) => {
   try {
-    const apps = dbService.getAppsByType('star');
+    const apps = await dbService.getAppsByType('star');
     res.json({
       success: true,
       apps: apps
@@ -554,10 +565,10 @@ app.get('/api/star-apps', (req, res) => {
 });
 
 // POST: Créer une nouvelle star app
-app.post('/api/star-apps', (req, res) => {
+app.post('/api/star-apps', async (req, res) => {
   try {
     const appData = { ...req.body, appType: 'star' };
-    const newApp = dbService.createApp(appData);
+    const newApp = await dbService.createApp(appData);
     
     res.json({
       success: true,
@@ -574,11 +585,18 @@ app.post('/api/star-apps', (req, res) => {
 });
 
 // PUT: Mettre à jour une star app
-app.put('/api/star-apps/:id', (req, res) => {
+app.put('/api/star-apps', async (req, res) => {
   try {
-    const { id } = req.params;
-    const appData = { ...req.body, appType: 'star' };
-    const updatedApp = dbService.updateApp(id, appData);
+    const { id, ...appData } = req.body;
+    
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: 'App ID is required'
+      });
+    }
+    
+    const updatedApp = await dbService.updateApp(id, { ...appData, appType: 'star' });
     
     if (updatedApp) {
       res.json({
@@ -602,10 +620,18 @@ app.put('/api/star-apps/:id', (req, res) => {
 });
 
 // DELETE Star App
-app.delete('/api/star-apps/:id', (req, res) => {
+app.delete('/api/star-apps', async (req, res) => {
   try {
-    const { id } = req.params;
-    const success = dbService.deleteApp(id);
+    const { id } = req.query;
+    
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: 'App ID is required'
+      });
+    }
+    
+    const success = await dbService.deleteApp(id);
     
     if (success) {
       res.json({

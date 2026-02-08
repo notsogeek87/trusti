@@ -101,35 +101,29 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
     }
 
     const newApp = {
-      id: editingApp.id || Date.now() + 2000, // ID unique
+      id: editingApp.id || String(Date.now() + 2000), // ID unique
       name: editingApp.name,
       icon: editingApp.logo || '📱',
       grade: editingApp.grade,
+      trustiScore: editingApp.grade,
       category: editingApp.category || 'Application',
       color: getGradeColor(editingApp.grade),
       reason: editingApp.description || 'Application respectueuse de la vie privée',
       replacesAppIds: editingApp.replacesAppIds || [], // Array d'IDs
       playStoreUrl: editingApp.playStoreUrl || '',
       appleStoreUrl: editingApp.appleStoreUrl || '',
-      fDroidUrl: editingApp.fDroidUrl || '',
-      websiteUrl: editingApp.websiteUrl || ''
+      githubUrl: editingApp.fDroidUrl || '',
+      website: editingApp.websiteUrl || '',
+      appType: 'trusti'
     };
-
-    let updatedApps;
-    if (editingApp.id) {
-      // Modification
-      updatedApps = apps.map(a => a.id === editingApp.id ? newApp : a);
-    } else {
-      // Ajout
-      updatedApps = [...apps, newApp];
-    }
 
     try {
       setIsSaving(true);
+      const method = editingApp.id ? 'PUT' : 'POST';
       const response = await fetch(`${API_URL}/custom-trusti-apps`, {
-        method: 'POST',
+        method: method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apps: updatedApps })
+        body: JSON.stringify(newApp)
       });
 
       const data = await response.json();

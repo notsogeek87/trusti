@@ -863,12 +863,39 @@
       "replacesAppIds": [],
       "createdAt": "2026-02-08T13:36:45.012Z",
       "updatedAt": "2026-02-08T13:36:45.012Z"
+    },
+    {
+      "id": "1770561515682",
+      "name": "testED",
+      "trustiScore": "E",
+      "grade": "E",
+      "category": "Application",
+      "icon": "⭐",
+      "color": "bg-[#c1272d]",
+      "reason": "Application sélectionnée par l'équipe",
+      "playStoreUrl": null,
+      "appleStoreUrl": null,
+      "githubUrl": null,
+      "otherStoreUrl": null,
+      "website": null,
+      "description": null,
+      "developer": null,
+      "license": null,
+      "isOpenSource": false,
+      "isEuropean": false,
+      "jurisdiction": null,
+      "appType": "star",
+      "privacyFeatures": {},
+      "alternativeAppIds": [],
+      "replacesAppIds": [],
+      "createdAt": "2026-02-08T14:38:30.860Z",
+      "updatedAt": "2026-02-08T14:38:30.860Z"
     }
   ],
   "relations": [],
   "metadata": {
     "version": 1,
     "createdAt": "2026-02-08T13:36:43.553Z",
-    "lastUpdate": "2026-02-08T13:36:45.012Z"
+    "lastUpdate": "2026-02-08T14:38:30.861Z"
   }
 }
