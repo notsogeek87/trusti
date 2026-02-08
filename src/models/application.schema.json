@@ -1,0 +1,194 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://trusti.app/schemas/application.json",
+  "title": "Trusti Application",
+  "description": "Schéma de validation pour une application Trusti",
+  "type": "object",
+  "required": ["id", "name", "trustiScore", "category", "reason"],
+  "properties": {
+    "id": {
+      "description": "Identifiant unique de l'application",
+      "oneOf": [
+        { "type": "number" },
+        { "type": "string" }
+      ]
+    },
+    "name": {
+      "type": "string",
+      "description": "Nom de l'application",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "trustiScore": {
+      "type": "string",
+      "description": "Note Trusti de A (excellent) à E (dangereux)",
+      "enum": ["A", "B", "C", "D", "E"]
+    },
+    "category": {
+      "type": "string",
+      "description": "Catégorie de l'application",
+      "minLength": 1
+    },
+    "icon": {
+      "type": "string",
+      "description": "URL de l'icône ou emoji"
+    },
+    "color": {
+      "type": "string",
+      "description": "Classe Tailwind CSS pour la couleur",
+      "pattern": "^bg-"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Explication du score Trusti attribué",
+      "minLength": 10,
+      "maxLength": 500
+    },
+    "playStoreUrl": {
+      "type": ["string", "null"],
+      "description": "Lien Google Play Store",
+      "format": "uri"
+    },
+    "appleStoreUrl": {
+      "type": ["string", "null"],
+      "description": "Lien Apple App Store",
+      "format": "uri"
+    },
+    "githubUrl": {
+      "type": ["string", "null"],
+      "description": "Lien vers le dépôt GitHub",
+      "format": "uri"
+    },
+    "otherStoreUrl": {
+      "type": ["string", "null"],
+      "description": "Lien vers un autre store (F-Droid, Microsoft Store, etc.)",
+      "format": "uri"
+    },
+    "website": {
+      "type": ["string", "null"],
+      "description": "Site web officiel de l'application",
+      "format": "uri"
+    },
+    "alternativeAppIds": {
+      "type": "array",
+      "description": "Liste des IDs d'applications alternatives recommandées",
+      "items": {
+        "oneOf": [
+          { "type": "number" },
+          { "type": "string" }
+        ]
+      },
+      "default": []
+    },
+    "replacesAppIds": {
+      "type": "array",
+      "description": "Liste des IDs d'applications que celle-ci peut remplacer",
+      "items": {
+        "oneOf": [
+          { "type": "number" },
+          { "type": "string" }
+        ]
+      },
+      "default": []
+    },
+    "description": {
+      "type": "string",
+      "description": "Description détaillée de l'application",
+      "maxLength": 1000
+    },
+    "developer": {
+      "type": ["string", "null"],
+      "description": "Nom du développeur ou de l'éditeur",
+      "maxLength": 100
+    },
+    "license": {
+      "type": ["string", "null"],
+      "description": "Type de licence (Open-source, Propriétaire, etc.)",
+      "maxLength": 50
+    },
+    "isOpenSource": {
+      "type": "boolean",
+      "description": "Indique si l'application est open-source",
+      "default": false
+    },
+    "isEuropean": {
+      "type": "boolean",
+      "description": "Indique si l'application est hébergée/développée en Europe",
+      "default": false
+    },
+    "jurisdiction": {
+      "type": ["string", "null"],
+      "description": "Juridiction légale (France, UE, USA, etc.)",
+      "maxLength": 50
+    },
+    "privacyFeatures": {
+      "type": "object",
+      "description": "Caractéristiques de confidentialité",
+      "properties": {
+        "endToEndEncryption": {
+          "type": "boolean",
+          "description": "Chiffrement de bout en bout",
+          "default": false
+        },
+        "noTracking": {
+          "type": "boolean",
+          "description": "Absence de tracking",
+          "default": false
+        },
+        "gdprCompliant": {
+          "type": "boolean",
+          "description": "Conformité RGPD",
+          "default": false
+        },
+        "noAds": {
+          "type": "boolean",
+          "description": "Absence de publicité",
+          "default": false
+        }
+      },
+      "additionalProperties": {
+        "type": "boolean"
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "description": "Date de création dans la base Trusti",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "description": "Date de dernière mise à jour",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "id": 1001,
+      "name": "Signal",
+      "trustiScore": "A",
+      "category": "Communication",
+      "icon": "💬",
+      "color": "bg-blue-600",
+      "reason": "Fondation à but non lucratif, chiffrement de bout en bout, code 100% open-source.",
+      "playStoreUrl": "https://play.google.com/store/apps/details?id=org.thoughtcrime.securesms",
+      "appleStoreUrl": "https://apps.apple.com/app/signal/id874139669",
+      "githubUrl": "https://github.com/signalapp",
+      "website": "https://signal.org",
+      "alternativeAppIds": [],
+      "replacesAppIds": [5],
+      "description": "Messagerie privée avec chiffrement de bout en bout",
+      "developer": "Signal Foundation",
+      "license": "GPLv3",
+      "isOpenSource": true,
+      "isEuropean": false,
+      "jurisdiction": "USA",
+      "privacyFeatures": {
+        "endToEndEncryption": true,
+        "noTracking": true,
+        "gdprCompliant": true,
+        "noAds": true
+      }
+    }
+  ]
+}

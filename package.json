@@ -7,12 +7,17 @@
     "dev": "vite",
     "server": "node server/index.js",
     "dev:all": "concurrently \"npm run server\" \"npm run dev\"",
+    "db:init": "node server/database/migrate-json.js",
+    "db:migrate-to-postgres": "node server/database/migrate-to-postgres.js",
+    "db:backup": "node -e \"import('./server/database/db.js').then(m => m.backup())\"",
     "build": "vite build",
     "preview": "vite preview",
     "vercel-build": "vite build"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
     "cors": "^2.8.6",
+    "dotenv": "^17.2.4",
     "express": "^5.2.1",
     "google-play-scraper": "^10.1.2",
     "lucide-react": "^0.344.0",

@@ -4,6 +4,7 @@ import gplay from 'google-play-scraper';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dbService from './database/service-json.js';
 
 const app = express();
 const PORT = 3001;
@@ -409,7 +410,7 @@ app.get('/api/trusti-apps', async (req, res) => {
 // GET: Récupérer les apps personnalisées
 app.get('/api/custom-trusti-apps', (req, res) => {
   try {
-    const apps = readCustomApps();
+    const apps = dbService.getAppsByType('trusti');
     res.json({
       success: true,
       apps: apps
@@ -424,34 +425,47 @@ app.get('/api/custom-trusti-apps', (req, res) => {
   }
 });
 
-// POST: Sauvegarder les apps personnalisées (bulk save)
+// POST: Créer une nouvelle app personnalisée
 app.post('/api/custom-trusti-apps', (req, res) => {
   try {
-    const { apps } = req.body;
+    const appData = { ...req.body, appType: 'trusti' };
+    const newApp = dbService.createApp(appData);
     
-    if (!Array.isArray(apps)) {
-      return res.status(400).json({
-        success: false,
-        error: 'Apps must be an array'
-      });
-    }
+    res.json({
+      success: true,
+      message: 'Custom app created successfully',
+      app: newApp
+    });
+  } catch (error) {
+    console.error('Error creating custom app:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
 
-    const success = writeCustomApps(apps);
+// PUT: Mettre à jour une app personnalisée
+app.put('/api/custom-trusti-apps/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const appData = { ...req.body, appType: 'trusti' };
+    const updatedApp = dbService.updateApp(id, appData);
     
-    if (success) {
+    if (updatedApp) {
       res.json({
         success: true,
-        message: 'Custom apps saved successfully',
-        apps: apps
+        message: 'Custom app updated successfully',
+        app: updatedApp
       });
     } else {
-      res.status(500).json({
+      res.status(404).json({
         success: false,
-        error: 'Failed to save apps'
+        error: 'App not found'
       });
     }
   } catch (error) {
-    console.error('Error saving custom apps:', error);
+    console.error('Error updating custom app:', error);
     res.status(500).json({
       success: false,
       error: error.message
@@ -471,20 +485,17 @@ app.delete('/api/custom-trusti-apps/:id', (req, res) => {
       });
     }
 
-    const apps = readCustomApps();
-    const filteredApps = apps.filter(app => app.id !== parseInt(id));
-    const success = writeCustomApps(filteredApps);
+    const success = dbService.deleteApp(id);
     
     if (success) {
       res.json({
         success: true,
-        message: 'App deleted successfully',
-        apps: filteredApps
+        message: 'App deleted successfully'
       });
     } else {
-      res.status(500).json({
+      res.status(404).json({
         success: false,
-        error: 'Failed to delete app'
+        error: 'App not found'
       });
     }
   } catch (error) {
@@ -527,7 +538,7 @@ const writeStarApps = (apps) => {
 // GET Star Apps
 app.get('/api/star-apps', (req, res) => {
   try {
-    const apps = readStarApps();
+    const apps = dbService.getAppsByType('star');
     res.json({
       success: true,
       apps: apps
@@ -542,34 +553,47 @@ app.get('/api/star-apps', (req, res) => {
   }
 });
 
-// POST Star Apps (create/update)
+// POST: Créer une nouvelle star app
 app.post('/api/star-apps', (req, res) => {
   try {
-    const { apps } = req.body;
+    const appData = { ...req.body, appType: 'star' };
+    const newApp = dbService.createApp(appData);
     
-    if (!Array.isArray(apps)) {
-      return res.status(400).json({
-        success: false,
-        error: 'Apps must be an array'
-      });
-    }
+    res.json({
+      success: true,
+      message: 'Star app created successfully',
+      app: newApp
+    });
+  } catch (error) {
+    console.error('Error creating star app:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
 
-    const success = writeStarApps(apps);
+// PUT: Mettre à jour une star app
+app.put('/api/star-apps/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const appData = { ...req.body, appType: 'star' };
+    const updatedApp = dbService.updateApp(id, appData);
     
-    if (success) {
+    if (updatedApp) {
       res.json({
         success: true,
-        message: 'Star apps saved successfully',
-        apps: readStarApps()
+        message: 'Star app updated successfully',
+        app: updatedApp
       });
     } else {
-      res.status(500).json({
+      res.status(404).json({
         success: false,
-        error: 'Failed to save star apps'
+        error: 'App not found'
       });
     }
   } catch (error) {
-    console.error('Error saving star apps:', error);
+    console.error('Error updating star app:', error);
     res.status(500).json({
       success: false,
       error: error.message
@@ -581,21 +605,17 @@ app.post('/api/star-apps', (req, res) => {
 app.delete('/api/star-apps/:id', (req, res) => {
   try {
     const { id } = req.params;
-    const apps = readStarApps();
-    const filteredApps = apps.filter(app => app.id !== id);
-    
-    const success = writeStarApps(filteredApps);
+    const success = dbService.deleteApp(id);
     
     if (success) {
       res.json({
         success: true,
-        message: 'Star app deleted successfully',
-        apps: filteredApps
+        message: 'Star app deleted successfully'
       });
     } else {
-      res.status(500).json({
+      res.status(404).json({
         success: false,
-        error: 'Failed to delete star app'
+        error: 'App not found'
       });
     }
   } catch (error) {
