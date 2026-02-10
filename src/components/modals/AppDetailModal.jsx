@@ -132,11 +132,11 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
           )}
         </div>
         
-        <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 mb-4">
+        <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 mb-4 min-h-[100px] flex flex-col justify-center">
           <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 mb-2 flex items-center gap-2">
             <ShieldCheck size={16} className="text-indigo-600" /> Analyse
           </h3>
-          <p className="text-sm text-slate-600 leading-relaxed">{app.reason}</p>
+          <p className="text-sm text-slate-600 leading-relaxed line-clamp-3">{app.reason}</p>
         </div>
 
         {/* Liens de téléchargement */}
