@@ -8,7 +8,7 @@ import { fetchTrustiApps } from '../utils/apiService';
  * Maintenant avec support de la sauvegarde par utilisateur
  */
 export const useAppManagement = (currentUser, saveUserData, getUserData) => {
-  const [activeTab, setActiveTab] = useState(TABS.SELECTION);
+  const [activeTab, setActiveTab] = useState(TABS.APPLICATIONS);
   const [searchTerm, setSearchTerm] = useState("");
   const [myApps, setMyApps] = useState(new Set());
   const [migratedApps, setMigratedApps] = useState(new Set());
@@ -155,16 +155,26 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
   const filteredApps = useMemo(() => {
     let list = [...APPS_DATA];
     
-    if (activeTab === TABS.SELECTION) {
-      // Afficher UNIQUEMENT les apps avec TrustiScore D ou E depuis starApps (triées alphabétiquement)
-      list = starApps
-        .filter(app => app.grade === 'D' || app.grade === 'E')
-        .sort((a, b) => a.name.localeCompare(b.name));
-    } else if (activeTab === TABS.ALTERNATIVES) {
-      // Afficher UNIQUEMENT les apps avec TrustiScore A, B ou C depuis trustiApps (triées alphabétiquement)
-      list = trustiApps
-        .filter(app => app.grade === 'A' || app.grade === 'B' || app.grade === 'C')
-        .sort((a, b) => a.name.localeCompare(b.name));
+    if (activeTab === TABS.APPLICATIONS) {
+      // Combiner toutes les apps : starApps (D/E) + trustiApps (A/B/C)
+      const dEApps = starApps.filter(app => app.grade === 'D' || app.grade === 'E');
+      const abcApps = trustiApps.filter(app => app.grade === 'A' || app.grade === 'B' || app.grade === 'C');
+      
+      // Fusionner et dédupliquer par ID
+      const appsById = new Map();
+      [...dEApps, ...abcApps].forEach(app => {
+        appsById.set(app.id, app);
+      });
+      
+      list = Array.from(appsById.values());
+      
+      // Trier par grade (A > B > C > D > E) puis par nom
+      const gradeOrder = { 'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5 };
+      list.sort((a, b) => {
+        const gradeCompare = (gradeOrder[a.grade] || 999) - (gradeOrder[b.grade] || 999);
+        if (gradeCompare !== 0) return gradeCompare;
+        return a.name.localeCompare(b.name);
+      });
     } else if (activeTab === TABS.MY_APPS) {
       // Combiner les apps statiques ET TrustiApps ET StarApps
       const allApps = [...APPS_DATA, ...trustiApps, ...starApps];

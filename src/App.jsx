@@ -276,45 +276,28 @@ const App = () => {
       <main className="max-w-md mx-auto p-4">
         <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
-        {/* Titre pour l'onglet Sélection */}
-        {activeTab === TABS.SELECTION && (
+        {/* Titre pour l'onglet Applications */}
+        {activeTab === TABS.APPLICATIONS && (
           <div className="mb-6 text-center">
             <div className="flex items-center justify-center gap-2 mb-1">
               <p className="text-xs font-black uppercase tracking-widest text-slate-400">
-                Remplacez les applications les plus utilisées
+                Toutes les applications
               </p>
-              {isLoadingStarApps && (
+              {(isLoadingStarApps || isLoadingTrustiApps) && (
                 <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
               )}
             </div>
             <p className="text-[11px] text-slate-400 mt-1">
-              {starApps.length} app{starApps.length > 1 ? 's' : ''} sélectionnée{starApps.length > 1 ? 's' : ''} par l'équipe
+              Classées par TrustiScore : du meilleur au moins bon
             </p>
             {/* Message incitatif */}
-            <div className="mt-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-3 border border-purple-100">
+            <div className="mt-3 bg-gradient-to-r from-purple-50 to-emerald-50 rounded-2xl p-3 border border-purple-100">
               <p className="text-xs text-purple-700 font-bold flex items-center justify-center gap-2">
                 <Sparkles size={14} className="animate-pulse" />
-                Clique sur une app pour voir ses alternatives !
+                Clique sur une app pour voir ses détails !
                 <Sparkles size={14} className="animate-pulse" />
               </p>
             </div>
-          </div>
-        )}
-
-        {/* En-tête pour Alternatives */}
-        {activeTab === TABS.ALTERNATIVES && (
-          <div className="mb-6 text-center">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <p className="text-xs font-black uppercase tracking-widest text-slate-400">
-                Alternatives
-              </p>
-              {isLoadingTrustiApps && (
-                <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
-              )}
-            </div>
-            <p className="text-[11px] text-slate-400 mt-1">
-              Apps européennes et même parfois open source !
-            </p>
           </div>
         )}
 

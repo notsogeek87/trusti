@@ -27,17 +27,17 @@ const Header = ({
             TrustiScore
           </h1>
           
-          {/* Bouton de test pour vider le localStorage */}
+          {/* Bouton de reset pour vider le localStorage */}
           <button
             onClick={() => {
               localStorage.clear();
               window.location.reload();
             }}
             className="p-1.5 text-xs bg-red-100 hover:bg-red-200 text-red-600 rounded-md transition-all flex items-center gap-1"
-            title="Vider localStorage et recharger (Test)"
+            title="Vider localStorage et recharger"
           >
             <Trash2 size={14} />
-            <span className="text-[10px] font-bold">TEST</span>
+            <span className="text-[10px] font-bold">RESET</span>
           </button>
         </div>
         
