@@ -12,6 +12,7 @@ const MigrationSelectorModal = ({
   currentSelection,
   onSelect, 
   onClose,
+  onSelectApp,
   allApps = [] // Apps à jour (trustiApps uniquement)
 }) => {
   // Combiner TOUTES les sources d'apps pour les alternatives
@@ -29,13 +30,6 @@ const MigrationSelectorModal = ({
   const allSourceApps = [...APPS_DATA, ...dynamicAlternatives];
   const currentApp = allSourceApps.find(a => String(a.id) === String(currentAppId));
   const currentCategory = currentApp?.category;
-  
-  console.log('=== MigrationSelector Debug ===');
-  console.log('Current App ID:', currentAppId, 'Type:', typeof currentAppId);
-  console.log('Current App Found:', currentApp?.name);
-  console.log('Current Category:', currentCategory);
-  console.log('Available Apps Count:', availableApps.length);
-  console.log('Available Apps:', availableApps.map(a => ({ id: a.id, name: a.name, cat: a.category, grade: a.grade })));
   
   // Filtrer par grade A ou B ET par catégorie (souple : contient la catégorie ou vice versa)
   const categoryMatches = (appCategory, targetCategory) => {
@@ -56,11 +50,6 @@ const MigrationSelectorModal = ({
   );
   const allAlternatives = [...alternativesA, ...alternativesB];
   
-  console.log('Alternatives Grade A:', alternativesA.map(a => a.name));
-  console.log('Alternatives Grade B:', alternativesB.map(a => a.name));
-  console.log('Total Alternatives found:', allAlternatives.length);
-  console.log('================================');
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl max-h-[80vh] overflow-y-auto">
@@ -100,8 +89,13 @@ const MigrationSelectorModal = ({
                   <button
                     key={alt.id}
                     onClick={() => {
-                      onSelect(alt.name);
-                      onClose();
+                      if (onSelectApp) {
+                        onSelectApp(alt);
+                        onClose();
+                      } else {
+                        onSelect(alt.name);
+                        onClose();
+                      }
                     }}
                     className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-3 ${
                       currentSelection === alt.name

@@ -181,26 +181,18 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
         .map(app => {
           // Chercher si une TrustiApp remplace cette app (support ancien et nouveau format)
           const replacement = trustiApps.find(ta => {
-            console.log('Checking replacement for app:', app.id, 'Type:', typeof app.id);
-            console.log('TrustiApp:', ta.name, 'replacesAppIds:', ta.replacesAppIds, 'replacesAppId:', ta.replacesAppId);
             if (ta.replacesAppIds && Array.isArray(ta.replacesAppIds)) {
-              const found = ta.replacesAppIds.includes(app.id);
-              console.log('Array check result:', found);
-              return found;
+              return ta.replacesAppIds.includes(app.id);
             }
-            const found = ta.replacesAppId === app.id;
-            console.log('Single check result:', found);
-            return found;
+            return ta.replacesAppId === app.id;
           });
           if (replacement) {
-            console.log('✅ Found replacement for', app.name, ':', replacement.name);
             return {
               ...app,
               alternative: replacement.name,
               altIcon: replacement.icon
             };
           }
-          console.log('❌ No replacement found for', app.name);
           return app;
         });
     }

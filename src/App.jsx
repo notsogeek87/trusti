@@ -224,6 +224,7 @@ const App = () => {
         isInMyApps={myApps.has(selectedApp.id)}
         onToggleMyApp={toggleMyApp}
         onClose={() => setSelectedApp(null)}
+        onSelectApp={setSelectedApp}
         trustiApps={trustiApps}
         starApps={starApps}
       />
@@ -317,40 +318,6 @@ const App = () => {
           </div>
         )}
 
-        {/* Boutons Partager pour Mes Apps */}
-        {activeTab === TABS.MY_APPS && myApps.size > 0 && (
-          <div className="space-y-3">
-            <ShareButton
-              title="Partager ma migration"
-              description={`${myApps.size} app${myApps.size > 1 ? 's' : ''} (${migratedApps.size} migré${migratedApps.size > 1 ? 's' : ''})`}
-              onShare={() => setShowShareModal(true)}
-            />
-            <ShareButton
-              title="Partager mes TrustiApp"
-              description={`${Array.from(myApps).filter(id => {
-                const allApps = [...trustiApps, ...starApps];
-                const app = allApps.find(a => a.id === id);
-                return app && (app.grade === 'A' || app.grade === 'B' || app.grade === 'C');
-              }).length} app${Array.from(myApps).filter(id => {
-                const allApps = [...trustiApps, ...starApps];
-                const app = allApps.find(a => a.id === id);
-                return app && (app.grade === 'A' || app.grade === 'B' || app.grade === 'C');
-              }).length > 1 ? 's' : ''}`}
-              onShare={() => setShowTrustiShareModal(true)}
-              disabled={Array.from(myApps).filter(id => {
-                const allApps = [...trustiApps, ...starApps];
-                const app = allApps.find(a => a.id === id);
-                return app && (app.grade === 'A' || app.grade === 'B' || app.grade === 'C');
-              }).length === 0}
-              bgColor="bg-emerald-50"
-              borderColor="border-emerald-200"
-              textColor="text-emerald-900"
-              subtextColor="text-emerald-700"
-              buttonColor="bg-emerald-600 hover:bg-emerald-700"
-            />
-          </div>
-        )}
-
         {/* Panneau explicatif */}
         {showExplainer && (
           <ExplainerPanel onClose={() => setShowExplainer(false)} />
@@ -397,12 +364,16 @@ const App = () => {
       )}
 
       {/* Modal de sélection de migration */}
-      {showMigrationSelector && (
+      {showMigrationSelector && !selectedApp && (
         <MigrationSelectorModal
           currentAppId={showMigrationSelector}
           currentSelection={customMigrations.get(showMigrationSelector)}
           onSelect={(altName) => setCustomMigration(showMigrationSelector, altName)}
           onClose={() => setShowMigrationSelector(null)}
+          onSelectApp={(app) => {
+            setShowMigrationSelector(null);
+            setSelectedApp(app);
+          }}
           allApps={[...trustiApps, ...starApps]}
         />
       )}
@@ -443,8 +414,8 @@ const App = () => {
       </>
       )}
 
-      {/* Widget de chat Trusti (visible partout sauf pendant la vérification du token) */}
-      {!isVerifying && <TrustiChatWidget onOpenLandingPage={handleOpenLandingPage} />}
+      {/* Widget de chat Trusti (visible partout sauf pendant la vérification du token, la page de bienvenue et l'onboarding) */}
+      {!isVerifying && !showWelcomeModal && !showOnboarding && <TrustiChatWidget onOpenLandingPage={handleOpenLandingPage} />}
 
       <style>{`
         @keyframes pulse-subtle {

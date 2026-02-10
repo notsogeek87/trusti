@@ -1,11 +1,11 @@
 import React from 'react';
-import { ChevronLeft, CheckCircle, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield } from 'lucide-react';
+import { ChevronLeft, CheckCircle, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 
 /**
  * Modal des détails d'une application
  */
-const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, trustiApps = [], starApps = [] }) => {
+const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, trustiApps = [], starApps = [] }) => {
   // Trouver les alternatives (TrustiApps qui remplacent cette app)
   const alternatives = trustiApps.filter(ta => {
     if (ta.replacesAppIds && Array.isArray(ta.replacesAppIds)) {
@@ -21,6 +21,15 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, trustiApps = 
     }
     return false;
   });
+
+  // Handler pour le clic sur une alternative
+  const handleAlternativeClick = (e, alternative) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onSelectApp) {
+      onSelectApp(alternative);
+    }
+  };
 
   // Formater la date de mise à jour
   const formatDate = (dateString) => {
@@ -130,6 +139,61 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, trustiApps = 
           <p className="text-sm text-slate-600 leading-relaxed font-medium">{app.reason}</p>
         </div>
 
+        {/* Liens de téléchargement */}
+        {(app.playStoreUrl || app.appleStoreUrl || app.fDroidUrl || app.websiteUrl) && (
+          <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-[2rem] p-6 border border-emerald-200 mb-6">
+            <h3 className="font-black text-sm uppercase tracking-tight text-slate-800 mb-4 flex items-center gap-2">
+              <ExternalLink size={18} className="text-emerald-600" /> Télécharger
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              {app.playStoreUrl && (
+                <a
+                  href={app.playStoreUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 bg-white hover:bg-emerald-100 text-emerald-700 font-bold text-xs py-3 px-4 rounded-xl transition-all border-2 border-emerald-200 hover:border-emerald-400 shadow-sm"
+                >
+                  <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.5MxY8CYsuOK6daH6aocNLAHaIe%3Fpid%3DApi&f=1&ipt=423621f87e3335ef5aa176e8f68343d5e008b4674699573ed4712e0d066a903b&ipo=images" alt="Play Store" className="w-5 h-5" />
+                  Play Store
+                </a>
+              )}
+              {app.appleStoreUrl && (
+                <a
+                  href={app.appleStoreUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs py-3 px-4 rounded-xl transition-all border-2 border-slate-200 hover:border-slate-400 shadow-sm"
+                >
+                  <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.jhRunii665tZxgBO17E0OwHaHa%3Fpid%3DApi&f=1&ipt=b405abc4f0e4ab24a5fd3be09175722438e0f888eb681770c42d8f1462036efb&ipo=images" alt="App Store" className="w-5 h-5" />
+                  App Store
+                </a>
+              )}
+              {app.fDroidUrl && (
+                <a
+                  href={app.fDroidUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 bg-white hover:bg-blue-100 text-blue-700 font-bold text-xs py-3 px-4 rounded-xl transition-all border-2 border-blue-200 hover:border-blue-400 shadow-sm"
+                >
+                  <img src="https://f-droid.org/assets/favicon.ico" alt="F-Droid" className="w-5 h-5" />
+                  F-Droid
+                </a>
+              )}
+              {app.websiteUrl && (
+                <a
+                  href={app.websiteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 bg-white hover:bg-purple-100 text-purple-700 font-bold text-xs py-3 px-4 rounded-xl transition-all border-2 border-purple-200 hover:border-purple-400 shadow-sm"
+                >
+                  <span className="text-lg">🌐</span>
+                  Site Web
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Permissions Android */}
         {app.permissions && app.permissions.length > 0 && (
           <div className="bg-slate-50 rounded-[2rem] p-6 border border-slate-100 mb-6">
@@ -157,7 +221,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, trustiApps = 
             </div>
             <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-[2rem] p-6 border-2 border-indigo-200 shadow-lg relative overflow-hidden">
               {/* Effet de brillance animé */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 animate-shimmer"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 animate-shimmer pointer-events-none"></div>
               
               <div className="relative">
                 <div className="flex items-center justify-between mb-4">
@@ -170,7 +234,11 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, trustiApps = 
                 </div>
                 <div className="space-y-3">
                   {alternatives.map(alt => (
-                    <div key={alt.id} className="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.02] cursor-pointer">
+                    <div 
+                      key={alt.id} 
+                      onClick={(e) => handleAlternativeClick(e, alt)}
+                      className="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.02] cursor-pointer"
+                    >
                       <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
                         {alt.icon && alt.icon.startsWith('http') ? (
                           <img 
@@ -264,7 +332,11 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, trustiApps = 
               </div>
               <div className="space-y-3">
                 {replacedApps.map(replaced => (
-                  <div key={replaced.id} className="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm">
+                  <div 
+                    key={replaced.id} 
+                    onClick={(e) => handleAlternativeClick(e, replaced)}
+                    className="bg-white rounded-xl p-4 flex items-center gap-3 shadow-sm hover:shadow-md transition-all hover:scale-[1.02] cursor-pointer"
+                  >
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
                       {replaced.icon && replaced.icon.startsWith('http') ? (
                         <img 
