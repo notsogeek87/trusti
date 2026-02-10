@@ -120,7 +120,15 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
               </div>
             )}
           </div>
-          <h2 className="text-2xl font-black text-slate-900 mb-2">{app.name}</h2>
+          <h2 className="text-2xl font-black text-slate-900 mb-1">{app.name}</h2>
+          
+          {/* Catégorie */}
+          {app.category && (
+            <div className="mb-3 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold uppercase tracking-wide">
+              {app.category}
+            </div>
+          )}
+          
           <ScoreIndicator grade={app.grade} size="large" />
           
           {/* Date de mise à jour du TrustiScore */}

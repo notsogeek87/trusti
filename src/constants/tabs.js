@@ -3,5 +3,6 @@
  */
 export const TABS = {
   APPLICATIONS: 'applications',
-  MY_APPS: 'my_apps'
+  MY_APPS: 'my_apps',
+  TOP_ALTERNATIVES: 'top_alternatives'
 };

@@ -211,6 +211,26 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
         if (gradeCompare !== 0) return gradeCompare;
         return a.name.localeCompare(b.name);
       });
+    } else if (activeTab === TABS.TOP_ALTERNATIVES) {
+      // Combiner toutes les apps
+      const allApps = [...starApps, ...trustiApps];
+      
+      // Dédupliquer par ID
+      const appsById = new Map();
+      allApps.forEach(app => {
+        appsById.set(app.id, app);
+      });
+      
+      // Filtrer uniquement les apps avec grade A
+      list = Array.from(appsById.values())
+        .filter(app => app.grade === 'A');
+      
+      // Trier par catégorie puis par nom
+      list.sort((a, b) => {
+        const categoryCompare = (a.category || '').localeCompare(b.category || '');
+        if (categoryCompare !== 0) return categoryCompare;
+        return a.name.localeCompare(b.name);
+      });
     }
     
     return list.filter(app => 

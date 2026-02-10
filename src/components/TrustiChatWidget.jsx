@@ -13,6 +13,7 @@ const TrustiChatWidget = ({ onOpenLandingPage }) => {
       subtext: 'Je peux t\'aider à comprendre les TrustiScores et à choisir les meilleures applications pour ta vie privée.'
     }
   ]);
+  const [showSuggestions, setShowSuggestions] = useState(true);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -33,6 +34,8 @@ const TrustiChatWidget = ({ onOpenLandingPage }) => {
     // Ajouter la réponse du bot après un court délai
     setTimeout(() => {
       addMessage('bot', answer, subtext);
+      // Masquer les suggestions après la réponse
+      setShowSuggestions(false);
     }, 500);
   };
 
@@ -131,49 +134,60 @@ const TrustiChatWidget = ({ onOpenLandingPage }) => {
 
             {/* Suggestions rapides */}
             <div className="mt-6 space-y-2">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">
-                Questions fréquentes :
-              </p>
-              <button 
-                  onClick={() => {
-                    setIsOpen(false);
-                    if (onOpenLandingPage) onOpenLandingPage();
-                  }}
-                  className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300"
-                >
-                  🤔 Comment fonctionne le TrustiScore ?
-                </button>
+              {showSuggestions ? (
+                <>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">
+                    Questions fréquentes :
+                  </p>
+                  <button 
+                    onClick={() => {
+                      setIsOpen(false);
+                      if (onOpenLandingPage) onOpenLandingPage();
+                    }}
+                    className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300"
+                  >
+                    🤔 Comment fonctionne le TrustiScore ?
+                  </button>
+                  <button 
+                    onClick={() => handleQuickReply(
+                      '🔍 Comment trouver une alternative ?',
+                      'C\'est simple ! Pour trouver une alternative plus respectueuse de ta vie privée :',
+                      '1️⃣ Clique sur une app avec une note D ou E\n2️⃣ Consulte la section "Alternatives recommandées"\n3️⃣ Tu y trouveras des apps notées A, B ou C qui font la même chose !\n\n💡 Les alternatives sont automatiquement proposées selon la catégorie de l\'app.'
+                    )}
+                    className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300"
+                  >
+                    🔍 Comment trouver une alternative ?
+                  </button>
+                  <button 
+                    onClick={() => handleQuickReply(
+                      '📱 Quelle différence entre A, B, C ?',
+                      'Le TrustiScore va de A à E pour évaluer le respect de ta vie privée :',
+                      '🌟 A = Excellent - Parfait pour ta vie privée\n✅ B = Très bien - Fortement recommandé\n👍 C = Bien - Un bon choix\n⚠️ D = Moyen - Attention aux données\n❌ E = À éviter - Risques importants\n\nLes apps A, B et C sont nos "TrustiApps" recommandées !'
+                    )}
+                    className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300"
+                  >
+                    📱 Quelle différence entre A, B, C ?
+                  </button>
+                  <button 
+                    onClick={() => handleQuickReply(
+                      '📧 Contacter l\'équipe Trusti',
+                      'Tu peux nous contacter pour toute question, suggestion ou signalement :',
+                      '📧 Email : contact@trusti.app\n🌐 Site : https://trusti.app\n💬 Nous répondons généralement sous 24h !\n\nN\'hésite pas à nous faire part de tes retours, ils nous aident à améliorer Trusti pour tout le monde ! 🚀'
+                    )}
+                    className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300"
+                  >
+                    📧 Contacter l'équipe Trusti
+                  </button>
+                </>
+              ) : (
                 <button 
-                  onClick={() => handleQuickReply(
-                    '🔍 Comment trouver une alternative ?',
-                    'C\'est simple ! Pour trouver une alternative plus respectueuse de ta vie privée :',
-                    '1️⃣ Clique sur une app avec une note D ou E\n2️⃣ Consulte la section "Alternatives recommandées"\n3️⃣ Tu y trouveras des apps notées A, B ou C qui font la même chose !\n\n💡 Les alternatives sont automatiquement proposées selon la catégorie de l\'app.'
-                  )}
-                  className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300"
+                  onClick={() => setShowSuggestions(true)}
+                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-4 py-3 rounded-xl text-sm font-bold shadow-lg hover:shadow-xl transition-all"
                 >
-                  🔍 Comment trouver une alternative ?
+                  💬 J'ai une autre question
                 </button>
-                <button 
-                  onClick={() => handleQuickReply(
-                    '📱 Quelle différence entre A, B, C ?',
-                    'Le TrustiScore va de A à E pour évaluer le respect de ta vie privée :',
-                    '🌟 A = Excellent - Parfait pour ta vie privée\n✅ B = Très bien - Fortement recommandé\n👍 C = Bien - Un bon choix\n⚠️ D = Moyen - Attention aux données\n❌ E = À éviter - Risques importants\n\nLes apps A, B et C sont nos "TrustiApps" recommandées !'
-                  )}
-                  className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300"
-                >
-                  📱 Quelle différence entre A, B, C ?
-                </button>
-                <button 
-                  onClick={() => handleQuickReply(
-                    '📧 Contacter l\'équipe Trusti',
-                    'Tu peux nous contacter pour toute question, suggestion ou signalement :',
-                    '📧 Email : contact@trusti.app\n🌐 Site : https://trusti.app\n💬 Nous répondons généralement sous 24h !\n\nN\'hésite pas à nous faire part de tes retours, ils nous aident à améliorer Trusti pour tout le monde ! 🚀'
-                  )}
-                  className="w-full bg-white hover:bg-indigo-50 text-left px-4 py-3 rounded-xl text-sm font-medium text-slate-700 shadow-sm hover:shadow-md transition-all border border-slate-200 hover:border-indigo-300"
-                >
-                  📧 Contacter l'équipe Trusti
-                </button>
-              </div>
+              )}
+            </div>
             
             {/* Élément invisible pour auto-scroll */}
             <div ref={messagesEndRef} />

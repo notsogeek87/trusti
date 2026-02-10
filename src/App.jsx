@@ -321,7 +321,7 @@ const App = () => {
           <div className="mb-6 text-center">
             <div className="flex items-center justify-center gap-2 mb-1">
               <p className="text-xs font-black uppercase tracking-widest text-slate-400">
-                Toutes les applications
+                Les applications les plus connues
               </p>
               {(isLoadingStarApps || isLoadingTrustiApps) && (
                 <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
@@ -331,11 +331,14 @@ const App = () => {
               Classées par TrustiScore : du meilleur au moins bon
             </p>
             {/* Message incitatif */}
-            <div className="mt-3 bg-gradient-to-r from-purple-50 to-emerald-50 rounded-2xl p-3 border border-purple-100">
-              <p className="text-xs text-purple-700 font-bold flex items-center justify-center gap-2">
+            <div className="mt-3 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-3 border border-purple-100">
+              <p className="text-xs text-purple-700 font-bold flex items-center justify-center gap-2 mb-2">
                 <Sparkles size={14} className="animate-pulse" />
-                Clique sur une app pour voir ses détails !
+                Cherche tes apps et sélectionne-les !
                 <Sparkles size={14} className="animate-pulse" />
+              </p>
+              <p className="text-[10px] text-purple-600">
+                👆 Utilise la recherche pour trouver tes apps du quotidien, puis clique sur ⚡ pour les ajouter à "Mes Apps"
               </p>
             </div>
           </div>
@@ -357,6 +360,31 @@ const App = () => {
               <p className="text-xs text-rose-700 font-bold flex items-center justify-center gap-2">
                 <Sparkles size={14} className="animate-pulse" />
                 Les apps à migrer en priorité sont en haut !
+                <Sparkles size={14} className="animate-pulse" />
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Titre pour l'onglet Top 20 Alternatives */}
+        {activeTab === TABS.TOP_ALTERNATIVES && (
+          <div className="mb-6 text-center">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <p className="text-xs font-black uppercase tracking-widest text-slate-400">
+                Top 20 Alternatives
+              </p>
+              {(isLoadingStarApps || isLoadingTrustiApps) && (
+                <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
+              )}
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Les meilleures apps (notées A) par catégorie
+            </p>
+            {/* Message incitatif */}
+            <div className="mt-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-3 border border-emerald-100">
+              <p className="text-xs text-emerald-700 font-bold flex items-center justify-center gap-2">
+                <Sparkles size={14} className="animate-pulse" />
+                Découvre les apps les plus respectueuses de ta vie privée !
                 <Sparkles size={14} className="animate-pulse" />
               </p>
             </div>
