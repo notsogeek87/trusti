@@ -1,15 +1,14 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
-import { APPS_DATA } from '../../constants/appsData';
 import { shareText, copyToClipboard } from '../../utils/shareUtils';
 
 /**
  * Modal de partage des migrations
  */
 const ShareModal = ({ migratedApps, customMigrations, topApps = [], onClose }) => {
-  // Combiner les apps statiques et du Play Store
-  const allApps = [...APPS_DATA, ...topApps];
+  // Utiliser uniquement les apps de la BDD
+  const allApps = topApps;
   
   const migratedList = Array.from(migratedApps).map(id => {
     const app = allApps.find(a => a.id === id);

@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect } from 'react';
-import { APPS_DATA } from '../constants/appsData';
 import { TABS } from '../constants/tabs';
 import { fetchTrustiApps } from '../utils/apiService';
 
@@ -153,16 +152,15 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
 
   // Filtrer les applications selon l'onglet actif et la recherche
   const filteredApps = useMemo(() => {
-    let list = [...APPS_DATA];
+    let list = [];
     
     if (activeTab === TABS.APPLICATIONS) {
-      // Combiner toutes les apps : starApps (D/E) + trustiApps (A/B/C)
-      const dEApps = starApps.filter(app => app.grade === 'D' || app.grade === 'E');
-      const abcApps = trustiApps.filter(app => app.grade === 'A' || app.grade === 'B' || app.grade === 'C');
+      // Combiner toutes les apps de la BDD : starApps + trustiApps
+      const allApps = [...starApps, ...trustiApps];
       
-      // Fusionner et dédupliquer par ID
+      // Dédupliquer par ID
       const appsById = new Map();
-      [...dEApps, ...abcApps].forEach(app => {
+      allApps.forEach(app => {
         appsById.set(app.id, app);
       });
       
@@ -176,8 +174,8 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
         return a.name.localeCompare(b.name);
       });
     } else if (activeTab === TABS.MY_APPS) {
-      // Combiner les apps statiques ET TrustiApps ET StarApps
-      const allApps = [...APPS_DATA, ...trustiApps, ...starApps];
+      // Combiner TrustiApps ET StarApps
+      const allApps = [...trustiApps, ...starApps];
       
       // Créer un Map pour dédupliquer par ID (le dernier gagne)
       const appsById = new Map();

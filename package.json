@@ -10,6 +10,7 @@
     "db:init": "node server/database/migrate-json.js",
     "db:migrate-to-postgres": "node server/database/migrate-to-postgres.js",
     "db:backup": "node -e \"import('./server/database/db.js').then(m => m.backup())\"",
+    "icons:fetch": "node server/database/fetch-icons-playstore.js",
     "check:resend": "node check-resend-config.js",
     "check:brevo": "node check-brevo-config.js",
     "test:email": "node check-brevo-config.js",

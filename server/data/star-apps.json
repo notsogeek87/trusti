@@ -2,7 +2,7 @@
   {
     "id": 1769803097037,
     "name": "GMail",
-    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstatic.vecteezy.com%2Fti%2Fvecteur-libre%2Fp3%2F13948544-logo-gmail-sur-fond-blanc-transparent-gratuit-vectoriel.jpg&f=1&nofb=1&ipt=a2a4ff6d1cbc41a5fc1ee99572567b05cad34b1e6a5f58127df8c7a0bb3cf9ec",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Gmail_icon_%282020%29.svg/240px-Gmail_icon_%282020%29.svg.png",
     "grade": "D",
     "category": "Application",
     "color": "bg-[#f7931e]",
@@ -11,7 +11,7 @@
   {
     "id": 1769804868717,
     "name": "Google Password",
-    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.ARgvFo9U6vQl8TRgjmDqFAHaHa%3Fpid%3DApi&f=1&ipt=d6b4488d3ddafa014ce5c19405a4ba2f7c67fa50dac9585362ec9e7dd2f4413b&ipo=images",
+    "icon": "https://play-lh.googleusercontent.com/2a0iKGz-P3LvzKy8onOmwXgjkN57by2VPJveRrx-5kyZoLpxYOrKqVBVTXS4E1RUQCo=s96-rw",
     "grade": "D",
     "category": "Application",
     "color": "bg-[#f7931e]",
@@ -20,7 +20,7 @@
   {
     "id": 1769805162254,
     "name": "Google Keep",
-    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse3.mm.bing.net%2Fth%2Fid%2FOIP.5YGYfi2vD8daz6TSuvEO6wHaKI%3Fpid%3DApi&f=1&ipt=defada21bb10e005922d341c78b236efe71947656448318a3b81b5b9e064e80f&ipo=images",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Google_Keep_icon_%282020%29.svg/240px-Google_Keep_icon_%282020%29.svg.png",
     "grade": "D",
     "category": "Application",
     "color": "bg-[#f7931e]",
@@ -29,7 +29,7 @@
   {
     "id": 1769805287786,
     "name": "Google Tasks",
-    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.mm.bing.net%2Fth%2Fid%2FOIP.OZbKMNXjReLOUstMDffc4QHaEK%3Fpid%3DApi&f=1&ipt=1d5f2753928af7d3adc48994479c4c65e8cc866318e9046782771f41c58e473d&ipo=images",
+    "icon": "https://play-lh.googleusercontent.com/8BFQK__w_IlLlj9kPPKdP-CEXO6FGo6nOE0emZI3WJlJ2bBp0yprFHiA9wMPLWKLbA=s96-rw",
     "grade": "D",
     "category": "Application",
     "color": "bg-[#f7931e]",
@@ -38,7 +38,7 @@
   {
     "id": 1769805620267,
     "name": "ChatGPT",
-    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.JX5IS3q1aA_zGw7TkD3CkQHaHg%3Fpid%3DApi&f=1&ipt=50987da5d31382d1ca015d1326604faba485639fc1e32362d5ee941b35c266cf&ipo=images",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/ChatGPT_logo.svg/240px-ChatGPT_logo.svg.png",
     "grade": "C",
     "category": "IA",
     "color": "bg-[#fbb03b]",
@@ -47,7 +47,7 @@
   {
     "id": 1769805693753,
     "name": "Google Photos",
-    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.mm.bing.net%2Fth%2Fid%2FOIP.gkT2d4Cgi4rrMWk1TykPQAHaHa%3Fpid%3DApi&f=1&ipt=9bff3e1ab94b2814a18c84d30c7dc652cf59846c9dceac1fb912b2ae2769e643&ipo=images",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Google_Photos_icon_%282020%29.svg/240px-Google_Photos_icon_%282020%29.svg.png",
     "grade": "D",
     "category": "Application",
     "color": "bg-[#f7931e]",
@@ -56,7 +56,7 @@
   {
     "id": 1769805796367,
     "name": "Google Drive",
-    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.explicit.bing.net%2Fth%2Fid%2FOIP.TQl3rhGtNi2Xryfd3kn9tgHaGo%3Fpid%3DApi&f=1&ipt=7d2b260ec40188962d42c3f1a2fe7091d5d775a11606798d738503a596862494&ipo=images",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Google_Drive_icon_%282020%29.svg/240px-Google_Drive_icon_%282020%29.svg.png",
     "grade": "D",
     "category": "Application",
     "color": "bg-[#f7931e]",
@@ -65,7 +65,7 @@
   {
     "id": 1769805919501,
     "name": "Google.com",
-    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.HgH-NjiOdFOrkmwjsZCCfAHaHl%3Fpid%3DApi&f=1&ipt=64a4204253b320cf52a1ca246ed9e31a8140379b16a9d9582984041de8038c78&ipo=images",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/240px-Google_2015_logo.svg.png",
     "grade": "D",
     "category": "Application",
     "color": "bg-[#f7931e]",
@@ -74,7 +74,7 @@
   {
     "id": 1769878297790,
     "name": "Apple Pay",
-    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.pT_Zxt2n9MJFh74snnY0eQHaHa%3Fpid%3DApi&f=1&ipt=fbbbae1e93ebba5d536f814a9428920ffcf03dc2fde171b5c5fd7bc523c0d176&ipo=images",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Apple_Pay_logo.svg/240px-Apple_Pay_logo.svg.png",
     "grade": "D",
     "category": "Application",
     "color": "bg-[#f7931e]",
@@ -83,7 +83,7 @@
   {
     "id": 1769878336878,
     "name": "Google Wallet",
-    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.mm.bing.net%2Fth%2Fid%2FOIP.GHPMAcQ_UAyMv0AMDgeTbwHaHa%3Fpid%3DApi&f=1&ipt=22c8d01b76907fde21362bd0d7416d5dd94cfe54089f42f1255be039c9ae5cfc&ipo=images",
+    "icon": "https://play-lh.googleusercontent.com/HArtbyi53u0jnqnetPLraQY4hBlxAfNMGmY4WJktwPxK4Aj-Vgon4Q5hhxwMRCkE0j0=s96-rw",
     "grade": "D",
     "category": "Application",
     "color": "bg-[#f7931e]",
@@ -92,7 +92,7 @@
   {
     "id": 1769878470016,
     "name": "Apple Music",
-    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.wz2TXIwMfzdIdxiv5IomlgHaHa%3Fpid%3DApi&f=1&ipt=8289586e1027fab37074d0f4b25a5a0f27e7352fc59cc47b1555cc8fb7fd7680&ipo=images",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Apple_Music_icon.svg/240px-Apple_Music_icon.svg.png",
     "grade": "D",
     "category": "Application",
     "color": "bg-[#f7931e]",
@@ -101,7 +101,7 @@
   {
     "id": 1769878491778,
     "name": "Youtube Music",
-    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.AzHiiRXXtfWM3MXVcXFwIwHaHa%3Fpid%3DApi&f=1&ipt=e4659bce30dd6dcbd94c02cc53a3da137bcd3722f8cbd8ffec5a90004962b290&ipo=images",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Youtube_Music_icon.svg/240px-Youtube_Music_icon.svg.png",
     "grade": "D",
     "category": "Application",
     "color": "bg-[#f7931e]",
@@ -110,7 +110,7 @@
   {
     "id": 1769878590420,
     "name": "Youtube",
-    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.mm.bing.net%2Fth%2Fid%2FOIP.VNnU-Z4m125quk879joB1QHaHa%3Fpid%3DApi&f=1&ipt=8f8da583ac4fbecb6fdc12b8d26b6a9d937009ac3ec3d413419c3c019ef216de&ipo=images",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/YouTube_full-color_icon_%282017%29.svg/240px-YouTube_full-color_icon_%282017%29.svg.png",
     "grade": "D",
     "category": "Application",
     "color": "bg-[#f7931e]",
@@ -119,7 +119,7 @@
   {
     "id": 1769879213451,
     "name": "Whatsapp",
-    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse3.mm.bing.net%2Fth%2Fid%2FOIP.XIpUoBRFXY_-v2TiT8jlvQHaHa%3Fpid%3DApi&f=1&ipt=1f3424577eae9959792e2cf28446e2bd1e5236e0674de55eaf87f32ea9cf6ac1&ipo=images",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/240px-WhatsApp.svg.png",
     "grade": "D",
     "category": "Application",
     "color": "bg-[#f7931e]",
@@ -128,10 +128,55 @@
   {
     "id": 1769882091205,
     "name": "Google Maps",
-    "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.6Sy3oQw7865LXHFunysiYwHaKo%3Fpid%3DApi&f=1&ipt=06017f79ef398ed988e29e90685ee47037dffdb78a3bf461d97d7118498c13c0&ipo=images",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Google_Maps_Logo_2020.svg/240px-Google_Maps_Logo_2020.svg.png",
     "grade": "D",
     "category": "Application",
     "color": "bg-[#f7931e]",
     "reason": "Application sélectionnée par l'équipe"
+  },
+  {
+    "id": 1770752284182,
+    "name": "Temu",
+    "icon": "https://play-lh.googleusercontent.com/qXgs8VUM9CKZ3qLS28bQo3c1PnK68pWfhLXWFrIl2I80RMO1rwXRU_oocZ6wTBz6JT8=w480-h960",
+    "grade": "E",
+    "category": "E-commerce",
+    "color": "bg-[#f7931e]",
+    "reason": "Collecte massive de données et opacité totale sur les métadonnées."
+  },
+  {
+    "id": 1770752283367,
+    "name": "TikTok",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Ionicons_logo-tiktok.svg/240px-Ionicons_logo-tiktok.svg.png",
+    "grade": "E",
+    "category": "Réseaux Sociaux",
+    "color": "bg-[#f7931e]",
+    "reason": "Transfert de données vers des juridictions non-équivalentes RGPD."
+  },
+  {
+    "id": 1770752284094,
+    "name": "Instagram",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/240px-Instagram_logo_2016.svg.png",
+    "grade": "D",
+    "category": "Réseaux Sociaux",
+    "color": "bg-[#f7931e]",
+    "reason": "Exploitation commerciale des données visuelles pour ciblage publicitaire."
+  },
+  {
+    "id": 1770752283967,
+    "name": "Google Chrome",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Google_Chrome_icon_%28February_2022%29.svg/240px-Google_Chrome_icon_%28February_2022%29.svg.png",
+    "grade": "D",
+    "category": "Navigateur",
+    "color": "bg-[#f7931e]",
+    "reason": "Suivi intensif de l'historique et des habitudes par Google."
+  },
+  {
+    "id": 1770752284282,
+    "name": "OneDrive",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Microsoft_Office_OneDrive_%282019%E2%80%93present%29.svg/240px-Microsoft_Office_OneDrive_%282019%E2%80%93present%29.svg.png",
+    "grade": "D",
+    "category": "Cloud / Stockage",
+    "color": "bg-[#f7931e]",
+    "reason": "Soumis au Cloud Act américain, lecture possible des fichiers."
   }
 ]

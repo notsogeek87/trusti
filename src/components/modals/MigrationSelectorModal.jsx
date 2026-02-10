@@ -1,7 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
-import { APPS_DATA } from '../../constants/appsData';
 
 /**
  * Modal de sélection d'une alternative de migration
@@ -15,20 +14,12 @@ const MigrationSelectorModal = ({
   onSelectApp,
   allApps = [] // Apps à jour (trustiApps uniquement)
 }) => {
-  // Combiner TOUTES les sources d'apps pour les alternatives
-  // APPS_DATA (alternatives statiques) + allApps (trustiApps + starApps dynamiques)
-  const staticAlternatives = APPS_DATA.filter(a => a.id >= 1000); // Alternatives de grade A/B
+  // Utiliser uniquement les apps dynamiques de la BDD
   const dynamicAlternatives = allApps || [];
+  const availableApps = dynamicAlternatives;
   
-  // Fusionner sans doublons (les dynamiques écrasent les statiques)
-  const allAvailableAppsById = new Map();
-  staticAlternatives.forEach(app => allAvailableAppsById.set(app.id, app));
-  dynamicAlternatives.forEach(app => allAvailableAppsById.set(app.id, app));
-  const availableApps = Array.from(allAvailableAppsById.values());
-  
-  // Trouver l'app actuelle dans toutes les sources (APPS_DATA + dynamiques)
-  const allSourceApps = [...APPS_DATA, ...dynamicAlternatives];
-  const currentApp = allSourceApps.find(a => String(a.id) === String(currentAppId));
+  // Trouver l'app actuelle dans les apps dynamiques
+  const currentApp = dynamicAlternatives.find(a => String(a.id) === String(currentAppId));
   const currentCategory = currentApp?.category;
   
   // Filtrer par grade A ou B ET par catégorie (souple : contient la catégorie ou vice versa)

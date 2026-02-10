@@ -1,7 +1,6 @@
 /**
  * Service API pour récupérer les données des applications
  */
-import { APPS_DATA } from '../constants/appsData';
 import { sanitizeApplication, migrateFromOldFormat } from '../models';
 
 // Détection automatique de l'environnement
@@ -43,11 +42,11 @@ export const fetchTrustiApps = async () => {
       return data.apps.map(normalizeApp);
     }
     
-    // Return fallback data if no apps received
-    return APPS_DATA.filter(a => a.id >= 1000).map(normalizeApp);
+    // Retourner un tableau vide si aucune app reçue
+    return [];
   } catch (error) {
     console.error('Error fetching trusti apps from backend:', error);
-    // Return fallback data in case of error
-    return APPS_DATA.filter(a => a.id >= 1000).map(normalizeApp);
+    // Retourner un tableau vide en cas d'erreur
+    return [];
   }
 };

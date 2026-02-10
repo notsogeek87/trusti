@@ -3,7 +3,6 @@ import { useAppManagement } from './hooks/useAppManagement';
 import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
 import { TABS } from './constants/tabs';
-import { APPS_DATA } from './constants/appsData';
 import { Sparkles } from 'lucide-react';
 
 // Layout
@@ -98,8 +97,12 @@ const App = () => {
     // Fermer l'onboarding
     setShowOnboarding(false);
     
-    // Rediriger vers l'onglet "Mes Apps"
-    setActiveTab(TABS.MY_APPS);
+    // Rediriger vers "Mes Apps" si des apps sélectionnées, sinon vers "Applications"
+    if (selectedAppIds && selectedAppIds.size > 0) {
+      setActiveTab(TABS.MY_APPS);
+    } else {
+      setActiveTab(TABS.APPLICATIONS);
+    }
     
     // Scroller en haut de la page
     setTimeout(() => {
@@ -229,24 +232,16 @@ const App = () => {
     // Combiner toutes les apps disponibles (sans doublons par nom)
     const allAppsByName = new Map();
     
-    // Ajouter APPS_DATA
-    APPS_DATA.forEach(app => {
-      const key = app.name.toLowerCase().trim();
-      if (!allAppsByName.has(key)) {
-        allAppsByName.set(key, app);
-      }
-    });
-    
-    // Ajouter starApps (peuvent écraser APPS_DATA si même nom)
+    // Ajouter starApps
     starApps.forEach(app => {
       const key = app.name.toLowerCase().trim();
-      allAppsByName.set(key, app); // Écrase toujours si même nom
+      allAppsByName.set(key, app);
     });
     
-    // Ajouter trustiApps (peuvent écraser si même nom)
+    // Ajouter trustiApps (écrasent si même nom)
     trustiApps.forEach(app => {
       const key = app.name.toLowerCase().trim();
-      allAppsByName.set(key, app); // Écrase toujours si même nom
+      allAppsByName.set(key, app);
     });
     
     const allApps = Array.from(allAppsByName.values()).sort((a, b) => 
