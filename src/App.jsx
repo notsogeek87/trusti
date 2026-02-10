@@ -66,17 +66,17 @@ const App = () => {
   // État pour la page d'onboarding
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  // Vérifier si c'est la première visite au chargement
+  // Afficher le modal de bienvenue si l'utilisateur n'est pas connecté
   useEffect(() => {
-    const hasVisited = localStorage.getItem('trusti_has_visited');
-    if (!hasVisited && !isVerifying) {
+    if (!currentUser && !isVerifying) {
       setShowWelcomeModal(true);
+    } else {
+      setShowWelcomeModal(false);
     }
-  }, [isVerifying]);
+  }, [currentUser, isVerifying]);
 
   // Handler pour "Oui, c'est ma première fois"
   const handleFirstTimeYes = () => {
-    localStorage.setItem('trusti_has_visited', 'true');
     setShowWelcomeModal(false);
     // Afficher la page d'onboarding de sélection des apps
     setShowOnboarding(true);
@@ -84,7 +84,6 @@ const App = () => {
 
   // Handler pour "Non, je connais déjà"
   const handleFirstTimeNo = () => {
-    localStorage.setItem('trusti_has_visited', 'true');
     setShowWelcomeModal(false);
   };
 
@@ -165,6 +164,52 @@ const App = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeTab]);
+
+  // Gérer le bouton retour du smartphone/navigateur
+  useEffect(() => {
+    const handleBackButton = (event) => {
+      // Si un modal de détails est ouvert
+      if (selectedApp) {
+        event.preventDefault();
+        setSelectedApp(null);
+        return;
+      }
+      
+      // Si le modal de migration est ouvert
+      if (showMigrationSelector) {
+        event.preventDefault();
+        setShowMigrationSelector(null);
+        return;
+      }
+      
+      // Si on est sur "Mes Apps", revenir à "Applications"
+      if (activeTab === TABS.MY_APPS) {
+        event.preventDefault();
+        setActiveTab(TABS.APPLICATIONS);
+        return;
+      }
+      
+      // Sinon, laisser le comportement par défaut
+    };
+
+    // Ajouter un état initial dans l'historique
+    if (window.history.state === null) {
+      window.history.pushState({ page: 'trusti' }, '');
+    }
+
+    window.addEventListener('popstate', handleBackButton);
+    
+    return () => {
+      window.removeEventListener('popstate', handleBackButton);
+    };
+  }, [selectedApp, showMigrationSelector, activeTab, setSelectedApp, setShowMigrationSelector, setActiveTab]);
+
+  // Ajouter un état dans l'historique quand on ouvre un modal ou change d'onglet
+  useEffect(() => {
+    if (selectedApp || showMigrationSelector || activeTab === TABS.MY_APPS) {
+      window.history.pushState({ page: 'trusti' }, '');
+    }
+  }, [selectedApp, showMigrationSelector, activeTab]);
 
   // Gérer le déverrouillage admin
   const handleUnlockAdmin = () => {
@@ -295,6 +340,28 @@ const App = () => {
               <p className="text-xs text-purple-700 font-bold flex items-center justify-center gap-2">
                 <Sparkles size={14} className="animate-pulse" />
                 Clique sur une app pour voir ses détails !
+                <Sparkles size={14} className="animate-pulse" />
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Titre pour l'onglet Mes Apps */}
+        {activeTab === TABS.MY_APPS && myApps.size > 0 && (
+          <div className="mb-6 text-center">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <p className="text-xs font-black uppercase tracking-widest text-slate-400">
+                Mes applications
+              </p>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Classées par TrustiScore : du plus mauvais au meilleur
+            </p>
+            {/* Message incitatif */}
+            <div className="mt-3 bg-gradient-to-r from-rose-50 to-amber-50 rounded-2xl p-3 border border-rose-100">
+              <p className="text-xs text-rose-700 font-bold flex items-center justify-center gap-2">
+                <Sparkles size={14} className="animate-pulse" />
+                Les apps à migrer en priorité sont en haut !
                 <Sparkles size={14} className="animate-pulse" />
               </p>
             </div>

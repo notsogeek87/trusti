@@ -205,6 +205,14 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
           }
           return app;
         });
+      
+      // Trier par grade (E > D > C > B > A - du plus mauvais au meilleur) puis par nom
+      const gradeOrder = { 'E': 1, 'D': 2, 'C': 3, 'B': 4, 'A': 5 };
+      list.sort((a, b) => {
+        const gradeCompare = (gradeOrder[a.grade] || 999) - (gradeOrder[b.grade] || 999);
+        if (gradeCompare !== 0) return gradeCompare;
+        return a.name.localeCompare(b.name);
+      });
     }
     
     return list.filter(app => 
