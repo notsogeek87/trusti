@@ -1,5 +1,5 @@
 import React from 'react';
-import { HelpCircle, LogOut, User, RotateCcw, Settings, Lock } from 'lucide-react';
+import { HelpCircle, LogOut, User, RotateCcw, Settings, Lock, Trash2 } from 'lucide-react';
 
 /**
  * Header de l'application
@@ -26,6 +26,19 @@ const Header = ({
           <h1 className="text-sm font-black tracking-tight text-slate-900 leading-none">
             TrustiScore
           </h1>
+          
+          {/* Bouton de test pour vider le localStorage */}
+          <button
+            onClick={() => {
+              localStorage.clear();
+              window.location.reload();
+            }}
+            className="p-1.5 text-xs bg-red-100 hover:bg-red-200 text-red-600 rounded-md transition-all flex items-center gap-1"
+            title="Vider localStorage et recharger (Test)"
+          >
+            <Trash2 size={14} />
+            <span className="text-[10px] font-bold">TEST</span>
+          </button>
         </div>
         
         <div className="flex items-center gap-2 flex-shrink min-w-0">

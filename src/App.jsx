@@ -3,6 +3,7 @@ import { useAppManagement } from './hooks/useAppManagement';
 import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
 import { TABS } from './constants/tabs';
+import { APPS_DATA } from './constants/appsData';
 import { Sparkles } from 'lucide-react';
 
 // Layout
@@ -17,6 +18,7 @@ import ShareButton from './components/ShareButton';
 import LandingPage from './components/LandingPage';
 import VerifyAuth from './components/VerifyAuth';
 import TrustiChatWidget from './components/TrustiChatWidget';
+import OnboardingApps from './components/OnboardingApps';
 
 // Modals
 import AppDetailModal from './components/modals/AppDetailModal';
@@ -26,6 +28,7 @@ import MigrationSelectorModal from './components/modals/MigrationSelectorModal';
 import LoginModal from './components/modals/LoginModal';
 import AdminAppsModal from './components/modals/AdminAppsModal';
 import PinModal from './components/modals/PinModal';
+import WelcomeModal from './components/modals/WelcomeModal';
 
 /**
  * Composant principal de l'application TrustiScore
@@ -55,6 +58,54 @@ const App = () => {
 
   const handleOpenLandingPage = () => {
     setShowLandingPage(true);
+  };
+
+  // État pour le modal de bienvenue (première visite)
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  
+  // État pour la page d'onboarding
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Vérifier si c'est la première visite au chargement
+  useEffect(() => {
+    const hasVisited = localStorage.getItem('trusti_has_visited');
+    if (!hasVisited && !isVerifying) {
+      setShowWelcomeModal(true);
+    }
+  }, [isVerifying]);
+
+  // Handler pour "Oui, c'est ma première fois"
+  const handleFirstTimeYes = () => {
+    localStorage.setItem('trusti_has_visited', 'true');
+    setShowWelcomeModal(false);
+    // Afficher la page d'onboarding de sélection des apps
+    setShowOnboarding(true);
+  };
+
+  // Handler pour "Non, je connais déjà"
+  const handleFirstTimeNo = () => {
+    localStorage.setItem('trusti_has_visited', 'true');
+    setShowWelcomeModal(false);
+  };
+
+  // Handler pour la fin de l'onboarding
+  const handleOnboardingComplete = (selectedAppIds) => {
+    // Ajouter toutes les apps sélectionnées à "Mes Apps"
+    const fakeEvent = { stopPropagation: () => {} };
+    selectedAppIds.forEach(appId => {
+      toggleMyApp(fakeEvent, appId);
+    });
+    
+    // Fermer l'onboarding
+    setShowOnboarding(false);
+    
+    // Rediriger vers l'onglet "Mes Apps"
+    setActiveTab(TABS.MY_APPS);
+    
+    // Scroller en haut de la page
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
   };
 
   // Gestion de l'état des applications (avec sauvegarde utilisateur)
@@ -110,6 +161,11 @@ const App = () => {
     }
   }, [currentUser, getUserData]);
 
+  // Scroller en haut lors du changement d'onglet
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeTab]);
+
   // Gérer le déverrouillage admin
   const handleUnlockAdmin = () => {
     setIsAdminUnlocked(true);
@@ -121,6 +177,43 @@ const App = () => {
   // Afficher la landing page en premier si c'est la première visite
   if (showLandingPage) {
     return <LandingPage onClose={handleCloseLandingPage} />;
+  }
+
+  // Afficher la page d'onboarding de sélection des apps
+  if (showOnboarding) {
+    // Combiner toutes les apps disponibles (sans doublons par nom)
+    const allAppsByName = new Map();
+    
+    // Ajouter APPS_DATA
+    APPS_DATA.forEach(app => {
+      const key = app.name.toLowerCase().trim();
+      if (!allAppsByName.has(key)) {
+        allAppsByName.set(key, app);
+      }
+    });
+    
+    // Ajouter starApps (peuvent écraser APPS_DATA si même nom)
+    starApps.forEach(app => {
+      const key = app.name.toLowerCase().trim();
+      allAppsByName.set(key, app); // Écrase toujours si même nom
+    });
+    
+    // Ajouter trustiApps (peuvent écraser si même nom)
+    trustiApps.forEach(app => {
+      const key = app.name.toLowerCase().trim();
+      allAppsByName.set(key, app); // Écrase toujours si même nom
+    });
+    
+    const allApps = Array.from(allAppsByName.values()).sort((a, b) => 
+      a.name.localeCompare(b.name)
+    );
+    
+    return (
+      <OnboardingApps 
+        allApps={allApps}
+        onComplete={handleOnboardingComplete}
+      />
+    );
   }
 
   // Affichage du détail d'une application
@@ -310,7 +403,7 @@ const App = () => {
           currentSelection={customMigrations.get(showMigrationSelector)}
           onSelect={(altName) => setCustomMigration(showMigrationSelector, altName)}
           onClose={() => setShowMigrationSelector(null)}
-          allApps={trustiApps}
+          allApps={[...trustiApps, ...starApps]}
         />
       )}
 
@@ -326,6 +419,14 @@ const App = () => {
         onClose={() => setShowPinModal(false)}
         onSuccess={handleUnlockAdmin}
       />
+
+      {/* Modal de bienvenue (première visite) */}
+      {showWelcomeModal && (
+        <WelcomeModal
+          onFirstTimeYes={handleFirstTimeYes}
+          onFirstTimeNo={handleFirstTimeNo}
+        />
+      )}
 
       {/* Modal d'administration Apps (TrustiApps et StarApps) */}
       {showAdminModal && (

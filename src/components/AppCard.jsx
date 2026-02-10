@@ -84,7 +84,35 @@ const AppCard = ({
       </div>
       
       {/* Section migration pour "Mes Apps" */}
-      {activeTab === TABS.MY_APPS && app.grade !== "A" && (
+      {activeTab === TABS.MY_APPS && app.grade === "A" && (
+        <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2">
+          <div className="text-2xl">✅</div>
+          <div className="flex-grow">
+            <p className="text-xs font-bold text-emerald-700">
+              TrustiScore au max, tout va bien !
+            </p>
+            <p className="text-[10px] text-emerald-600">
+              Cette application respecte votre souveraineté numérique
+            </p>
+          </div>
+        </div>
+      )}
+      
+      {activeTab === TABS.MY_APPS && app.grade !== "A" && !app.alternative && !customMigration && (
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center gap-2">
+          <div className="text-xl">🔍</div>
+          <div className="flex-grow">
+            <p className="text-xs font-bold text-slate-600">
+              Alternative inconnue pour le moment
+            </p>
+            <p className="text-[10px] text-slate-500">
+              Nous travaillons à identifier les meilleures alternatives
+            </p>
+          </div>
+        </div>
+      )}
+      
+      {activeTab === TABS.MY_APPS && app.grade !== "A" && (app.alternative || customMigration) && (
         <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex items-center justify-between animate-pulse-subtle">
           <div className="flex items-center gap-3 flex-grow min-w-0">
             {app.altIcon && (
