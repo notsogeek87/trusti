@@ -18,10 +18,10 @@
     "id": 1769540682080,
     "name": "Lumo AI",
     "icon": "https://play-lh.googleusercontent.com/z7gZl7kHHzLRE_lKBRdogJ6Q9KT4bFXHGxBm6YxTdJlVxBqxY6MxGxZqZxZqZxZ/s96-rw",
-    "grade": "B",
+    "grade": "A",
     "category": "IA",
-    "color": "bg-[#8dc63f]",
-    "reason": "Application respectueuse de la vie privée",
+    "color": "bg-[#006837]",
+    "reason": "IA de Proton, chiffrement end-to-end. Protection totale de vos données.",
     "replacesAppIds": [
       "com.openai.chatgpt",
       "1769805620267"
@@ -284,5 +284,70 @@
     "playStoreUrl": "",
     "appleStoreUrl": "",
     "websiteUrl": "https://chat.mistral.ai/"
+  },
+  {
+    "id": 1770752500001,
+    "name": "DuckDuckGo AI Chat",
+    "icon": "https://duckduckgo.com/assets/logo_homepage.normal.v108.svg",
+    "grade": "A",
+    "category": "IA",
+    "color": "bg-[#006837]",
+    "reason": "Chat IA anonyme et privé. Accès gratuit à plusieurs modèles IA sans tracking.",
+    "replacesAppIds": ["1769805620267"],
+    "playStoreUrl": "",
+    "appleStoreUrl": "",
+    "websiteUrl": "https://duckduckgo.com/aichat"
+  },
+  {
+    "id": 1770752500002,
+    "name": "Perplexity AI",
+    "icon": "https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/perplexity-ai-icon.png",
+    "grade": "A",
+    "category": "IA",
+    "color": "bg-[#006837]",
+    "reason": "Moteur de recherche IA avec sources citées. Transparent sur les données utilisées.",
+    "replacesAppIds": ["1769805620267"],
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=ai.perplexity.app.android",
+    "appleStoreUrl": "https://apps.apple.com/app/perplexity-ask-anything/id6714467650",
+    "websiteUrl": "https://www.perplexity.ai/"
+  },
+  {
+    "id": 1770752500003,
+    "name": "HuggingChat",
+    "icon": "https://huggingface.co/front/assets/huggingface_logo-noborder.svg",
+    "grade": "A",
+    "category": "IA",
+    "color": "bg-[#006837]",
+    "reason": "Chat IA open-source, accès à de nombreux modèles libres. Communauté collaborative.",
+    "replacesAppIds": ["1769805620267"],
+    "playStoreUrl": "",
+    "appleStoreUrl": "",
+    "websiteUrl": "https://huggingface.co/chat"
+  },
+  {
+    "id": 1770752500004,
+    "name": "Ollama",
+    "icon": "https://github.com/ollama/ollama/blob/main/docs/images/ollama.png?raw=true",
+    "grade": "A",
+    "category": "IA",
+    "color": "bg-[#006837]",
+    "reason": "IA locale sur votre machine. Vos données restent privées, aucune connexion cloud.",
+    "replacesAppIds": ["1769805620267"],
+    "playStoreUrl": "",
+    "appleStoreUrl": "",
+    "websiteUrl": "https://ollama.com/"
+  },
+  {
+    "id": 1770752500005,
+    "name": "You.com",
+    "icon": "https://styles.redditmedia.com/t5_5zf21p/styles/communityIcon_hy8t5jzyyhpa1.png",
+    "grade": "A",
+    "category": "IA",
+    "color": "bg-[#006837]",
+    "reason": "Moteur de recherche avec IA intégrée. Respect de la vie privée et pas de tracking.",
+    "replacesAppIds": ["1769805620267"],
+    "playStoreUrl": "",
+    "appleStoreUrl": "",
+    "websiteUrl": "https://you.com/"
   }
 ]
