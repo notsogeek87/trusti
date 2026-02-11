@@ -57,7 +57,7 @@ const Navigation = ({ activeTab, onTabChange, myAppsCount }) => {
         }`}
       >
         <Award size={22} />
-        <span className="text-[7px] font-black uppercase tracking-widest">Top 20</span>
+        <span className="text-[7px] font-black uppercase tracking-widest">Awards</span>
       </button>
     </nav>
   );

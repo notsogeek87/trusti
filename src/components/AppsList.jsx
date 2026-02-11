@@ -1,6 +1,15 @@
 import React from 'react';
 import AppCard from './AppCard';
 import { TABS } from '../constants/tabs';
+import { CATEGORY_MAPPING } from '../constants/categories';
+
+/**
+ * Normalise une catégorie vers sa catégorie principale
+ */
+const normalizeCategory = (category) => {
+  if (!category) return 'Autre';
+  return CATEGORY_MAPPING[category] || category;
+};
 
 /**
  * Liste des applications
@@ -14,13 +23,23 @@ const AppsList = ({
   onToggleMyApp,
   onToggleMigrate,
   onSelectApp,
-  onSelectMigration
+  onSelectMigration,
+  selectedCategory = 'Toutes'
 }) => {
+  // Filtrer par catégorie dans l'onglet APPLICATIONS
+  let displayApps = apps;
+  if (activeTab === TABS.APPLICATIONS && selectedCategory !== 'Toutes') {
+    displayApps = apps.filter(app => {
+      const normalizedCat = normalizeCategory(app.category);
+      return normalizedCat === selectedCategory;
+    });
+  }
+
   // Pour l'onglet TOP_ALTERNATIVES, grouper par catégorie
   if (activeTab === TABS.TOP_ALTERNATIVES) {
-    // Grouper les apps par catégorie
+    // Grouper les apps par catégorie normalisée
     const appsByCategory = apps.reduce((acc, app) => {
-      const category = app.category || 'Autre';
+      const category = normalizeCategory(app.category);
       if (!acc[category]) {
         acc[category] = [];
       }
@@ -67,7 +86,13 @@ const AppsList = ({
   // Affichage normal pour les autres onglets
   return (
     <div className="space-y-4">
-      {apps.map((app) => (
+      {displayApps.length === 0 && activeTab === TABS.APPLICATIONS && selectedCategory !== 'Toutes' && (
+        <div className="text-center py-8 px-4">
+          <p className="text-slate-500 text-sm mb-2">Aucune application dans cette catégorie</p>
+          <p className="text-slate-400 text-xs">Essayez une autre catégorie ou utilisez la recherche</p>
+        </div>
+      )}
+      {displayApps.map((app) => (
         <AppCard
           key={app.id}
           app={app}

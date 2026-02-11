@@ -3,6 +3,7 @@ import { useAppManagement } from './hooks/useAppManagement';
 import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
 import { TABS } from './constants/tabs';
+import { CATEGORIES } from './constants/categories';
 import { Sparkles } from 'lucide-react';
 
 // Layout
@@ -132,6 +133,9 @@ const App = () => {
     setSelectedApp,
   } = useAppManagement(currentUser, saveUserData, getUserData);
 
+  // État pour le filtre de catégorie dans l'onglet Applications
+  const [selectedCategory, setSelectedCategory] = useState('Toutes');
+
   // Gestion des modales
   const {
     showExplainer,
@@ -163,9 +167,16 @@ const App = () => {
     }
   }, [currentUser, getUserData]);
 
-  // Scroller en haut lors du changement d'onglet
+  // Scroller en haut lors du changement d'onglet ou de catégorie
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeTab, selectedCategory]);
+
+  // Réinitialiser la catégorie lors du changement d'onglet
+  useEffect(() => {
+    if (activeTab !== TABS.APPLICATIONS) {
+      setSelectedCategory('Toutes');
+    }
   }, [activeTab]);
 
   // Gérer le bouton retour du smartphone/navigateur
@@ -313,79 +324,74 @@ const App = () => {
         onRequestAdminUnlock={() => setShowPinModal(true)}
       />
 
-      <main className="max-w-md mx-auto p-4">
+      <main className="max-w-md mx-auto px-4 py-3">
         <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
         {/* Titre pour l'onglet Applications */}
         {activeTab === TABS.APPLICATIONS && (
-          <div className="mb-6 text-center">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <p className="text-xs font-black uppercase tracking-widest text-slate-400">
-                Les applications les plus connues
+          <div className="mb-3 text-center">
+            <div className="flex items-center justify-center gap-2 mb-0.5">
+              <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+                Apps populaires
               </p>
               {(isLoadingStarApps || isLoadingTrustiApps) && (
                 <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
               )}
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">
-              Classées par TrustiScore : du meilleur au moins bon
-            </p>
-            {/* Message incitatif */}
-            <div className="mt-3 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-3 border border-purple-100">
-              <p className="text-xs text-purple-700 font-bold flex items-center justify-center gap-2 mb-2">
-                <Sparkles size={14} className="animate-pulse" />
-                Cherche tes apps et sélectionne-les !
-                <Sparkles size={14} className="animate-pulse" />
-              </p>
-              <p className="text-[10px] text-purple-600">
-                👆 Utilise la recherche pour trouver tes apps du quotidien, puis clique sur ⚡ pour les ajouter à "Mes Apps"
-              </p>
+            {/* Sélecteur de catégorie - scrollable horizontal pour mobile */}
+            <div className="mt-2">
+              <div className="overflow-x-auto scrollbar-hide">
+                <div className="flex gap-1.5 pb-1.5 px-0.5">
+                  {['Toutes', ...CATEGORIES].map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => setSelectedCategory(category)}
+                      className={`
+                        flex-shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition-all
+                        ${
+                          selectedCategory === category
+                            ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md scale-105'
+                            : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300 hover:shadow-sm'
+                        }
+                      `}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}
 
         {/* Titre pour l'onglet Mes Apps */}
         {activeTab === TABS.MY_APPS && myApps.size > 0 && (
-          <div className="mb-6 text-center">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <p className="text-xs font-black uppercase tracking-widest text-slate-400">
-                Mes applications
-              </p>
-            </div>
-            <p className="text-[11px] text-slate-400 mt-1">
-              Classées par TrustiScore : du plus mauvais au meilleur
+          <div className="mb-3 text-center">
+            <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2">
+              Mes applications
             </p>
-            {/* Message incitatif */}
-            <div className="mt-3 bg-gradient-to-r from-rose-50 to-amber-50 rounded-2xl p-3 border border-rose-100">
-              <p className="text-xs text-rose-700 font-bold flex items-center justify-center gap-2">
-                <Sparkles size={14} className="animate-pulse" />
-                Les apps à migrer en priorité sont en haut !
-                <Sparkles size={14} className="animate-pulse" />
+            <div className="bg-gradient-to-r from-rose-50 to-amber-50 rounded-lg p-2 border border-rose-100">
+              <p className="text-[10px] text-rose-700 font-bold">
+                ⚠️ Apps à migrer en priorité en haut
               </p>
             </div>
           </div>
         )}
 
-        {/* Titre pour l'onglet Top 20 Alternatives */}
+        {/* Titre pour l'onglet Nos recommandations */}
         {activeTab === TABS.TOP_ALTERNATIVES && (
-          <div className="mb-6 text-center">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <p className="text-xs font-black uppercase tracking-widest text-slate-400">
-                Top 20 Alternatives
+          <div className="mb-3 text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+                Nos Awards
               </p>
               {(isLoadingStarApps || isLoadingTrustiApps) && (
                 <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
               )}
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">
-              Les meilleures apps (notées A) par catégorie
-            </p>
-            {/* Message incitatif */}
-            <div className="mt-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-3 border border-emerald-100">
-              <p className="text-xs text-emerald-700 font-bold flex items-center justify-center gap-2">
-                <Sparkles size={14} className="animate-pulse" />
-                Découvre les apps les plus respectueuses de ta vie privée !
-                <Sparkles size={14} className="animate-pulse" />
+            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-2 border border-emerald-100">
+              <p className="text-[10px] text-emerald-700 font-bold">
+                ✨ Meilleures apps (notées A) par catégorie
               </p>
             </div>
           </div>
@@ -407,6 +413,7 @@ const App = () => {
           onToggleMigrate={toggleMigrate}
           onSelectApp={setSelectedApp}
           onSelectMigration={setShowMigrationSelector}
+          selectedCategory={selectedCategory}
         />
       </main>
 

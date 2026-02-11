@@ -38,6 +38,16 @@
   .scrollbar-custom-dark::-webkit-scrollbar-thumb:hover {
     background: rgb(71, 85, 105);
   }
+  
+  /* Masquer la scrollbar pour les conteneurs à défilement horizontal (mobile) */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE et Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari et Opera */
+  }
 }
 
 @keyframes pulse-subtle {
