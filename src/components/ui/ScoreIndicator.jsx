@@ -20,15 +20,24 @@ const ScoreIndicator = ({ grade, size = "small" }) => {
   return (
     <div className="flex items-center bg-slate-100 rounded-full p-0.5 h-8 w-24 relative overflow-hidden">
       {GRADES.map((g) => (
-        <div 
-          key={g} 
-          className={`flex-1 h-full flex items-center justify-center transition-all duration-300 ${
-            grade === g 
-              ? `${GRADE_COLORS[g]} text-white scale-110 z-10 rounded-full shadow-md` 
-              : 'text-slate-400'
-          }`}
+        <div
+          key={g}
+          className="relative flex-1 h-full flex items-center justify-center"
         >
-          <span className="text-[10px] font-black">{g}</span>
+          {grade === g && (
+            <div
+              className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${
+                GRADE_COLORS[g]
+              } w-5 h-5 rounded-full shadow-md`}
+            />
+          )}
+          <span
+            className={`relative z-10 text-[10px] font-black transition-colors duration-200 ${
+              grade === g ? 'text-white' : 'text-slate-400'
+            }`}
+          >
+            {g}
+          </span>
         </div>
       ))}
     </div>
