@@ -28,7 +28,7 @@ const ScoreIndicator = ({ grade, size = "small" }) => {
             <div
               className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${
                 GRADE_COLORS[g]
-              } w-5 h-5 rounded-full shadow-md`}
+              } w-4 h-7 rounded-full shadow-md pointer-events-none`}
             />
           )}
           <span
