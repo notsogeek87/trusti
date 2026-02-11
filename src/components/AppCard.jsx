@@ -152,8 +152,8 @@ const AppCard = ({
               </button>
             </div>
           </div>
-          <div className="bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase shrink-0 ml-2">
-            Grade A/B
+          <div className="shrink-0 ml-2">
+            <ScoreIndicator grade={app.altGrade || 'A'} />
           </div>
         </div>
       )}

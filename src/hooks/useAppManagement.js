@@ -198,7 +198,8 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
             return {
               ...app,
               alternative: replacement.name,
-              altIcon: replacement.icon
+              altIcon: replacement.icon,
+              altGrade: replacement.grade
             };
           }
           return app;
