@@ -2,26 +2,7 @@
  * API endpoint pour nettoyer les doublons dans la base de données
  * Usage: GET /api/clean-duplicates?action=list ou GET /api/clean-duplicates?action=delete
  */
-import { neon } from '@neondatabase/serverless';
-
-const sql = neon(process.env.DATABASE_URL);
-
-/**
- * Récupère toutes les applications depuis la base de données
- */
-async function getAllApps() {
-  try {
-    const result = await sql`
-      SELECT id, name, grade, category, icon, description, developer
-      FROM apps
-      ORDER BY name
-    `;
-    return result;
-  } catch (error) {
-    console.error('Error getting apps from database:', error);
-    throw error;
-  }
-}
+import dbService from '../server/database/service-postgres.js';
 
 /**
  * Normalise un nom d'application pour la comparaison
@@ -93,6 +74,16 @@ function findExactDuplicates(apps) {
 }
 
 export default async function handler(req, res) {
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -101,7 +92,7 @@ export default async function handler(req, res) {
 
   try {
     console.log('🔍 Récupération de toutes les applications...');
-    const apps = await getAllApps();
+    const apps = await dbService.getAllApps();
     console.log(`📱 ${apps.length} applications trouvées`);
     
     // Chercher spécifiquement leboncoin
@@ -162,7 +153,7 @@ export default async function handler(req, res) {
       for (const appId of deleteIds) {
         try {
           console.log(`Suppression de ${appId}...`);
-          const result = await sql`DELETE FROM apps WHERE id = ${appId}`;
+          await dbService.deleteApp(appId);
           results.push({ id: appId, status: 'deleted' });
           console.log(`✅ ${appId} supprimé`);
         } catch (error) {
