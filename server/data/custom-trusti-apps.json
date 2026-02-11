@@ -17,7 +17,7 @@
   {
     "id": 1769540682080,
     "name": "Lumo AI",
-    "icon": "https://play-lh.googleusercontent.com/z7gZl7kHHzLRE_lKBRdogJ6Q9KT4bFXHGxBm6YxTdJlVxBqxY6MxGxZqZxZqZxZ/s96-rw",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Proton_Technologies_AG_logo.svg/120px-Proton_Technologies_AG_logo.svg.png",
     "grade": "A",
     "category": "IA",
     "color": "bg-[#006837]",
@@ -275,7 +275,7 @@
   {
     "id": 1770752284146,
     "name": "Mistral (Le Chat)",
-    "icon": "https://avatars.githubusercontent.com/u/132372032?s=200&v=4",
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Mistral_AI_logo.svg/120px-Mistral_AI_logo.svg.png",
     "grade": "A",
     "category": "IA",
     "color": "bg-[#006837]",
@@ -288,7 +288,7 @@
   {
     "id": 1770752500001,
     "name": "DuckDuckGo AI Chat",
-    "icon": "https://duckduckgo.com/assets/logo_homepage.normal.v108.svg",
+    "icon": "https://upload.wikimedia.org/wikipedia/en/9/90/The_DuckDuckGo_Duck.png",
     "grade": "A",
     "category": "IA",
     "color": "bg-[#006837]",
@@ -301,7 +301,7 @@
   {
     "id": 1770752500002,
     "name": "Perplexity AI",
-    "icon": "https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/perplexity-ai-icon.png",
+    "icon": "https://pbs.twimg.com/profile_images/1730656471172317184/QmM_u9ql_400x400.jpg",
     "grade": "A",
     "category": "IA",
     "color": "bg-[#006837]",
@@ -314,7 +314,7 @@
   {
     "id": 1770752500003,
     "name": "HuggingChat",
-    "icon": "https://huggingface.co/front/assets/huggingface_logo-noborder.svg",
+    "icon": "https://avatars.githubusercontent.com/u/25720743?s=200&v=4",
     "grade": "A",
     "category": "IA",
     "color": "bg-[#006837]",
@@ -327,7 +327,7 @@
   {
     "id": 1770752500004,
     "name": "Ollama",
-    "icon": "https://github.com/ollama/ollama/blob/main/docs/images/ollama.png?raw=true",
+    "icon": "https://avatars.githubusercontent.com/u/151674099?s=200&v=4",
     "grade": "A",
     "category": "IA",
     "color": "bg-[#006837]",
@@ -340,7 +340,7 @@
   {
     "id": 1770752500005,
     "name": "You.com",
-    "icon": "https://styles.redditmedia.com/t5_5zf21p/styles/communityIcon_hy8t5jzyyhpa1.png",
+    "icon": "https://pbs.twimg.com/profile_images/1669403207969579008/JlcZ7z_v_400x400.jpg",
     "grade": "A",
     "category": "IA",
     "color": "bg-[#006837]",
