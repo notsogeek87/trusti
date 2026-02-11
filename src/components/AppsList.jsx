@@ -7,8 +7,8 @@ import { CATEGORY_MAPPING } from '../constants/categories';
  * Normalise une catégorie vers sa catégorie principale
  */
 const normalizeCategory = (category) => {
-  if (!category) return 'Autre';
-  return CATEGORY_MAPPING[category] || category;
+  if (!category) return 'Divers';
+  return CATEGORY_MAPPING[category] || 'Divers';
 };
 
 /**

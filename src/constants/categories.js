@@ -16,7 +16,12 @@ export const CATEGORIES = [
   'Santé & Sport',
   'Navigation',
   'Jeux',
-  'Autre'
+  'Éducation',
+  'Utilitaires',
+  'Tech & Dev',
+  'Créativité',
+  'News & Info',
+  'Divers'
 ];
 
 /**
@@ -76,15 +81,29 @@ export const CATEGORY_MAPPING = {
   'Navigation GPS': 'Navigation',
   'Cartographie': 'Navigation',
   
-  // Autres
+  // IA
   'IA': 'IA',
-  'Éducation': 'Autre',
+  
+  // Jeux
   'Jeux': 'Jeux',
-  'Utilitaires': 'Autre',
-  'Développement': 'Autre',
-  'Design': 'Autre',
-  'Agrégateurs RSS': 'Autre',
-  'Autre': 'Autre',
-  'Application': 'Autre',
+  
+  // Éducation
+  'Éducation': 'Éducation',
+  
+  // Utilitaires
+  'Utilitaires': 'Utilitaires',
+  
+  // Tech & Dev
+  'Développement': 'Tech & Dev',
+  
+  // Créativité
+  'Design': 'Créativité',
+  
+  // News & Info
+  'Agrégateurs RSS': 'News & Info',
+  
+  // Divers (catégories génériques non classées)
+  'Autre': 'Divers',
+  'Application': 'Divers',
   'Navigateur': 'Réseaux sociaux'
 };
