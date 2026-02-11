@@ -95,6 +95,7 @@ export const CATEGORY_MAPPING = {
   
   // Tech & Dev
   'Développement': 'Tech & Dev',
+  'Tech & Dev': 'Tech & Dev',
   
   // Créativité
   'Design': 'Créativité',
@@ -102,8 +103,6 @@ export const CATEGORY_MAPPING = {
   // News & Info
   'Agrégateurs RSS': 'News & Info',
   
-  // Divers (catégories génériques non classées)
-  'Autre': 'Divers',
-  'Application': 'Divers',
+  // Divers (catégories génériques non classées - normalement vide maintenant)
   'Navigateur': 'Réseaux sociaux'
 };
