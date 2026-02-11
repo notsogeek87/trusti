@@ -33,6 +33,7 @@ export const CATEGORY_MAPPING = {
   'Email': 'Communication',
   'Messagerie': 'Communication',
   'Visioconférence': 'Communication',
+  'Communication': 'Communication',
   
   // Réseaux sociaux
   'Réseaux sociaux': 'Réseaux sociaux',
@@ -44,6 +45,7 @@ export const CATEGORY_MAPPING = {
   'VPN': 'Sécurité & VPN',
   'Gestionnaires de Mots de Passe': 'Sécurité & VPN',
   'Chiffrement & Sécurité': 'Sécurité & VPN',
+  'Sécurité & VPN': 'Sécurité & VPN',
   
   // Productivité
   'Stockage Cloud': 'Productivité',
@@ -57,10 +59,12 @@ export const CATEGORY_MAPPING = {
   'Podcasts': 'Multimédia',
   'Lecteurs Multimédia': 'Multimédia',
   'Photo & Vidéo': 'Multimédia',
+  'Multimédia': 'Multimédia',
   
   // Finance
   'Banque & Finance': 'Finance',
   'Paiement Mobile': 'Finance',
+  'Finance': 'Finance',
   
   // Transport & Voyage
   'Transport & Mobilité': 'Transport & Voyage',
@@ -71,6 +75,7 @@ export const CATEGORY_MAPPING = {
   'Petites Annonces': 'Shopping',
   'Anti-gaspillage': 'Shopping',
   'Livraison de Repas': 'Shopping',
+  'Shopping': 'Shopping',
   
   // Santé
   'Santé & Médical': 'Santé & Sport',
@@ -80,6 +85,7 @@ export const CATEGORY_MAPPING = {
   // Navigation
   'Navigation GPS': 'Navigation',
   'Cartographie': 'Navigation',
+  'Navigation': 'Navigation',
   
   // IA
   'IA': 'IA',
