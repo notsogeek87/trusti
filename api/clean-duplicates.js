@@ -2,10 +2,26 @@
  * API endpoint pour nettoyer les doublons dans la base de données
  * Usage: GET /api/clean-duplicates?action=list ou GET /api/clean-duplicates?action=delete
  */
-import { getAllApps } from '../../server/database/service-postgres.js';
 import { neon } from '@neondatabase/serverless';
 
 const sql = neon(process.env.DATABASE_URL);
+
+/**
+ * Récupère toutes les applications depuis la base de données
+ */
+async function getAllApps() {
+  try {
+    const result = await sql`
+      SELECT id, name, grade, category, icon, description, developer
+      FROM apps
+      ORDER BY name
+    `;
+    return result;
+  } catch (error) {
+    console.error('Error getting apps from database:', error);
+    throw error;
+  }
+}
 
 /**
  * Normalise un nom d'application pour la comparaison
@@ -86,6 +102,14 @@ export default async function handler(req, res) {
   try {
     console.log('🔍 Récupération de toutes les applications...');
     const apps = await getAllApps();
+    console.log(`📱 ${apps.length} applications trouvées`);
+    
+    // Chercher spécifiquement leboncoin
+    const leboncoinApps = apps.filter(app => 
+      app.name && app.name.toLowerCase().includes('leboncoin')
+    );
+    
+    console.log('🔍 Applications leboncoin trouvées:', leboncoinApps.map(app => ({ id: app.id, name: app.name })));
     
     // Chercher les doublons exacts
     const exactDuplicates = findExactDuplicates(apps);
@@ -93,18 +117,15 @@ export default async function handler(req, res) {
     // Chercher les similaires  
     const similarApps = findSimilar(apps);
     
-    // Cas spécifique: leboncoin
-    const leboncoinApps = apps.filter(app => 
-      normalizeName(app.name).includes('leboncoin')
-    );
-    
-    const leboncoinDuplicates = leboncoinApps.length > 1 ? leboncoinApps.filter(app => 
-      app.name !== 'Leboncoin' && normalizeName(app.name).includes('leboncoin')
+    // Cas spécifique: leboncoin - garder seulement "Leboncoin"
+    const leboncoinDuplicates = leboncoinApps.filter(app => 
+      app.name !== 'Leboncoin'
     ).map(app => ({
       original: { name: 'Leboncoin' },
       duplicate: { id: app.id, name: app.name },
-      shouldDelete: app.id
-    })) : [];
+      shouldDelete: app.id,
+      reason: 'leboncoin variant'
+    }));
 
     const allDuplicates = [
       ...exactDuplicates,
@@ -112,10 +133,13 @@ export default async function handler(req, res) {
       ...leboncoinDuplicates
     ];
 
+    console.log('📋 Doublons détectés:', allDuplicates);
+
     if (action === 'list') {
       return res.json({
         total: apps.length,
         duplicates: allDuplicates.length,
+        leboncoinApps: leboncoinApps.map(app => ({ id: app.id, name: app.name })),
         details: {
           exact: exactDuplicates,
           similar: similarApps,
@@ -127,23 +151,32 @@ export default async function handler(req, res) {
     if (action === 'delete') {
       const deleteIds = [...new Set(allDuplicates.map(d => d.shouldDelete))];
       
+      console.log('🗑️ IDs à supprimer:', deleteIds);
+      
       if (deleteIds.length === 0) {
         return res.json({ message: 'Aucun doublon à supprimer', deleted: 0 });
       }
 
-      // Supprimer les doublons
+      // Supprimer les doublons un par un
       const results = [];
       for (const appId of deleteIds) {
         try {
-          await sql`DELETE FROM apps WHERE id = ${appId}`;
+          console.log(`Suppression de ${appId}...`);
+          const result = await sql`DELETE FROM apps WHERE id = ${appId}`;
           results.push({ id: appId, status: 'deleted' });
+          console.log(`✅ ${appId} supprimé`);
         } catch (error) {
+          console.error(`❌ Erreur suppression ${appId}:`, error);
           results.push({ id: appId, status: 'error', error: error.message });
         }
       }
 
+      const deletedCount = results.filter(r => r.status === 'deleted').length;
+      console.log(`🎉 ${deletedCount} doublons supprimés au total`);
+
       return res.json({
-        message: `${results.filter(r => r.status === 'deleted').length} doublons supprimés`,
+        message: `${deletedCount} doublons supprimés`,
+        total_attempted: deleteIds.length,
         results
       });
     }
@@ -153,10 +186,11 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Erreur:', error);
+    console.error('❌ Erreur dans clean-duplicates:', error);
     return res.status(500).json({ 
       error: 'Erreur serveur', 
-      details: error.message 
+      details: error.message,
+      stack: error.stack 
     });
   }
 }
