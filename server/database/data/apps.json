@@ -222,7 +222,7 @@
       "trustiScore": "A",
       "grade": "A",
       "category": "Photo & Vidéo",
-      "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse3.mm.bing.net%2Fth%2Fid%2FOIP.7zKngYWLEiK8BRKv555l_wAAAA%3Fpid%3DApi&f=1&ipt=5dd64c5bc9b2927a708aa4b954bddc339fa22796d8236240587a542f5e782615&ipo=images",
+      "icon": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse3.mm.bing.net%2Fth%2Fid%2FOIP.7zKngYWLEiK8BRKv555l_wAAAA%3Fpid%3DApi&f=1&ipt=5dd64c5bc9b2927a708aa4b954bddc339fa22796d82362405877a542f5e782615&ipo=images",
       "color": "bg-[#006837]",
       "reason": "Application respectueuse de la vie privée",
       "playStoreUrl": "https://play.google.com/store/apps/details?id=io.ente.photos",
@@ -456,6 +456,7 @@
       "privacyFeatures": {},
       "alternativeAppIds": [],
       "replacesAppIds": [],
+      "showInAwards": true,
       "createdAt": "2026-02-08T13:36:45.006Z",
       "updatedAt": "2026-02-08T13:36:45.006Z"
     },
@@ -1725,6 +1726,7 @@
       "privacyFeatures": {},
       "alternativeAppIds": [],
       "replacesAppIds": [],
+      "showInAwards": false,
       "createdAt": "2026-02-10T20:29:06.360Z",
       "updatedAt": "2026-02-10T20:29:06.360Z"
     },
