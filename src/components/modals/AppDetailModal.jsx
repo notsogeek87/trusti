@@ -264,7 +264,9 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                         <h4 className="font-black text-sm text-slate-900">{alt.name}</h4>
                         <p className="text-[11px] text-slate-500 line-clamp-1">{alt.reason}</p>
                       </div>
-                      <ScoreIndicator grade={alt.grade} />
+                      <div className="shrink-0">
+                        <ScoreIndicator grade={alt.grade} />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -309,7 +311,9 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                       <h4 className="font-black text-sm text-slate-900">{replaced.name}</h4>
                       <p className="text-[11px] text-slate-500 line-clamp-1">{replaced.reason}</p>
                     </div>
-                    <ScoreIndicator grade={replaced.grade} />
+                    <div className="shrink-0">
+                      <ScoreIndicator grade={replaced.grade} />
+                    </div>
                   </div>
                 ))}
               </div>
