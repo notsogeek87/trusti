@@ -21,7 +21,8 @@ const AdminStarAppsModal = ({ onClose, isEmbedded = false }) => {
     logo: '',
     grade: 'A',
     category: 'Application',
-    description: ''
+    description: '',
+    showInAwards: true
   });
 
   const [isAdding, setIsAdding] = useState(false);
@@ -63,7 +64,8 @@ const AdminStarAppsModal = ({ onClose, isEmbedded = false }) => {
       category: editingApp.category || 'Application',
       color: getGradeColor(editingApp.grade),
       reason: editingApp.description || 'Application sélectionnée par l\'équipe',
-      appType: 'star'
+      appType: 'star',
+      showInAwards: editingApp.showInAwards !== false
     };
 
     try {
@@ -84,7 +86,8 @@ const AdminStarAppsModal = ({ onClose, isEmbedded = false }) => {
           logo: '',
           grade: 'A',
           category: 'Application',
-          description: ''
+          description: '',
+          showInAwards: true
         });
         setIsAdding(false);
       } else {
@@ -136,7 +139,8 @@ const AdminStarAppsModal = ({ onClose, isEmbedded = false }) => {
       logo: app.icon,
       grade: app.grade,
       category: app.category,
-      description: app.reason
+      description: app.reason,
+      showInAwards: app.showInAwards !== false
     });
     setIsAdding(true);
   };
@@ -275,6 +279,24 @@ const AdminStarAppsModal = ({ onClose, isEmbedded = false }) => {
                     />
                   </div>
 
+                  {/* Afficher dans Awards */}
+                  {editingApp.grade === 'A' && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editingApp.showInAwards !== false}
+                          onChange={(e) => setEditingApp({...editingApp, showInAwards: e.target.checked})}
+                          className="w-4 h-4 text-amber-600 rounded focus:ring-2 focus:ring-amber-500"
+                        />
+                        <div className="flex-1">
+                          <span className="text-sm font-bold text-amber-900">🏆 Afficher dans l'onglet Awards</span>
+                          <p className="text-xs text-amber-700 mt-0.5">Les apps de grade A peuvent être mises en avant dans les Awards</p>
+                        </div>
+                      </label>
+                    </div>
+                  )}
+
                   {/* Boutons */}
                   <div className="flex gap-3 pt-4">
                     <button
@@ -295,7 +317,7 @@ const AdminStarAppsModal = ({ onClose, isEmbedded = false }) => {
                     <button
                       type="button"
                       onClick={() => {
-                        setEditingApp({name: '', logo: '', grade: 'A', category: 'Application', description: ''});
+                        setEditingApp({name: '', logo: '', grade: 'A', category: 'Application', description: '', showInAwards: true});
                         setIsAdding(false);
                       }}
                       disabled={isSaving}
@@ -347,6 +369,13 @@ const AdminStarAppsModal = ({ onClose, isEmbedded = false }) => {
                   <div className={`${app.color} w-7 h-7 rounded-lg flex items-center justify-center font-black text-white shrink-0 text-sm`}>
                     {app.grade}
                   </div>
+
+                  {/* Badge Awards */}
+                  {app.grade === 'A' && app.showInAwards !== false && (
+                    <div className="shrink-0" title="Affiché dans Awards">
+                      <span className="text-amber-500 text-lg">🏆</span>
+                    </div>
+                  )}
 
                   {/* Actions */}
                   <div className="flex gap-1.5 shrink-0">

@@ -32,6 +32,9 @@ CREATE TABLE IF NOT EXISTS applications (
   -- Type d'application
   appType TEXT DEFAULT 'regular' CHECK(appType IN ('regular', 'trusti', 'star')),
   
+  -- Afficher dans l'onglet Awards
+  showInAwards INTEGER DEFAULT 1,
+  
   -- Privacy features (JSON stocké comme TEXT)
   privacyFeatures TEXT,
   

@@ -222,9 +222,9 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
         appsById.set(app.id, app);
       });
       
-      // Filtrer uniquement les apps avec grade A
+      // Filtrer uniquement les apps avec grade A ET showInAwards activé
       list = Array.from(appsById.values())
-        .filter(app => app.grade === 'A');
+        .filter(app => app.grade === 'A' && app.showInAwards !== false);
       
       // Trier par catégorie puis par nom
       list.sort((a, b) => {
