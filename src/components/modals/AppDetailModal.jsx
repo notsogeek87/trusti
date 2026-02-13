@@ -111,7 +111,8 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
             {app.icon && app.icon.startsWith('http') ? (
               <img 
                 src={app.icon} 
-                alt={app.name} 
+                alt={app.name}
+                loading="lazy"
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -251,7 +252,8 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                         {alt.icon && alt.icon.startsWith('http') ? (
                           <img 
                             src={alt.icon} 
-                            alt={alt.name} 
+                            alt={alt.name}
+                            loading="lazy"
                             className="w-full h-full object-cover"
                           />
                         ) : (
@@ -298,7 +300,8 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                       {replaced.icon && replaced.icon.startsWith('http') ? (
                         <img 
                           src={replaced.icon} 
-                          alt={replaced.name} 
+                          alt={replaced.name}
+                          loading="lazy"
                           className="w-full h-full object-cover"
                         />
                       ) : (

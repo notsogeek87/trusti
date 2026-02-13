@@ -96,7 +96,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     // Recharger régulièrement pour détecter les modifications par l'admin
     const intervalId = setInterval(() => {
       loadTrustiApps();
-    }, 10000); // Vérifier toutes les 10 secondes
+    }, 30000); // Vérifier toutes les 30 secondes
     
     return () => {
       clearInterval(intervalId);
@@ -135,7 +135,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     // Recharger régulièrement pour détecter les modifications par l'admin
     const intervalId = setInterval(() => {
       loadStarApps();
-    }, 10000); // Vérifier toutes les 10 secondes
+    }, 30000); // Vérifier toutes les 30 secondes
     
     return () => {
       clearInterval(intervalId);

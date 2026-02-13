@@ -5,8 +5,9 @@ import { TABS } from '../constants/tabs';
 
 /**
  * Carte d'application dans la liste
+ * Mémoïsé pour éviter les re-rendus inutiles
  */
-const AppCard = ({ 
+const AppCard = React.memo(({ 
   app, 
   activeTab,
   isInMyApps,
@@ -28,6 +29,7 @@ const AppCard = ({
             <img 
               src={app.icon} 
               alt={app.name} 
+              loading="lazy"
               className="w-full h-full object-cover"
             />
           ) : (
@@ -159,6 +161,8 @@ const AppCard = ({
       )}
     </div>
   );
-};
+});
+
+AppCard.displayName = 'AppCard';
 
 export default AppCard;
