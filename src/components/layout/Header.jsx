@@ -14,6 +14,9 @@ const Header = ({
   isAdminUnlocked,
   onRequestAdminUnlock
 }) => {
+  // Détection de l'environnement local
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  
   return (
     <header className="bg-white border-b border-slate-100 sticky top-0 z-30 shadow-sm">
       <div className="max-w-md mx-auto px-4 py-1 flex items-center justify-between gap-2">
@@ -39,14 +42,16 @@ const Header = ({
               
               {/* Bouton Lock ou Settings selon déverrouillage admin */}
               {isAdminUnlocked ? (
+                // Déverrouillé : roue crantée (Settings) partout
                 <button
                   onClick={onOpenAdmin}
-                  className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all"
-                  title="Administration Alternatives"
+                  className="p-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-full transition-all"
+                  title="Administration des Applications"
                 >
                   <Settings size={18} />
                 </button>
               ) : (
+                // Verrouillé : cadenas (Lock) partout
                 <button
                   onClick={onRequestAdminUnlock}
                   className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-all"
@@ -72,13 +77,26 @@ const Header = ({
               </button>
             </div>
           ) : (
-            <button
-              onClick={onLogin}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2"
-            >
-              <User size={16} />
-              Se connecter
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onLogin}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2"
+              >
+                <User size={16} />
+                Se connecter
+              </button>
+              
+              {/* Cadenas visible en local même sans connexion */}
+              {isLocal && (
+                <button
+                  onClick={onRequestAdminUnlock}
+                  className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-all"
+                  title="Mode Admin (connexion requise)"
+                >
+                  <Lock size={18} />
+                </button>
+              )}
+            </div>
           )}
           
           {/* Bouton d'aide */}

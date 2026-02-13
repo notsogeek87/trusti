@@ -159,13 +159,21 @@ const App = () => {
 
   // Charger l'état de déverrouillage admin au changement d'utilisateur
   useEffect(() => {
-    if (currentUser && getUserData) {
-      const adminUnlocked = getUserData('admin_unlocked');
-      setIsAdminUnlocked(!!adminUnlocked);
+    if (currentUser) {
+      // Si c'est l'admin local, toujours déverrouillé
+      if (currentUser.email === 'admin@local' || currentUser === 'admin@local') {
+        setIsAdminUnlocked(true);
+        if (saveUserData) {
+          saveUserData('admin_unlocked', true);
+        }
+      } else if (getUserData) {
+        const adminUnlocked = getUserData('admin_unlocked');
+        setIsAdminUnlocked(!!adminUnlocked);
+      }
     } else {
       setIsAdminUnlocked(false);
     }
-  }, [currentUser, getUserData]);
+  }, [currentUser, getUserData, saveUserData]);
 
   // Scroller en haut lors du changement d'onglet ou de catégorie
   useEffect(() => {
@@ -226,11 +234,24 @@ const App = () => {
   }, [selectedApp, showMigrationSelector, activeTab]);
 
   // Gérer le déverrouillage admin
-  const handleUnlockAdmin = () => {
-    setIsAdminUnlocked(true);
-    if (saveUserData) {
-      saveUserData('admin_unlocked', true);
+  const handleUnlockAdmin = async () => {
+    // En local sans utilisateur connecté, connecter automatiquement un admin local
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    
+    if (isLocal && !currentUser) {
+      // Connexion automatique en tant qu'admin local
+      // Le useEffect se chargera de définir isAdminUnlocked après la connexion
+      await login('admin@local');
+    } else {
+      // Utilisateur déjà connecté : déverrouiller directement
+      setIsAdminUnlocked(true);
+      if (saveUserData) {
+        saveUserData('admin_unlocked', true);
+      }
     }
+    
+    // Fermer le modal PIN
+    setShowPinModal(false);
   };
 
   // Afficher la landing page en premier si c'est la première visite
