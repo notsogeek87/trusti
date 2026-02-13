@@ -1,0 +1,241 @@
+=== RAPPORT DE MISE À JOUR DES ICÔNES ===
+Date: 2026-02-13T18:48:15.963Z
+Total traité: 116
+
+✅ SUCCÈS (1):
+  - Doctolib (doctolib)
+    Nouvelle icône: https://play-lh.googleusercontent.com/5mfgTn0SHVnTcjRS5V1vMYeNZ7Wjn2Y1YX5xq1jKq3AN5k3SMF9dcz3dLT4HiK4n7Ls
+
+❌ ÉCHECS (0):
+
+⚠️  IGNORÉS (115):
+  - Adobe Acrobat Reader: Edit PDF (app_1770825759096_a70v3dc59)
+    Raison: No valid Play Store URL
+  - AliExpress - Shopping App (app_1770825800428_ycbkuwpjh)
+    Raison: No valid Play Store URL
+  - Alibaba.com - B2B marketplace (app_1770825803858_cjrxsizsf)
+    Raison: No valid Play Store URL
+  - Android Accessibility Suite (app_1770825768298_s5kuh23rn)
+    Raison: No valid Play Store URL
+  - Audiomack: Music Downloader (app_1770825770148_zbz9zykl7)
+    Raison: No valid Play Store URL
+  - B612 AI Photo&Video Editor (app_1770825794036_hjss1d0iv)
+    Raison: No valid Play Store URL
+  - Bath & Body Works (app_1770825807960_ufot67j5c)
+    Raison: No valid Play Store URL
+  - BeReal. Your friends for real. (app_1770825752659_v1q9eago9)
+    Raison: No valid Play Store URL
+  - BeautyPlus-Selfie Photo Editor (app_1770825797607_wihji5he8)
+    Raison: No valid Play Store URL
+  - BookMyShow | Movies & Events (app_1770825781917_7e2kjwpx7)
+    Raison: No valid Play Store URL
+  - Boosted Time Tracker (app_1770825764963_uqsze73cy)
+    Raison: No valid Play Store URL
+  - CamScanner- scanner, PDF maker (app_1770825765435_93kkkgffz)
+    Raison: No valid Play Store URL
+  - Canva: AI Photo & Video Editor (app_1770825788594_sat7dxsru)
+    Raison: No valid Play Store URL
+  - Chai: Chat AI Platform (app_1770825781468_wfesaukpp)
+    Raison: No valid Play Store URL
+  - Character AI: Chat, Talk, Text (app_1770825777036_swtjjfh1l)
+    Raison: No valid Play Store URL
+  - Clapper: Video, Live, Chat (app_1770825756592_hnmko4dpn)
+    Raison: No valid Play Store URL
+  - Cleanup: Phone Storage Cleaner (app_1770825766513_rwna8fr8d)
+    Raison: No valid Play Store URL
+  - Collage Maker | Photo Editor (app_1770825797286_1ftis86ag)
+    Raison: No valid Play Store URL
+  - Contacts (app_1770825748821_ajbsklzhs)
+    Raison: No valid Play Store URL
+  - Crunchyroll: Anime Streaming (app_1770825780511_q8urgruun)
+    Raison: No valid Play Store URL
+  - Disney+ (app_1770825775649_c50fi2639)
+    Raison: No valid Play Store URL
+  - Dollar General-Digital Coupons (app_1770825807611_8eb1y6eou)
+    Raison: No valid Play Store URL
+  - DuckDuckGo, Duck.ai (optional) (app_1770825773593_ckjlu9lx8)
+    Raison: No valid Play Store URL
+  - Etsy: Shop Home, Style & More (app_1770825799674_jz2mxml77)
+    Raison: No valid Play Store URL
+  - FaceApp: Perfect Face Editor (app_1770825794769_otx1mawp9)
+    Raison: No valid Play Store URL
+  - Fashion Nova: Trendy Shopping (app_1770825802810_wzqv4ms5h)
+    Raison: No valid Play Store URL
+  - Fetch: America’s Rewards App (app_1770825808260_nu7x4mls4)
+    Raison: No valid Play Store URL
+  - Flipkart Online Shopping App (app_1770825801043_etm3iaxou)
+    Raison: No valid Play Store URL
+  - Focus To-Do: Pomodoro & Tasks (app_1770825760111_c25g5x2y1)
+    Raison: No valid Play Store URL
+  - Forest: Focus for Productivity (app_1770825758573_sdb288so4)
+    Raison: No valid Play Store URL
+  - Gallery (app_1770825789754_mll1ozz1b)
+    Raison: No valid Play Store URL
+  - Google.com (1769805919501)
+    Raison: No valid Play Store URL
+  - GroupMe (app_1770825747010_74lftxlie)
+    Raison: No valid Play Store URL
+  - HBO Max: Stream TV & Movies (app_1770825776601_qw55xyzd8)
+    Raison: No valid Play Store URL
+  - HD Video Player All Formats (app_1770825785870_k3jply57a)
+    Raison: No valid Play Store URL
+  - Hollister Co. (app_1770825803475_d9dmxh3k7)
+    Raison: No valid Play Store URL
+  - Hulu: Stream TV shows & movies (app_1770825784104_plqwtnehg)
+    Raison: No valid Play Store URL
+  - Hypic - Photo Editor & AI Art (app_1770825795858_5dultjvee)
+    Raison: No valid Play Store URL
+  - Journal it! Productivity, Note (app_1770825763426_kj80eucbz)
+    Raison: No valid Play Store URL
+  - JusTalk Kids - Safe Messenger (app_1770825750312_dmheoaa34)
+    Raison: No valid Play Store URL
+  - KMPlayer - All Video Player (app_1770825784871_6q4ultwth)
+    Raison: No valid Play Store URL
+  - Kohl's - Shopping & More (app_1770825803175_mlccz4e9d)
+    Raison: No valid Play Store URL
+  - Kwai - Cool Video & Social Fun (app_1770825754095_k0z9sy103)
+    Raison: No valid Play Store URL
+  - LINE Camera - Photo editor (app_1770825797990_7j4cp242z)
+    Raison: No valid Play Store URL
+  - LINE: Calls & Messages (app_1770825744790_ykkz29eou)
+    Raison: No valid Play Store URL
+  - Lazada | All Shipping On Us (app_1770825805409_0f0z84854)
+    Raison: No valid Play Store URL
+  - Lightroom Photo & Video Editor (app_1770825790807_37k17ubzi)
+    Raison: No valid Play Store URL
+  - Meesho: Online Shopping App (app_1770825805760_q5p4yw7om)
+    Raison: No valid Play Store URL
+  - Meetup: Social Events & Groups (app_1770825751826_bbt53psby)
+    Raison: No valid Play Store URL
+  - Meitu- AI Photo & Video Editor (app_1770825795491_3c6kyuha4)
+    Raison: No valid Play Store URL
+  - Mercado Libre: Compras online (app_1770825802460_mjudnfujc)
+    Raison: No valid Play Store URL
+  - Messenger (app_1770825745319_s7tu4atl7)
+    Raison: No valid Play Store URL
+  - Messenger Kids – The Messaging (app_1770825746467_9jylbq7f2)
+    Raison: No valid Play Store URL
+  - Myntra - Fashion Shopping App (app_1770825802108_je8tedjpz)
+    Raison: No valid Play Store URL
+  - N26 — La banque qu'on adore (app_1770825808627_mnfy4yr07)
+    Raison: No valid Play Store URL
+  - NOVA Video Player (app_1770825785536_xi3lov238)
+    Raison: No valid Play Store URL
+  - Notion: Notes, Tasks, AI (app_1770825762747_0vzkh4zmk)
+    Raison: No valid Play Store URL
+  - OK: Social Network (app_1770825752242_2aqqkshm6)
+    Raison: No valid Play Store URL
+  - OZON: товары, одежда, билеты (app_1770825807309_1sagaiou0)
+    Raison: No valid Play Store URL
+  - OfferUp - Buy. Sell. Local. (app_1770825806945_ljl0jt9i4)
+    Raison: No valid Play Store URL
+  - Opera: Private Web Browser (app_1770825772357_5krpdcgab)
+    Raison: No valid Play Store URL
+  - Orange et moi France (app_1770825809276_cxz6ek8hc)
+    Raison: No valid Play Store URL
+  - Paramount+ (app_1770825779370_55oawz6rx)
+    Raison: No valid Play Store URL
+  - Peacock TV: Stream TV & Movies (app_1770825782369_lhdsozenp)
+    Raison: No valid Play Store URL
+  - Philo: Shows, Movies, Live TV. (app_1770825779072_av0me4msu)
+    Raison: No valid Play Store URL
+  - Photoroom: AI Photo Editor (app_1770825792755_sxld9iujy)
+    Raison: No valid Play Store URL
+  - Photoshop Express Photo Editor (app_1770825791455_a52oa7n2k)
+    Raison: No valid Play Store URL
+  - Picsart AI Photo Editor, Video (app_1770825789437_z2u9netcl)
+    Raison: No valid Play Store URL
+  - PlutoTV: Live TV & Free Movies (app_1770825783371_4ioydfgzx)
+    Raison: No valid Play Store URL
+  - PolyBuzz: Chat with AI Friends (app_1770825774531_0sclqh3zb)
+    Raison: No valid Play Store URL
+  - Prime Video (app_1770825777435_5lqci2quy)
+    Raison: No valid Play Store URL
+  - Rakuten Viber Messenger (app_1770825750808_ap2fvs1xa)
+    Raison: No valid Play Store URL
+  - Remini - AI Photo Enhancer (app_1770825790189_kf5kiop65)
+    Raison: No valid Play Store URL
+  - SHEIN-Shopping Online (app_1770825798444_7onat0hby)
+    Raison: No valid Play Store URL
+  - STARZ (app_1770825776033_pa0fruqf9)
+    Raison: No valid Play Store URL
+  - Samsung Internet Browser (app_1770825767400_vcsimxulv)
+    Raison: No valid Play Store URL
+  - SmugMug - Photography Platform (app_1770825791124_7y7w7qrph)
+    Raison: No valid Play Store URL
+  - Snapseed (app_1770825792381_0aod61n6k)
+    Raison: No valid Play Store URL
+  - Sony LIV: Series, Shows, Movie (app_1770825777784_igzxc49jf)
+    Raison: No valid Play Store URL
+  - Sora by OpenAI (app_1770825756112_4vftq29u7)
+    Raison: No valid Play Store URL
+  - Target: Shop Deals & Trends (app_1770825804160_73a1diwmj)
+    Raison: No valid Play Store URL
+  - Temu: Shop Like a Billionaire (app_1770825800745_u1t52eytd)
+    Raison: No valid Play Store URL
+  - Text Free: Second Phone Number (app_1770825749825_1e2071x46)
+    Raison: No valid Play Store URL
+  - TextNow: Call + Text Unlimited (app_1770825743256_09txpgcuj)
+    Raison: No valid Play Store URL
+  - The Roku App (Official) (app_1770825780918_z9m5648kn)
+    Raison: No valid Play Store URL
+  - Threads (app_1770825754572_by6nhhm2i)
+    Raison: No valid Play Store URL
+  - Trendyol - Online Alışveriş (app_1770825806111_0lr15vpps)
+    Raison: No valid Play Store URL
+  - Truecaller: Spam Call Blocker (app_1770825749376_nq2d6dajv)
+    Raison: No valid Play Store URL
+  - Tubi: Free Movies & Live TV (app_1770825775219_um0hhlzj1)
+    Raison: No valid Play Store URL
+  - Tumblr Social Media & Art Blog (app_1770825753160_bcl5fsqg3)
+    Raison: No valid Play Store URL
+  - Twitch: Live Streaming (app_1770825755663_0e4bvgjan)
+    Raison: No valid Play Store URL
+  - Unscripted Photography Posing (app_1770825791907_fstylnbrx)
+    Raison: No valid Play Store URL
+  - VK: music, video, messenger (app_1770825755206_aenmodq1o)
+    Raison: No valid Play Store URL
+  - VSCO: Photo Editor (app_1770825789066_v5c83eak0)
+    Raison: No valid Play Store URL
+  - VidHub - Ultimate media player (app_1770825787839_hw3d205nm)
+    Raison: No valid Play Store URL
+  - Video Player - OPlayer Lite (app_1770825786488_m8rtiv95a)
+    Raison: No valid Play Store URL
+  - Video Player - PRO Version (app_1770825787286_23kw68t5m)
+    Raison: No valid Play Store URL
+  - Video Player All Format (app_1770825786172_i55nhla55)
+    Raison: No valid Play Store URL
+  - Video Player All Format (app_1770825784570_ztlvsya2t)
+    Raison: No valid Play Store URL
+  - Video Player All Format (app_1770825785238_rh822qez0)
+    Raison: No valid Play Store URL
+  - Video Player for Android (app_1770825786856_rckttgmt2)
+    Raison: No valid Play Store URL
+  - WEBTOON: Manga, Comics, Manhwa (app_1770825783786_4oz3igde7)
+    Raison: No valid Play Store URL
+  - Walmart: Shopping & Savings (app_1770825798943_xi2zmvl3k)
+    Raison: No valid Play Store URL
+  - Wayfair - Shop All Things Home (app_1770825805084_f3hdd5iu5)
+    Raison: No valid Play Store URL
+  - Wish: Shop and Save (app_1770825801408_he7rh00kb)
+    Raison: No valid Play Store URL
+  - Xbox (app_1770825778308_52u0qtp0q)
+    Raison: No valid Play Store URL
+  - YouCam Makeup - Selfie Editor (app_1770825795091_q6c6vopgp)
+    Raison: No valid Play Store URL
+  - YouCam Perfect - Photo Editor (app_1770825790489_bzr07u7h3)
+    Raison: No valid Play Store URL
+  - ZEPETO: Avatar, Connect & Live (app_1770825753579_ubmnnmdyb)
+    Raison: No valid Play Store URL
+  - adidas: Shop Shoes & Clothing (app_1770825806494_h1nk5i88o)
+    Raison: No valid Play Store URL
+  - aha - 100% Local Entertainment (app_1770825782950_kn2s2hh77)
+    Raison: No valid Play Store URL
+  - eBay online shopping & selling (app_1770825799343_u1klsdm6y)
+    Raison: No valid Play Store URL
+  - noon Online Shopping & Grocery (app_1770825801791_1h21lvvfk)
+    Raison: No valid Play Store URL
+  - testED (1770561515682)
+    Raison: No valid Play Store URL
+  - ​​Microsoft Copilot (app_1770825764543_wf8m0sp37)
+    Raison: No valid Play Store URL
