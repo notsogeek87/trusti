@@ -8,7 +8,7 @@ export const CATEGORIES = [
   'Réseaux sociaux',
   'IA',
   'Multimédia',
-  'Productivité',
+  'Productivité/Organisation',
   'Sécurité & VPN',
   'Shopping',
   'Finance',
@@ -48,10 +48,10 @@ export const CATEGORY_MAPPING = {
   'Sécurité & VPN': 'Sécurité & VPN',
   
   // Productivité
-  'Stockage Cloud': 'Productivité',
-  'Productivité': 'Productivité',
-  'Bureautique': 'Productivité',
-  'Prise de Notes': 'Productivité',
+  'Stockage Cloud': 'Productivité/Organisation',
+  'Productivité': 'Productivité/Organisation',
+  'Bureautique': 'Productivité/Organisation',
+  'Prise de Notes': 'Productivité/Organisation',
   
   // Multimédia
   'Streaming Musical': 'Multimédia',

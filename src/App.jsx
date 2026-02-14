@@ -412,7 +412,7 @@ const App = () => {
             </div>
             <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-2 border border-emerald-100">
               <p className="text-[10px] text-emerald-700 font-bold">
-                ✨ Meilleures apps (notées A) par catégorie
+                ✨ Nos conseils d'apps avec un TrustiScore respectueux (A, B ou C) par catégorie
               </p>
             </div>
           </div>

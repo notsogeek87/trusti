@@ -7,7 +7,7 @@ export type TrustiScore = 'A' | 'B' | 'C' | 'D' | 'E';
 
 export type AppCategory = 
   | 'Communication'
-  | 'Productivité'
+  | 'Productivité/Organisation'
   | 'Réseaux Sociaux'
   | 'E-commerce'
   | 'Cloud / Stockage'
@@ -72,7 +72,7 @@ export interface TrustiGrades {
 
 export interface AppCategories {
   COMMUNICATION: 'Communication';
-  PRODUCTIVITY: 'Productivité';
+  PRODUCTIVITY: 'Productivité/Organisation';
   SOCIAL_NETWORK: 'Réseaux Sociaux';
   E_COMMERCE: 'E-commerce';
   CLOUD_STORAGE: 'Cloud / Stockage';

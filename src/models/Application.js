@@ -56,7 +56,7 @@ export const TRUSTI_GRADES = {
  */
 export const APP_CATEGORIES = {
   COMMUNICATION: 'Communication',
-  PRODUCTIVITY: 'Productivité',
+  PRODUCTIVITY: 'Productivité/Organisation',
   SOCIAL_NETWORK: 'Réseaux Sociaux',
   E_COMMERCE: 'E-commerce',
   CLOUD_STORAGE: 'Cloud / Stockage',
