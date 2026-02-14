@@ -28,7 +28,8 @@
       "updatedAt": "2026-02-08T13:36:45.005Z"
     },
     {
-      "id": 1769540682080,
+        "showInAwards": true
+        ,"showInAwards": true
       "name": "Lumo AI",
       "trustiScore": "B",
       "grade": "B",
@@ -55,8 +56,9 @@
       "updatedAt": "2026-02-08T13:36:45.005Z"
     },
     {
+        "showInAwards": false
       "id": 1769541460710,
-      "name": "Proton Mail",
+        ,"showInAwards": false
       "trustiScore": "B",
       "grade": "B",
       "category": "Email",
