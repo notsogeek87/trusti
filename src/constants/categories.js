@@ -4,7 +4,7 @@
  * Ordonnées par pertinence/popularité
  */
 export const CATEGORIES = [
-  'Communication',
+  'Messagerie',
   'Réseaux sociaux',
   'IA',
   'Multimédia',
@@ -29,11 +29,11 @@ export const CATEGORIES = [
  * Permet de regrouper automatiquement les apps
  */
 export const CATEGORY_MAPPING = {
-  // Communication
-  'Email': 'Communication',
-  'Messagerie': 'Communication',
-  'Visioconférence': 'Communication',
-  'Communication': 'Communication',
+  // Messagerie
+  'Email': 'Messagerie',
+  'Messagerie': 'Messagerie',
+  'Visioconférence': 'Messagerie',
+  'Communication': 'Messagerie',
   
   // Réseaux sociaux
   'Réseaux sociaux': 'Réseaux sociaux',
