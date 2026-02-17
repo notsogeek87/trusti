@@ -419,7 +419,7 @@ export async function createApp(appData) {
         ${appData.developer || null}, ${appData.license || null},
         ${appData.isOpenSource || false}, ${appData.isEuropean || false},
         ${appData.jurisdiction || null}, ${appData.appType || 'regular'},
-        ${appData.showInAwards !== false ? 1 : 0},
+        ${appData.show_in_awards !== undefined ? Number(appData.show_in_awards) : (appData.showInAwards !== false ? 1 : 0)},
         ${JSON.stringify(appData.privacyFeatures || {})},
         ${JSON.stringify(appData.permissions || [])}
       )
@@ -470,7 +470,10 @@ export async function updateApp(id, appData) {
         is_european = COALESCE(${appData.isEuropean}, is_european),
         jurisdiction = COALESCE(${appData.jurisdiction}, jurisdiction),
         app_type = COALESCE(${appData.appType}, app_type),
-        show_in_awards = COALESCE(${appData.showInAwards !== undefined ? (appData.showInAwards ? 1 : 0) : null}, show_in_awards),
+        show_in_awards = COALESCE(${
+          appData.show_in_awards !== undefined ? Number(appData.show_in_awards) : 
+          (appData.showInAwards !== undefined ? (appData.showInAwards ? 1 : 0) : null)
+        }, show_in_awards),
         privacy_features = COALESCE(${JSON.stringify(appData.privacyFeatures || {})}, privacy_features),
         permissions = COALESCE(${JSON.stringify(appData.permissions || [])}, permissions),
         updated_at = NOW()

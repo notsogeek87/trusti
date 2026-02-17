@@ -599,6 +599,44 @@ app.get('/api/apps', async (req, res) => {
   }
 });
 
+// PUT /api/apps?id=xxx - Mettre à jour une app
+app.put('/api/apps', async (req, res) => {
+  try {
+    const { id } = req.query;
+    const appData = req.body;
+    
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: 'App ID is required'
+      });
+    }
+
+    console.log(`Updating app ${id} with data:`, appData);
+    
+    const updatedApp = await dbService.updateApp(id, appData);
+    
+    if (updatedApp) {
+      return res.json({
+        success: true,
+        message: 'App updated successfully',
+        app: updatedApp
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        error: 'App not found'
+      });
+    }
+  } catch (error) {
+    console.error('Error updating app:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

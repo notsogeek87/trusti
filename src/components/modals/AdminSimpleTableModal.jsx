@@ -288,16 +288,18 @@ const AdminSimpleTableModal = ({ onClose }) => {
                     </td>
                     <td className="border border-slate-200 px-2 py-1.5 text-center">
                       <input
-                        type="checkbox"
-                        checked={
+                        type="number"
+                        min="0"
+                        max="1"
+                        value={
                           typeof app.show_in_awards !== 'undefined' && app.show_in_awards !== null
-                            ? Boolean(app.show_in_awards)
+                            ? app.show_in_awards
                             : (typeof app.showInAwards !== 'undefined' && app.showInAwards !== null
-                                ? Boolean(app.showInAwards)
-                                : false)
+                                ? (app.showInAwards === true ? 1 : app.showInAwards === false ? 0 : app.showInAwards)
+                                : 0)
                         }
-                        onChange={e => handleChange(idx, 'show_in_awards', e.target.checked ? 1 : 0)}
-                        className="w-4 h-4 cursor-pointer"
+                        onChange={e => handleChange(idx, 'show_in_awards', e.target.value === '' ? 0 : Number(e.target.value))}
+                        className="w-full px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 text-xs text-center"
                       />
                     </td>
                     <td className="border border-slate-200 px-2 py-1.5">
