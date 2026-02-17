@@ -83,10 +83,12 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
           ? '/api'
           : 'http://localhost:3001/api';
         
-        // Charger avec pagination
+        // Charger TOUTES les apps au démarrage (limit=0 = pas de limite)
+        // Cela permet d'afficher toutes les apps dans l'onboarding
         const currentOffset = append ? pagination.offset + pagination.limit : 0;
-        const url = `${API_URL}/apps?limit=${pagination.limit}&offset=${currentOffset}`;
-        console.log('🔍 Chargement apps:', { url, append, currentOffset, limit: pagination.limit });
+        const limitToUse = append ? pagination.limit : 0; // 0 = toutes les apps
+        const url = `${API_URL}/apps?limit=${limitToUse}&offset=${currentOffset}`;
+        console.log('🔍 Chargement apps:', { url, append, currentOffset, limit: limitToUse });
         
         const response = await fetch(url);
         const data = await response.json();
