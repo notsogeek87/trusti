@@ -14,23 +14,67 @@ export default async function handler(req, res) {
 
   try {
     // Extraire le type depuis l'URL ou le body
-    const { type } = req.query; // ?type=trusti ou ?type=star
+    const { type, limit, offset, page, search, q } = req.query; // ?type=trusti ou ?type=star
     
     if (req.method === 'GET') {
       // GET /api/apps?type=trusti
       // GET /api/apps?type=star
       // GET /api/apps (toutes les apps)
+      // GET /api/apps?limit=50&offset=0 (pagination)
+      // GET /api/apps?limit=50&page=1 (pagination par page)
+      // GET /api/apps?search=query (recherche dans toutes les apps)
       
-      let apps;
+      // Si une recherche est demandée, utiliser searchApps
+      const searchQuery = search || q;
+      if (searchQuery && searchQuery.trim()) {
+        const apps = await dbService.searchApps(searchQuery.trim());
+        return res.status(200).json({
+          success: true,
+          apps: apps,
+          pagination: {
+            total: apps.length,
+            limit: 0,
+            offset: 0,
+            page: 1,
+            totalPages: 1,
+            hasMore: false
+          }
+        });
+      }
+      
+      // Calculer les paramètres de pagination
+      const paginationLimit = parseInt(limit) || 0; // 0 = pas de limite (tout)
+      let paginationOffset = parseInt(offset) || 0;
+      
+      // Si page est fourni, calculer l'offset
+      if (page && paginationLimit > 0) {
+        const pageNum = parseInt(page);
+        paginationOffset = (pageNum - 1) * paginationLimit;
+      }
+      
+      const paginationOptions = {
+        limit: paginationLimit,
+        offset: paginationOffset
+      };
+      
+      let result;
       if (type) {
-        apps = await dbService.getAppsByType(type);
+        result = await dbService.getAppsByType(type, paginationOptions);
       } else {
-        apps = await dbService.getAllApps();
+        result = await dbService.getAllApps(paginationOptions);
       }
       
       return res.status(200).json({
         success: true,
-        apps: apps
+        apps: result.apps,
+        pagination: {
+          total: result.total,
+          limit: result.limit,
+          offset: result.offset,
+          page: paginationLimit > 0 ? Math.floor(paginationOffset / paginationLimit) + 1 : 1,
+          totalPages: paginationLimit > 0 ? Math.ceil(result.total / paginationLimit) : 1,
+          hasMore: paginationLimit > 0 ? (paginationOffset + paginationLimit) < result.total : false
+        }
       });
     }
 

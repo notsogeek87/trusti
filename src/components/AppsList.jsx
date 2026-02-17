@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import AppCard from './AppCard';
 import { TABS } from '../constants/tabs';
 import { CATEGORY_MAPPING } from '../constants/categories';
@@ -24,12 +24,11 @@ const AppsList = ({
   onToggleMigrate,
   onSelectApp,
   onSelectMigration,
-  selectedCategory = 'Toutes'
+  selectedCategory = 'Toutes',
+  searchTerm = '',
+  pagination = { hasMore: false, isLoadingMore: false, total: 0 },
+  onLoadMore
 }) => {
-  // État pour la pagination
-  const [displayCount, setDisplayCount] = useState(50);
-  const ITEMS_PER_PAGE = 50;
-
   // Filtrer par catégorie dans l'onglet APPLICATIONS
   let displayApps = apps;
   if (activeTab === TABS.APPLICATIONS && selectedCategory !== 'Toutes') {
@@ -38,26 +37,12 @@ const AppsList = ({
       return normalizedCat === selectedCategory;
     });
   }
-
-  // Pagination des apps (seulement pour l'onglet APPLICATIONS)
-  const paginatedApps = useMemo(() => {
-    if (activeTab === TABS.APPLICATIONS) {
-      return displayApps.slice(0, displayCount);
-    }
-    return displayApps;
-  }, [activeTab, displayApps, displayCount]);
-
-  const hasMore = activeTab === TABS.APPLICATIONS && displayCount < displayApps.length;
-
-  // Fonction pour charger plus d'apps
-  const loadMore = () => {
-    setDisplayCount(prev => prev + ITEMS_PER_PAGE);
-  };
-
-  // Réinitialiser le compteur lors du changement d'onglet ou de catégorie
-  React.useEffect(() => {
-    setDisplayCount(50);
-  }, [activeTab, selectedCategory]);
+  
+  // Pour l'onglet APPLICATIONS, utiliser la pagination serveur
+  // Désactiver la pagination pendant une recherche
+  const showPagination = activeTab === TABS.APPLICATIONS && selectedCategory === 'Toutes' && !searchTerm.trim();
+  const hasMore = showPagination && pagination.hasMore;
+  const isLoadingMore = pagination.isLoadingMore;
 
   // Pour l'onglet TOP_ALTERNATIVES, grouper par catégorie
   if (activeTab === TABS.TOP_ALTERNATIVES) {
@@ -108,8 +93,6 @@ const AppsList = ({
   }
 
   // Affichage normal pour les autres onglets
-  const appsToDisplay = activeTab === TABS.APPLICATIONS ? paginatedApps : displayApps;
-
   return (
     <div className="space-y-4">
       {displayApps.length === 0 && activeTab === TABS.APPLICATIONS && selectedCategory !== 'Toutes' && (
@@ -118,7 +101,7 @@ const AppsList = ({
           <p className="text-slate-400 text-xs">Essayez une autre catégorie ou utilisez la recherche</p>
         </div>
       )}
-      {appsToDisplay.map((app) => (
+      {displayApps.map((app) => (
         <AppCard
           key={app.id}
           app={app}
@@ -133,14 +116,25 @@ const AppsList = ({
         />
       ))}
       
-      {/* Bouton "Voir plus" pour la pagination */}
+      {/* Bouton "Voir plus" pour la pagination serveur */}
       {hasMore && (
         <div className="text-center py-6">
           <button
-            onClick={loadMore}
-            className="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-semibold text-sm transition-all shadow-md hover:shadow-lg"
+            onClick={onLoadMore}
+            disabled={isLoadingMore}
+            className="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 disabled:bg-indigo-300 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-sm transition-all shadow-md hover:shadow-lg"
           >
-            Voir plus ({displayApps.length - displayCount} restantes)
+            {isLoadingMore ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Chargement...
+              </span>
+            ) : (
+              `Voir plus (${pagination.total - apps.length} restantes)`
+            )}
           </button>
         </div>
       )}

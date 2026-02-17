@@ -228,14 +228,46 @@ export async function initDatabase() {
 
 /**
  * Obtenir toutes les applications
+ * @param {Object} options - Options de pagination
+ * @param {number} options.limit - Nombre d'apps à retourner (0 = toutes)
+ * @param {number} options.offset - Position de départ
+ * @returns {Promise<{apps: Array, total: number}>} Apps et total
  */
-export async function getAllApps() {
+export async function getAllApps(options = {}) {
   try {
-    const apps = await sql`
-      SELECT * FROM applications
-      ORDER BY name ASC
+    const { limit = 0, offset = 0 } = options;
+    
+    // Obtenir le total d'apps
+    const totalResult = await sql`
+      SELECT COUNT(*) as count FROM applications
     `;
-    return Promise.all(apps.map(app => formatAppFromDB(app)));
+    const total = parseInt(totalResult[0].count);
+    
+    // Obtenir les apps avec pagination
+    let apps;
+    if (limit > 0) {
+      apps = await sql`
+        SELECT * FROM applications
+        ORDER BY trusti_score ASC, name ASC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `;
+    } else {
+      // Si limit = 0, retourner toutes les apps (comportement par défaut)
+      apps = await sql`
+        SELECT * FROM applications
+        ORDER BY trusti_score ASC, name ASC
+      `;
+    }
+    
+    const formattedApps = await Promise.all(apps.map(app => formatAppFromDB(app)));
+    
+    return {
+      apps: formattedApps,
+      total,
+      limit,
+      offset
+    };
   } catch (error) {
     console.error('Error getting all apps:', error);
     throw error;
@@ -247,35 +279,95 @@ export async function getAllApps() {
  * Type déterminé par le trustiScore:
  * - 'trusti': scores A, B, C
  * - 'star': scores D, E
+ * @param {string} appType - Type d'apps à récupérer
+ * @param {Object} options - Options de pagination
+ * @param {number} options.limit - Nombre d'apps à retourner (0 = toutes)
+ * @param {number} options.offset - Position de départ
+ * @returns {Promise<{apps: Array, total: number}>} Apps et total
  */
-export async function getAppsByType(appType) {
+export async function getAppsByType(appType, options = {}) {
   try {
+    const { limit = 0, offset = 0 } = options;
     let apps;
+    let totalResult;
     
     if (appType === 'trusti') {
       // Trusti Apps: scores A, B, C
-      apps = await sql`
-        SELECT * FROM applications
+      totalResult = await sql`
+        SELECT COUNT(*) as count FROM applications
         WHERE trusti_score IN ('A', 'B', 'C')
-        ORDER BY name ASC
       `;
+      
+      if (limit > 0) {
+        apps = await sql`
+          SELECT * FROM applications
+          WHERE trusti_score IN ('A', 'B', 'C')
+          ORDER BY trusti_score ASC, name ASC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else {
+        apps = await sql`
+          SELECT * FROM applications
+          WHERE trusti_score IN ('A', 'B', 'C')
+          ORDER BY trusti_score ASC, name ASC
+        `;
+      }
     } else if (appType === 'star') {
       // Star Apps: scores D, E
-      apps = await sql`
-        SELECT * FROM applications
+      totalResult = await sql`
+        SELECT COUNT(*) as count FROM applications
         WHERE trusti_score IN ('D', 'E')
-        ORDER BY name ASC
       `;
+      
+      if (limit > 0) {
+        apps = await sql`
+          SELECT * FROM applications
+          WHERE trusti_score IN ('D', 'E')
+          ORDER BY trusti_score ASC, name ASC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else {
+        apps = await sql`
+          SELECT * FROM applications
+          WHERE trusti_score IN ('D', 'E')
+          ORDER BY trusti_score ASC, name ASC
+        `;
+      }
     } else {
       // Autres types par appType stocké (pour compatibilité)
-      apps = await sql`
-        SELECT * FROM applications
+      totalResult = await sql`
+        SELECT COUNT(*) as count FROM applications
         WHERE app_type = ${appType}
-        ORDER BY name ASC
       `;
+      
+      if (limit > 0) {
+        apps = await sql`
+          SELECT * FROM applications
+          WHERE app_type = ${appType}
+          ORDER BY trusti_score ASC, name ASC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else {
+        apps = await sql`
+          SELECT * FROM applications
+          WHERE app_type = ${appType}
+          ORDER BY trusti_score ASC, name ASC
+        `;
+      }
     }
     
-    return Promise.all(apps.map(app => formatAppFromDB(app)));
+    const total = parseInt(totalResult[0].count);
+    const formattedApps = await Promise.all(apps.map(app => formatAppFromDB(app)));
+    
+    return {
+      apps: formattedApps,
+      total,
+      limit,
+      offset
+    };
   } catch (error) {
     console.error('Error getting apps by type:', error);
     throw error;
@@ -427,49 +519,59 @@ export async function deleteApp(id) {
  */
 export async function searchApps(query, filters = {}) {
   try {
-    let whereConditions = [];
-    let params = [];
+    console.log('🔍 searchApps called with:', { query, filters });
     
-    // Filtre par nom
-    if (query) {
-      whereConditions.push(`name ILIKE $${params.length + 1}`);
-      params.push(`%${query}%`);
+    let apps;
+    
+    // Recherche simple par nom (cas le plus courant)
+    if (query && Object.keys(filters).length === 0) {
+      const searchPattern = `%${query}%`;
+      apps = await sql`
+        SELECT * FROM applications
+        WHERE name ILIKE ${searchPattern}
+        ORDER BY trusti_score ASC, name ASC
+      `;
+    } 
+    // Recherche avec filtres additionnels
+    else if (query && filters.category) {
+      const searchPattern = `%${query}%`;
+      apps = await sql`
+        SELECT * FROM applications
+        WHERE name ILIKE ${searchPattern} AND category = ${filters.category}
+        ORDER BY trusti_score ASC, name ASC
+      `;
+    }
+    else if (query && filters.score) {
+      const searchPattern = `%${query}%`;
+      apps = await sql`
+        SELECT * FROM applications
+        WHERE name ILIKE ${searchPattern} AND trusti_score = ${filters.score}
+        ORDER BY trusti_score ASC, name ASC
+      `;
+    }
+    else if (filters.category && !query) {
+      apps = await sql`
+        SELECT * FROM applications
+        WHERE category = ${filters.category}
+        ORDER BY trusti_score ASC, name ASC
+      `;
+    }
+    else if (filters.score && !query) {
+      apps = await sql`
+        SELECT * FROM applications
+        WHERE trusti_score = ${filters.score}
+        ORDER BY trusti_score ASC, name ASC
+      `;
+    }
+    // Pas de filtre du tout - retourner toutes les apps
+    else {
+      apps = await sql`
+        SELECT * FROM applications
+        ORDER BY trusti_score ASC, name ASC
+      `;
     }
     
-    // Filtre par catégorie
-    if (filters.category) {
-      whereConditions.push(`category = $${params.length + 1}`);
-      params.push(filters.category);
-    }
-    
-    // Filtre par score
-    if (filters.score) {
-      whereConditions.push(`trusti_score = $${params.length + 1}`);
-      params.push(filters.score);
-    }
-    
-    // Filtre par type
-    if (filters.appType) {
-      whereConditions.push(`app_type = $${params.length + 1}`);
-      params.push(filters.appType);
-    }
-    
-    // Filtre open-source
-    if (filters.isOpenSource !== undefined) {
-      whereConditions.push(`is_open_source = $${params.length + 1}`);
-      params.push(filters.isOpenSource);
-    }
-    
-    const whereClause = whereConditions.length > 0 
-      ? `WHERE ${whereConditions.join(' AND ')}`
-      : '';
-    
-    const apps = await sql`
-      SELECT * FROM applications
-      ${sql.unsafe(whereClause)}
-      ORDER BY name ASC
-    `;
-    
+    console.log('🔍 searchApps found:', apps.length, 'apps');
     return Promise.all(apps.map(app => formatAppFromDB(app)));
   } catch (error) {
     console.error('Error searching apps:', error);

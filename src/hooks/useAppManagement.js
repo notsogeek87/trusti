@@ -21,6 +21,19 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
   const [isLoadingApps, setIsLoadingApps] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+  
+  // État pour les résultats de recherche
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  
+  // État de pagination
+  const [pagination, setPagination] = useState({
+    total: 0,
+    limit: 50,
+    offset: 0,
+    hasMore: false,
+    isLoadingMore: false
+  });
 
   // Charger les données de l'utilisateur connecté
   useEffect(() => {
@@ -64,15 +77,26 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
 
   // Charger toutes les applications au montage
   useEffect(() => {
-    const loadApps = async () => {
+    const loadApps = async (append = false) => {
       try {
         const API_URL = import.meta.env.PROD 
           ? '/api'
           : 'http://localhost:3001/api';
         
-        const response = await fetch(`${API_URL}/apps`);
+        // Charger avec pagination
+        const currentOffset = append ? pagination.offset + pagination.limit : 0;
+        const url = `${API_URL}/apps?limit=${pagination.limit}&offset=${currentOffset}`;
+        console.log('🔍 Chargement apps:', { url, append, currentOffset, limit: pagination.limit });
+        
+        const response = await fetch(url);
         const data = await response.json();
         const appsArray = data.success ? data.apps : [];
+        
+        console.log('📦 Apps reçues:', { 
+          count: appsArray.length, 
+          total: data.pagination?.total,
+          hasMore: data.pagination?.hasMore 
+        });
         
         // Normaliser les IDs en strings pour la cohérence
         const normalizedApps = appsArray.map(app => ({
@@ -82,26 +106,41 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
           replacesAppIds: app.replacesAppIds ? app.replacesAppIds.map(id => String(id)) : undefined
         }));
         
-        setApps(normalizedApps);
+        // Mettre à jour les apps (ajouter ou remplacer)
+        if (append) {
+          setApps(prev => [...prev, ...normalizedApps]);
+        } else {
+          setApps(normalizedApps);
+        }
+        
+        // Mettre à jour l'état de pagination
+        if (data.pagination) {
+          setPagination({
+            total: data.pagination.total,
+            limit: data.pagination.limit,
+            offset: currentOffset,
+            hasMore: data.pagination.hasMore,
+            isLoadingMore: false
+          });
+        }
       } catch (error) {
         console.error('Erreur lors du chargement des applications:', error);
-        setApps([]);
+        if (!append) {
+          setApps([]);
+        }
+        setPagination(prev => ({ ...prev, isLoadingMore: false }));
       } finally {
-        setIsLoadingApps(false);
+        if (!append) {
+          setIsLoadingApps(false);
+        }
       }
     };
 
     loadApps();
     
-    // Recharger régulièrement pour détecter les modifications par l'admin
-    const intervalId = setInterval(() => {
-      loadApps();
-    }, 30000); // Vérifier toutes les 30 secondes
-    
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, []);
+    // Note: Le rechargement automatique est désactivé pour ne pas interférer avec la pagination
+    // Si l'admin modifie des données, l'utilisateur peut rafraîchir la page manuellement
+  }, []); // Pas de dépendance à pagination pour éviter les boucles
 
   // Détecter quand le chargement initial est terminé
   useEffect(() => {
@@ -111,13 +150,68 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     }
   }, [isLoadingApps]);
 
+  // Effectuer une recherche API quand searchTerm change
+  useEffect(() => {
+    console.log('🔎 useAppManagement - searchTerm changed:', searchTerm);
+    
+    if (!searchTerm.trim()) {
+      // Si la recherche est vide, réinitialiser les résultats
+      console.log('🔎 Recherche vide, réinitialisation');
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    // Lancer la recherche immédiatement (le debounce est déjà fait dans SearchBar)
+    const performSearch = async () => {
+      console.log('🔎 Lancement recherche API pour:', searchTerm);
+      setIsSearching(true);
+      try {
+        const API_URL = import.meta.env.PROD 
+          ? '/api'
+          : 'http://localhost:3001/api';
+        
+        const url = `${API_URL}/apps?search=${encodeURIComponent(searchTerm)}`;
+        console.log('🔎 URL:', url);
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        console.log('🔎 Résultats reçus:', data);
+        
+        if (data.success) {
+          // Normaliser les IDs en strings pour la cohérence
+          const normalizedApps = data.apps.map(app => ({
+            ...app,
+            id: String(app.id),
+            replacesAppId: app.replacesAppId ? String(app.replacesAppId) : undefined,
+            replacesAppIds: app.replacesAppIds ? app.replacesAppIds.map(id => String(id)) : undefined
+          }));
+          
+          console.log('🔎 Apps normalisées:', normalizedApps.length, 'résultats');
+          setSearchResults(normalizedApps);
+        }
+      } catch (error) {
+        console.error('❌ Erreur lors de la recherche:', error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    performSearch();
+  }, [searchTerm]);
+
   // Filtrer les applications selon l'onglet actif et la recherche
   const filteredApps = useMemo(() => {
+    // Si une recherche est active, utiliser les résultats de recherche
+    const sourceApps = searchTerm.trim() ? searchResults : apps;
+    
     let list = [];
     
     if (activeTab === TABS.APPLICATIONS) {
       // Toutes les apps du catalogue
-      list = [...apps];
+      list = [...sourceApps];
       
       // Trier par grade (A > B > C > D > E) puis par nom
       const gradeOrder = { 'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5 };
@@ -128,10 +222,11 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
       });
     } else if (activeTab === TABS.MY_APPS) {
       // Filtrer uniquement les apps dans myApps et ajouter les alternatives
-      list = apps
+      list = sourceApps
         .filter(app => myApps.has(app.id))
         .map(app => {
           // Chercher si une app avec meilleur grade remplace cette app (alternative)
+          // On cherche dans TOUTES les apps (pas seulement sourceApps) pour trouver les alternatives
           const replacement = apps.find(replacementApp => {
             // L'app de remplacement doit avoir un meilleur grade (A, B, C)
             const goodGrades = ['A', 'B', 'C'];
@@ -166,7 +261,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
       });
     } else if (activeTab === TABS.TOP_ALTERNATIVES) {
       // Filtrer uniquement les apps avec showInAwards activé
-      list = apps.filter(app => app.showInAwards === true);
+      list = sourceApps.filter(app => app.showInAwards === true);
       
       // Trier par catégorie puis par nom
       list.sort((a, b) => {
@@ -176,10 +271,8 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
       });
     }
     
-    return list.filter(app => 
-      app.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [activeTab, myApps, searchTerm, apps]);
+    return list;
+  }, [activeTab, myApps, searchTerm, searchResults, apps]);
 
   // Ajouter/retirer une app de "Mes Apps"
   const toggleMyApp = (e, id) => {
@@ -213,6 +306,50 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
   const setCustomMigration = (appId, alternativeName) => {
     setCustomMigrations(prev => new Map(prev).set(appId, alternativeName));
   };
+  
+  // Charger plus d'applications
+  const loadMoreApps = async () => {
+    if (pagination.isLoadingMore || !pagination.hasMore) return;
+    
+    setPagination(prev => ({ ...prev, isLoadingMore: true }));
+    
+    try {
+      const API_URL = import.meta.env.PROD 
+        ? '/api'
+        : 'http://localhost:3001/api';
+      
+      // Charger la page suivante
+      const nextOffset = pagination.offset + pagination.limit;
+      const response = await fetch(`${API_URL}/apps?limit=${pagination.limit}&offset=${nextOffset}`);
+      const data = await response.json();
+      const appsArray = data.success ? data.apps : [];
+      
+      // Normaliser les IDs en strings pour la cohérence
+      const normalizedApps = appsArray.map(app => ({
+        ...app,
+        id: String(app.id),
+        replacesAppId: app.replacesAppId ? String(app.replacesAppId) : undefined,
+        replacesAppIds: app.replacesAppIds ? app.replacesAppIds.map(id => String(id)) : undefined
+      }));
+      
+      // Ajouter les nouvelles apps à la liste existante
+      setApps(prev => [...prev, ...normalizedApps]);
+      
+      // Mettre à jour l'état de pagination
+      if (data.pagination) {
+        setPagination({
+          total: data.pagination.total,
+          limit: data.pagination.limit,
+          offset: nextOffset,
+          hasMore: data.pagination.hasMore,
+          isLoadingMore: false
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement de plus d\'applications:', error);
+      setPagination(prev => ({ ...prev, isLoadingMore: false }));
+    }
+  };
 
   return {
     // État
@@ -225,7 +362,9 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     apps,
     isLoadingApps,
     isInitialLoading,
+    isSearching,
     filteredApps,
+    pagination,
     
     // Actions
     setActiveTab,
@@ -234,5 +373,6 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     toggleMigrate,
     setCustomMigration,
     setSelectedApp,
+    loadMoreApps,
   };
 };

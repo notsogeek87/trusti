@@ -7,21 +7,32 @@ import { Search, X } from 'lucide-react';
 const SearchBar = ({ searchTerm, onSearchChange }) => {
   const [localValue, setLocalValue] = useState(searchTerm);
 
+  console.log('🔍 SearchBar render - searchTerm:', searchTerm, 'localValue:', localValue);
+
   // Synchroniser avec la prop externe
   useEffect(() => {
+    console.log('🔍 SearchBar - sync effect: searchTerm changed to', searchTerm);
     setLocalValue(searchTerm);
   }, [searchTerm]);
 
   // Debounce : mettre à jour la recherche après 300ms d'inactivité
   useEffect(() => {
+    console.log('🔍 SearchBar - debounce effect: localValue is', localValue);
     const timer = setTimeout(() => {
       if (localValue !== searchTerm) {
+        console.log('🔍 SearchBar -> calling onSearchChange with:', localValue);
         onSearchChange(localValue);
+      } else {
+        console.log('🔍 SearchBar -> no change needed, localValue === searchTerm');
       }
     }, 300);
 
-    return () => clearTimeout(timer);
-  }, [localValue]);
+    return () => {
+      console.log('🔍 SearchBar - cleaning up timer');
+      clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localValue]); // On ne met que localValue, pas onSearchChange ni searchTerm
 
   const handleClear = () => {
     setLocalValue('');

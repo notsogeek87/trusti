@@ -123,12 +123,15 @@ const App = () => {
     apps,
     isLoadingApps,
     isInitialLoading,
+    isSearching,
+    pagination,
     setActiveTab,
     setSearchTerm,
     toggleMyApp,
     toggleMigrate,
     setCustomMigration,
     setSelectedApp,
+    loadMoreApps,
   } = useAppManagement(currentUser, saveUserData, getUserData);
 
   // État pour le filtre de catégorie dans l'onglet Applications
@@ -418,6 +421,9 @@ const App = () => {
           onSelectApp={setSelectedApp}
           onSelectMigration={setShowMigrationSelector}
           selectedCategory={selectedCategory}
+          searchTerm={searchTerm}
+          pagination={pagination}
+          onLoadMore={loadMoreApps}
         />
       </main>
 

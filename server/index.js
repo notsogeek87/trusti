@@ -534,12 +534,65 @@ app.delete('/api/star-apps', async (req, res) => {
 // GET all apps (combines custom-trusti-apps and star-apps)
 app.get('/api/apps', async (req, res) => {
   try {
-    // Get all apps from database
-    const allApps = await dbService.getAllApps();
+    // Extraire les paramètres de pagination et de recherche
+    const { type, limit, offset, page, search, q } = req.query;
+    
+    console.log('📥 API /api/apps - params:', { type, limit, offset, page, search, q });
+    
+    // Si une recherche est demandée, utiliser searchApps
+    const searchQuery = search || q;
+    if (searchQuery && searchQuery.trim()) {
+      console.log('🔎 Recherche demandée:', searchQuery);
+      const apps = await dbService.searchApps(searchQuery.trim());
+      console.log('🔎 Résultats trouvés:', apps.length);
+      return res.json({
+        success: true,
+        apps: apps,
+        pagination: {
+          total: apps.length,
+          limit: 0,
+          offset: 0,
+          page: 1,
+          totalPages: 1,
+          hasMore: false
+        }
+      });
+    }
+    
+    // Calculer les paramètres de pagination
+    const paginationLimit = parseInt(limit) || 0; // 0 = pas de limite (tout)
+    let paginationOffset = parseInt(offset) || 0;
+    
+    // Si page est fourni, calculer l'offset
+    if (page && paginationLimit > 0) {
+      const pageNum = parseInt(page);
+      paginationOffset = (pageNum - 1) * paginationLimit;
+    }
+    
+    const paginationOptions = {
+      limit: paginationLimit,
+      offset: paginationOffset
+    };
+    
+    // Get apps from database avec pagination
+    let result;
+    if (type) {
+      result = await dbService.getAppsByType(type, paginationOptions);
+    } else {
+      result = await dbService.getAllApps(paginationOptions);
+    }
     
     res.json({
       success: true,
-      apps: allApps
+      apps: result.apps,
+      pagination: {
+        total: result.total,
+        limit: result.limit,
+        offset: result.offset,
+        page: paginationLimit > 0 ? Math.floor(paginationOffset / paginationLimit) + 1 : 1,
+        totalPages: paginationLimit > 0 ? Math.ceil(result.total / paginationLimit) : 1,
+        hasMore: paginationLimit > 0 ? (paginationOffset + paginationLimit) < result.total : false
+      }
     });
   } catch (error) {
     console.error('Error fetching all apps:', error);
