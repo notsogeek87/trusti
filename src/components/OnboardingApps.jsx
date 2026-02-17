@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Check, ShieldCheck, Search } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
-import TrustiLogo from './ui/TrustiLogo';
 
 /**
  * Page d'onboarding pour sélectionner les applications utilisées
@@ -37,20 +36,24 @@ const OnboardingApps = ({ allApps, onComplete }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-y-auto">
+    <div className="min-h-screen bg-slate-50 overflow-y-auto">
       {/* En-tête fixe avec recherche */}
-      <div className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm border-b border-slate-700/50 shadow-lg">
-        <div className="max-w-md mx-auto px-3 py-2.5">
-          <div className="flex items-center justify-between gap-2 mb-2">
+      <div className="sticky top-0 z-10 bg-white border-b border-slate-100 shadow-sm">
+        <div className="max-w-md mx-auto px-4 py-3">
+          <div className="flex items-center justify-between gap-2 mb-2.5">
             <div className="flex items-center gap-2 min-w-0">
-              <TrustiLogo className="w-7 h-7 flex-shrink-0" />
+              <img 
+                src="/assets/logo.png" 
+                alt="TrustiScore" 
+                className="w-8 flex-shrink-0"
+              />
               <div className="min-w-0">
-                <h1 className="text-sm font-bold text-white leading-tight">Configuration</h1>
+                <h1 className="text-sm font-black tracking-tight text-slate-900">Configuration</h1>
               </div>
             </div>
             <div className="text-right flex-shrink-0">
-              <div className="text-lg font-bold text-indigo-400">
-                {selectedApps.size}
+              <div className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">
+                <span className="text-xs font-bold">{selectedApps.size}</span>
               </div>
             </div>
           </div>
@@ -63,12 +66,12 @@ const OnboardingApps = ({ allApps, onComplete }) => {
               placeholder="Rechercher une app..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              className="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs font-bold"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
               >
                 ✕
               </button>
@@ -78,26 +81,26 @@ const OnboardingApps = ({ allApps, onComplete }) => {
       </div>
 
       {/* Contenu principal */}
-      <div className="max-w-md mx-auto px-3 py-3">
+      <div className="max-w-md mx-auto px-4 py-4">
         {/* Message d'invitation compact */}
         {!searchTerm && (
-          <div className="mb-3 bg-indigo-500/10 rounded-lg p-2.5 border border-indigo-500/20">
-            <p className="text-xs text-slate-300 text-center">
-              💡 Sélectionnez vos apps du quotidien
+          <div className="mb-4 bg-indigo-50 rounded-xl p-3 border border-indigo-100">
+            <p className="text-xs text-indigo-700 text-center font-semibold">
+              💡 Sélectionnez les apps que vous utilisez
             </p>
           </div>
         )}
         
         {/* Message si aucun résultat */}
         {searchTerm && filteredApps.length === 0 && (
-          <div className="mb-3 bg-slate-800 rounded-lg p-6 text-center">
+          <div className="mb-4 bg-white rounded-xl p-6 text-center border border-slate-100">
             <div className="text-3xl mb-2">🔍</div>
-            <p className="text-sm text-slate-400">Aucune app trouvée</p>
+            <p className="text-sm text-slate-500">Aucune app trouvée</p>
           </div>
         )}
 
         {/* Grille d'applications */}
-        <div className="grid grid-cols-2 gap-2.5 mb-32">
+        <div className="grid grid-cols-2 gap-3 mb-32">
           {filteredApps.map((app) => {
             const isSelected = selectedApps.has(app.id);
             return (
@@ -105,37 +108,38 @@ const OnboardingApps = ({ allApps, onComplete }) => {
                 key={app.id}
                 onClick={() => toggleApp(app.id)}
                 className={`
-                  relative p-3 rounded-xl transition-all duration-200 active:scale-95
+                  relative p-3.5 rounded-2xl transition-all duration-200 active:scale-95
                   ${isSelected 
-                    ? 'bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg shadow-indigo-500/30 scale-[1.02]' 
-                    : 'bg-slate-800 active:bg-slate-750 border border-slate-700'
+                    ? 'bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg border-2 border-indigo-400' 
+                    : 'bg-white hover:shadow-md border border-slate-200 hover:border-slate-300'
                   }
                 `}
               >
                 {/* Icône de sélection */}
                 {isSelected && (
-                  <div className="absolute top-1.5 right-1.5 bg-white rounded-full p-0.5">
-                    <Check size={12} className="text-indigo-600" />
+                  <div className="absolute top-2 right-2 bg-white rounded-full p-1">
+                    <Check size={14} className="text-indigo-600" strokeWidth={3} />
                   </div>
                 )}
 
                 {/* Logo de l'app */}
-                <div className="mb-2 flex items-center justify-center">
+                <div className="mb-2.5 flex items-center justify-center">
                   {app.icon && app.icon.startsWith('http') ? (
                     <img 
                       src={app.icon} 
                       alt={app.name}
-                      className="w-10 h-10 rounded-lg object-cover"
+                      className="w-12 h-12 rounded-xl object-cover"
+                      loading="lazy"
                     />
                   ) : (
-                    <div className={`w-10 h-10 rounded-lg ${app.color || 'bg-gradient-to-br from-slate-600 to-slate-700'} flex items-center justify-center text-white font-bold text-lg`}>
+                    <div className={`w-12 h-12 rounded-xl ${app.color || 'bg-slate-400'} flex items-center justify-center text-white font-bold text-xl`}>
                       {app.icon || app.name.charAt(0)}
                     </div>
                   )}
                 </div>
 
                 {/* Nom de l'app */}
-                <div className={`text-xs font-semibold mb-1.5 truncate leading-tight ${isSelected ? 'text-white' : 'text-slate-200'}`}>
+                <div className={`text-xs font-black mb-2 truncate leading-tight ${isSelected ? 'text-white' : 'text-slate-900'}`}>
                   {app.name}
                 </div>
 
@@ -150,30 +154,30 @@ const OnboardingApps = ({ allApps, onComplete }) => {
       </div>
 
       {/* Bouton flottant de validation */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-slate-900 via-slate-900/95 to-transparent px-3 py-4 border-t border-slate-700/50 safe-area-inset-bottom">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-100 px-4 py-4 shadow-lg">
         <div className="max-w-md mx-auto">
           <button
             onClick={handleComplete}
             disabled={selectedApps.size === 0}
             className={`
-              w-full py-3.5 px-6 rounded-xl font-bold text-base
-              transition-all duration-200 shadow-lg
+              w-full py-4 px-6 rounded-2xl font-bold text-base
+              transition-all duration-200
               ${selectedApps.size > 0
-                ? 'bg-gradient-to-r from-indigo-500 to-purple-500 active:from-indigo-600 active:to-purple-600 text-white shadow-indigo-500/30 active:scale-[0.98]'
-                : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg active:scale-[0.98]'
+                : 'bg-slate-200 text-slate-400 cursor-not-allowed'
               }
             `}
           >
             {selectedApps.size === 0 
               ? 'Sélectionnez au moins une app' 
-              : `Continuer (${selectedApps.size})`
+              : `Continuer avec ${selectedApps.size} app${selectedApps.size > 1 ? 's' : ''}`
             }
           </button>
           
           {/* Bouton skip */}
           <button
             onClick={() => onComplete(new Set())}
-            className="w-full mt-2.5 py-2.5 text-xs text-slate-400 active:text-slate-300 transition-colors"
+            className="w-full mt-3 py-2.5 text-xs text-slate-500 hover:text-slate-700 font-semibold transition-colors"
           >
             Passer cette étape
           </button>
