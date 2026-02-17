@@ -706,34 +706,36 @@ async function getAppRelations(appId) {
     const currentApp = apps[0];
     const currentScore = currentApp.trusti_score;
     const currentCategory = currentApp.category;
-    const currentType = calculateAppType(currentScore);
+    
+    // Ordre des scores (A est meilleur que E)
+    const scoreOrder = { 'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5 };
+    const currentScoreValue = scoreOrder[currentScore] || 999;
     
     const alternativeAppIds = [];
     const replacesAppIds = [];
     
-    // Si c'est une TrustiApp (A/B/C), elle remplace les StarApps (D/E) de même catégorie
-    if (currentType === 'trusti') {
-      const starApps = await sql`
-        SELECT id 
-        FROM applications 
-        WHERE category = ${currentCategory}
-        AND trusti_score IN ('D', 'E')
-        AND id != ${appId}
-      `;
-      replacesAppIds.push(...starApps.map(app => app.id));
-    }
+    // 1. Récupérer toutes les apps de la même catégorie
+    const sameCategory = await sql`
+      SELECT id, trusti_score 
+      FROM applications 
+      WHERE category = ${currentCategory}
+      AND id != ${appId}
+    `;
     
-    // Si c'est une StarApp (D/E), ses alternatives sont les TrustiApps (A/B/C) de même catégorie
-    if (currentType === 'star') {
-      const trustiApps = await sql`
-        SELECT id 
-        FROM applications 
-        WHERE category = ${currentCategory}
-        AND trusti_score IN ('A', 'B', 'C')
-        AND id != ${appId}
-      `;
-      alternativeAppIds.push(...trustiApps.map(app => app.id));
-    }
+    // 2. Séparer en alternatives (meilleurs scores) et remplace (pires scores)
+    sameCategory.forEach(app => {
+      const appScoreValue = scoreOrder[app.trusti_score] || 999;
+      
+      // Alternative = score meilleur (valeur plus petite)
+      if (appScoreValue < currentScoreValue) {
+        alternativeAppIds.push(app.id);
+      }
+      
+      // Remplace = score pire (valeur plus grande)
+      if (appScoreValue > currentScoreValue) {
+        replacesAppIds.push(app.id);
+      }
+    });
     
     return { alternativeAppIds, replacesAppIds };
   } catch (error) {
