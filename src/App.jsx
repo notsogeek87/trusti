@@ -30,6 +30,38 @@ import AdminAppsModal from './components/modals/AdminAppsModal';
 import PinModal from './components/modals/PinModal';
 import WelcomeModal from './components/modals/WelcomeModal';
 
+// Apps populaires pour le tri dans l'onboarding (ordre exact de téléchargement)
+const POPULAR_APPS = [
+  'WhatsApp Messenger', 'YouTube', 'Instagram', 'Facebook', 'TikTok', 'Snapchat', 
+  'Telegram', 'Google Chrome', 'Messenger', 'Google Maps', 'Gmail', 'Google Photos', 
+  'PUBG Mobile', 'Free Fire', 'Roblox', 'Spotify', 'Netflix', 'Amazon Shopping', 
+  'Flipkart', 'Shopee', 'Candy Crush Saga', 'Subway Surfers', 'Clash of Clans', 
+  'Clash Royale', 'Duolingo', 'Google Play Games', 'Phone by Google', 'Google Messages', 
+  'Google Drive', 'Google Play services', 'MyJio', 'PhonePe', 'Truecaller', 'MX Player', 
+  'Hotstar', 'ShareChat', 'Ulike', 'Zalo', 'OLX', 'Lazada', 'PicsArt', 'CapCut', 
+  'Kuaishou', 'Meitu', 'UC Browser', 'SHAREit', 'XRecorder', 'InShot', 'VN Video Editor', 'KineMaster'
+];
+
+// Fonction pour trier les apps par popularité
+const sortAppsByPopularity = (apps) => {
+  return apps.slice().sort((a, b) => {
+    const idxA = POPULAR_APPS.indexOf(a.name);
+    const idxB = POPULAR_APPS.indexOf(b.name);
+    
+    // Les deux sont dans la liste : trier par ordre de popularité
+    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+    
+    // Seulement A est dans la liste : A vient avant
+    if (idxA !== -1) return -1;
+    
+    // Seulement B est dans la liste : B vient avant
+    if (idxB !== -1) return 1;
+    
+    // Aucun n'est dans la liste : tri alphabétique
+    return a.name.localeCompare(b.name);
+  });
+};
+
 /**
  * Composant principal de l'application TrustiScore
  */
@@ -65,6 +97,39 @@ const App = () => {
   
   // État pour la page d'onboarding
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [allAppsForOnboarding, setAllAppsForOnboarding] = useState([]);
+  const [isLoadingOnboardingApps, setIsLoadingOnboardingApps] = useState(false);
+
+  // Charger TOUTES les apps pour l'onboarding
+  useEffect(() => {
+    if (showOnboarding && allAppsForOnboarding.length === 0 && !isLoadingOnboardingApps) {
+      const loadAllApps = async () => {
+        setIsLoadingOnboardingApps(true);
+        try {
+          const API_URL = import.meta.env.PROD 
+            ? '/api'
+            : 'http://localhost:3001/api';
+          
+          // Utiliser limit=500 au lieu de 0 pour éviter les problèmes de rendu
+          const url = `${API_URL}/apps?limit=500&offset=0`;
+          console.log('🔍 Chargement de toutes les apps pour onboarding:', url);
+          
+          const response = await fetch(url);
+          const data = await response.json();
+          const appsArray = data.success ? data.apps : [];
+          
+          console.log('📦 Apps onboarding reçues:', appsArray.length);
+          setAllAppsForOnboarding(appsArray);
+        } catch (error) {
+          console.error('❌ Erreur de chargement des apps onboarding:', error);
+        } finally {
+          setIsLoadingOnboardingApps(false);
+        }
+      };
+      
+      loadAllApps();
+    }
+  }, [showOnboarding, allAppsForOnboarding.length, isLoadingOnboardingApps]);
 
   // Afficher le modal de bienvenue si l'utilisateur n'est pas connecté
   useEffect(() => {
@@ -262,10 +327,20 @@ const App = () => {
 
   // Afficher la page d'onboarding de sélection des apps
   if (showOnboarding) {
-    // Toutes les apps disponibles triées par nom
-    const allApps = [...apps].sort((a, b) => 
-      a.name.localeCompare(b.name)
-    );
+    // Afficher un loader pendant le chargement
+    if (isLoadingOnboardingApps || allAppsForOnboarding.length === 0) {
+      return (
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
+            <p className="text-slate-600">Chargement des applications...</p>
+          </div>
+        </div>
+      );
+    }
+    
+    // Toutes les apps disponibles triées par popularité
+    const allApps = sortAppsByPopularity(allAppsForOnboarding);
     
     return (
       <OnboardingApps 
