@@ -242,7 +242,9 @@ const AdminSimpleTableModal = ({ onClose }) => {
                   <th className="border border-slate-200 px-2 py-2 text-left font-semibold w-[250px]">Description/Raison</th>
                   <th className="border border-slate-200 px-2 py-2 text-center font-semibold w-[60px]" title="Show in Awards">Awards</th>
                   <th className="border border-slate-200 px-2 py-2 text-left font-semibold w-[200px]">Play Store URL</th>
+                  <th className="border border-slate-200 px-2 py-2 text-left font-semibold w-[200px]">App Store URL</th>
                   <th className="border border-slate-200 px-2 py-2 text-left font-semibold w-[200px]">F-Droid URL</th>
+                  <th className="border border-slate-200 px-2 py-2 text-left font-semibold w-[200px]">Github URL</th>
                   <th className="border border-slate-200 px-2 py-2 text-left font-semibold w-[200px]">Site Web</th>
                 </tr>
               </thead>
@@ -308,6 +310,14 @@ const AdminSimpleTableModal = ({ onClose }) => {
                     </td>
                     <td className="border border-slate-200 px-2 py-1.5">
                       <input 
+                        value={app.appleStoreUrl || ''} 
+                        onChange={e => handleChange(idx, 'appleStoreUrl', e.target.value)} 
+                        className="w-full px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 text-xs font-mono"
+                        placeholder="https://apps.apple.com/..."
+                      />
+                    </td>
+                    <td className="border border-slate-200 px-2 py-1.5">
+                      <input 
                         value={app.fDroidUrl || ''} 
                         onChange={e => handleChange(idx, 'fDroidUrl', e.target.value)} 
                         className="w-full px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 text-xs font-mono"
@@ -316,8 +326,16 @@ const AdminSimpleTableModal = ({ onClose }) => {
                     </td>
                     <td className="border border-slate-200 px-2 py-1.5">
                       <input 
-                        value={app.websiteUrl || ''} 
-                        onChange={e => handleChange(idx, 'websiteUrl', e.target.value)} 
+                        value={app.githubUrl || ''} 
+                        onChange={e => handleChange(idx, 'githubUrl', e.target.value)} 
+                        className="w-full px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 text-xs font-mono"
+                        placeholder="https://github.com/..."
+                      />
+                    </td>
+                    <td className="border border-slate-200 px-2 py-1.5">
+                      <input 
+                        value={app.website || ''} 
+                        onChange={e => handleChange(idx, 'website', e.target.value)} 
                         className="w-full px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 text-xs font-mono"
                         placeholder="https://..."
                       />
