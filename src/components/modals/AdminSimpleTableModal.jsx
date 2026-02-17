@@ -10,7 +10,7 @@ const AdminSimpleTableModal = ({ onClose }) => {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    fetch(`${API_URL}/custom-trusti-apps`)
+    fetch(`${API_URL}/apps`)
       .then(res => res.json())
       .then(data => {
         if (data.success) setApps(data.apps);
@@ -41,7 +41,7 @@ const AdminSimpleTableModal = ({ onClose }) => {
         show_in_awards: showValue,
         showInAwards: showValue
       };
-      await fetch(`${API_URL}/custom-trusti-apps`, {
+      await fetch(`${API_URL}/apps?id=${app.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(appToSend)

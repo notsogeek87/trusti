@@ -5,19 +5,26 @@ import ScoreIndicator from '../ui/ScoreIndicator';
 /**
  * Modal des détails d'une application
  */
-const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, trustiApps = [], starApps = [] }) => {
-  // Trouver les alternatives (TrustiApps qui remplacent cette app)
-  const alternatives = trustiApps.filter(ta => {
-    if (ta.replacesAppIds && Array.isArray(ta.replacesAppIds)) {
-      return ta.replacesAppIds.includes(String(app.id));
+const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, allApps = [] }) => {
+  // Trouver les alternatives (apps avec bon grade A,B,C qui remplacent cette app)
+  const alternatives = allApps.filter(altApp => {
+    // L'alternative doit avoir un bon grade
+    const goodGrades = ['A', 'B', 'C'];
+    if (!goodGrades.includes(altApp.grade)) {
+      return false;
     }
-    return ta.replacesAppId === String(app.id);
+    
+    // Vérifier si elle remplace cette app
+    if (altApp.replacesAppIds && Array.isArray(altApp.replacesAppIds)) {
+      return altApp.replacesAppIds.includes(String(app.id));
+    }
+    return altApp.replacesAppId === String(app.id);
   });
   
-  // Trouver les Star Apps que cette Trusti App remplace
-  const replacedApps = starApps.filter(sa => {
+  // Trouver les apps que cette app remplace (si c'est une alternative)
+  const replacedApps = allApps.filter(replacedApp => {
     if (app.replacesAppIds && Array.isArray(app.replacesAppIds)) {
-      return app.replacesAppIds.includes(String(sa.id));
+      return app.replacesAppIds.includes(String(replacedApp.id));
     }
     return false;
   });

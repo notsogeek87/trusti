@@ -527,6 +527,29 @@ app.delete('/api/star-apps', async (req, res) => {
   }
 });
 
+// ==============================
+// ALL APPS (Unified endpoint)
+// ==============================
+
+// GET all apps (combines custom-trusti-apps and star-apps)
+app.get('/api/apps', async (req, res) => {
+  try {
+    // Get all apps from database
+    const allApps = await dbService.getAllApps();
+    
+    res.json({
+      success: true,
+      apps: allApps
+    });
+  } catch (error) {
+    console.error('Error fetching all apps:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

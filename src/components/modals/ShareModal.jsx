@@ -6,16 +6,16 @@ import { shareText, copyToClipboard } from '../../utils/shareUtils';
 /**
  * Modal de partage des migrations
  */
-const ShareModal = ({ migratedApps, customMigrations, topApps = [], onClose }) => {
+const ShareModal = ({ migratedApps, customMigrations, allApps = [], onClose }) => {
   // Utiliser uniquement les apps de la BDD
-  const allApps = topApps;
+  const apps = allApps;
   
   const migratedList = Array.from(migratedApps).map(id => {
-    const app = allApps.find(a => a.id === id);
+    const app = apps.find(a => a.id === id);
     const customAlt = customMigrations.get(id);
     const altApp = customAlt 
-      ? allApps.find(a => a.name === customAlt) 
-      : (app?.alternative ? allApps.find(a => a.name === app.alternative) : null);
+      ? apps.find(a => a.name === customAlt) 
+      : (app?.alternative ? apps.find(a => a.name === app.alternative) : null);
     
     return { app, customAlt, altApp };
   }).filter(({ app }) => app);

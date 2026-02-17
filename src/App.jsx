@@ -120,10 +120,8 @@ const App = () => {
     customMigrations,
     selectedApp,
     filteredApps,
-    trustiApps,
-    starApps,
-    isLoadingTrustiApps,
-    isLoadingStarApps,
+    apps,
+    isLoadingApps,
     isInitialLoading,
     setActiveTab,
     setSearchTerm,
@@ -261,22 +259,8 @@ const App = () => {
 
   // Afficher la page d'onboarding de sélection des apps
   if (showOnboarding) {
-    // Combiner toutes les apps disponibles (sans doublons par nom)
-    const allAppsByName = new Map();
-    
-    // Ajouter starApps
-    starApps.forEach(app => {
-      const key = app.name.toLowerCase().trim();
-      allAppsByName.set(key, app);
-    });
-    
-    // Ajouter trustiApps (écrasent si même nom)
-    trustiApps.forEach(app => {
-      const key = app.name.toLowerCase().trim();
-      allAppsByName.set(key, app);
-    });
-    
-    const allApps = Array.from(allAppsByName.values()).sort((a, b) => 
+    // Toutes les apps disponibles triées par nom
+    const allApps = [...apps].sort((a, b) => 
       a.name.localeCompare(b.name)
     );
     
@@ -297,8 +281,7 @@ const App = () => {
         onToggleMyApp={toggleMyApp}
         onClose={() => setSelectedApp(null)}
         onSelectApp={setSelectedApp}
-        trustiApps={trustiApps}
-        starApps={starApps}
+        allApps={apps}
       />
     );
   }
@@ -355,7 +338,7 @@ const App = () => {
               <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
                 Apps populaires
               </p>
-              {(isLoadingStarApps || isLoadingTrustiApps) && (
+              {isLoadingApps && (
                 <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
               )}
             </div>
@@ -406,7 +389,7 @@ const App = () => {
               <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
                 Nos Awards
               </p>
-              {(isLoadingStarApps || isLoadingTrustiApps) && (
+              {isLoadingApps && (
                 <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
               )}
             </div>
@@ -450,7 +433,7 @@ const App = () => {
         <ShareModal
           migratedApps={migratedApps}
           customMigrations={customMigrations}
-          topApps={[...topApps, ...trustiApps]}
+          allApps={apps}
           onClose={() => setShowShareModal(false)}
         />
       )}
@@ -459,7 +442,7 @@ const App = () => {
       {showTrustiShareModal && (
         <TrustiShareModal
           selectedApps={filteredApps.filter(a => myApps.has(a.id))}
-          topApps={[...topApps, ...trustiApps]}
+          allApps={apps}
           onClose={() => setShowTrustiShareModal(false)}
         />
       )}
@@ -475,7 +458,7 @@ const App = () => {
             setShowMigrationSelector(null);
             setSelectedApp(app);
           }}
-          allApps={[...trustiApps, ...starApps]}
+          allApps={apps}
         />
       )}
 
