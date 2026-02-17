@@ -519,8 +519,6 @@ export async function deleteApp(id) {
  */
 export async function searchApps(query, filters = {}) {
   try {
-    console.log('🔍 searchApps called with:', { query, filters });
-    
     let apps;
     
     // Recherche simple par nom (cas le plus courant)
@@ -571,7 +569,6 @@ export async function searchApps(query, filters = {}) {
       `;
     }
     
-    console.log('🔍 searchApps found:', apps.length, 'apps');
     return Promise.all(apps.map(app => formatAppFromDB(app)));
   } catch (error) {
     console.error('Error searching apps:', error);

@@ -537,14 +537,10 @@ app.get('/api/apps', async (req, res) => {
     // Extraire les paramètres de pagination et de recherche
     const { type, limit, offset, page, search, q } = req.query;
     
-    console.log('📥 API /api/apps - params:', { type, limit, offset, page, search, q });
-    
     // Si une recherche est demandée, utiliser searchApps
     const searchQuery = search || q;
     if (searchQuery && searchQuery.trim()) {
-      console.log('🔎 Recherche demandée:', searchQuery);
       const apps = await dbService.searchApps(searchQuery.trim());
-      console.log('🔎 Résultats trouvés:', apps.length);
       return res.json({
         success: true,
         apps: apps,

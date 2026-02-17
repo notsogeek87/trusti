@@ -152,11 +152,8 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
 
   // Effectuer une recherche API quand searchTerm change
   useEffect(() => {
-    console.log('🔎 useAppManagement - searchTerm changed:', searchTerm);
-    
     if (!searchTerm.trim()) {
       // Si la recherche est vide, réinitialiser les résultats
-      console.log('🔎 Recherche vide, réinitialisation');
       setSearchResults([]);
       setIsSearching(false);
       return;
@@ -164,7 +161,6 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
 
     // Lancer la recherche immédiatement (le debounce est déjà fait dans SearchBar)
     const performSearch = async () => {
-      console.log('🔎 Lancement recherche API pour:', searchTerm);
       setIsSearching(true);
       try {
         const API_URL = import.meta.env.PROD 
@@ -172,12 +168,8 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
           : 'http://localhost:3001/api';
         
         const url = `${API_URL}/apps?search=${encodeURIComponent(searchTerm)}`;
-        console.log('🔎 URL:', url);
-        
         const response = await fetch(url);
         const data = await response.json();
-        
-        console.log('🔎 Résultats reçus:', data);
         
         if (data.success) {
           // Normaliser les IDs en strings pour la cohérence
@@ -188,11 +180,10 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
             replacesAppIds: app.replacesAppIds ? app.replacesAppIds.map(id => String(id)) : undefined
           }));
           
-          console.log('🔎 Apps normalisées:', normalizedApps.length, 'résultats');
           setSearchResults(normalizedApps);
         }
       } catch (error) {
-        console.error('❌ Erreur lors de la recherche:', error);
+        console.error('Erreur lors de la recherche:', error);
         setSearchResults([]);
       } finally {
         setIsSearching(false);
