@@ -57,6 +57,9 @@ export interface Application {
   // Vie privée
   privacyFeatures?: PrivacyFeatures;
 
+  // Popularité
+  popularity?: number;
+
   // Métadonnées
   createdAt?: string | Date;
   updatedAt?: string | Date;

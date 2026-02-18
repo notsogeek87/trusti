@@ -121,6 +121,12 @@
       "description": "Juridiction légale (France, UE, USA, etc.)",
       "maxLength": 50
     },
+    "popularity": {
+      "type": "number",
+      "description": "Rang de popularité (0 = le plus populaire, 9999 = inconnu)",
+      "minimum": 0,
+      "default": 9999
+    },
     "privacyFeatures": {
       "type": "object",
       "description": "Caractéristiques de confidentialité",

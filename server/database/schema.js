@@ -35,6 +35,9 @@ CREATE TABLE IF NOT EXISTS applications (
   -- Afficher dans l'onglet Awards
   showInAwards INTEGER DEFAULT 1,
   
+  -- Popularité (rang de 0 à N, 0 étant la plus populaire)
+  popularity INTEGER DEFAULT 9999,
+  
   -- Privacy features (JSON stocké comme TEXT)
   privacyFeatures TEXT,
   
@@ -59,6 +62,7 @@ CREATE INDEX IF NOT EXISTS idx_app_name ON applications(name);
 CREATE INDEX IF NOT EXISTS idx_app_category ON applications(category);
 CREATE INDEX IF NOT EXISTS idx_app_score ON applications(trustiScore);
 CREATE INDEX IF NOT EXISTS idx_app_type ON applications(appType);
+CREATE INDEX IF NOT EXISTS idx_app_popularity ON applications(popularity);
 CREATE INDEX IF NOT EXISTS idx_relations_app ON app_relations(appId);
 CREATE INDEX IF NOT EXISTS idx_relations_related ON app_relations(relatedAppId);
 

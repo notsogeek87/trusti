@@ -30,34 +30,18 @@ import AdminAppsModal from './components/modals/AdminAppsModal';
 import PinModal from './components/modals/PinModal';
 import WelcomeModal from './components/modals/WelcomeModal';
 
-// Apps populaires pour le tri dans l'onboarding (ordre exact de téléchargement)
-const POPULAR_APPS = [
-  'WhatsApp Messenger', 'YouTube', 'Instagram', 'Facebook', 'TikTok', 'Snapchat', 
-  'Telegram', 'Google Chrome', 'Messenger', 'Google Maps', 'Gmail', 'Google Photos', 
-  'PUBG Mobile', 'Free Fire', 'Roblox', 'Spotify', 'Netflix', 'Amazon Shopping', 
-  'Flipkart', 'Shopee', 'Candy Crush Saga', 'Subway Surfers', 'Clash of Clans', 
-  'Clash Royale', 'Duolingo', 'Google Play Games', 'Phone by Google', 'Google Messages', 
-  'Google Drive', 'Google Play services', 'MyJio', 'PhonePe', 'Truecaller', 'MX Player', 
-  'Hotstar', 'ShareChat', 'Ulike', 'Zalo', 'OLX', 'Lazada', 'PicsArt', 'CapCut', 
-  'Kuaishou', 'Meitu', 'UC Browser', 'SHAREit', 'XRecorder', 'InShot', 'VN Video Editor', 'KineMaster'
-];
-
-// Fonction pour trier les apps par popularité
+// Fonction pour trier les apps par popularité (utilise le champ popularity de la BDD)
 const sortAppsByPopularity = (apps) => {
   return apps.slice().sort((a, b) => {
-    const idxA = POPULAR_APPS.indexOf(a.name);
-    const idxB = POPULAR_APPS.indexOf(b.name);
+    const popA = a.popularity || 9999;
+    const popB = b.popularity || 9999;
     
-    // Les deux sont dans la liste : trier par ordre de popularité
-    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+    // Trier par popularité (rang le plus bas = plus populaire)
+    if (popA !== popB) {
+      return popA - popB;
+    }
     
-    // Seulement A est dans la liste : A vient avant
-    if (idxA !== -1) return -1;
-    
-    // Seulement B est dans la liste : B vient avant
-    if (idxB !== -1) return 1;
-    
-    // Aucun n'est dans la liste : tri alphabétique
+    // Si même popularité, tri alphabétique
     return a.name.localeCompare(b.name);
   });
 };

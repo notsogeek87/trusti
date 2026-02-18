@@ -407,7 +407,7 @@ export async function createApp(appData) {
         id, name, trusti_score, grade, category, icon, color, reason,
         play_store_url, apple_store_url, github_url, other_store_url,
         website, description, developer, license,
-        is_open_source, is_european, jurisdiction, app_type, show_in_awards, privacy_features, permissions
+        is_open_source, is_european, jurisdiction, app_type, show_in_awards, popularity, privacy_features, permissions
       )
       VALUES (
         ${id}, ${appData.name}, ${trustiScore}, ${grade},
@@ -420,6 +420,7 @@ export async function createApp(appData) {
         ${appData.isOpenSource || false}, ${appData.isEuropean || false},
         ${appData.jurisdiction || null}, ${appData.appType || 'regular'},
         ${appData.show_in_awards !== undefined ? Number(appData.show_in_awards) : (appData.showInAwards !== false ? 1 : 0)},
+        ${appData.popularity !== undefined ? appData.popularity : 9999},
         ${JSON.stringify(appData.privacyFeatures || {})},
         ${JSON.stringify(appData.permissions || [])}
       )
@@ -474,6 +475,7 @@ export async function updateApp(id, appData) {
           appData.show_in_awards !== undefined ? Number(appData.show_in_awards) : 
           (appData.showInAwards !== undefined ? (appData.showInAwards ? 1 : 0) : null)
         }, show_in_awards),
+        popularity = COALESCE(${appData.popularity !== undefined ? appData.popularity : null}, popularity),
         privacy_features = COALESCE(${JSON.stringify(appData.privacyFeatures || {})}, privacy_features),
         permissions = COALESCE(${JSON.stringify(appData.permissions || [])}, permissions),
         updated_at = NOW()
@@ -827,6 +829,7 @@ async function formatAppFromDB(app) {
     jurisdiction: app.jurisdiction,
     appType: appType,
     showInAwards: app.show_in_awards !== 0,
+    popularity: app.popularity ?? 9999,
     privacyFeatures: typeof app.privacy_features === 'string' 
       ? JSON.parse(app.privacy_features) 
       : app.privacy_features,

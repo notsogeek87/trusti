@@ -36,6 +36,8 @@
  * @property {boolean} [privacyFeatures.gdprCompliant] - Conformité RGPD
  * @property {boolean} [privacyFeatures.noAds] - Absence de publicité
  * 
+ * @property {number} [popularity] - Rang de popularité (0 = le plus populaire, 9999 = inconnu)
+ * 
  * @property {Date|string} [createdAt] - Date de création dans la base Trusti
  * @property {Date|string} [updatedAt] - Date de dernière mise à jour
  */
@@ -113,6 +115,9 @@ export class TrustiApplication {
       ...data.privacyFeatures
     };
 
+    // Popularité
+    this.popularity = data.popularity !== undefined ? data.popularity : 9999;
+
     // Métadonnées
     this.createdAt = data.createdAt || new Date().toISOString();
     this.updatedAt = data.updatedAt || new Date().toISOString();
@@ -165,6 +170,7 @@ export class TrustiApplication {
       isOpenSource: this.isOpenSource,
       isEuropean: this.isEuropean,
       jurisdiction: this.jurisdiction,
+      popularity: this.popularity,
       privacyFeatures: this.privacyFeatures,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt
@@ -276,6 +282,8 @@ export const APPLICATION_EXAMPLE = {
   isOpenSource: true,
   isEuropean: false,
   jurisdiction: "USA",
+  
+  popularity: 5, // Très populaire
   
   privacyFeatures: {
     endToEndEncryption: true,
