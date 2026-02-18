@@ -83,10 +83,12 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
           ? '/api'
           : 'http://localhost:3001/api';
         
-        // Charger avec pagination
+        // IMPORTANT : Charger TOUTES les apps (limit=0) pour que les relations fonctionnent
+        // Les relations (alternatives/remplace) nécessitent d'avoir toutes les apps chargées
         const currentOffset = append ? pagination.offset + pagination.limit : 0;
-        const url = `${API_URL}/apps?limit=${pagination.limit}&offset=${currentOffset}`;
-        console.log('🔍 Chargement apps:', { url, append, currentOffset, limit: pagination.limit });
+        const limit = append ? pagination.limit : 0; // 0 = toutes les apps au premier chargement
+        const url = `${API_URL}/apps?limit=${limit}&offset=${currentOffset}`;
+        console.log('🔍 Chargement apps:', { url, append, currentOffset, limit });
         
         const response = await fetch(url);
         const data = await response.json();

@@ -6,28 +6,16 @@ import ScoreIndicator from '../ui/ScoreIndicator';
  * Modal des détails d'une application
  */
 const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, allApps = [] }) => {
-  // Trouver les alternatives (apps avec bon grade A,B,C qui remplacent cette app)
-  const alternatives = allApps.filter(altApp => {
-    // L'alternative doit avoir un bon grade
-    const goodGrades = ['A', 'B', 'C'];
-    if (!goodGrades.includes(altApp.grade)) {
-      return false;
-    }
-    
-    // Vérifier si elle remplace cette app
-    if (altApp.replacesAppIds && Array.isArray(altApp.replacesAppIds)) {
-      return altApp.replacesAppIds.includes(String(app.id));
-    }
-    return altApp.replacesAppId === String(app.id);
-  });
+  // Utiliser directement les relations calculées par le serveur
+  // alternativeAppIds = apps avec meilleur score dans la même catégorie
+  const alternatives = allApps.filter(altApp => 
+    app.alternativeAppIds && app.alternativeAppIds.includes(String(altApp.id))
+  );
   
-  // Trouver les apps que cette app remplace (si c'est une alternative)
-  const replacedApps = allApps.filter(replacedApp => {
-    if (app.replacesAppIds && Array.isArray(app.replacesAppIds)) {
-      return app.replacesAppIds.includes(String(replacedApp.id));
-    }
-    return false;
-  });
+  // replacesAppIds = apps avec pire score dans la même catégorie
+  const replacedApps = allApps.filter(replacedApp => 
+    app.replacesAppIds && app.replacesAppIds.includes(String(replacedApp.id))
+  );
 
   // Handler pour le clic sur une alternative
   const handleAlternativeClick = (e, alternative) => {

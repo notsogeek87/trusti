@@ -763,12 +763,12 @@ async function getAppRelations(appId) {
       
       // Alternative = score meilleur (valeur plus petite)
       if (appScoreValue < currentScoreValue) {
-        alternativeAppIds.push(app.id);
+        alternativeAppIds.push(String(app.id));
       }
       
       // Remplace = score pire (valeur plus grande)
       if (appScoreValue > currentScoreValue) {
-        replacesAppIds.push(app.id);
+        replacesAppIds.push(String(app.id));
       }
     });
     
