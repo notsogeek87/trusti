@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 
   try {
     // Extraire le type depuis l'URL ou le body
-    const { type, limit, offset, page, search, q } = req.query; // ?type=trusti ou ?type=star
+    const { type, limit, offset, page, search, q, sortBy } = req.query; // ?type=trusti ou ?type=star
     
     if (req.method === 'GET') {
       // GET /api/apps?type=trusti
@@ -54,7 +54,8 @@ export default async function handler(req, res) {
       
       const paginationOptions = {
         limit: paginationLimit,
-        offset: paginationOffset
+        offset: paginationOffset,
+        sortBy: sortBy || 'trusti_score' // Par défaut: tri par trusti_score
       };
       
       let result;

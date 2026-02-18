@@ -235,7 +235,7 @@ export async function initDatabase() {
  */
 export async function getAllApps(options = {}) {
   try {
-    const { limit = 0, offset = 0 } = options;
+    const { limit = 0, offset = 0, sortBy = 'trusti_score' } = options;
     
     // Obtenir le total d'apps
     const totalResult = await sql`
@@ -243,21 +243,54 @@ export async function getAllApps(options = {}) {
     `;
     const total = parseInt(totalResult[0].count);
     
-    // Obtenir les apps avec pagination
+    // Obtenir les apps avec pagination et tri
     let apps;
-    if (limit > 0) {
-      apps = await sql`
-        SELECT * FROM applications
-        ORDER BY trusti_score ASC, name ASC
-        LIMIT ${limit}
-        OFFSET ${offset}
-      `;
+    
+    if (sortBy === 'popularity') {
+      // Tri par popularité
+      if (limit > 0) {
+        apps = await sql`
+          SELECT * FROM applications
+          ORDER BY popularity ASC, name ASC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else {
+        apps = await sql`
+          SELECT * FROM applications
+          ORDER BY popularity ASC, name ASC
+        `;
+      }
+    } else if (sortBy === 'name') {
+      // Tri par nom
+      if (limit > 0) {
+        apps = await sql`
+          SELECT * FROM applications
+          ORDER BY name ASC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else {
+        apps = await sql`
+          SELECT * FROM applications
+          ORDER BY name ASC
+        `;
+      }
     } else {
-      // Si limit = 0, retourner toutes les apps (comportement par défaut)
-      apps = await sql`
-        SELECT * FROM applications
-        ORDER BY trusti_score ASC, name ASC
-      `;
+      // Tri par défaut: trusti_score
+      if (limit > 0) {
+        apps = await sql`
+          SELECT * FROM applications
+          ORDER BY trusti_score ASC, name ASC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else {
+        apps = await sql`
+          SELECT * FROM applications
+          ORDER BY trusti_score ASC, name ASC
+        `;
+      }
     }
     
     const formattedApps = await Promise.all(apps.map(app => formatAppFromDB(app)));

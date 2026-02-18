@@ -83,8 +83,15 @@ const App = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [allAppsForOnboarding, setAllAppsForOnboarding] = useState([]);
   const [isLoadingOnboardingApps, setIsLoadingOnboardingApps] = useState(false);
+  const [onboardingPagination, setOnboardingPagination] = useState({
+    total: 0,
+    limit: 50,
+    offset: 0,
+    hasMore: false,
+    isLoadingMore: false
+  });
 
-  // Charger TOUTES les apps pour l'onboarding
+  // Charger TOUTES les apps pour l'onboarding (avec tri par popularité)
   useEffect(() => {
     if (showOnboarding && allAppsForOnboarding.length === 0 && !isLoadingOnboardingApps) {
       const loadAllApps = async () => {
@@ -94,8 +101,8 @@ const App = () => {
             ? '/api'
             : 'http://localhost:3001/api';
           
-          // Utiliser limit=500 au lieu de 0 pour éviter les problèmes de rendu
-          const url = `${API_URL}/apps?limit=500&offset=0`;
+          // Charger les apps triées par popularité avec pagination
+          const url = `${API_URL}/apps?limit=${onboardingPagination.limit}&offset=0&sortBy=popularity`;
           console.log('🔍 Chargement de toutes les apps pour onboarding:', url);
           
           const response = await fetch(url);
@@ -104,6 +111,17 @@ const App = () => {
           
           console.log('📦 Apps onboarding reçues:', appsArray.length);
           setAllAppsForOnboarding(appsArray);
+          
+          // Mettre à jour l'état de pagination
+          if (data.pagination) {
+            setOnboardingPagination({
+              total: data.pagination.total,
+              limit: data.pagination.limit,
+              offset: 0,
+              hasMore: data.pagination.hasMore,
+              isLoadingMore: false
+            });
+          }
         } catch (error) {
           console.error('❌ Erreur de chargement des apps onboarding:', error);
         } finally {
@@ -114,6 +132,48 @@ const App = () => {
       loadAllApps();
     }
   }, [showOnboarding, allAppsForOnboarding.length, isLoadingOnboardingApps]);
+
+  // Fonction pour charger plus d'apps pour l'onboarding
+  const loadMoreOnboardingApps = async () => {
+    if (onboardingPagination.isLoadingMore || !onboardingPagination.hasMore) {
+      return;
+    }
+
+    setOnboardingPagination(prev => ({ ...prev, isLoadingMore: true }));
+
+    try {
+      const API_URL = import.meta.env.PROD 
+        ? '/api'
+        : 'http://localhost:3001/api';
+      
+      const newOffset = onboardingPagination.offset + onboardingPagination.limit;
+      const url = `${API_URL}/apps?limit=${onboardingPagination.limit}&offset=${newOffset}&sortBy=popularity`;
+      console.log('📥 Chargement de plus d\'apps onboarding:', url);
+      
+      const response = await fetch(url);
+      const data = await response.json();
+      const appsArray = data.success ? data.apps : [];
+      
+      console.log('📦 Apps supplémentaires reçues:', appsArray.length);
+      
+      // Ajouter les nouvelles apps à la liste existante
+      setAllAppsForOnboarding(prev => [...prev, ...appsArray]);
+      
+      // Mettre à jour la pagination
+      if (data.pagination) {
+        setOnboardingPagination({
+          total: data.pagination.total,
+          limit: data.pagination.limit,
+          offset: newOffset,
+          hasMore: data.pagination.hasMore,
+          isLoadingMore: false
+        });
+      }
+    } catch (error) {
+      console.error('❌ Erreur lors du chargement de plus d\'apps:', error);
+      setOnboardingPagination(prev => ({ ...prev, isLoadingMore: false }));
+    }
+  };
 
   // Afficher le modal de bienvenue si l'utilisateur n'est pas connecté
   useEffect(() => {
@@ -323,13 +383,15 @@ const App = () => {
       );
     }
     
-    // Toutes les apps disponibles triées par popularité
-    const allApps = sortAppsByPopularity(allAppsForOnboarding);
+    // Toutes les apps disponibles triées par popularité (le tri est déjà fait côté serveur)
+    const allApps = allAppsForOnboarding;
     
     return (
       <OnboardingApps 
         allApps={allApps}
         onComplete={handleOnboardingComplete}
+        pagination={onboardingPagination}
+        onLoadMore={loadMoreOnboardingApps}
       />
     );
   }

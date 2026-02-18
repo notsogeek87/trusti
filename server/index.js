@@ -535,7 +535,7 @@ app.delete('/api/star-apps', async (req, res) => {
 app.get('/api/apps', async (req, res) => {
   try {
     // Extraire les paramètres de pagination et de recherche
-    const { type, limit, offset, page, search, q } = req.query;
+    const { type, limit, offset, page, search, q, sortBy } = req.query;
     
     // Si une recherche est demandée, utiliser searchApps
     const searchQuery = search || q;
@@ -567,7 +567,8 @@ app.get('/api/apps', async (req, res) => {
     
     const paginationOptions = {
       limit: paginationLimit,
-      offset: paginationOffset
+      offset: paginationOffset,
+      sortBy: sortBy || 'trusti_score' // Par défaut: tri par trusti_score
     };
     
     // Get apps from database avec pagination
