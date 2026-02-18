@@ -29,7 +29,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
   // État de pagination
   const [pagination, setPagination] = useState({
     total: 0,
-    limit: 50,
+    limit: 20,
     offset: 0,
     hasMore: false,
     isLoadingMore: false
@@ -83,10 +83,10 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
           ? '/api'
           : 'http://localhost:3001/api';
         
-        // IMPORTANT : Charger TOUTES les apps (limit=0) pour que les relations fonctionnent
-        // Les relations (alternatives/remplace) nécessitent d'avoir toutes les apps chargées
+        // Utiliser une pagination avec limit=20 pour améliorer les performances
+        // et permettre le chargement progressif des applications
         const currentOffset = append ? pagination.offset + pagination.limit : 0;
-        const limit = append ? pagination.limit : 0; // 0 = toutes les apps au premier chargement
+        const limit = 20; // Charger 20 apps par page
         const url = `${API_URL}/apps?limit=${limit}&offset=${currentOffset}`;
         console.log('🔍 Chargement apps:', { url, append, currentOffset, limit });
         
