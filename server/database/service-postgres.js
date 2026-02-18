@@ -539,11 +539,22 @@ export async function updateApp(id, appData) {
  */
 export async function deleteApp(id) {
   try {
+    // S'assurer que l'ID est une string pour la comparaison avec TEXT
+    const idString = String(id);
+    console.log('🗑️ Attempting to delete app with ID:', idString, 'original type:', typeof id);
+    
     const result = await sql`
       DELETE FROM applications
-      WHERE id = ${id}
+      WHERE id = ${idString}
       RETURNING id
     `;
+    
+    console.log('🗑️ Delete result:', result.length > 0 ? 'Success' : 'Not found', 'rows affected:', result.length);
+    
+    if (result.length > 0) {
+      // Supprimer aussi les relations
+      await sql`DELETE FROM app_relations WHERE app_id = ${idString} OR related_app_id = ${idString}`;
+    }
     
     return result.length > 0;
   } catch (error) {

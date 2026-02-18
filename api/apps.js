@@ -126,6 +126,8 @@ export default async function handler(req, res) {
       // DELETE /api/apps?id=xxx
       const { id } = req.query;
       
+      console.log('🗑️ DELETE request received for ID:', id, 'type:', typeof id);
+      
       if (!id) {
         return res.status(400).json({
           success: false,
@@ -134,6 +136,8 @@ export default async function handler(req, res) {
       }
 
       const success = await dbService.deleteApp(id);
+      
+      console.log('🗑️ Delete operation result:', success);
       
       if (success) {
         return res.status(200).json({

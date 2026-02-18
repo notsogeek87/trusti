@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { CATEGORIES } from '../../constants/categories';
 
 const API_URL = import.meta.env.PROD 
   ? '/api'
@@ -20,6 +21,21 @@ const AdminSimpleTableModal = ({ onClose }) => {
   // Recherche
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  
+  // Modal d'ajout d'app
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newApp, setNewApp] = useState({
+    name: '',
+    category: '',
+    grade: 'C',
+    reason: '',
+    playStoreUrl: '',
+    appleStoreUrl: '',
+    fDroidUrl: '',
+    githubUrl: '',
+    website: '',
+    show_in_awards: 0
+  });
 
   // Charger les apps
   const loadApps = async (page = 1, search = '') => {
@@ -154,6 +170,79 @@ const AdminSimpleTableModal = ({ onClose }) => {
     setSearchTerm('');
     loadApps(1, '');
   };
+  
+  const handleDeleteApp = async (appId, appName) => {
+    if (!confirm(`⚠️ Voulez-vous vraiment supprimer l'application "${appName}" ?\n\nCette action est irréversible !`)) {
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      const response = await fetch(`${API_URL}/apps?id=${appId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        alert(`✅ Application "${appName}" supprimée avec succès !`);
+        // Recharger la liste
+        loadApps(currentPage, searchTerm);
+      } else {
+        alert('❌ Erreur lors de la suppression de l\'application');
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('❌ Erreur lors de la suppression de l\'application');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  const handleAddApp = async () => {
+    if (!newApp.name.trim()) {
+      alert('Le nom de l\'application est obligatoire');
+      return;
+    }
+    if (!newApp.category) {
+      alert('La catégorie est obligatoire');
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      const response = await fetch(`${API_URL}/apps`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newApp)
+      });
+      
+      if (response.ok) {
+        alert('Application ajoutée avec succès !');
+        setShowAddModal(false);
+        // Réinitialiser le formulaire
+        setNewApp({
+          name: '',
+          category: '',
+          grade: 'C',
+          reason: '',
+          playStoreUrl: '',
+          appleStoreUrl: '',
+          fDroidUrl: '',
+          githubUrl: '',
+          website: '',
+          show_in_awards: 0
+        });
+        // Recharger la liste
+        loadApps(currentPage, searchTerm);
+      } else {
+        alert('Erreur lors de l\'ajout de l\'application');
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('Erreur lors de l\'ajout de l\'application');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
@@ -168,6 +257,13 @@ const AdminSimpleTableModal = ({ onClose }) => {
                 : `${totalApps} app${totalApps > 1 ? 's' : ''} total`
               }
             </span>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
+              title="Ajouter une nouvelle application"
+            >
+              <span className="text-lg leading-none">+</span> Ajouter une app
+            </button>
           </div>
           <button 
             onClick={onClose} 
@@ -246,6 +342,7 @@ const AdminSimpleTableModal = ({ onClose }) => {
                   <th className="border border-slate-200 px-2 py-2 text-left font-semibold w-[200px]">F-Droid URL</th>
                   <th className="border border-slate-200 px-2 py-2 text-left font-semibold w-[200px]">Github URL</th>
                   <th className="border border-slate-200 px-2 py-2 text-left font-semibold w-[200px]">Site Web</th>
+                  <th className="border border-slate-200 px-2 py-2 text-center font-semibold w-[80px]">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -272,11 +369,23 @@ const AdminSimpleTableModal = ({ onClose }) => {
                       </select>
                     </td>
                     <td className="border border-slate-200 px-2 py-1.5">
-                      <input 
-                        value={app.category} 
+                      <select
+                        value={app.category || ''} 
                         onChange={e => handleChange(idx, 'category', e.target.value)} 
                         className="w-full px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 text-xs"
-                      />
+                      >
+                        <option value="">Sélectionner...</option>
+                        {/* Afficher la catégorie actuelle si elle n'est pas dans la liste standard */}
+                        {app.category && !CATEGORIES.includes(app.category) && (
+                          <option value={app.category} className="text-orange-600">
+                            {app.category} (ancienne)
+                          </option>
+                        )}
+                        {/* Liste des catégories standards */}
+                        {CATEGORIES.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </select>
                     </td>
                     <td className="border border-slate-200 px-2 py-1.5">
                       <textarea
@@ -342,6 +451,16 @@ const AdminSimpleTableModal = ({ onClose }) => {
                         placeholder="https://..."
                       />
                     </td>
+                    <td className="border border-slate-200 px-2 py-1.5 text-center">
+                      <button
+                        onClick={() => handleDeleteApp(app.id, app.name)}
+                        disabled={isSaving}
+                        className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded border border-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs font-semibold"
+                        title="Supprimer cette application"
+                      >
+                        🗑️ Suppr.
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -387,6 +506,183 @@ const AdminSimpleTableModal = ({ onClose }) => {
           </div>
         </div>
       </div>
+      
+      {/* Modal d'ajout d'application */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-4 rounded-t-2xl">
+              <h3 className="text-xl font-bold">➕ Ajouter une nouvelle application</h3>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              {/* Nom (obligatoire) */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Nom de l'application <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newApp.name}
+                  onChange={e => setNewApp({...newApp, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                  placeholder="Ex: Signal, ProtonMail..."
+                />
+              </div>
+              
+              {/* Catégorie (obligatoire) */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Catégorie <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={newApp.category}
+                  onChange={e => setNewApp({...newApp, category: e.target.value})}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                >
+                  <option value="">Sélectionner une catégorie...</option>
+                  {CATEGORIES.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+              
+              {/* Grade */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  TrustiScore <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={newApp.grade}
+                  onChange={e => setNewApp({...newApp, grade: e.target.value})}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                >
+                  <option value="A">A - Excellent</option>
+                  <option value="B">B - Très bon</option>
+                  <option value="C">C - Bon</option>
+                  <option value="D">D - Moyen</option>
+                  <option value="E">E - Mauvais</option>
+                </select>
+              </div>
+              
+              {/* Raison/Description */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Description / Raison du score
+                </label>
+                <textarea
+                  value={newApp.reason}
+                  onChange={e => setNewApp({...newApp, reason: e.target.value})}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 resize-none"
+                  rows="3"
+                  placeholder="Pourquoi ce score ? Points forts/faibles..."
+                />
+              </div>
+              
+              {/* URLs */}
+              <div className="grid grid-cols-1 gap-3">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">
+                    Play Store URL
+                  </label>
+                  <input
+                    type="url"
+                    value={newApp.playStoreUrl}
+                    onChange={e => setNewApp({...newApp, playStoreUrl: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-xs font-mono"
+                    placeholder="https://play.google.com/store/apps/details?id=..."
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">
+                    App Store URL
+                  </label>
+                  <input
+                    type="url"
+                    value={newApp.appleStoreUrl}
+                    onChange={e => setNewApp({...newApp, appleStoreUrl: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-xs font-mono"
+                    placeholder="https://apps.apple.com/..."
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">
+                    F-Droid URL
+                  </label>
+                  <input
+                    type="url"
+                    value={newApp.fDroidUrl}
+                    onChange={e => setNewApp({...newApp, fDroidUrl: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-xs font-mono"
+                    placeholder="https://f-droid.org/packages/..."
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">
+                    GitHub URL
+                  </label>
+                  <input
+                    type="url"
+                    value={newApp.githubUrl}
+                    onChange={e => setNewApp({...newApp, githubUrl: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-xs font-mono"
+                    placeholder="https://github.com/..."
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">
+                    Site Web
+                  </label>
+                  <input
+                    type="url"
+                    value={newApp.website}
+                    onChange={e => setNewApp({...newApp, website: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-xs font-mono"
+                    placeholder="https://..."
+                  />
+                </div>
+              </div>
+              
+              {/* Show in Awards */}
+              <div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={newApp.show_in_awards === 1}
+                    onChange={e => setNewApp({...newApp, show_in_awards: e.target.checked ? 1 : 0})}
+                    className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-2 focus:ring-green-400"
+                  />
+                  <span className="text-sm font-semibold text-slate-700">
+                    Afficher dans les Awards (Nos recommandations)
+                  </span>
+                </label>
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="sticky bottom-0 bg-slate-50 px-6 py-4 border-t flex justify-end gap-3 rounded-b-2xl">
+              <button
+                onClick={() => setShowAddModal(false)}
+                disabled={isSaving}
+                className="px-5 py-2 bg-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-300 transition-colors disabled:opacity-50"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleAddApp}
+                disabled={isSaving || !newApp.name.trim() || !newApp.category}
+                className="px-5 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSaving ? '⏳ Ajout...' : '✅ Ajouter l\'application'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

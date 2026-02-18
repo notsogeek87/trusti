@@ -638,6 +638,67 @@ app.put('/api/apps', async (req, res) => {
   }
 });
 
+// DELETE /api/apps?id=xxx - Supprimer une app
+app.delete('/api/apps', async (req, res) => {
+  try {
+    const { id } = req.query;
+    
+    console.log('🗑️ DELETE request received for ID:', id, 'type:', typeof id);
+    
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: 'App ID is required'
+      });
+    }
+
+    const success = await dbService.deleteApp(id);
+    
+    console.log('🗑️ Delete operation result:', success);
+    
+    if (success) {
+      return res.json({
+        success: true,
+        message: 'App deleted successfully'
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        error: 'App not found'
+      });
+    }
+  } catch (error) {
+    console.error('Error deleting app:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// POST /api/apps - Créer une nouvelle app
+app.post('/api/apps', async (req, res) => {
+  try {
+    const appData = req.body;
+    
+    console.log('➕ POST request to create app:', appData.name);
+    
+    const newApp = await dbService.createApp(appData);
+    
+    return res.json({
+      success: true,
+      message: 'App created successfully',
+      app: newApp
+    });
+  } catch (error) {
+    console.error('Error creating app:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
