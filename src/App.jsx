@@ -220,6 +220,9 @@ const App = () => {
     }, 100);
   };
 
+  // État pour le filtre de catégorie dans l'onglet Applications
+  const [selectedCategory, setSelectedCategory] = useState('Toutes');
+
   // Gestion de l'état des applications (avec sauvegarde utilisateur)
   const {
     activeTab,
@@ -241,10 +244,7 @@ const App = () => {
     setCustomMigration,
     setSelectedApp,
     loadMoreApps,
-  } = useAppManagement(currentUser, saveUserData, getUserData);
-
-  // État pour le filtre de catégorie dans l'onglet Applications
-  const [selectedCategory, setSelectedCategory] = useState('Toutes');
+  } = useAppManagement(currentUser, saveUserData, getUserData, selectedCategory);
 
   // Gestion des modales
   const {

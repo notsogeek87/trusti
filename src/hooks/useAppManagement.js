@@ -8,7 +8,7 @@ import { TABS } from '../constants/tabs';
  * Toutes les apps sont des Applications avec un GRADE (A, B, C, D, E)
  * Le filtrage se fait côté front selon les besoins
  */
-export const useAppManagement = (currentUser, saveUserData, getUserData) => {
+export const useAppManagement = (currentUser, saveUserData, getUserData, selectedCategory = 'Toutes') => {
   const [activeTab, setActiveTab] = useState(TABS.APPLICATIONS);
   const [searchTerm, setSearchTerm] = useState("");
   const [myApps, setMyApps] = useState(new Set());
@@ -34,6 +34,9 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     hasMore: false,
     isLoadingMore: false
   });
+  
+  // État pour savoir si toutes les apps sont chargées (pour le filtrage par catégorie)
+  const [allAppsLoaded, setAllAppsLoaded] = useState(false);
 
   // Charger les données de l'utilisateur connecté
   useEffect(() => {
@@ -143,6 +146,100 @@ export const useAppManagement = (currentUser, saveUserData, getUserData) => {
     // Note: Le rechargement automatique est désactivé pour ne pas interférer avec la pagination
     // Si l'admin modifie des données, l'utilisateur peut rafraîchir la page manuellement
   }, []); // Pas de dépendance à pagination pour éviter les boucles
+  
+  // Charger toutes les apps quand une catégorie est sélectionnée (sauf "Toutes")
+  useEffect(() => {
+    const loadAllAppsForCategory = async () => {
+      // Si "Toutes" est sélectionné, ne rien faire
+      if (selectedCategory === 'Toutes') {
+        return;
+      }
+      
+      // Si toutes les apps sont déjà chargées, ne rien faire
+      if (allAppsLoaded) {
+        console.log('✅ Toutes les apps déjà chargées');
+        return;
+      }
+      
+      // S'il n'y a plus d'apps à charger, marquer comme terminé
+      if (!pagination.hasMore) {
+        console.log('✅ Toutes les apps déjà présentes (pas de hasMore)');
+        setAllAppsLoaded(true);
+        return;
+      }
+      
+      console.log('🔄 Chargement progressif de TOUTES les apps pour filtrer par catégorie:', selectedCategory);
+      console.log('📊 État avant chargement:', { 
+        appsCount: apps.length, 
+        total: pagination.total, 
+        hasMore: pagination.hasMore 
+      });
+      
+      setIsLoadingApps(true);
+      
+      try {
+        const API_URL = import.meta.env.PROD 
+          ? '/api'
+          : 'http://localhost:3001/api';
+        
+        let allApps = [...apps]; // Commencer avec les apps déjà chargées
+        let offset = apps.length;
+        const batchSize = 50;
+        let hasMore = true;
+        
+        console.log('🔄 Chargement par lots de', batchSize, 'apps...');
+        
+        // Charger par lots jusqu'à avoir tout
+        while (hasMore && offset < pagination.total) {
+          const url = `${API_URL}/apps?limit=${batchSize}&offset=${offset}`;
+          console.log(`📦 Chargement lot: offset=${offset}, limit=${batchSize}`);
+          
+          const response = await fetch(url);
+          const data = await response.json();
+          const appsArray = data.success ? data.apps : [];
+          
+          if (appsArray.length === 0) {
+            break;
+          }
+          
+          // Normaliser les IDs en strings pour la cohérence
+          const normalizedApps = appsArray.map(app => ({
+            ...app,
+            id: String(app.id),
+            replacesAppId: app.replacesAppId ? String(app.replacesAppId) : undefined,
+            replacesAppIds: app.replacesAppIds ? app.replacesAppIds.map(id => String(id)) : undefined
+          }));
+          
+          allApps = [...allApps, ...normalizedApps];
+          offset += appsArray.length;
+          hasMore = data.pagination?.hasMore || false;
+          
+          console.log(`✅ Lot chargé: ${appsArray.length} apps (total: ${allApps.length}/${pagination.total})`);
+        }
+        
+        console.log('✅ Chargement terminé:', allApps.length, 'apps au total');
+        
+        setApps(allApps);
+        setAllAppsLoaded(true);
+        
+        // Mettre à jour la pagination pour indiquer qu'il n'y a plus rien à charger
+        setPagination({
+          total: pagination.total,
+          limit: 0,
+          offset: allApps.length,
+          hasMore: false,
+          isLoadingMore: false
+        });
+        
+      } catch (error) {
+        console.error('❌ Erreur lors du chargement:', error);
+      } finally {
+        setIsLoadingApps(false);
+      }
+    };
+    
+    loadAllAppsForCategory();
+  }, [selectedCategory]);
 
   // Détecter quand le chargement initial est terminé
   useEffect(() => {
