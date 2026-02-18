@@ -58,11 +58,23 @@ const App = () => {
     currentUser,
     isLoading: isAuthLoading,
     login,
-    logout,
+    logout: authLogout,
     getUserData,
     saveUserData,
-    resetUserData
+    resetUserData: authResetUserData
   } = useAuth();
+  
+  // Wrapper pour logout qui réinitialise aussi l'état admin
+  const logout = () => {
+    setIsAdminUnlocked(false);
+    authLogout();
+  };
+  
+  // Wrapper pour resetUserData qui réinitialise aussi l'état admin
+  const resetUserData = () => {
+    setIsAdminUnlocked(false);
+    authResetUserData();
+  };
 
   // État pour la landing page
   // La landing page ne s'affiche plus automatiquement, seulement sur demande
@@ -273,6 +285,7 @@ const App = () => {
       const adminUnlocked = getUserData('admin_unlocked');
       setIsAdminUnlocked(!!adminUnlocked);
     } else {
+      // Réinitialiser l'état admin quand on se déconnecte
       setIsAdminUnlocked(false);
     }
   }, [currentUser, getUserData]);
