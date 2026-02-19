@@ -1,19 +1,70 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, CheckCircle, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
+
+const API_URL = import.meta.env.PROD 
+  ? '/api'
+  : 'http://localhost:3001/api';
 
 /**
  * Modal des détails d'une application
  */
 const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, allApps = [] }) => {
+  // State pour stocker les apps chargées dynamiquement
+  const [loadedApps, setLoadedApps] = useState([]);
+  const [isLoadingRelations, setIsLoadingRelations] = useState(false);
+
+  // Fusionner allApps avec les apps chargées dynamiquement
+  const availableApps = [...allApps, ...loadedApps];
+
+  // Charger les apps manquantes pour les relations
+  useEffect(() => {
+    const loadMissingApps = async () => {
+      if (!app.alternativeAppIds && !app.replacesAppIds) return;
+
+      // Collecter tous les IDs des relations
+      const allRelationIds = [
+        ...(app.alternativeAppIds || []),
+        ...(app.replacesAppIds || [])
+      ];
+
+      if (allRelationIds.length === 0) return;
+
+      // Identifier les IDs qui ne sont pas dans allApps
+      const existingIds = new Set(allApps.map(a => String(a.id)));
+      const missingIds = allRelationIds
+        .map(id => String(id))
+        .filter(id => !existingIds.has(id));
+
+      if (missingIds.length === 0) return;
+
+      // Charger les apps manquantes
+      setIsLoadingRelations(true);
+      try {
+        const response = await fetch(`${API_URL}/apps?ids=${missingIds.join(',')}`);
+        const data = await response.json();
+        
+        if (data.success && data.apps) {
+          setLoadedApps(data.apps);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des apps liées:', error);
+      } finally {
+        setIsLoadingRelations(false);
+      }
+    };
+
+    loadMissingApps();
+  }, [app.id, app.alternativeAppIds, app.replacesAppIds, allApps]);
+
   // Utiliser directement les relations calculées par le serveur
   // alternativeAppIds = apps avec meilleur score dans la même catégorie
-  const alternatives = allApps.filter(altApp => 
+  const alternatives = availableApps.filter(altApp => 
     app.alternativeAppIds && app.alternativeAppIds.includes(String(altApp.id))
   );
   
   // replacesAppIds = apps avec pire score dans la même catégorie
-  const replacedApps = allApps.filter(replacedApp => 
+  const replacedApps = availableApps.filter(replacedApp => 
     app.replacesAppIds && app.replacesAppIds.includes(String(replacedApp.id))
   );
 
@@ -216,13 +267,15 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
         )}
 
         {/* Badge incitatif pour les alternatives */}
-        {alternatives.length > 0 && (
+        {((isLoadingRelations && app.alternativeAppIds && app.alternativeAppIds.length > 0) || alternatives.length > 0) && (
           <div className="mb-4 relative">
-            <div className="absolute -top-2 -right-2 z-10">
-              <div className="bg-gradient-to-r from-pink-500 to-purple-500 text-white text-xs font-black px-2.5 py-1 rounded-full shadow-lg animate-bounce">
-                {alternatives.length} alternative{alternatives.length > 1 ? 's' : ''}
+            {!isLoadingRelations && (
+              <div className="absolute -top-2 -right-2 z-10">
+                <div className="bg-gradient-to-r from-pink-500 to-purple-500 text-white text-xs font-black px-2.5 py-1 rounded-full shadow-lg animate-bounce">
+                  {alternatives.length} alternative{alternatives.length > 1 ? 's' : ''}
+                </div>
               </div>
-            </div>
+            )}
             <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-4 border-2 border-indigo-200 shadow-lg relative overflow-hidden">
               {/* Effet de brillance animé */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 animate-shimmer pointer-events-none"></div>
@@ -232,11 +285,27 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                   <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 flex items-center gap-2">
                     <ArrowRight size={16} className="text-indigo-600 animate-pulse" /> Alternatives
                   </h3>
-                  <div className="bg-emerald-100 text-emerald-700 text-[10px] font-black px-2 py-0.5 rounded-full">
-                    Meilleures notes
-                  </div>
+                  {!isLoadingRelations && (
+                    <div className="bg-emerald-100 text-emerald-700 text-[10px] font-black px-2 py-0.5 rounded-full">
+                      Meilleures notes
+                    </div>
+                  )}
                 </div>
-                <div className="space-y-2">
+                {isLoadingRelations ? (
+                  <div className="space-y-2">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="bg-white rounded-xl p-3 flex items-center gap-2.5 shadow-sm animate-pulse">
+                        <div className="w-10 h-10 rounded-xl bg-slate-200"></div>
+                        <div className="flex-grow space-y-2">
+                          <div className="h-3 bg-slate-200 rounded w-3/4"></div>
+                          <div className="h-2 bg-slate-100 rounded w-full"></div>
+                        </div>
+                        <div className="w-8 h-8 rounded-lg bg-slate-200"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
                   {alternatives.map(alt => (
                     <div 
                       key={alt.id} 
@@ -266,25 +335,42 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                       </div>
                     </div>
                   ))}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         )}
         
         {/* Section pour les apps remplacées (quand on affiche une Trusti App) */}
-        {replacedApps.length > 0 && (
+        {((isLoadingRelations && app.replacesAppIds && app.replacesAppIds.length > 0) || replacedApps.length > 0) && (
           <div className="mb-4">
             <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl p-4 border-2 border-orange-200 shadow-lg">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 flex items-center gap-2">
                   <ShieldCheck size={16} className="text-orange-600" /> Remplace
                 </h3>
-                <div className="bg-orange-100 text-orange-700 text-[10px] font-black px-2 py-0.5 rounded-full">
-                  {replacedApps.length} app{replacedApps.length > 1 ? 's' : ''}
-                </div>
+                {!isLoadingRelations && (
+                  <div className="bg-orange-100 text-orange-700 text-[10px] font-black px-2 py-0.5 rounded-full">
+                    {replacedApps.length} app{replacedApps.length > 1 ? 's' : ''}
+                  </div>
+                )}
               </div>
-              <div className="space-y-2">
+              {isLoadingRelations ? (
+                <div className="space-y-2">
+                  {[1].map((i) => (
+                    <div key={i} className="bg-white rounded-xl p-3 flex items-center gap-2.5 shadow-sm animate-pulse">
+                      <div className="w-10 h-10 rounded-xl bg-slate-200"></div>
+                      <div className="flex-grow space-y-2">
+                        <div className="h-3 bg-slate-200 rounded w-3/4"></div>
+                        <div className="h-2 bg-slate-100 rounded w-full"></div>
+                      </div>
+                      <div className="w-8 h-8 rounded-lg bg-slate-200"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-2">
                 {replacedApps.map(replaced => (
                   <div 
                     key={replaced.id} 
@@ -314,7 +400,8 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                     </div>
                   </div>
                 ))}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         )}
