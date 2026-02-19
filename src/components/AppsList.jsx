@@ -27,7 +27,8 @@ const AppsList = ({
   selectedCategory = 'Toutes',
   searchTerm = '',
   pagination = { hasMore: false, isLoadingMore: false, total: 0 },
-  onLoadMore
+  onLoadMore,
+  isLoadingAwards = false
 }) => {
   // Filtrer par catégorie dans l'onglet APPLICATIONS
   let displayApps = apps;
@@ -46,6 +47,16 @@ const AppsList = ({
 
   // Pour l'onglet TOP_ALTERNATIVES, grouper par catégorie
   if (activeTab === TABS.TOP_ALTERNATIVES) {
+    // Afficher un loader pendant le chargement initial
+    if (isLoadingAwards) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent mb-4"></div>
+          <p className="text-slate-600 text-sm font-semibold">Chargement des Awards...</p>
+        </div>
+      );
+    }
+    
     // Grouper les apps par catégorie normalisée
     const appsByCategory = apps.reduce((acc, app) => {
       const category = normalizeCategory(app.category);

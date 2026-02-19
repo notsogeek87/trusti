@@ -408,6 +408,97 @@ export async function getAppsByType(appType, options = {}) {
 }
 
 /**
+ * Obtenir les applications pour les Awards (show_in_awards = 1)
+ * @param {Object} options - Options de pagination
+ * @param {number} options.limit - Nombre d'apps à retourner (0 = toutes)
+ * @param {number} options.offset - Position de départ
+ * @param {string} options.sortBy - Champ de tri (name, category, trusti_score)
+ * @returns {Promise<{apps: Array, total: number}>} Apps et total
+ */
+export async function getAwardsApps(options = {}) {
+  try {
+    const { limit = 0, offset = 0, sortBy = 'category' } = options;
+    
+    console.log('🎯 getAwardsApps appelée avec:', { limit, offset, sortBy });
+    
+    // Obtenir le total d'apps Awards
+    const totalResult = await sql`
+      SELECT COUNT(*) as count FROM applications
+      WHERE show_in_awards = 1
+    `;
+    const total = parseInt(totalResult[0].count);
+    
+    console.log(`📊 Total d'apps avec show_in_awards = 1: ${total}`);
+    
+    // Obtenir les apps avec pagination et tri
+    let apps;
+    
+    if (sortBy === 'name') {
+      if (limit > 0) {
+        apps = await sql`
+          SELECT * FROM applications
+          WHERE show_in_awards = 1
+          ORDER BY name ASC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else {
+        apps = await sql`
+          SELECT * FROM applications
+          WHERE show_in_awards = 1
+          ORDER BY name ASC
+        `;
+      }
+    } else if (sortBy === 'trusti_score') {
+      if (limit > 0) {
+        apps = await sql`
+          SELECT * FROM applications
+          WHERE show_in_awards = 1
+          ORDER BY trusti_score ASC, name ASC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else {
+        apps = await sql`
+          SELECT * FROM applications
+          WHERE show_in_awards = 1
+          ORDER BY trusti_score ASC, name ASC
+        `;
+      }
+    } else {
+      // Tri par défaut: catégorie puis nom
+      if (limit > 0) {
+        apps = await sql`
+          SELECT * FROM applications
+          WHERE show_in_awards = 1
+          ORDER BY category ASC, name ASC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else {
+        apps = await sql`
+          SELECT * FROM applications
+          WHERE show_in_awards = 1
+          ORDER BY category ASC, name ASC
+        `;
+      }
+    }
+    
+    const formattedApps = await Promise.all(apps.map(app => formatAppFromDB(app)));
+    
+    return {
+      apps: formattedApps,
+      total,
+      limit,
+      offset
+    };
+  } catch (error) {
+    console.error('Error getting awards apps:', error);
+    throw error;
+  }
+}
+
+/**
  * Obtenir une application par ID
  */
 export async function getAppById(id) {
@@ -889,6 +980,7 @@ export default {
   initDatabase,
   getAllApps,
   getAppsByType,
+  getAwardsApps,
   getAppById,
   createApp,
   updateApp,

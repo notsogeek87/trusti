@@ -14,11 +14,12 @@ export default async function handler(req, res) {
 
   try {
     // Extraire le type depuis l'URL ou le body
-    const { type, limit, offset, page, search, q, sortBy } = req.query; // ?type=trusti ou ?type=star
+    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards } = req.query;
     
     if (req.method === 'GET') {
       // GET /api/apps?type=trusti
       // GET /api/apps?type=star
+      // GET /api/apps?awards=true (apps avec show_in_awards = 1)
       // GET /api/apps (toutes les apps)
       // GET /api/apps?limit=50&offset=0 (pagination)
       // GET /api/apps?limit=50&page=1 (pagination par page)
@@ -35,6 +36,39 @@ export default async function handler(req, res) {
             total: apps.length,
             limit: 0,
             offset: 0,
+            page: 1,
+            totalPages: 1,
+            hasMore: false
+          }
+        });
+      }
+      
+      // Si awards/showInAwards est demandé, utiliser getAwardsApps
+      const requestAwards = awards === 'true' || awards === '1' || showInAwards === 'true' || showInAwards === '1';
+      if (requestAwards) {
+        console.log('🏆 Requête Awards détectée:', { awards, showInAwards, requestAwards });
+        
+        const paginationOptions = {
+          limit: parseInt(limit) || 0,
+          offset: parseInt(offset) || 0,
+          sortBy: sortBy || 'category'
+        };
+        
+        console.log('📊 Appel de getAwardsApps avec options:', paginationOptions);
+        const result = await dbService.getAwardsApps(paginationOptions);
+        
+        console.log('✅ Résultat getAwardsApps:', {
+          total: result.total,
+          returned: result.apps.length
+        });
+        
+        return res.status(200).json({
+          success: true,
+          apps: result.apps,
+          pagination: {
+            total: result.total,
+            limit: result.limit,
+            offset: result.offset,
             page: 1,
             totalPages: 1,
             hasMore: false

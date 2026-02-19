@@ -38,6 +38,11 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
   // État pour savoir si toutes les apps sont chargées (pour le filtrage par catégorie)
   const [allAppsLoaded, setAllAppsLoaded] = useState(false);
 
+  // État spécifique pour les apps Awards (show_in_awards = 1)
+  const [awardsApps, setAwardsApps] = useState([]);
+  const [isLoadingAwards, setIsLoadingAwards] = useState(false);
+  const [awardsLoaded, setAwardsLoaded] = useState(false);
+
   // Charger les données de l'utilisateur connecté
   useEffect(() => {
     setIsInitialized(false); // Réinitialiser avant de charger
@@ -147,11 +152,71 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     // Si l'admin modifie des données, l'utilisateur peut rafraîchir la page manuellement
   }, []); // Pas de dépendance à pagination pour éviter les boucles
   
-  // Charger toutes les apps quand une catégorie est sélectionnée (sauf "Toutes")
+  // Charger les apps Awards quand l'onglet TOP_ALTERNATIVES est actif
+  useEffect(() => {
+    const loadAwardsApps = async () => {
+      // Ne charger que si l'onglet Awards est actif
+      if (activeTab !== TABS.TOP_ALTERNATIVES) {
+        return;
+      }
+      
+      // Si déjà en train de charger, ne rien faire
+      if (isLoadingAwards) {
+        return;
+      }
+      
+      console.log('🏆 Chargement des apps Awards (show_in_awards = 1)');
+      setIsLoadingAwards(true);
+      
+      try {
+        const API_URL = import.meta.env.PROD 
+          ? '/api'
+          : 'http://localhost:3001/api';
+        
+        // Ajouter un timestamp pour éviter le cache
+        const url = `${API_URL}/apps?awards=true&_t=${Date.now()}`;
+        console.log('🔍 URL Awards:', url);
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        const appsArray = data.success ? data.apps : [];
+        
+        console.log('📦 Apps Awards reçues:', appsArray.length);
+        
+        // Normaliser les IDs en strings pour la cohérence
+        const normalizedApps = appsArray.map(app => ({
+          ...app,
+          id: String(app.id),
+          replacesAppId: app.replacesAppId ? String(app.replacesAppId) : undefined,
+          replacesAppIds: app.replacesAppIds ? app.replacesAppIds.map(id => String(id)) : undefined
+        }));
+        
+        setAwardsApps(normalizedApps);
+        setAwardsLoaded(true);
+        
+      } catch (error) {
+        console.error('❌ Erreur lors du chargement des apps Awards:', error);
+        setAwardsApps([]);
+      } finally {
+        setIsLoadingAwards(false);
+      }
+    };
+    
+    loadAwardsApps();
+  }, [activeTab]); // Recharger à chaque changement d'onglet
+  
+  // Charger toutes les apps quand nécessaire :
+  // - Une catégorie est sélectionnée (sauf "Toutes")
+  // - L'onglet MY_APPS est actif
   useEffect(() => {
     const loadAllAppsForCategory = async () => {
-      // Si "Toutes" est sélectionné, ne rien faire
-      if (selectedCategory === 'Toutes') {
+      // Déterminer si on a besoin de charger toutes les apps
+      const needsAllApps = 
+        selectedCategory !== 'Toutes' || 
+        activeTab === TABS.MY_APPS;
+      
+      // Si on n'a pas besoin de toutes les apps, ne rien faire
+      if (!needsAllApps) {
         return;
       }
       
@@ -168,7 +233,10 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
         return;
       }
       
-      console.log('🔄 Chargement progressif de TOUTES les apps pour filtrer par catégorie:', selectedCategory);
+      console.log('🔄 Chargement progressif de TOUTES les apps pour:', {
+        selectedCategory: selectedCategory !== 'Toutes' ? selectedCategory : null,
+        activeTab
+      });
       console.log('📊 État avant chargement:', { 
         appsCount: apps.length, 
         total: pagination.total, 
@@ -239,7 +307,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     };
     
     loadAllAppsForCategory();
-  }, [selectedCategory]);
+  }, [selectedCategory, activeTab]);
 
   // Détecter quand le chargement initial est terminé
   useEffect(() => {
@@ -294,6 +362,12 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
 
   // Filtrer les applications selon l'onglet actif et la recherche
   const filteredApps = useMemo(() => {
+    // Pour TOP_ALTERNATIVES, utiliser awardsApps (chargées via API spécifique)
+    // sauf si une recherche est active
+    if (activeTab === TABS.TOP_ALTERNATIVES && !searchTerm.trim()) {
+      return awardsApps; // Déjà triées par catégorie dans l'API
+    }
+    
     // Si une recherche est active, utiliser les résultats de recherche
     const sourceApps = searchTerm.trim() ? searchResults : apps;
     
@@ -350,7 +424,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
         return a.name.localeCompare(b.name);
       });
     } else if (activeTab === TABS.TOP_ALTERNATIVES) {
-      // Filtrer uniquement les apps avec showInAwards activé
+      // Si recherche active, filtrer les résultats de recherche par showInAwards
       list = sourceApps.filter(app => app.showInAwards === true);
       
       // Trier par catégorie puis par nom
@@ -362,7 +436,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     }
     
     return list;
-  }, [activeTab, myApps, searchTerm, searchResults, apps]);
+  }, [activeTab, myApps, searchTerm, searchResults, apps, awardsApps]);
 
   // Ajouter/retirer une app de "Mes Apps"
   const toggleMyApp = (e, id) => {
@@ -453,6 +527,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     isLoadingApps,
     isInitialLoading,
     isSearching,
+    isLoadingAwards,
     filteredApps,
     pagination,
     

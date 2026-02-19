@@ -248,6 +248,7 @@ const App = () => {
     isLoadingApps,
     isInitialLoading,
     isSearching,
+    isLoadingAwards,
     pagination,
     setActiveTab,
     setSearchTerm,
@@ -549,6 +550,7 @@ const App = () => {
           searchTerm={searchTerm}
           pagination={pagination}
           onLoadMore={loadMoreApps}
+          isLoadingAwards={isLoadingAwards}
         />
       </main>
 

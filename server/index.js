@@ -535,7 +535,7 @@ app.delete('/api/star-apps', async (req, res) => {
 app.get('/api/apps', async (req, res) => {
   try {
     // Extraire les paramètres de pagination et de recherche
-    const { type, limit, offset, page, search, q, sortBy } = req.query;
+    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards } = req.query;
     
     // Si une recherche est demandée, utiliser searchApps
     const searchQuery = search || q;
@@ -548,6 +548,36 @@ app.get('/api/apps', async (req, res) => {
           total: apps.length,
           limit: 0,
           offset: 0,
+          page: 1,
+          totalPages: 1,
+          hasMore: false
+        }
+      });
+    }
+    
+    // Si awards/showInAwards est demandé, utiliser getAwardsApps
+    const requestAwards = awards === 'true' || awards === '1' || showInAwards === 'true' || showInAwards === '1';
+    if (requestAwards) {
+      console.log('🏆 Requête Awards détectée:', { awards, showInAwards });
+      
+      const paginationOptions = {
+        limit: parseInt(limit) || 0,
+        offset: parseInt(offset) || 0,
+        sortBy: sortBy || 'category'
+      };
+      
+      console.log('📊 Appel de getAwardsApps');
+      const result = await dbService.getAwardsApps(paginationOptions);
+      
+      console.log('✅ Résultat:', { total: result.total, returned: result.apps.length });
+      
+      return res.json({
+        success: true,
+        apps: result.apps,
+        pagination: {
+          total: result.total,
+          limit: result.limit,
+          offset: result.offset,
           page: 1,
           totalPages: 1,
           hasMore: false

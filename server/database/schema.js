@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS applications (
   appType TEXT DEFAULT 'regular' CHECK(appType IN ('regular', 'trusti', 'star')),
   
   -- Afficher dans l'onglet Awards
-  showInAwards INTEGER DEFAULT 1,
+  showInAwards INTEGER DEFAULT 0,
   
   -- Popularité (rang de 0 à N, 0 étant la plus populaire)
   popularity INTEGER DEFAULT 9999,
