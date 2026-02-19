@@ -47,11 +47,9 @@ const AppsList = ({
   const hasMore = showPagination && pagination.hasMore;
   const isLoadingMore = pagination.isLoadingMore;
 
-  // Pour l'onglet MY_APPS, afficher un loader pendant le chargement
-  if (activeTab === TABS.MY_APPS && isLoadingMyApps) {
-    return <LoadingSpinner message="Chargement de Mes Apps..." size="medium" />;
-  }
-
+  // Pour l'onglet MY_APPS, ne pas bloquer l'affichage pendant le chargement
+  // On laisse les AppCard individuelles afficher leur loader
+  
   // Pour l'onglet TOP_ALTERNATIVES, grouper par catégorie
   if (activeTab === TABS.TOP_ALTERNATIVES) {
     // Afficher un loader pendant le chargement initial
@@ -96,6 +94,7 @@ const AppsList = ({
                   onToggleMigrate={onToggleMigrate}
                   onSelectApp={onSelectApp}
                   onSelectMigration={onSelectMigration}
+                  isLoadingMyApps={isLoadingMyApps}
                 />
               ))}
             </div>
@@ -126,6 +125,7 @@ const AppsList = ({
           onToggleMigrate={onToggleMigrate}
           onSelectApp={onSelectApp}
           onSelectMigration={onSelectMigration}
+          isLoadingMyApps={isLoadingMyApps}
         />
       ))}
       

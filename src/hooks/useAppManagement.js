@@ -403,11 +403,42 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     // Pour MY_APPS, utiliser myAppsData (chargées par IDs)
     // sauf si une recherche est active
     if (activeTab === TABS.MY_APPS && !searchTerm.trim()) {
-      // Enrichir avec les alternatives
-      const list = myAppsData.map(app => {
+      // Créer une Map des apps déjà chargées pour un accès rapide
+      const loadedAppsMap = new Map(myAppsData.map(app => [String(app.id), app]));
+      
+      // Pour chaque app dans myApps, vérifier si elle est chargée ou créer un skeleton
+      const allMyApps = Array.from(myApps).map(id => {
+        const loadedApp = loadedAppsMap.get(String(id));
+        
+        // Si l'app est chargée, la retourner
+        if (loadedApp) {
+          return loadedApp;
+        }
+        
+        // Si l'app n'est pas encore chargée, créer un skeleton
+        // (ne pas dépendre de isLoadingMyApps qui est global et change rapidement)
+        return {
+          id: String(id),
+          name: 'Chargement...',
+          grade: 'C',
+          category: '',
+          icon: '⏳',
+          reason: '',
+          isLoadingSkeleton: true
+        };
+      });
+      
+      // Enrichir avec les alternatives (seulement pour les apps réelles, pas les skeletons)
+      const list = allMyApps.map(app => {
+        // Si c'est un skeleton, le retourner tel quel
+        if (app.isLoadingSkeleton) {
+          return app;
+        }
+        
         // Chercher si une app avec meilleur grade remplace cette app (alternative)
         // On cherche dans myAppsData ou apps
         const allAvailableApps = [...new Map([...myAppsData, ...apps].map(a => [a.id, a])).values()];
+        const availableIds = new Set(allAvailableApps.map(a => String(a.id)));
         
         const replacement = allAvailableApps.find(replacementApp => {
           // L'app de remplacement doit avoir un meilleur grade (A, B, C)
@@ -431,6 +462,24 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
             altGrade: replacement.grade
           };
         }
+        
+        // Détecter si l'app a des relations qui ne sont pas encore chargées
+        // Cela indique qu'on devrait afficher un loader
+        if (app.grade !== "A") {
+          // Vérifier si l'app a des alternativeAppIds qui ne sont pas dans le cache
+          const hasUnloadedAlternatives = app.alternativeAppIds && 
+            app.alternativeAppIds.length > 0 &&
+            app.alternativeAppIds.some(id => !availableIds.has(String(id)));
+          
+          // Si on a des alternatives non chargées OU qu'on est en train de charger
+          if (hasUnloadedAlternatives || isLoadingMyApps) {
+            return {
+              ...app,
+              isLoadingAlternative: true
+            };
+          }
+        }
+        
         return app;
       });
       
@@ -512,7 +561,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     }
     
     return list;
-  }, [activeTab, myApps, searchTerm, searchResults, apps, awardsApps, myAppsData]);
+  }, [activeTab, myApps, searchTerm, searchResults, apps, awardsApps, myAppsData, isLoadingMyApps]);
 
   // Ajouter/retirer une app de "Mes Apps"
   const toggleMyApp = (e, id) => {
