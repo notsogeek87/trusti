@@ -10,7 +10,7 @@ export const shareText = async (title, text) => {
     try {
       await navigator.share({ title, text });
     } catch (err) {
-      console.log('Partage annulé');
+      // Partage annulé par l'utilisateur
     }
   } else {
     try {

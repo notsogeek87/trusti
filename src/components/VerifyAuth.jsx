@@ -57,7 +57,6 @@ const VerifyAuth = ({ onLogin }) => {
           setError(data.error || 'Token invalide');
         }
       } catch (error) {
-        console.error('Verify token error:', error);
         setStatus('error');
         setError('Erreur de connexion au serveur');
       }

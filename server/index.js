@@ -540,7 +540,6 @@ app.get('/api/apps', async (req, res) => {
     // Si des IDs spécifiques sont demandés, utiliser getAppsByIds
     if (ids) {
       const idsArray = ids.split(',').map(id => id.trim()).filter(id => id);
-      console.log('🔍 Requête par IDs:', idsArray.length, 'IDs');
       const apps = await dbService.getAppsByIds(idsArray);
       return res.json({
         success: true,
@@ -577,18 +576,13 @@ app.get('/api/apps', async (req, res) => {
     // Si awards/showInAwards est demandé, utiliser getAwardsApps
     const requestAwards = awards === 'true' || awards === '1' || showInAwards === 'true' || showInAwards === '1';
     if (requestAwards) {
-      console.log('🏆 Requête Awards détectée:', { awards, showInAwards });
-      
       const paginationOptions = {
         limit: parseInt(limit) || 0,
         offset: parseInt(offset) || 0,
         sortBy: sortBy || 'category'
       };
       
-      console.log('📊 Appel de getAwardsApps');
       const result = await dbService.getAwardsApps(paginationOptions);
-      
-      console.log('✅ Résultat:', { total: result.total, returned: result.apps.length });
       
       return res.json({
         success: true,
@@ -662,8 +656,6 @@ app.put('/api/apps', async (req, res) => {
       });
     }
 
-    console.log(`Updating app ${id} with data:`, appData);
-    
     const updatedApp = await dbService.updateApp(id, appData);
     
     if (updatedApp) {
@@ -692,8 +684,6 @@ app.delete('/api/apps', async (req, res) => {
   try {
     const { id } = req.query;
     
-    console.log('🗑️ DELETE request received for ID:', id, 'type:', typeof id);
-    
     if (!id) {
       return res.status(400).json({
         success: false,
@@ -702,8 +692,6 @@ app.delete('/api/apps', async (req, res) => {
     }
 
     const success = await dbService.deleteApp(id);
-    
-    console.log('🗑️ Delete operation result:', success);
     
     if (success) {
       return res.json({
@@ -729,8 +717,6 @@ app.delete('/api/apps', async (req, res) => {
 app.post('/api/apps', async (req, res) => {
   try {
     const appData = req.body;
-    
-    console.log('➕ POST request to create app:', appData.name);
     
     const newApp = await dbService.createApp(appData);
     

@@ -101,17 +101,10 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
         const currentOffset = append ? pagination.offset + pagination.limit : 0;
         const limit = 20; // Charger 20 apps par page
         const url = `${API_URL}/apps?limit=${limit}&offset=${currentOffset}`;
-        console.log('🔍 Chargement apps:', { url, append, currentOffset, limit });
         
         const response = await fetch(url);
         const data = await response.json();
         const appsArray = data.success ? data.apps : [];
-        
-        console.log('📦 Apps reçues:', { 
-          count: appsArray.length, 
-          total: data.pagination?.total,
-          hasMore: data.pagination?.hasMore 
-        });
         
         // Normaliser les IDs en strings pour la cohérence
         const normalizedApps = appsArray.map(app => ({
@@ -180,13 +173,10 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
         
         // Ajouter un timestamp pour éviter le cache
         const url = `${API_URL}/apps?awards=true&_t=${Date.now()}`;
-        console.log('🔍 URL Awards:', url);
         
         const response = await fetch(url);
         const data = await response.json();
         const appsArray = data.success ? data.apps : [];
-        
-        console.log('📦 Apps Awards reçues:', appsArray.length);
         
         // Normaliser les IDs en strings pour la cohérence
         const normalizedApps = appsArray.map(app => ({
@@ -227,7 +217,6 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
         return;
       }
       
-      console.log('📱 Chargement des Mes Apps par IDs:', myApps.size, 'apps');
       setIsLoadingMyApps(true);
       
       try {
@@ -240,13 +229,10 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
         const idsParam = idsArray.join(',');
         
         const url = `${API_URL}/apps?ids=${encodeURIComponent(idsParam)}&_t=${Date.now()}`;
-        console.log('🔍 URL Mes Apps:', url);
         
         const response = await fetch(url);
         const data = await response.json();
         const appsArray = data.success ? data.apps : [];
-        
-        console.log('📦 Mes Apps reçues:', appsArray.length, '/', myApps.size);
         
         // Normaliser les IDs en strings pour la cohérence
         const normalizedApps = appsArray.map(app => ({
@@ -287,26 +273,14 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
       
       // Si toutes les apps sont déjà chargées, ne rien faire
       if (allAppsLoaded) {
-        console.log('✅ Toutes les apps déjà chargées');
         return;
       }
       
       // S'il n'y a plus d'apps à charger, marquer comme terminé
       if (!pagination.hasMore) {
-        console.log('✅ Toutes les apps déjà présentes (pas de hasMore)');
         setAllAppsLoaded(true);
         return;
       }
-      
-      console.log('🔄 Chargement progressif de TOUTES les apps pour:', {
-        selectedCategory: selectedCategory !== 'Toutes' ? selectedCategory : null,
-        activeTab
-      });
-      console.log('📊 État avant chargement:', { 
-        appsCount: apps.length, 
-        total: pagination.total, 
-        hasMore: pagination.hasMore 
-      });
       
       setIsLoadingApps(true);
       
@@ -320,12 +294,9 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
         const batchSize = 50;
         let hasMore = true;
         
-        console.log('🔄 Chargement par lots de', batchSize, 'apps...');
-        
         // Charger par lots jusqu'à avoir tout
         while (hasMore && offset < pagination.total) {
           const url = `${API_URL}/apps?limit=${batchSize}&offset=${offset}`;
-          console.log(`📦 Chargement lot: offset=${offset}, limit=${batchSize}`);
           
           const response = await fetch(url);
           const data = await response.json();
@@ -346,11 +317,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
           allApps = [...allApps, ...normalizedApps];
           offset += appsArray.length;
           hasMore = data.pagination?.hasMore || false;
-          
-          console.log(`✅ Lot chargé: ${appsArray.length} apps (total: ${allApps.length}/${pagination.total})`);
         }
-        
-        console.log('✅ Chargement terminé:', allApps.length, 'apps au total');
         
         setApps(allApps);
         setAllAppsLoaded(true);

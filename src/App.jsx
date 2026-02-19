@@ -118,13 +118,11 @@ const App = () => {
           
           // Charger les apps triées par popularité avec pagination
           const url = `${API_URL}/apps?limit=${onboardingPagination.limit}&offset=0&sortBy=popularity`;
-          console.log('🔍 Chargement de toutes les apps pour onboarding:', url);
           
           const response = await fetch(url);
           const data = await response.json();
           const appsArray = data.success ? data.apps : [];
           
-          console.log('📦 Apps onboarding reçues:', appsArray.length);
           setAllAppsForOnboarding(appsArray);
           
           // Mettre à jour l'état de pagination
@@ -138,7 +136,6 @@ const App = () => {
             });
           }
         } catch (error) {
-          console.error('❌ Erreur de chargement des apps onboarding:', error);
         } finally {
           setIsLoadingOnboardingApps(false);
         }
@@ -163,13 +160,10 @@ const App = () => {
       
       const newOffset = onboardingPagination.offset + onboardingPagination.limit;
       const url = `${API_URL}/apps?limit=${onboardingPagination.limit}&offset=${newOffset}&sortBy=popularity`;
-      console.log('📥 Chargement de plus d\'apps onboarding:', url);
       
       const response = await fetch(url);
       const data = await response.json();
       const appsArray = data.success ? data.apps : [];
-      
-      console.log('📦 Apps supplémentaires reçues:', appsArray.length);
       
       // Ajouter les nouvelles apps à la liste existante
       setAllAppsForOnboarding(prev => [...prev, ...appsArray]);
@@ -185,7 +179,6 @@ const App = () => {
         });
       }
     } catch (error) {
-      console.error('❌ Erreur lors du chargement de plus d\'apps:', error);
       setOnboardingPagination(prev => ({ ...prev, isLoadingMore: false }));
     }
   };
