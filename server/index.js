@@ -535,7 +535,26 @@ app.delete('/api/star-apps', async (req, res) => {
 app.get('/api/apps', async (req, res) => {
   try {
     // Extraire les paramètres de pagination et de recherche
-    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards } = req.query;
+    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, ids } = req.query;
+    
+    // Si des IDs spécifiques sont demandés, utiliser getAppsByIds
+    if (ids) {
+      const idsArray = ids.split(',').map(id => id.trim()).filter(id => id);
+      console.log('🔍 Requête par IDs:', idsArray.length, 'IDs');
+      const apps = await dbService.getAppsByIds(idsArray);
+      return res.json({
+        success: true,
+        apps: apps,
+        pagination: {
+          total: apps.length,
+          limit: 0,
+          offset: 0,
+          page: 1,
+          totalPages: 1,
+          hasMore: false
+        }
+      });
+    }
     
     // Si une recherche est demandée, utiliser searchApps
     const searchQuery = search || q;

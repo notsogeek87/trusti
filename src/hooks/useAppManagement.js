@@ -43,6 +43,11 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
   const [isLoadingAwards, setIsLoadingAwards] = useState(false);
   const [awardsLoaded, setAwardsLoaded] = useState(false);
 
+  // État spécifique pour les apps "Mes Apps" (chargées par IDs)
+  const [myAppsData, setMyAppsData] = useState([]);
+  const [isLoadingMyApps, setIsLoadingMyApps] = useState(false);
+  const [myAppsLoaded, setMyAppsLoaded] = useState(false);
+
   // Charger les données de l'utilisateur connecté
   useEffect(() => {
     setIsInitialized(false); // Réinitialiser avant de charger
@@ -204,6 +209,66 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     
     loadAwardsApps();
   }, [activeTab]); // Recharger à chaque changement d'onglet
+  
+  // Charger les apps "Mes Apps" par leurs IDs quand l'onglet MY_APPS est actif
+  useEffect(() => {
+    const loadMyApps = async () => {
+      // Ne charger que si l'onglet Mes Apps est actif et qu'il y a des apps
+      if (activeTab !== TABS.MY_APPS || myApps.size === 0) {
+        if (activeTab !== TABS.MY_APPS) {
+          // Réinitialiser quand on quitte l'onglet
+          setMyAppsLoaded(false);
+        }
+        return;
+      }
+      
+      // Si déjà en train de charger, ne rien faire
+      if (isLoadingMyApps) {
+        return;
+      }
+      
+      console.log('📱 Chargement des Mes Apps par IDs:', myApps.size, 'apps');
+      setIsLoadingMyApps(true);
+      
+      try {
+        const API_URL = import.meta.env.PROD 
+          ? '/api'
+          : 'http://localhost:3001/api';
+        
+        // Convertir le Set en tableau d'IDs
+        const idsArray = Array.from(myApps);
+        const idsParam = idsArray.join(',');
+        
+        const url = `${API_URL}/apps?ids=${encodeURIComponent(idsParam)}&_t=${Date.now()}`;
+        console.log('🔍 URL Mes Apps:', url);
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        const appsArray = data.success ? data.apps : [];
+        
+        console.log('📦 Mes Apps reçues:', appsArray.length, '/', myApps.size);
+        
+        // Normaliser les IDs en strings pour la cohérence
+        const normalizedApps = appsArray.map(app => ({
+          ...app,
+          id: String(app.id),
+          replacesAppId: app.replacesAppId ? String(app.replacesAppId) : undefined,
+          replacesAppIds: app.replacesAppIds ? app.replacesAppIds.map(id => String(id)) : undefined
+        }));
+        
+        setMyAppsData(normalizedApps);
+        setMyAppsLoaded(true);
+        
+      } catch (error) {
+        console.error('❌ Erreur lors du chargement de Mes Apps:', error);
+        setMyAppsData([]);
+      } finally {
+        setIsLoadingMyApps(false);
+      }
+    };
+    
+    loadMyApps();
+  }, [activeTab, myApps]); // Recharger quand l'onglet change ou que myApps change
   
   // Charger toutes les apps quand nécessaire :
   // - Une catégorie est sélectionnée (sauf "Toutes")
@@ -368,6 +433,51 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
       return awardsApps; // Déjà triées par catégorie dans l'API
     }
     
+    // Pour MY_APPS, utiliser myAppsData (chargées par IDs)
+    // sauf si une recherche est active
+    if (activeTab === TABS.MY_APPS && !searchTerm.trim()) {
+      // Enrichir avec les alternatives
+      const list = myAppsData.map(app => {
+        // Chercher si une app avec meilleur grade remplace cette app (alternative)
+        // On cherche dans myAppsData ou apps
+        const allAvailableApps = [...new Map([...myAppsData, ...apps].map(a => [a.id, a])).values()];
+        
+        const replacement = allAvailableApps.find(replacementApp => {
+          // L'app de remplacement doit avoir un meilleur grade (A, B, C)
+          const goodGrades = ['A', 'B', 'C'];
+          if (!goodGrades.includes(replacementApp.grade)) {
+            return false;
+          }
+          
+          // Vérifier si elle remplace cette app
+          if (replacementApp.replacesAppIds && Array.isArray(replacementApp.replacesAppIds)) {
+            return replacementApp.replacesAppIds.includes(app.id);
+          }
+          return replacementApp.replacesAppId === app.id;
+        });
+        
+        if (replacement) {
+          return {
+            ...app,
+            alternative: replacement.name,
+            altIcon: replacement.icon,
+            altGrade: replacement.grade
+          };
+        }
+        return app;
+      });
+      
+      // Trier par grade (E > D > C > B > A - du plus mauvais au meilleur) puis par nom
+      const gradeOrder = { 'E': 1, 'D': 2, 'C': 3, 'B': 4, 'A': 5 };
+      list.sort((a, b) => {
+        const gradeCompare = (gradeOrder[a.grade] || 999) - (gradeOrder[b.grade] || 999);
+        if (gradeCompare !== 0) return gradeCompare;
+        return a.name.localeCompare(b.name);
+      });
+      
+      return list;
+    }
+    
     // Si une recherche est active, utiliser les résultats de recherche
     const sourceApps = searchTerm.trim() ? searchResults : apps;
     
@@ -385,12 +495,11 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
         return a.name.localeCompare(b.name);
       });
     } else if (activeTab === TABS.MY_APPS) {
-      // Filtrer uniquement les apps dans myApps et ajouter les alternatives
+      // Si recherche active dans MY_APPS, filtrer les résultats de recherche
       list = sourceApps
         .filter(app => myApps.has(app.id))
         .map(app => {
           // Chercher si une app avec meilleur grade remplace cette app (alternative)
-          // On cherche dans TOUTES les apps (pas seulement sourceApps) pour trouver les alternatives
           const replacement = apps.find(replacementApp => {
             // L'app de remplacement doit avoir un meilleur grade (A, B, C)
             const goodGrades = ['A', 'B', 'C'];
@@ -436,7 +545,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     }
     
     return list;
-  }, [activeTab, myApps, searchTerm, searchResults, apps, awardsApps]);
+  }, [activeTab, myApps, searchTerm, searchResults, apps, awardsApps, myAppsData]);
 
   // Ajouter/retirer une app de "Mes Apps"
   const toggleMyApp = (e, id) => {
@@ -528,6 +637,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     isInitialLoading,
     isSearching,
     isLoadingAwards,
+    isLoadingMyApps,
     filteredApps,
     pagination,
     

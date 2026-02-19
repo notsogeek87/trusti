@@ -14,16 +14,35 @@ export default async function handler(req, res) {
 
   try {
     // Extraire le type depuis l'URL ou le body
-    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards } = req.query;
+    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, ids } = req.query;
     
     if (req.method === 'GET') {
       // GET /api/apps?type=trusti
       // GET /api/apps?type=star
       // GET /api/apps?awards=true (apps avec show_in_awards = 1)
+      // GET /api/apps?ids=1,2,3,4 (apps par IDs spécifiques)
       // GET /api/apps (toutes les apps)
       // GET /api/apps?limit=50&offset=0 (pagination)
       // GET /api/apps?limit=50&page=1 (pagination par page)
       // GET /api/apps?search=query (recherche dans toutes les apps)
+      
+      // Si des IDs spécifiques sont demandés, utiliser getAppsByIds
+      if (ids) {
+        const idsArray = ids.split(',').map(id => id.trim()).filter(id => id);
+        const apps = await dbService.getAppsByIds(idsArray);
+        return res.status(200).json({
+          success: true,
+          apps: apps,
+          pagination: {
+            total: apps.length,
+            limit: 0,
+            offset: 0,
+            page: 1,
+            totalPages: 1,
+            hasMore: false
+          }
+        });
+      }
       
       // Si une recherche est demandée, utiliser searchApps
       const searchQuery = search || q;

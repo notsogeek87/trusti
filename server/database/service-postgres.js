@@ -518,6 +518,40 @@ export async function getAppById(id) {
 }
 
 /**
+ * Obtenir plusieurs applications par leurs IDs
+ * @param {Array<string>} ids - Tableau d'IDs d'applications
+ * @returns {Promise<Array>} Apps correspondant aux IDs fournis
+ */
+export async function getAppsByIds(ids) {
+  try {
+    if (!ids || ids.length === 0) {
+      return [];
+    }
+    
+    console.log('🔍 getAppsByIds appelée avec:', ids.length, 'IDs');
+    
+    // Normaliser les IDs en strings
+    const normalizedIds = ids.map(id => String(id));
+    
+    // Utiliser IN pour récupérer toutes les apps en une seule requête
+    const apps = await sql`
+      SELECT * FROM applications
+      WHERE id = ANY(${normalizedIds})
+      ORDER BY name ASC
+    `;
+    
+    console.log(`✅ ${apps.length} apps trouvées sur ${ids.length} IDs demandés`);
+    
+    const formattedApps = await Promise.all(apps.map(app => formatAppFromDB(app)));
+    
+    return formattedApps;
+  } catch (error) {
+    console.error('Error getting apps by ids:', error);
+    throw error;
+  }
+}
+
+/**
  * Créer une nouvelle application
  */
 export async function createApp(appData) {
@@ -982,6 +1016,7 @@ export default {
   getAppsByType,
   getAwardsApps,
   getAppById,
+  getAppsByIds,
   createApp,
   updateApp,
   deleteApp,

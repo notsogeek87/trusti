@@ -28,7 +28,8 @@ const AppsList = ({
   searchTerm = '',
   pagination = { hasMore: false, isLoadingMore: false, total: 0 },
   onLoadMore,
-  isLoadingAwards = false
+  isLoadingAwards = false,
+  isLoadingMyApps = false
 }) => {
   // Filtrer par catégorie dans l'onglet APPLICATIONS
   let displayApps = apps;
@@ -44,6 +45,16 @@ const AppsList = ({
   const showPagination = activeTab === TABS.APPLICATIONS && selectedCategory === 'Toutes' && !searchTerm.trim();
   const hasMore = showPagination && pagination.hasMore;
   const isLoadingMore = pagination.isLoadingMore;
+
+  // Pour l'onglet MY_APPS, afficher un loader pendant le chargement
+  if (activeTab === TABS.MY_APPS && isLoadingMyApps) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent mb-4"></div>
+        <p className="text-slate-600 text-sm font-semibold">Chargement de Mes Apps...</p>
+      </div>
+    );
+  }
 
   // Pour l'onglet TOP_ALTERNATIVES, grouper par catégorie
   if (activeTab === TABS.TOP_ALTERNATIVES) {
