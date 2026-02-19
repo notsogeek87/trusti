@@ -8,6 +8,9 @@ import { Sparkles } from 'lucide-react';
 
 // Layout
 import Header from './components/layout/Header';
+
+// UI Components
+import LoadingSpinner from './components/ui/LoadingSpinner';
 import Navigation from './components/layout/Navigation';
 
 // UI Components
@@ -381,10 +384,7 @@ const App = () => {
     if (isLoadingOnboardingApps || allAppsForOnboarding.length === 0) {
       return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
-            <p className="text-slate-600">Chargement des applications...</p>
-          </div>
+          <LoadingSpinner message="Chargement des applications..." size="large" />
         </div>
       );
     }
@@ -430,20 +430,7 @@ const App = () => {
       {/* Écran de chargement initial */}
       {isInitialLoading && (
         <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
-          <div className="text-center">
-            <div className="mb-6">
-              <img 
-                src="/assets/logo.png" 
-                alt="TrustiScore Logo" 
-                className="w-48 mx-auto"
-              />
-            </div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-2">TrustiScore</h2>
-            <p className="text-slate-500 mb-6">Chargement des applications...</p>
-            <div className="flex items-center justify-center gap-2">
-              <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-200 border-t-blue-600"></div>
-            </div>
-          </div>
+          <LoadingSpinner message="Chargement de TrustiScore..." size="large" />
         </div>
       )}
       

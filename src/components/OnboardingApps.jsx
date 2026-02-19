@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Check, ShieldCheck, Search } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
+import LoadingSpinner from './ui/LoadingSpinner';
 
 /**
  * Page d'onboarding pour sélectionner les applications utilisées
@@ -131,9 +132,8 @@ const OnboardingApps = ({ allApps, onComplete, pagination = {}, onLoadMore }) =>
         
         {/* Message de chargement pendant la recherche */}
         {searchTerm && isSearching && (
-          <div className="mb-4 bg-white rounded-xl p-6 text-center border border-slate-100">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-2"></div>
-            <p className="text-sm text-slate-500">Recherche en cours...</p>
+          <div className="mb-4">
+            <LoadingSpinner message="Recherche en cours..." size="small" />
           </div>
         )}
         

@@ -1,5 +1,6 @@
 import React from 'react';
 import AppCard from './AppCard';
+import LoadingSpinner from './ui/LoadingSpinner';
 import { TABS } from '../constants/tabs';
 import { CATEGORY_MAPPING } from '../constants/categories';
 
@@ -48,24 +49,14 @@ const AppsList = ({
 
   // Pour l'onglet MY_APPS, afficher un loader pendant le chargement
   if (activeTab === TABS.MY_APPS && isLoadingMyApps) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent mb-4"></div>
-        <p className="text-slate-600 text-sm font-semibold">Chargement de Mes Apps...</p>
-      </div>
-    );
+    return <LoadingSpinner message="Chargement de Mes Apps..." size="medium" />;
   }
 
   // Pour l'onglet TOP_ALTERNATIVES, grouper par catégorie
   if (activeTab === TABS.TOP_ALTERNATIVES) {
     // Afficher un loader pendant le chargement initial
     if (isLoadingAwards) {
-      return (
-        <div className="flex flex-col items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent mb-4"></div>
-          <p className="text-slate-600 text-sm font-semibold">Chargement des Awards...</p>
-        </div>
-      );
+      return <LoadingSpinner message="Chargement des Awards..." size="medium" />;
     }
     
     // Grouper les apps par catégorie normalisée

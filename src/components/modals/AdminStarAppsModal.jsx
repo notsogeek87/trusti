@@ -154,9 +154,7 @@ const AdminStarAppsModal = ({ onClose, isEmbedded = false }) => {
   const innerContent = (
     <>
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-200 border-t-purple-600"></div>
-        </div>
+        <LoadingSpinner message="Chargement des StarApps..." size="medium" />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Colonne gauche : Formulaire */}

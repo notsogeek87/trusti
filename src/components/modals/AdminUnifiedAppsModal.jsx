@@ -241,9 +241,7 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
   const innerContent = (
     <>
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600"></div>
-        </div>
+        <LoadingSpinner message="Chargement des applications..." size="medium" />
       ) : (
         <div className="space-y-4">
           {/* Filtre de TrustiScore */}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { CheckCircle, X, AlertCircle } from 'lucide-react';
+import LoadingSpinner from './ui/LoadingSpinner';
 
 // Détection de l'environnement
 const API_URL = import.meta.env.PROD 
@@ -69,13 +70,7 @@ const VerifyAuth = ({ onLogin }) => {
     return (
       <div className="fixed inset-0 bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center">
         <div className="bg-white rounded-3xl shadow-2xl p-12 max-w-md w-full text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-indigo-200 border-t-indigo-600 mx-auto mb-6"></div>
-          <h2 className="text-2xl font-black text-slate-900 mb-2">
-            Vérification en cours...
-          </h2>
-          <p className="text-sm text-slate-600">
-            Nous vérifions votre lien de connexion
-          </p>
+          <LoadingSpinner message="Vérification de votre lien de connexion..." size="large" />
         </div>
       </div>
     );
