@@ -1,5 +1,5 @@
 import React from 'react';
-import { Globe, Zap, Star, Award } from 'lucide-react';
+import { Globe, BookmarkCheck, Award } from 'lucide-react';
 import { TABS } from '../../constants/tabs';
 
 /**
@@ -17,7 +17,7 @@ const Navigation = ({ activeTab, onTabChange, myAppsCount }) => {
         }`}
       >
         <div className="relative">
-          <Zap size={22} />
+          <BookmarkCheck size={22} />
           {myAppsCount > 0 && (
             <span className="absolute -top-1 -right-2 bg-amber-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">
               {myAppsCount}
@@ -57,7 +57,7 @@ const Navigation = ({ activeTab, onTabChange, myAppsCount }) => {
         }`}
       >
         <Award size={22} />
-        <span className="text-[10px] font-black uppercase tracking-widest">Awards</span>
+        <span className="text-[10px] font-black uppercase tracking-widest">Palmarès</span>
       </button>
     </nav>
   );
