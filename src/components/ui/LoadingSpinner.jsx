@@ -1,48 +1,38 @@
 import React from 'react';
-import TrustiLogo from './TrustiLogo';
 
-/**
- * Composant de chargement unifié avec logo Trusti
- */
-const LoadingSpinner = ({ 
-  message = "Chargement...", 
+const LoadingSpinner = ({
+  message = "Chargement...",
   size = "medium",
-  showLogo = true 
 }) => {
-  // Tailles disponibles
   const sizes = {
-    small: {
-      container: "py-6",
-      logo: "w-8 h-8",
-      spinner: "h-8 w-8 border-3",
-      text: "text-xs"
-    },
-    medium: {
-      container: "py-12",
-      logo: "w-12 h-12",
-      spinner: "h-12 w-12 border-4",
-      text: "text-sm"
-    },
-    large: {
-      container: "py-16",
-      logo: "w-16 h-16",
-      spinner: "h-16 w-16 border-4",
-      text: "text-base"
-    }
+    small:  { container: "py-6",  dot: "w-2 h-2",   text: "text-xs", gap: "gap-1.5" },
+    medium: { container: "py-12", dot: "w-3 h-3",   text: "text-sm", gap: "gap-2"   },
+    large:  { container: "py-16", dot: "w-4 h-4",   text: "text-base", gap: "gap-2.5" },
   };
 
-  const sizeConfig = sizes[size] || sizes.medium;
+  const s = sizes[size] || sizes.medium;
 
   return (
-    <div className={`flex flex-col items-center justify-center ${sizeConfig.container}`}>
-      {showLogo ? (
-        <div className="mb-4 animate-pulse">
-          <TrustiLogo className={sizeConfig.logo} />
-        </div>
-      ) : (
-        <div className={`animate-spin rounded-full ${sizeConfig.spinner} border-indigo-500 border-t-transparent mb-4`}></div>
-      )}
-      <p className={`text-slate-600 font-semibold ${sizeConfig.text}`}>{message}</p>
+    <div className={`flex flex-col items-center justify-center ${s.container}`}>
+      <div className={`flex items-center ${s.gap} mb-5`}>
+        {[0, 1, 2].map(i => (
+          <span
+            key={i}
+            className={`${s.dot} rounded-full bg-indigo-500 opacity-80`}
+            style={{
+              animation: `trusti-bounce 1.2s ease-in-out ${i * 0.2}s infinite`,
+            }}
+          />
+        ))}
+      </div>
+      <p className={`text-slate-500 font-medium tracking-wide ${s.text}`}>{message}</p>
+
+      <style>{`
+        @keyframes trusti-bounce {
+          0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+          40%            { transform: translateY(-10px); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 };
