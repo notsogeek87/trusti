@@ -179,33 +179,36 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
           
           <ScoreIndicator grade={app.grade} size="large" />
 
-          {(() => {
-            const info = GRADE_INFO.find(g => g.grade === app.grade);
-            return info ? (
-              <div className="mt-3 text-center">
-                <p className={`text-sm font-black uppercase tracking-wide ${
-                  app.grade === 'C' || app.grade === 'D' ? 'text-slate-800' : 'text-slate-700'
-                }`}>{info.title}</p>
-                <p className="text-xs text-slate-500 mt-0.5 max-w-[220px]">{info.description}</p>
-              </div>
-            ) : null;
-          })()}
+        </div>
 
-          {/* Date de mise à jour du TrustiScore */}
-          {app.updatedAt && (
-            <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
-              <Calendar size={12} />
-              <span>Mis à jour le {formatDate(app.updatedAt)}</span>
+        {(() => {
+          const info = GRADE_INFO.find(g => g.grade === app.grade);
+          return (
+            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 mb-4">
+              <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 mb-3 flex items-center gap-2">
+                <ShieldCheck size={16} className="text-indigo-600" /> Analyse de confidentialité
+              </h3>
+
+              {info && (
+                <div className="mb-3 pb-3 border-b border-slate-200">
+                  <p className={`text-xs font-black uppercase tracking-wider mb-1 ${
+                    app.grade === 'C' || app.grade === 'D' ? 'text-slate-800' : 'text-indigo-700'
+                  }`}>{info.title}</p>
+                  <p className="text-xs text-slate-500 leading-relaxed">{info.description}</p>
+                </div>
+              )}
+
+              <p className="text-sm text-slate-600 leading-relaxed">{app.reason}</p>
+
+              {app.updatedAt && (
+                <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-400">
+                  <Calendar size={12} />
+                  <span>Analyse mise à jour le {formatDate(app.updatedAt)}</span>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        
-        <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 mb-4 min-h-[100px] flex flex-col justify-center">
-          <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 mb-2 flex items-center gap-2">
-            <ShieldCheck size={16} className="text-indigo-600" /> Analyse
-          </h3>
-          <p className="text-sm text-slate-600 leading-relaxed line-clamp-3">{app.reason}</p>
-        </div>
+          );
+        })()}
 
         {/* Liens de téléchargement */}
         {(app.playStoreUrl || app.appleStoreUrl || app.fDroidUrl || app.websiteUrl) && (
