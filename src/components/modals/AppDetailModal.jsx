@@ -186,7 +186,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
           return (
             <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 mb-4">
               <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 mb-3 flex items-center gap-2">
-                <ShieldCheck size={16} className="text-indigo-600" /> Analyse de confidentialité
+                <ShieldCheck size={16} className="text-indigo-600" /> Pourquoi cette note ?
               </h3>
 
               {info && (
