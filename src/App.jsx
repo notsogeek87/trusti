@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAppManagement } from './hooks/useAppManagement';
 import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
@@ -367,6 +367,43 @@ const App = () => {
     setShowPinModal(false);
   };
 
+  // ── Toggle mobile / desktop ─────────────────────────────────────────
+  const [forceMobile, setForceMobile] = useState(
+    () => localStorage.getItem('trusti_force_mobile') === 'true'
+  );
+  const toggleForceMobile = useCallback(() => {
+    setForceMobile(prev => {
+      const next = !prev;
+      localStorage.setItem('trusti_force_mobile', String(next));
+      return next;
+    });
+  }, []);
+
+  // Wrapper qui simule un écran mobile sur desktop
+  const MobileFrame = ({ children }) => {
+    if (!forceMobile) return children;
+    return (
+      <div className="min-h-screen bg-slate-300 flex flex-col items-center pt-4 pb-4">
+        <div className="mb-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-500">
+          <span>Aperçu mobile</span>
+        </div>
+        <div
+          className="relative bg-white shadow-2xl overflow-hidden"
+          style={{
+            width: 430,
+            maxHeight: 'calc(100vh - 72px)',
+            borderRadius: '2.5rem',
+            border: '8px solid #1e293b',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+          }}
+        >
+          {children}
+        </div>
+      </div>
+    );
+  };
+
   // Afficher la landing page en premier si c'est la première visite
   if (showLandingPage) {
     return <LandingPage onClose={handleCloseLandingPage} />;
@@ -399,19 +436,22 @@ const App = () => {
   // Affichage du détail d'une application
   if (selectedApp) {
     return (
-      <AppDetailModal
-        app={selectedApp}
-        isInMyApps={myApps.has(selectedApp.id)}
-        onToggleMyApp={toggleMyApp}
-        onClose={() => setSelectedApp(null)}
-        onSelectApp={setSelectedApp}
-        allApps={apps}
-      />
+      <MobileFrame>
+        <AppDetailModal
+          app={selectedApp}
+          isInMyApps={myApps.has(selectedApp.id)}
+          onToggleMyApp={toggleMyApp}
+          onClose={() => setSelectedApp(null)}
+          onSelectApp={setSelectedApp}
+          allApps={apps}
+        />
+      </MobileFrame>
     );
   }
 
   // Vue principale
   return (
+    <MobileFrame>
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-24">
       {/* Mode vérification de token */}
       {isVerifying && (
@@ -458,7 +498,7 @@ const App = () => {
         </div>
       )}
       
-      <Header 
+      <Header
         currentUser={currentUser}
         onLogout={logout}
         onLogin={() => setShowLoginModal(true)}
@@ -467,6 +507,8 @@ const App = () => {
         onShowLandingPage={() => setShowLandingPage(true)}
         isAdminUnlocked={isAdminUnlocked}
         onRequestAdminUnlock={() => setShowPinModal(true)}
+        forceMobile={forceMobile}
+        onToggleViewMode={toggleForceMobile}
       />
 
       <div className="md:flex md:items-start">
@@ -657,6 +699,7 @@ const App = () => {
         }
       `}</style>
     </div>
+    </MobileFrame>
   );
 };
 
