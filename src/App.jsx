@@ -4,7 +4,8 @@ import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
 import { TABS } from './constants/tabs';
 import { CATEGORIES } from './constants/categories';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Smartphone, Monitor } from 'lucide-react';
+import { ViewModeContext } from './contexts/ViewModeContext';
 
 // Layout
 import Header from './components/layout/Header';
@@ -33,6 +34,17 @@ import LoginModal from './components/modals/LoginModal';
 import AdminAppsModal from './components/modals/AdminAppsModal';
 import PinModal from './components/modals/PinModal';
 import WelcomeModal from './components/modals/WelcomeModal';
+
+const useIsSmallViewport = () => {
+  const [isSmall, setIsSmall] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const handler = (e) => setIsSmall(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return isSmall;
+};
 
 // Fonction pour trier les apps par popularité (utilise le champ popularity de la BDD)
 const sortAppsByPopularity = (apps) => {
@@ -368,6 +380,7 @@ const App = () => {
   };
 
   // ── Toggle mobile / desktop ─────────────────────────────────────────
+  const isSmallViewport = useIsSmallViewport();
   const [forceMobile, setForceMobile] = useState(
     () => localStorage.getItem('trusti_force_mobile') === 'true'
   );
@@ -379,23 +392,42 @@ const App = () => {
     });
   }, []);
 
-  // Wrapper qui simule un écran mobile sur desktop
+  // isMobile = vrai viewport étroit OU mode forcé manuellement
+  const isMobile = isSmallViewport || forceMobile;
+
+  // Bouton flottant toujours accessible pour switcher le mode
+  const FloatingToggle = () => (
+    <button
+      onClick={toggleForceMobile}
+      className="fixed z-[9999] flex items-center gap-2 text-xs font-bold shadow-xl transition-all"
+      style={{
+        bottom: forceMobile ? 'auto' : 20,
+        top: forceMobile ? 16 : 'auto',
+        right: 16,
+        padding: '8px 14px',
+        borderRadius: 999,
+        background: forceMobile ? '#4f46e5' : '#1e293b',
+        color: '#fff',
+      }}
+      title={forceMobile ? 'Quitter le mode mobile' : 'Aperçu mobile'}
+    >
+      {forceMobile ? <Monitor size={14} /> : <Smartphone size={14} />}
+      <span>{forceMobile ? 'Desktop' : 'Mobile'}</span>
+    </button>
+  );
+
+  // Cadre phone visuel (purement décoratif, le layout est contrôlé via context)
   const MobileFrame = ({ children }) => {
     if (!forceMobile) return children;
     return (
-      <div className="min-h-screen bg-slate-300 flex flex-col items-center pt-4 pb-4">
-        <div className="mb-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-500">
-          <span>Aperçu mobile</span>
-        </div>
+      <div className="min-h-screen bg-slate-300 flex flex-col items-center py-6 gap-3">
         <div
-          className="relative bg-white shadow-2xl overflow-hidden"
+          className="bg-white shadow-2xl"
           style={{
             width: 430,
-            maxHeight: 'calc(100vh - 72px)',
-            borderRadius: '2.5rem',
+            borderRadius: '2.8rem',
             border: '8px solid #1e293b',
-            overflowY: 'auto',
-            overflowX: 'hidden',
+            overflow: 'hidden',
           }}
         >
           {children}
@@ -436,23 +468,28 @@ const App = () => {
   // Affichage du détail d'une application
   if (selectedApp) {
     return (
-      <MobileFrame>
-        <AppDetailModal
-          app={selectedApp}
-          isInMyApps={myApps.has(selectedApp.id)}
-          onToggleMyApp={toggleMyApp}
-          onClose={() => setSelectedApp(null)}
-          onSelectApp={setSelectedApp}
-          allApps={apps}
-        />
-      </MobileFrame>
+      <ViewModeContext.Provider value={isMobile}>
+        <FloatingToggle />
+        <MobileFrame>
+          <AppDetailModal
+            app={selectedApp}
+            isInMyApps={myApps.has(selectedApp.id)}
+            onToggleMyApp={toggleMyApp}
+            onClose={() => setSelectedApp(null)}
+            onSelectApp={setSelectedApp}
+            allApps={apps}
+          />
+        </MobileFrame>
+      </ViewModeContext.Provider>
     );
   }
 
   // Vue principale
   return (
+    <ViewModeContext.Provider value={isMobile}>
+    <FloatingToggle />
     <MobileFrame>
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-24">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       {/* Mode vérification de token */}
       {isVerifying && (
         <VerifyAuth onLogin={login} />
@@ -507,17 +544,18 @@ const App = () => {
         onShowLandingPage={() => setShowLandingPage(true)}
         isAdminUnlocked={isAdminUnlocked}
         onRequestAdminUnlock={() => setShowPinModal(true)}
-        forceMobile={forceMobile}
-        onToggleViewMode={toggleForceMobile}
       />
 
-      <div className="md:flex md:items-start">
+      <div className={isMobile ? '' : 'flex items-start'}>
       <Navigation
         activeTab={activeTab}
         onTabChange={setActiveTab}
         myAppsCount={myApps.size}
       />
-      <main className="flex-1 min-w-0 max-w-md md:max-w-none mx-auto md:mx-0 px-4 md:px-6 py-3 pb-28 md:pb-6">
+      <main className={isMobile
+        ? 'max-w-md mx-auto px-4 py-3 pb-28'
+        : 'flex-1 min-w-0 px-6 py-3 pb-6'
+      }>
         <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
         {/* Titre pour l'onglet Applications */}
@@ -700,6 +738,7 @@ const App = () => {
       `}</style>
     </div>
     </MobileFrame>
+    </ViewModeContext.Provider>
   );
 };
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft, CheckCircle, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { GRADE_INFO } from '../../constants/grades';
+import { useIsMobile } from '../../contexts/ViewModeContext';
 
 const API_URL = import.meta.env.PROD 
   ? '/api'
@@ -127,6 +128,8 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
     return permissionMap[permission] || permission.replace(/_/g, ' ').toLowerCase();
   };
 
+  const isMobile = useIsMobile();
+
   // Bloc réutilisable pour une app liée (alternative ou remplacée)
   const RelatedAppRow = ({ app: relatedApp }) => (
     <div
@@ -181,10 +184,10 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
       </header>
 
       {/* ── Contenu 2 colonnes sur desktop ── */}
-      <main className="max-w-5xl mx-auto p-4 md:p-6 md:flex md:gap-6 md:items-start">
+      <main className={isMobile ? 'p-4' : 'max-w-5xl mx-auto p-6 flex gap-6 items-start'}>
 
         {/* ── Colonne gauche : identité ── */}
-        <div className="md:w-72 md:shrink-0 md:sticky md:top-[69px]">
+        <div className={isMobile ? '' : 'w-72 shrink-0 sticky top-[69px]'}>
 
           {/* Carte hero */}
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col items-center text-center mb-4">
@@ -246,14 +249,16 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
           )}
 
           {/* Bouton retour (desktop) */}
-          <button onClick={onClose}
-            className="hidden md:block w-full py-3 bg-slate-900 hover:bg-slate-700 text-white rounded-xl font-black text-sm uppercase tracking-widest transition-colors">
-            ← Retour
-          </button>
+          {!isMobile && (
+            <button onClick={onClose}
+              className="w-full py-3 bg-slate-900 hover:bg-slate-700 text-white rounded-xl font-black text-sm uppercase tracking-widest transition-colors">
+              ← Retour
+            </button>
+          )}
         </div>
 
         {/* ── Colonne droite : analyse & relations ── */}
-        <div className="flex-1 min-w-0">
+        <div className={isMobile ? '' : 'flex-1 min-w-0'}>
 
           {/* Pourquoi cette note ? */}
           {(() => {
@@ -346,7 +351,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
               <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 mb-3 flex items-center gap-2">
                 <Shield size={16} className="text-orange-600" /> Permissions demandées
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+              <div className={isMobile ? 'grid grid-cols-1 gap-1.5' : 'grid grid-cols-2 gap-1.5'}>
                 {app.permissions.map((permission, index) => (
                   <div key={index} className="flex items-center gap-2 text-xs text-slate-600 bg-slate-50 rounded-lg px-2.5 py-1.5 border border-slate-200">
                     <div className="w-1.5 h-1.5 rounded-full bg-orange-400 shrink-0" />
@@ -358,10 +363,12 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
           )}
 
           {/* Bouton retour (mobile uniquement) */}
-          <button onClick={onClose}
-            className="md:hidden w-full py-4 bg-slate-900 text-white rounded-xl font-black text-sm uppercase tracking-widest">
-            Retour
-          </button>
+          {isMobile && (
+            <button onClick={onClose}
+              className="w-full py-4 bg-slate-900 text-white rounded-xl font-black text-sm uppercase tracking-widest">
+              Retour
+            </button>
+          )}
         </div>
 
       </main>

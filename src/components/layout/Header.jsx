@@ -1,5 +1,5 @@
 import React from 'react';
-import { HelpCircle, LogOut, User, RotateCcw, Settings, Lock, Smartphone, Monitor } from 'lucide-react';
+import { HelpCircle, LogOut, User, RotateCcw, Settings, Lock } from 'lucide-react';
 
 /**
  * Header de l'application
@@ -13,8 +13,6 @@ const Header = ({
   onShowLandingPage,
   isAdminUnlocked,
   onRequestAdminUnlock,
-  forceMobile,
-  onToggleViewMode,
 }) => {
   // Détection de l'environnement local
   const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
@@ -101,22 +99,6 @@ const Header = ({
             </div>
           )}
           
-          {/* Toggle mobile / desktop (visible sur desktop uniquement) */}
-          {onToggleViewMode && (
-            <button
-              onClick={onToggleViewMode}
-              className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
-                forceMobile
-                  ? 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'
-                  : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300 hover:text-indigo-600'
-              }`}
-              title={forceMobile ? 'Passer en mode desktop' : 'Passer en mode mobile'}
-            >
-              {forceMobile ? <Monitor size={14} /> : <Smartphone size={14} />}
-              <span>{forceMobile ? 'Desktop' : 'Mobile'}</span>
-            </button>
-          )}
-
           {/* Bouton d'aide */}
           <button
             onClick={onShowLandingPage}
