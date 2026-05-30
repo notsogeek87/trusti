@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, CheckCircle, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
+import { GRADE_INFO } from '../../constants/grades';
 
 const API_URL = import.meta.env.PROD 
   ? '/api'
@@ -177,7 +178,19 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
           )}
           
           <ScoreIndicator grade={app.grade} size="large" />
-          
+
+          {(() => {
+            const info = GRADE_INFO.find(g => g.grade === app.grade);
+            return info ? (
+              <div className="mt-3 text-center">
+                <p className={`text-sm font-black uppercase tracking-wide ${
+                  app.grade === 'C' || app.grade === 'D' ? 'text-slate-800' : 'text-slate-700'
+                }`}>{info.title}</p>
+                <p className="text-xs text-slate-500 mt-0.5 max-w-[220px]">{info.description}</p>
+              </div>
+            ) : null;
+          })()}
+
           {/* Date de mise à jour du TrustiScore */}
           {app.updatedAt && (
             <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
