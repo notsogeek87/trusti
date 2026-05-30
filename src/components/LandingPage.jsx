@@ -36,12 +36,14 @@ const LandingPage = ({ onClose }) => {
           </div>
 
           <div className="max-w-md animate-in slide-in-from-bottom duration-700 delay-300">
-            <div className="flex items-center justify-center gap-2 mb-4 text-indigo-400">
-              <ShieldCheck size={20} />
-              <span className="font-black text-xs uppercase tracking-widest">TrustiScore</span>
+            <div className="flex justify-center mb-6">
+              <div className="inline-flex items-center gap-2 bg-indigo-500/20 border border-indigo-500/40 px-4 py-1.5 rounded-full">
+                <ShieldCheck size={14} className="text-indigo-400" />
+                <span className="font-black text-xs uppercase tracking-widest text-indigo-300">TrustiScore</span>
+              </div>
             </div>
 
-            <h1 className="text-3xl font-black mb-4 text-white leading-tight">
+            <h1 className="text-4xl font-black mb-4 text-white leading-tight">
               Reprenez votre souveraineté numérique européenne
             </h1>
             
