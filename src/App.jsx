@@ -395,26 +395,28 @@ const App = () => {
   // isMobile = vrai viewport étroit OU mode forcé manuellement
   const isMobile = isSmallViewport || forceMobile;
 
-  // Bouton flottant toujours accessible pour switcher le mode
-  const FloatingToggle = () => (
-    <button
-      onClick={toggleForceMobile}
-      className="fixed z-[9999] flex items-center gap-2 text-xs font-bold shadow-xl transition-all"
-      style={{
-        bottom: forceMobile ? 'auto' : 20,
-        top: forceMobile ? 16 : 'auto',
-        right: 16,
-        padding: '8px 14px',
-        borderRadius: 999,
-        background: forceMobile ? '#4f46e5' : '#1e293b',
-        color: '#fff',
-      }}
-      title={forceMobile ? 'Quitter le mode mobile' : 'Aperçu mobile'}
-    >
-      {forceMobile ? <Monitor size={14} /> : <Smartphone size={14} />}
-      <span>{forceMobile ? 'Desktop' : 'Mobile'}</span>
-    </button>
-  );
+  // Bouton flottant uniquement sur vrai écran large (pas sur mobile réel)
+  const FloatingToggle = () => {
+    if (isSmallViewport) return null;
+    return (
+      <button
+        onClick={toggleForceMobile}
+        className="fixed z-[9999] flex items-center gap-2 text-xs font-bold shadow-xl transition-all"
+        style={{
+          top: 16,
+          right: 16,
+          padding: '8px 14px',
+          borderRadius: 999,
+          background: forceMobile ? '#4f46e5' : '#1e293b',
+          color: '#fff',
+        }}
+        title={forceMobile ? 'Quitter le mode mobile' : 'Aperçu mobile'}
+      >
+        {forceMobile ? <Monitor size={14} /> : <Smartphone size={14} />}
+        <span>{forceMobile ? 'Desktop' : 'Mobile'}</span>
+      </button>
+    );
+  };
 
   // Cadre phone visuel (purement décoratif, le layout est contrôlé via context)
   const MobileFrame = ({ children }) => {

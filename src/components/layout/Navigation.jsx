@@ -5,14 +5,6 @@ import { useIsMobile } from '../../contexts/ViewModeContext';
 
 const TABS_CONFIG = [
   {
-    id: TABS.APPLICATIONS,
-    label: 'Catalogue',
-    icon: Globe,
-    activeColor: 'text-purple-600',
-    activeBg: 'bg-purple-50',
-    inactiveColor: 'text-slate-400 hover:text-purple-400',
-  },
-  {
     id: TABS.MY_APPS,
     label: 'Mes Apps',
     icon: BookmarkCheck,
@@ -20,6 +12,14 @@ const TABS_CONFIG = [
     activeBg: 'bg-indigo-50',
     inactiveColor: 'text-slate-400 hover:text-indigo-400',
     badge: true,
+  },
+  {
+    id: TABS.APPLICATIONS,
+    label: 'Catalogue',
+    icon: Globe,
+    activeColor: 'text-purple-600',
+    activeBg: 'bg-purple-50',
+    inactiveColor: 'text-slate-400 hover:text-purple-400',
   },
   {
     id: TABS.TOP_ALTERNATIVES,
