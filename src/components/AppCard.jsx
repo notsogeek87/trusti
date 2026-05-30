@@ -1,5 +1,5 @@
 import React from 'react';
-import { PlusCircle, CheckCircle, CheckCircle2, Trash2, Sparkles, ExternalLink } from 'lucide-react';
+import { PlusCircle, CheckCircle, CheckCircle2, Trash2, Sparkles, ExternalLink, ShieldCheck, Search, Star } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
 import { TABS } from '../constants/tabs';
 
@@ -117,7 +117,7 @@ const AppCard = React.memo(({
       
       {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade === "A" && (
         <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2">
-          <div className="text-2xl">✅</div>
+          <ShieldCheck size={20} className="text-emerald-600 shrink-0" />
           <div className="flex-grow">
             <p className="text-xs font-bold text-emerald-700">
               TrustiScore au max, tout va bien !
@@ -145,7 +145,7 @@ const AppCard = React.memo(({
             </>
           ) : (
             <>
-              <div className="text-xl">🔍</div>
+              <Search size={16} className="text-slate-400 shrink-0" />
               <div className="flex-grow">
                 <p className="text-xs font-bold text-slate-600">
                   Alternative inconnue pour le moment
@@ -186,7 +186,7 @@ const AppCard = React.memo(({
                 {app.alternative ? (
                   <span>
                     {app.alternative}
-                    <span className="text-[10px] ml-1 opacity-70">⭐ Recommandé</span>
+                    <span className="inline-flex items-center gap-0.5 text-[10px] ml-1 opacity-70"><Star size={8} className="fill-current" /> Recommandé</span>
                   </span>
                 ) : customMigration ? (
                   <span>
