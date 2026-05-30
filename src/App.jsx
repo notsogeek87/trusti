@@ -469,7 +469,13 @@ const App = () => {
         onRequestAdminUnlock={() => setShowPinModal(true)}
       />
 
-      <main className="max-w-md mx-auto px-4 py-3">
+      <div className="md:flex md:items-start">
+      <Navigation
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        myAppsCount={myApps.size}
+      />
+      <main className="flex-1 min-w-0 max-w-md md:max-w-none mx-auto md:mx-0 px-4 md:px-6 py-3 pb-28 md:pb-6">
         <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
         {/* Titre pour l'onglet Applications */}
@@ -566,13 +572,7 @@ const App = () => {
           isLoadingMyApps={isLoadingMyApps}
         />
       </main>
-
-      {/* Navigation */}
-      <Navigation
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        myAppsCount={myApps.size}
-      />
+      </div>
 
       {/* Modal de partage des migrations */}
       {showShareModal && (
