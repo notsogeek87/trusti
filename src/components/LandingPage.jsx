@@ -98,7 +98,7 @@ const LandingPage = ({ onClose }) => {
                     </div>
                     <div className="flex flex-col text-left">
                       <span className="text-xs font-bold text-white">{title}</span>
-                      <p className="text-[10px] leading-tight text-slate-400 mt-0.5">{description}</p>
+                      <p className="text-[11px] leading-tight text-slate-400 mt-0.5">{description}</p>
                     </div>
                   </div>
                 ))}
@@ -124,7 +124,7 @@ const LandingPage = ({ onClose }) => {
               <ArrowRight size={18} className="text-indigo-400 group-hover:text-indigo-300 group-hover:translate-x-1 transition-transform" />
             </a>
 
-            <p className="text-[10px] text-slate-500 mt-6 italic">
+            <p className="text-[11px] text-slate-500 mt-6 italic">
               Basé sur 12 critères : RGPD, Cloud Act, Open Source, Localisation des données, et plus encore.
             </p>
           </div>

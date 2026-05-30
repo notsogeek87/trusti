@@ -485,7 +485,7 @@ const App = () => {
               Mes applications
             </p>
             <div className="bg-gradient-to-r from-rose-50 to-amber-50 rounded-lg p-2 border border-rose-100">
-              <p className="text-[10px] text-rose-700 font-bold">
+              <p className="text-[11px] text-rose-700 font-bold">
                 ⚠️ Apps à migrer en priorité en haut
               </p>
             </div>
@@ -504,7 +504,7 @@ const App = () => {
               )}
             </div>
             <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-2 border border-emerald-100">
-              <p className="text-[10px] text-emerald-700 font-bold">
+              <p className="text-[11px] text-emerald-700 font-bold">
                 ✨ Nos conseils d'apps avec un TrustiScore respectueux (A, B ou C) par catégorie
               </p>
             </div>

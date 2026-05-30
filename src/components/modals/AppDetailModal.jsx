@@ -135,7 +135,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
         >
           <ChevronLeft size={24} />
         </button>
-        <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest text-center">
+        <div className="text-[11px] font-black uppercase text-slate-400 tracking-widest text-center">
           Détails
         </div>
         <button 
@@ -286,7 +286,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                     <ArrowRight size={16} className="text-indigo-600 animate-pulse" /> Alternatives
                   </h3>
                   {!isLoadingRelations && (
-                    <div className="bg-emerald-100 text-emerald-700 text-[10px] font-black px-2 py-0.5 rounded-full">
+                    <div className="bg-emerald-100 text-emerald-700 text-[11px] font-black px-2 py-0.5 rounded-full">
                       Meilleures notes
                     </div>
                   )}
@@ -351,7 +351,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                   <ShieldCheck size={16} className="text-orange-600" /> Remplace
                 </h3>
                 {!isLoadingRelations && (
-                  <div className="bg-orange-100 text-orange-700 text-[10px] font-black px-2 py-0.5 rounded-full">
+                  <div className="bg-orange-100 text-orange-700 text-[11px] font-black px-2 py-0.5 rounded-full">
                     {replacedApps.length} app{replacedApps.length > 1 ? 's' : ''}
                   </div>
                 )}

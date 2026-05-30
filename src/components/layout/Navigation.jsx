@@ -19,12 +19,12 @@ const Navigation = ({ activeTab, onTabChange, myAppsCount }) => {
         <div className="relative">
           <Zap size={22} />
           {myAppsCount > 0 && (
-            <span className="absolute -top-1 -right-2 bg-amber-500 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">
+            <span className="absolute -top-1 -right-2 bg-amber-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">
               {myAppsCount}
             </span>
           )}
         </div>
-        <span className="text-[7px] font-black uppercase tracking-widest">Mes Apps</span>
+        <span className="text-[10px] font-black uppercase tracking-widest">Mes Apps</span>
       </button>
       
       <button 
@@ -42,7 +42,7 @@ const Navigation = ({ activeTab, onTabChange, myAppsCount }) => {
           <Globe size={activeTab === TABS.APPLICATIONS ? 28 : 24} className="relative z-10 transition-all" />
         </div>
         <span className={`font-black uppercase tracking-widest relative z-10 ${
-          activeTab === TABS.APPLICATIONS ? 'text-[8px]' : 'text-[7px]'
+          activeTab === TABS.APPLICATIONS ? 'text-[10px]' : 'text-[10px]'
         }`}>
           Catalogue
         </span>
@@ -57,7 +57,7 @@ const Navigation = ({ activeTab, onTabChange, myAppsCount }) => {
         }`}
       >
         <Award size={22} />
-        <span className="text-[7px] font-black uppercase tracking-widest">Awards</span>
+        <span className="text-[10px] font-black uppercase tracking-widest">Awards</span>
       </button>
     </nav>
   );

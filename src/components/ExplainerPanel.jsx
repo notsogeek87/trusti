@@ -32,7 +32,7 @@ const ExplainerPanel = ({ onClose }) => {
           </p>
         </div>
 
-        <h4 className="font-black text-[10px] uppercase tracking-widest mb-5 text-slate-500 flex items-center gap-2">
+        <h4 className="font-black text-[11px] uppercase tracking-widest mb-5 text-slate-500 flex items-center gap-2">
           <div className="h-px bg-slate-800 flex-grow"></div>
           Échelle des notes
           <div className="h-px bg-slate-800 flex-grow"></div>
@@ -64,7 +64,7 @@ const ExplainerPanel = ({ onClose }) => {
           </div>
         </a>
 
-        <div className="mt-8 pt-5 border-t border-slate-800 text-[10px] italic text-slate-500 text-center">
+        <div className="mt-8 pt-5 border-t border-slate-800 text-[11px] italic text-slate-500 text-center">
           Basé sur 12 critères (RGPD, Cloud Act, Open Source, Localisation).
         </div>
         </div>
