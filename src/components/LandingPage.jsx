@@ -37,13 +37,13 @@ const LandingPage = ({ onClose }) => {
 
           <div className="max-w-md animate-in slide-in-from-bottom duration-700 delay-300">
             <div className="flex items-center justify-center gap-2 mb-4 text-indigo-400">
-              <ShieldCheck size={24} />
-              <h1 className="font-black text-sm uppercase tracking-widest">TrustiScore</h1>
+              <ShieldCheck size={20} />
+              <span className="font-black text-xs uppercase tracking-widest">TrustiScore</span>
             </div>
-            
-            <h2 className="text-3xl font-black mb-4 text-white leading-tight">
+
+            <h1 className="text-3xl font-black mb-4 text-white leading-tight">
               Reprenez votre souveraineté numérique européenne
-            </h2>
+            </h1>
             
             <p className="text-base leading-relaxed text-slate-400 font-medium mb-8">
               TrustiScore évalue la confiance que vous pouvez accorder à vos applications. 
