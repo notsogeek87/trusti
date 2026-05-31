@@ -4,14 +4,42 @@ import ScoreIndicator from '../ui/ScoreIndicator';
 import { GRADE_INFO } from '../../constants/grades';
 import { useIsMobile } from '../../contexts/ViewModeContext';
 
-const API_URL = import.meta.env.PROD 
+const API_URL = import.meta.env.PROD
   ? '/api'
   : 'http://localhost:3001/api';
+
+const ANIM_STYLES = `
+  @keyframes detailSlideUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes detailSlideDown {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(40px); }
+  }
+  @keyframes detailFadeIn {
+    from { opacity: 0; transform: scale(0.97); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes detailFadeOut {
+    from { opacity: 1; transform: scale(1); }
+    to   { opacity: 0; transform: scale(0.97); }
+  }
+  @keyframes sectionFadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+`;
+
+const sectionAnim = (delay = 0) => ({
+  animation: `sectionFadeUp 0.3s ease-out ${delay}ms both`,
+});
 
 /**
  * Modal des détails d'une application
  */
 const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, allApps = [] }) => {
+  const [isExiting, setIsExiting] = useState(false);
   // State pour stocker les apps chargées dynamiquement
   const [loadedApps, setLoadedApps] = useState([]);
   const [isLoadingRelations, setIsLoadingRelations] = useState(false);
@@ -130,6 +158,11 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
 
   const isMobile = useIsMobile();
 
+  const handleClose = () => {
+    setIsExiting(true);
+    setTimeout(onClose, 240);
+  };
+
   // Bloc réutilisable pour une app liée (alternative ou remplacée)
   const RelatedAppRow = ({ app: relatedApp }) => (
     <div
@@ -164,13 +197,21 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
     </div>
   );
 
+  const pageAnim = isExiting
+    ? (isMobile ? 'detailSlideDown 0.24s ease-in forwards' : 'detailFadeOut 0.2s ease-in forwards')
+    : (isMobile ? 'detailSlideUp 0.32s cubic-bezier(0.22, 1, 0.36, 1)' : 'detailFadeIn 0.22s ease-out');
+
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-16 md:pb-0">
+    <div
+      className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-16 md:pb-0"
+      style={{ animation: pageAnim }}
+    >
+      <style>{ANIM_STYLES}</style>
 
       {/* ── Header ── */}
       <header className="bg-white border-b border-slate-100 sticky top-0 z-50 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-          <button onClick={onClose} className="p-2 -ml-2 text-slate-400 hover:text-slate-700 transition-colors">
+          <button onClick={handleClose} className="p-2 -ml-2 text-slate-400 hover:text-slate-700 transition-colors active:scale-90">
             <ChevronLeft size={24} />
           </button>
           <div className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Détails</div>
@@ -187,7 +228,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
       <main className={isMobile ? 'p-4' : 'max-w-5xl mx-auto p-6 flex gap-6 items-start'}>
 
         {/* ── Colonne gauche : identité ── */}
-        <div className={isMobile ? '' : 'w-72 shrink-0 sticky top-[69px]'}>
+        <div className={isMobile ? '' : 'w-72 shrink-0 sticky top-[69px]'} style={sectionAnim(60)}>
 
           {/* Carte hero */}
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col items-center text-center mb-4">
@@ -250,15 +291,15 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
 
           {/* Bouton retour (desktop) */}
           {!isMobile && (
-            <button onClick={onClose}
-              className="w-full py-3 bg-slate-900 hover:bg-slate-700 text-white rounded-xl font-black text-sm uppercase tracking-widest transition-colors">
+            <button onClick={handleClose}
+              className="w-full py-3 bg-slate-900 hover:bg-slate-700 text-white rounded-xl font-black text-sm uppercase tracking-widest transition-colors active:scale-[0.98]">
               ← Retour
             </button>
           )}
         </div>
 
         {/* ── Colonne droite : analyse & relations ── */}
-        <div className={isMobile ? '' : 'flex-1 min-w-0'}>
+        <div className={isMobile ? '' : 'flex-1 min-w-0'} style={sectionAnim(isMobile ? 100 : 120)}>
 
           {/* Pourquoi cette note ? */}
           {(() => {
@@ -364,8 +405,8 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
 
           {/* Bouton retour (mobile uniquement) */}
           {isMobile && (
-            <button onClick={onClose}
-              className="w-full py-4 bg-slate-900 text-white rounded-xl font-black text-sm uppercase tracking-widest">
+            <button onClick={handleClose}
+              className="w-full py-4 bg-slate-900 text-white rounded-xl font-black text-sm uppercase tracking-widest active:scale-[0.98] transition-transform">
               Retour
             </button>
           )}

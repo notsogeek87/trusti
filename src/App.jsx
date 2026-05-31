@@ -459,6 +459,7 @@ const App = () => {
         <FloatingToggle />
         <MobileFrame>
           <AppDetailModal
+            key={selectedApp?.id}
             app={selectedApp}
             isInMyApps={myApps.has(selectedApp.id)}
             onToggleMyApp={toggleMyApp}
