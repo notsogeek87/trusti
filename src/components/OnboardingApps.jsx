@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Check, Search, ChevronRight, ChevronLeft, X, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Check, Search, ChevronRight, ChevronLeft, X, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
 
 const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
 
@@ -46,7 +46,9 @@ const STEPS = [
 // step -1 = intro
 // step 0..N-1 = catégories
 // step N = recherche libre
-const LAST_STEP = STEPS.length; // step de recherche
+// step N+1 = écran succès
+const LAST_STEP = STEPS.length;     // recherche libre
+const SUCCESS_STEP = LAST_STEP + 1; // écran succès
 
 const GRADE_DOT = {
   A: 'bg-emerald-500',
@@ -248,14 +250,67 @@ const OnboardingApps = ({ allApps, onComplete }) => {
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-4 py-4 shadow-lg">
           <div className="max-w-md mx-auto">
             <button
-              onClick={() => onComplete(selected)}
+              onClick={goNext}
               className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm shadow-lg transition-all active:scale-[0.98]"
             >
               {selected.size === 0
                 ? 'Terminer sans sélection'
-                : `Voir mes ${selected.size} app${selected.size !== 1 ? 's' : ''} →`}
+                : `Continuer avec ${selected.size} app${selected.size !== 1 ? 's' : ''} →`}
             </button>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── ÉCRAN SUCCÈS ──────────────────────────────────────────────────────
+  if (step === SUCCESS_STEP) {
+    const count = selected.size;
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-indigo-600 to-purple-700 flex flex-col items-center justify-center px-6 text-center text-white">
+        <style>{ANIM_CSS}</style>
+        <div style={{ animation: 'onbFadeUp 0.4s ease-out' }} className="flex flex-col items-center">
+
+          {/* Icône succès */}
+          <div className="w-24 h-24 bg-white/20 backdrop-blur rounded-3xl flex items-center justify-center mb-6 shadow-2xl">
+            <ShieldCheck size={44} className="text-white" />
+          </div>
+
+          {/* Titre */}
+          <h2 className="text-2xl font-black mb-2">
+            {count === 0 ? 'Prêt à explorer !' : `${count} app${count !== 1 ? 's' : ''} ajoutée${count !== 1 ? 's' : ''} !`}
+          </h2>
+          <p className="text-white/70 text-sm mb-10 max-w-xs leading-relaxed">
+            {count === 0
+              ? 'Tu pourras ajouter des apps à tout moment depuis le catalogue.'
+              : 'TrustiScore va analyser chaque app et te proposer des alternatives plus respectueuses de ta vie privée.'}
+          </p>
+
+          {/* Ce qui va se passer */}
+          {count > 0 && (
+            <div className="w-full max-w-xs space-y-3 mb-10" style={{ animation: 'onbFadeUp 0.4s 0.1s ease-out both' }}>
+              {[
+                { emoji: '🔍', text: 'Analyse de ta vie privée par app' },
+                { emoji: '⭐', text: 'Score de A à E pour chaque app' },
+                { emoji: '✅', text: 'Alternatives recommandées si besoin' },
+              ].map(({ emoji, text }) => (
+                <div key={text} className="flex items-center gap-3 bg-white/10 rounded-2xl px-4 py-3 text-left">
+                  <span className="text-xl">{emoji}</span>
+                  <span className="text-sm font-semibold text-white/90">{text}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* CTA */}
+          <button
+            onClick={() => onComplete(selected)}
+            className="flex items-center gap-2 bg-white text-indigo-700 hover:bg-indigo-50 px-8 py-4 rounded-2xl font-black text-base shadow-xl transition-all active:scale-95"
+            style={{ animation: 'onbFadeUp 0.4s 0.2s ease-out both' }}
+          >
+            {count === 0 ? 'Explorer le catalogue' : 'Voir mon score de confidentialité'}
+            <ArrowRight size={18} />
+          </button>
         </div>
       </div>
     );
@@ -331,7 +386,7 @@ const OnboardingApps = ({ allApps, onComplete }) => {
             <ChevronRight size={16} />
           </button>
           <button
-            onClick={() => onComplete(selected)}
+            onClick={() => { setDirection('forward'); setStep(SUCCESS_STEP); }}
             className="w-full py-2 text-xs text-slate-400 hover:text-slate-600 transition-colors"
           >
             Terminer maintenant
