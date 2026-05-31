@@ -1,10 +1,7 @@
 import React from 'react';
 import { HelpCircle, LogOut, User, RotateCcw, Settings, Lock } from 'lucide-react';
+import { useIsMobile } from '../../contexts/ViewModeContext';
 
-
-/**
- * Header de l'application
- */
 const Header = ({
   currentUser,
   onLogout,
@@ -15,60 +12,61 @@ const Header = ({
   isAdminUnlocked,
   onRequestAdminUnlock,
 }) => {
+  const isMobile = useIsMobile();
+
   return (
     <header className="bg-white border-b border-slate-100 sticky top-0 z-30 shadow-sm">
       <div className="max-w-full md:max-w-none px-4 md:px-6 py-1 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 flex-shrink-0">
-          <img 
-            src="/assets/logo.png" 
-            alt="TrustiScore" 
+          <img
+            src="/assets/logo.png"
+            alt="TrustiScore"
             className="w-8"
           />
           <h1 className="text-sm font-black tracking-tight text-slate-900 leading-none">
             TrustiScore
           </h1>
         </div>
-        
+
         <div className="flex items-center gap-2 flex-shrink min-w-0">
-          {/* Utilisateur connecté */}
           {currentUser ? (
             <div className="flex items-center gap-2">
               <div className="bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full flex items-center gap-2 max-w-[140px]">
                 <User size={14} className="flex-shrink-0" />
                 <span className="text-xs font-bold truncate">{currentUser.email || currentUser}</span>
               </div>
-              
-              {/* Bouton Lock ou Settings selon déverrouillage admin */}
+
               {isAdminUnlocked ? (
-                // Déverrouillé : roue crantée (Settings) partout
                 <button
                   onClick={onOpenAdmin}
-                  className="p-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-full transition-all"
+                  className="p-2.5 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-full transition-all"
                   title="Administration des Applications"
                 >
                   <Settings size={18} />
                 </button>
               ) : (
-                // Verrouillé : cadenas (Lock) partout
                 <button
                   onClick={onRequestAdminUnlock}
-                  className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-all"
+                  className="p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-all"
                   title="Déverrouiller l'administration"
                 >
                   <Lock size={18} />
                 </button>
               )}
-              
-              <button
-                onClick={onResetUserData}
-                className="p-2 text-slate-300 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-all"
-                title="Réinitialiser mes données (démo)"
-              >
-                <RotateCcw size={16} />
-              </button>
+
+              {!isMobile && (
+                <button
+                  onClick={onResetUserData}
+                  className="p-2.5 text-slate-300 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-all"
+                  title="Réinitialiser mes données (démo)"
+                >
+                  <RotateCcw size={16} />
+                </button>
+              )}
+
               <button
                 onClick={onLogout}
-                className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-all"
+                className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-all"
                 title="Se déconnecter"
               >
                 <LogOut size={18} />
@@ -85,8 +83,7 @@ const Header = ({
               </button>
             </div>
           )}
-          
-          {/* Bouton d'aide */}
+
           <button
             onClick={onShowLandingPage}
             className="p-2.5 rounded-full transition-all duration-300 shadow-sm bg-indigo-500 text-white hover:bg-indigo-600"

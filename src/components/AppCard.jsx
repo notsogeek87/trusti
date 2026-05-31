@@ -25,7 +25,7 @@ const AppCard = React.memo(({
   return (
     <div 
       onClick={() => !isLoadingSkeleton && onSelectApp(app)} 
-      className={`bg-white rounded-2xl border border-slate-100 p-4 flex flex-col gap-3 ${isLoadingSkeleton ? 'cursor-default' : 'cursor-pointer hover:shadow-md hover:border-indigo-100'} transition-all group`}
+      className={`bg-white rounded-2xl border border-slate-100 p-4 flex flex-col gap-3 ${isLoadingSkeleton ? 'cursor-default' : 'cursor-pointer hover:shadow-md hover:border-indigo-100 active:scale-[0.98] active:shadow-none'} transition-all group`}
     >
       <div className="flex items-center gap-3">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 ${isLoadingSkeleton ? 'bg-slate-200 animate-pulse' : 'bg-slate-100'}`}>

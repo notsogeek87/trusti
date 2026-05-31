@@ -530,7 +530,7 @@ const AdminSimpleTableModal = ({ onClose }) => {
 
         {/* ── Drawer panel ── */}
         <div
-          className={`absolute top-0 right-0 h-full w-[440px] max-w-[95%] bg-white shadow-2xl z-20 flex flex-col transition-transform duration-300 ease-out rounded-r-2xl ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
+          className={`absolute top-0 right-0 h-full w-full sm:w-[440px] bg-white shadow-2xl z-20 flex flex-col transition-transform duration-300 ease-out sm:rounded-r-2xl ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
         >
           {/* Drawer header */}
           <div className="flex items-center gap-3 px-5 py-4 border-b flex-shrink-0 bg-white">

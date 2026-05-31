@@ -533,10 +533,12 @@ const App = () => {
         myAppsCount={myApps.size}
       />
       <main className={isMobile
-        ? 'max-w-md mx-auto px-4 py-3 pb-28'
+        ? 'max-w-md mx-auto px-4 py-3 pb-24'
         : 'flex-1 min-w-0 px-6 py-3 pb-6'
       }>
         <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+
+        <div key={activeTab} style={{ animation: 'tabFadeIn 0.18s ease-out' }}>
 
         {/* Titre pour l'onglet Applications */}
         {activeTab === TABS.APPLICATIONS && (
@@ -551,6 +553,7 @@ const App = () => {
             </div>
             {/* Sélecteur de catégorie - scrollable horizontal pour mobile */}
             <div className="mt-2">
+              <div className="relative">
               <div className="overflow-x-auto scrollbar-hide">
                 <div className="flex gap-1.5 pb-1.5 px-0.5">
                   {['Toutes', ...CATEGORIES].map((category) => (
@@ -570,6 +573,8 @@ const App = () => {
                     </button>
                   ))}
                 </div>
+              </div>
+              <div className="pointer-events-none absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-slate-50 to-transparent" />
               </div>
             </div>
           </div>
@@ -631,6 +636,7 @@ const App = () => {
           isLoadingAwards={isLoadingAwards}
           isLoadingMyApps={isLoadingMyApps}
         />
+        </div>
       </main>
       </div>
 
@@ -714,6 +720,10 @@ const App = () => {
         }
         .animate-pulse-subtle {
           animation: pulse-subtle 3s infinite ease-in-out;
+        }
+        @keyframes tabFadeIn {
+          from { opacity: 0; transform: translateY(6px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </div>
