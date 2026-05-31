@@ -10,9 +10,11 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 // Utiliser service-postgres pour Neon (base de données distante)
 import dbService from './database/service-postgres.js';
+import { neon } from '@neondatabase/serverless';
 
 const app = express();
 const PORT = 3001;
+const sql = neon(process.env.DATABASE_URL);
 
 // Enable CORS for frontend
 app.use(cors());
@@ -731,6 +733,99 @@ app.post('/api/apps', async (req, res) => {
       success: false,
       error: error.message
     });
+  }
+});
+
+// ==============================
+// OTP AUTH
+// ==============================
+
+const otpFailedAttempts = new Map();
+
+app.post('/api/send-otp', async (req, res) => {
+  try {
+    const { email } = req.body || {};
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ error: 'Email invalide' });
+    }
+    const cleanEmail = email.toLowerCase().trim();
+
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = Date.now() + 10 * 60 * 1000;
+
+    // Supprimer les anciens codes OTP pour cet email
+    await sql`DELETE FROM magic_link_tokens WHERE email = ${cleanEmail} AND LENGTH(token) = 6`;
+    await sql`DELETE FROM magic_link_tokens WHERE expires_at < ${Date.now()}`;
+    await sql`INSERT INTO magic_link_tokens (token, email, expires_at, used) VALUES (${code}, ${cleanEmail}, ${expiresAt}, false)`;
+
+    // En dev sans Brevo configuré, afficher le code dans la console
+    if (!process.env.BREVO_API_KEY) {
+      console.log(`\n🔑 OTP pour ${cleanEmail}: ${code}\n`);
+      return res.json({ success: true, _devCode: code });
+    }
+
+    const brevo = await import('@getbrevo/brevo');
+    const apiInstance = new brevo.TransactionalEmailsApi();
+    apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+    const mail = new brevo.SendSmtpEmail();
+    mail.subject = `${code} est votre code TrustiScore`;
+    mail.to = [{ email: cleanEmail }];
+    mail.sender = { name: process.env.BREVO_FROM_NAME || 'TrustiScore', email: process.env.BREVO_FROM_EMAIL || 'noreply@trustiscore.fr' };
+    mail.htmlContent = `<p style="font-size:32px;font-weight:900;letter-spacing:8px;font-family:monospace;">${code}</p><p>Valable 10 minutes.</p>`;
+    await apiInstance.sendTransacEmail(mail);
+
+    return res.json({ success: true });
+  } catch (error) {
+    console.error('send-otp error:', error);
+    return res.status(500).json({ error: "Erreur lors de l'envoi du code" });
+  }
+});
+
+app.post('/api/verify-otp', async (req, res) => {
+  try {
+    const { email, code } = req.body || {};
+    if (!email || !code) return res.status(400).json({ error: 'Email et code requis' });
+
+    const cleanEmail = email.toLowerCase().trim();
+    const cleanCode = String(code).trim();
+    const now = Date.now();
+
+    const record = otpFailedAttempts.get(cleanEmail) || { count: 0, lockedUntil: 0 };
+    if (record.lockedUntil > now) {
+      const retryAfter = Math.ceil((record.lockedUntil - now) / 1000 / 60);
+      return res.status(429).json({ error: `Trop de tentatives. Réessayez dans ${retryAfter} min.` });
+    }
+
+    const result = await sql`
+      SELECT * FROM magic_link_tokens
+      WHERE email = ${cleanEmail} AND token = ${cleanCode} AND LENGTH(token) = 6 AND used = false
+      LIMIT 1
+    `;
+
+    if (result.length === 0) {
+      const newCount = record.count + 1;
+      const lockedUntil = newCount >= 5 ? now + 15 * 60 * 1000 : 0;
+      otpFailedAttempts.set(cleanEmail, { count: newCount, lockedUntil });
+      const remaining = 5 - newCount;
+      return res.status(401).json({
+        error: remaining > 0
+          ? `Code incorrect. ${remaining} tentative${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}.`
+          : 'Trop de tentatives. Réessayez dans 15 minutes.',
+      });
+    }
+
+    if (now > result[0].expires_at) {
+      await sql`DELETE FROM magic_link_tokens WHERE token = ${cleanCode} AND email = ${cleanEmail}`;
+      return res.status(401).json({ error: 'Code expiré. Demandez un nouveau code.' });
+    }
+
+    await sql`UPDATE magic_link_tokens SET used = true WHERE token = ${cleanCode} AND email = ${cleanEmail}`;
+    otpFailedAttempts.delete(cleanEmail);
+
+    return res.json({ success: true, email: cleanEmail });
+  } catch (error) {
+    console.error('verify-otp error:', error);
+    return res.status(500).json({ error: 'Erreur lors de la vérification du code' });
   }
 });
 

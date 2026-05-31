@@ -678,6 +678,7 @@ const App = () => {
       <LoginModal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
+        onLogin={(email) => { login(email); setShowLoginModal(false); }}
       />
 
       {/* Modal de code PIN admin */}

@@ -1,163 +1,283 @@
-import React, { useState } from 'react';
-import { X, Mail, Send, CheckCircle } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Mail, Loader2, CheckCircle2, ArrowLeft } from 'lucide-react';
 
-// Détection de l'environnement
-const API_URL = import.meta.env.PROD 
+const API_URL = import.meta.env.PROD
   ? '/api'
   : 'http://localhost:3001/api';
 
-/**
- * Modal de connexion par Magic Link
- */
-const LoginModal = ({ isOpen, onClose }) => {
+const RESEND_COOLDOWN = 60; // secondes
+
+const LoginModal = ({ isOpen, onClose, onLogin }) => {
+  const [step, setStep] = useState('email'); // 'email' | 'otp' | 'success'
   const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  const inputRefs = useRef([]);
+  const cooldownRef = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setStep('email');
+    setEmail('');
+    setOtp(['', '', '', '', '', '']);
+    setError('');
+    setResendCooldown(0);
+    clearInterval(cooldownRef.current);
+  }, [isOpen]);
+
+  useEffect(() => () => clearInterval(cooldownRef.current), []);
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!email.trim()) {
-      setError('Veuillez entrer votre adresse email');
-      return;
-    }
+  // ── Email step ─────────────────────────────────────────────────────────────
 
-    if (!email.includes('@') || !email.includes('.')) {
-      setError('Veuillez entrer une adresse email valide');
-      return;
-    }
-
+  const sendOtp = async (emailToUse) => {
     setIsLoading(true);
     setError('');
-
     try {
-      const response = await fetch(`${API_URL}/send-magic-link`, {
+      const res = await fetch(`${API_URL}/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim().toLowerCase() })
+        body: JSON.stringify({ email: emailToUse }),
       });
-
-      const data = await response.json();
-
+      const data = await res.json();
       if (data.success) {
-        setEmailSent(true);
+        setStep('otp');
+        setOtp(['', '', '', '', '', '']);
+        startCooldown();
+        setTimeout(() => inputRefs.current[0]?.focus(), 100);
       } else {
-        setError(data.error || 'Erreur lors de l\'envoi de l\'email');
+        setError(data.error || "Erreur lors de l'envoi");
       }
-    } catch (error) {
-      console.error('Error sending magic link:', error);
+    } catch {
       setError('Erreur de connexion au serveur');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleClose = () => {
-    setEmail('');
-    setError('');
-    setEmailSent(false);
-    onClose();
+  const handleEmailSubmit = async (e) => {
+    e.preventDefault();
+    const trimmed = email.trim().toLowerCase();
+    if (!trimmed || !trimmed.includes('@') || !trimmed.includes('.')) {
+      setError('Adresse email invalide');
+      return;
+    }
+    await sendOtp(trimmed);
   };
+
+  const startCooldown = () => {
+    setResendCooldown(RESEND_COOLDOWN);
+    clearInterval(cooldownRef.current);
+    cooldownRef.current = setInterval(() => {
+      setResendCooldown(prev => {
+        if (prev <= 1) { clearInterval(cooldownRef.current); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  // ── OTP step ───────────────────────────────────────────────────────────────
+
+  const handleOtpChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return;
+    const newOtp = [...otp];
+    newOtp[index] = value.slice(-1);
+    setOtp(newOtp);
+    setError('');
+    if (value && index < 5) inputRefs.current[index + 1]?.focus();
+    if (index === 5 && value) verifyOtp(newOtp.join(''));
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').trim().replace(/\D/g, '').slice(0, 6);
+    if (pasted.length === 6) {
+      const newOtp = pasted.split('');
+      setOtp(newOtp);
+      inputRefs.current[5]?.focus();
+      verifyOtp(pasted);
+    }
+  };
+
+  const verifyOtp = async (code) => {
+    if (code.length !== 6) return;
+    setIsLoading(true);
+    setError('');
+    try {
+      const res = await fetch(`${API_URL}/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), code }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStep('success');
+        clearInterval(cooldownRef.current);
+        if (onLogin) onLogin(data.email);
+        setTimeout(() => onClose(), 1500);
+      } else {
+        setError(data.error || 'Code incorrect');
+        setOtp(['', '', '', '', '', '']);
+        setTimeout(() => inputRefs.current[0]?.focus(), 50);
+      }
+    } catch {
+      setError('Erreur de connexion au serveur');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifySubmit = (e) => {
+    e.preventDefault();
+    verifyOtp(otp.join(''));
+  };
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 relative animate-fade-in">
-        <button 
-          onClick={handleClose}
-          className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors"
-        >
-          <X size={24} />
+      <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 relative">
+        <button onClick={onClose} className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all">
+          <X size={18} />
         </button>
 
-        {!emailSent ? (
+        {/* ── Étape 1 : email ── */}
+        {step === 'email' && (
           <>
             <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Mail size={32} className="text-indigo-600" />
+              <div className="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Mail size={28} className="text-indigo-600" />
               </div>
-              <h2 className="text-2xl font-black text-slate-900 mb-2">
-                Connexion par email
-              </h2>
-              <p className="text-sm text-slate-600">
-                Recevez un lien de connexion sécurisé par email
-              </p>
+              <h2 className="text-2xl font-black text-slate-900 mb-1">Connexion</h2>
+              <p className="text-sm text-slate-500">Recevez un code à 6 chiffres par email</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleEmailSubmit} className="space-y-4">
               <div>
-                <label htmlFor="email" className="block text-sm font-bold text-slate-700 mb-2">
-                  Adresse email
-                </label>
+                <label className="block text-xs font-bold text-slate-600 mb-1.5">Adresse email</label>
                 <input
-                  id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setError('');
-                  }}
+                  onChange={e => { setEmail(e.target.value); setError(''); }}
                   placeholder="vous@exemple.fr"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-indigo-500 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-indigo-500 focus:outline-none transition-colors text-sm"
                   autoFocus
                   disabled={isLoading}
                 />
-                {error && (
-                  <p className="text-xs text-rose-600 mt-2 font-semibold">{error}</p>
-                )}
+                {error && <p className="text-xs text-rose-600 mt-1.5 font-semibold">{error}</p>}
               </div>
 
               <button
                 type="submit"
-                disabled={isLoading}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoading || !email.trim()}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
               >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                    Envoi en cours...
-                  </>
-                ) : (
-                  <>
-                    <Send size={20} />
-                    Envoyer le lien
-                  </>
-                )}
+                {isLoading
+                  ? <><Loader2 size={18} className="animate-spin" /> Envoi en cours…</>
+                  : 'Recevoir le code'
+                }
+              </button>
+            </form>
+          </>
+        )}
+
+        {/* ── Étape 2 : OTP ── */}
+        {step === 'otp' && (
+          <>
+            <button
+              onClick={() => { setStep('email'); setError(''); }}
+              className="absolute top-5 left-5 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all"
+            >
+              <ArrowLeft size={18} />
+            </button>
+
+            <div className="text-center mb-8">
+              <div className="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Mail size={28} className="text-indigo-600" />
+              </div>
+              <h2 className="text-2xl font-black text-slate-900 mb-1">Code reçu ?</h2>
+              <p className="text-sm text-slate-500">
+                Code envoyé à <span className="font-semibold text-slate-700">{email}</span>
+              </p>
+            </div>
+
+            <form onSubmit={handleVerifySubmit} className="space-y-5">
+              {/* 6 cases OTP */}
+              <div className="flex gap-2 justify-center" onPaste={handlePaste}>
+                {otp.map((digit, i) => (
+                  <input
+                    key={i}
+                    ref={el => inputRefs.current[i] = el}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength="1"
+                    value={digit}
+                    onChange={e => handleOtpChange(i, e.target.value)}
+                    onKeyDown={e => handleOtpKeyDown(i, e)}
+                    disabled={isLoading}
+                    className={`w-11 h-13 py-3 text-center text-xl font-bold border-2 rounded-xl transition-all focus:outline-none disabled:opacity-50 ${
+                      error
+                        ? 'border-rose-400 bg-rose-50 text-rose-800'
+                        : digit
+                        ? 'border-indigo-500 bg-indigo-50 text-indigo-900'
+                        : 'border-slate-200 hover:border-indigo-300 focus:border-indigo-500'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              {error && (
+                <p className="text-center text-xs font-semibold text-rose-600">{error}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={isLoading || otp.join('').length !== 6}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+              >
+                {isLoading
+                  ? <><Loader2 size={18} className="animate-spin" /> Vérification…</>
+                  : 'Se connecter'
+                }
               </button>
 
-              <p className="text-xs text-slate-500 text-center">
-                Un lien de connexion sécurisé sera envoyé à votre adresse email
+              {/* Renvoyer le code */}
+              <p className="text-center text-xs text-slate-400">
+                {resendCooldown > 0
+                  ? `Renvoyer dans ${resendCooldown}s`
+                  : (
+                    <button
+                      type="button"
+                      onClick={() => sendOtp(email.trim().toLowerCase())}
+                      className="text-indigo-500 hover:text-indigo-700 font-semibold underline transition-colors"
+                    >
+                      Renvoyer le code
+                    </button>
+                  )
+                }
               </p>
             </form>
           </>
-        ) : (
-          <div className="text-center">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle size={32} className="text-emerald-600" />
+        )}
+
+        {/* ── Étape 3 : succès ── */}
+        {step === 'success' && (
+          <div className="text-center py-4">
+            <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 size={28} className="text-emerald-600" />
             </div>
-            <h2 className="text-2xl font-black text-slate-900 mb-2">
-              Email envoyé !
-            </h2>
-            <p className="text-sm text-slate-600 mb-6">
-              Nous avons envoyé un lien de connexion à<br />
-              <strong className="text-slate-900">{email}</strong>
-            </p>
-            <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 mb-6">
-              <p className="text-sm text-indigo-900 font-semibold mb-2">
-                📧 Consultez votre boîte mail
-              </p>
-              <p className="text-xs text-indigo-700">
-                Le lien est valable pendant 15 minutes. Si vous ne le trouvez pas, vérifiez vos spams.
-              </p>
-            </div>
-            <button
-              onClick={handleClose}
-              className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-6 rounded-xl transition-colors"
-            >
-              Fermer
-            </button>
+            <h2 className="text-2xl font-black text-slate-900 mb-1">Connecté !</h2>
+            <p className="text-sm text-slate-500">Bienvenue sur TrustiScore</p>
           </div>
         )}
       </div>
