@@ -290,16 +290,10 @@ const App = () => {
   const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
 
-  // Charger l'état de déverrouillage admin au changement d'utilisateur
+  // Réinitialiser l'état admin quand l'utilisateur se déconnecte
   useEffect(() => {
-    if (currentUser && getUserData) {
-      const adminUnlocked = getUserData('admin_unlocked');
-      setIsAdminUnlocked(!!adminUnlocked);
-    } else {
-      // Réinitialiser l'état admin quand on se déconnecte
-      setIsAdminUnlocked(false);
-    }
-  }, [currentUser, getUserData]);
+    if (!currentUser) setIsAdminUnlocked(false);
+  }, [currentUser]);
 
   // Scroller en haut lors du changement d'onglet ou de catégorie
   useEffect(() => {
@@ -359,23 +353,13 @@ const App = () => {
     }
   }, [selectedApp, showMigrationSelector, activeTab]);
 
-  // Gérer le déverrouillage admin après validation du code PIN
+  // Appelé par PinModal après validation serveur réussie
   const handleUnlockAdmin = async () => {
-    // En local sans utilisateur connecté, connecter automatiquement un admin local
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    
     if (isLocal && !currentUser) {
-      // Connexion automatique en tant qu'admin local
       await login('admin@local');
     }
-    
-    // Déverrouiller l'admin (après validation du PIN)
     setIsAdminUnlocked(true);
-    if (saveUserData) {
-      saveUserData('admin_unlocked', true);
-    }
-    
-    // Fermer le modal PIN
     setShowPinModal(false);
   };
 

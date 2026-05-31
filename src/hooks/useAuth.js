@@ -36,14 +36,9 @@ export const useAuth = () => {
 
   // Déconnexion
   const logout = useCallback(() => {
-    // Effacer aussi l'état admin_unlocked avant de se déconnecter
-    if (currentUser) {
-      const userEmail = currentUser.email || currentUser;
-      localStorage.removeItem(`trusti_${userEmail}_admin_unlocked`);
-    }
     localStorage.removeItem('trusti_current_user');
     setCurrentUser(null);
-  }, [currentUser]);
+  }, []);
 
   // Récupérer les données de l'utilisateur
   const getUserData = useCallback((key) => {
@@ -66,9 +61,7 @@ export const useAuth = () => {
   const resetUserData = useCallback(() => {
     if (!currentUser) return;
     const userEmail = currentUser.email || currentUser;
-    // Supprimer toutes les données sauvegardées
     localStorage.removeItem(`trusti_${userEmail}_apps`);
-    localStorage.removeItem(`trusti_${userEmail}_admin_unlocked`);
     // Forcer un rechargement en changeant l'utilisateur temporairement
     const user = currentUser;
     setCurrentUser(null);
