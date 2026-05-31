@@ -1,67 +1,66 @@
-// Rate limiting in-memory (resets on cold start — intentional for serverless)
-const attempts = new Map();
+import 'dotenv/config';
+import * as brevo from '@getbrevo/brevo';
+import { neon } from '@neondatabase/serverless';
 
-const LOCKOUT_DURATION = 30 * 1000;
-const MAX_ATTEMPTS = 3;
+const sql = neon(process.env.DATABASE_URL);
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') {
-    return res.status(405).json({ success: false, error: 'Method not allowed' });
-  }
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const ip = req.headers['x-forwarded-for']?.split(',')[0].trim()
-    || req.socket?.remoteAddress
-    || 'unknown';
-  const now = Date.now();
+  try {
+    const { email } = req.body || {};
+    if (!email) return res.status(400).json({ error: 'Email requis' });
 
-  const record = attempts.get(ip) || { count: 0, lockedUntil: 0 };
+    const cleanEmail = email.toLowerCase().trim();
+    const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase().trim();
 
-  if (record.lockedUntil > now) {
-    const retryAfter = Math.ceil((record.lockedUntil - now) / 1000);
-    return res.status(429).json({
-      success: false,
-      error: `Trop de tentatives. Réessayez dans ${retryAfter} secondes.`,
-      retryAfter,
-    });
-  }
+    // Vérifier que l'email est autorisé (dev bypass si ADMIN_EMAIL non défini)
+    if (adminEmail && cleanEmail !== adminEmail) {
+      return res.status(403).json({ error: 'Accès non autorisé' });
+    }
 
-  const { pin } = req.body || {};
+    // Générer le code
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = Date.now() + 10 * 60 * 1000;
 
-  if (!pin) {
-    return res.status(400).json({ success: false, error: 'PIN manquant' });
-  }
+    await sql`DELETE FROM magic_link_tokens WHERE email = ${cleanEmail} AND LENGTH(token) = 6`;
+    await sql`DELETE FROM magic_link_tokens WHERE expires_at < ${Date.now()}`;
+    await sql`INSERT INTO magic_link_tokens (token, email, expires_at, used) VALUES (${code}, ${cleanEmail}, ${expiresAt}, false)`;
 
-  const adminPin = process.env.ADMIN_PIN;
+    // Dev sans Brevo → console
+    if (!process.env.BREVO_API_KEY) {
+      console.log(`\n🔑 Code admin pour ${cleanEmail} : ${code}\n`);
+      return res.status(200).json({ success: true });
+    }
 
-  // Dev bypass: if ADMIN_PIN not configured, accept any non-empty PIN
-  if (!adminPin) {
-    attempts.delete(ip);
+    const apiInstance = new brevo.TransactionalEmailsApi();
+    apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+
+    const mail = new brevo.SendSmtpEmail();
+    mail.subject = `${code} — Code administrateur TrustiScore`;
+    mail.to = [{ email: cleanEmail }];
+    mail.sender = {
+      name: process.env.BREVO_FROM_NAME || 'TrustiScore',
+      email: process.env.BREVO_FROM_EMAIL || 'noreply@trustiscore.fr',
+    };
+    mail.htmlContent = `
+      <!DOCTYPE html><html><body style="margin:0;padding:40px 20px;font-family:sans-serif;background:#f8fafc;">
+        <div style="max-width:400px;margin:0 auto;background:#fff;border-radius:16px;padding:40px;text-align:center;box-shadow:0 4px 6px rgba(0,0,0,.08);">
+          <p style="margin:0 0 8px;font-size:13px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Code administrateur</p>
+          <p style="margin:16px 0;font-size:48px;font-weight:900;letter-spacing:12px;font-family:'Courier New',monospace;color:#1e293b;">${code}</p>
+          <p style="margin:0;font-size:13px;color:#94a3b8;">Valable 10 minutes · Ne partagez pas ce code</p>
+        </div>
+      </body></html>
+    `;
+    await apiInstance.sendTransacEmail(mail);
+
     return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('admin-auth error:', error);
+    return res.status(500).json({ error: "Erreur lors de l'envoi du code" });
   }
-
-  if (pin === adminPin) {
-    attempts.delete(ip);
-    return res.status(200).json({ success: true });
-  }
-
-  // Wrong PIN — increment counter
-  const newCount = record.count + 1;
-  const lockedUntil = newCount >= MAX_ATTEMPTS ? now + LOCKOUT_DURATION : 0;
-  attempts.set(ip, { count: newCount, lockedUntil });
-
-  const remaining = MAX_ATTEMPTS - newCount;
-  const error = remaining > 0
-    ? `Code incorrect. ${remaining} tentative${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}.`
-    : 'Trop de tentatives. Réessayez dans 30 secondes.';
-
-  return res.status(401).json({
-    success: false,
-    error,
-    retryAfter: lockedUntil > 0 ? 30 : 0,
-  });
 }

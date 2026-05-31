@@ -21,7 +21,6 @@ import ExplainerPanel from './components/ExplainerPanel';
 import AppsList from './components/AppsList';
 import ShareButton from './components/ShareButton';
 import LandingPage from './components/LandingPage';
-import VerifyAuth from './components/VerifyAuth';
 import TrustiChatWidget from './components/TrustiChatWidget';
 import OnboardingApps from './components/OnboardingApps';
 
@@ -66,9 +65,6 @@ const sortAppsByPopularity = (apps) => {
  * Composant principal de l'application TrustiScore
  */
 const App = () => {
-  // Vérifier si on est en mode vérification de token
-  const urlParams = new URLSearchParams(window.location.search);
-  const isVerifying = urlParams.has('token');
   // Gestion de l'authentification
   const {
     currentUser,
@@ -198,12 +194,8 @@ const App = () => {
 
   // Afficher le modal de bienvenue si l'utilisateur n'est pas connecté
   useEffect(() => {
-    if (!currentUser && !isVerifying) {
-      setShowWelcomeModal(true);
-    } else {
-      setShowWelcomeModal(false);
-    }
-  }, [currentUser, isVerifying]);
+    setShowWelcomeModal(!currentUser);
+  }, [currentUser]);
 
   // Handler pour "Oui, c'est ma première fois"
   const handleFirstTimeYes = () => {
@@ -476,14 +468,7 @@ const App = () => {
     <FloatingToggle />
     <MobileFrame>
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
-      {/* Mode vérification de token */}
-      {isVerifying && (
-        <VerifyAuth onLogin={login} />
-      )}
-
-      {/* Interface normale (masquée pendant la vérification) */}
-      {!isVerifying && (
-        <>
+      <>
       {/* Écran de chargement initial */}
       {isInitialLoading && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-indigo-50 via-white to-purple-50">
@@ -686,6 +671,7 @@ const App = () => {
         isOpen={showPinModal}
         onClose={() => setShowPinModal(false)}
         onSuccess={handleUnlockAdmin}
+        userEmail={currentUser?.email || currentUser}
       />
 
       {/* Modal de bienvenue (première visite) */}
@@ -707,12 +693,10 @@ const App = () => {
         />
       )}
 
-      {/* Fermeture du fragment pour l'interface normale */}
       </>
-      )}
 
       {/* Widget de chat Trusti (visible partout sauf pendant la vérification du token, la page de bienvenue, l'onboarding et la console admin) */}
-      {!isVerifying && !showWelcomeModal && !showOnboarding && !showAdminModal && <TrustiChatWidget onOpenLandingPage={handleOpenLandingPage} />}
+      {!showWelcomeModal && !showOnboarding && !showAdminModal && <TrustiChatWidget onOpenLandingPage={handleOpenLandingPage} />}
 
       <style>{`
         @keyframes pulse-subtle {

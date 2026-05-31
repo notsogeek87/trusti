@@ -830,55 +830,49 @@ app.post('/api/verify-otp', async (req, res) => {
 });
 
 // ==============================
-// ADMIN AUTH
+// ADMIN AUTH (OTP par email)
 // ==============================
 
-const adminAttempts = new Map();
-const ADMIN_LOCKOUT_DURATION = 30 * 1000;
-const ADMIN_MAX_ATTEMPTS = 3;
+app.post('/api/admin-auth', async (req, res) => {
+  try {
+    const { email } = req.body || {};
+    if (!email) return res.status(400).json({ error: 'Email requis' });
 
-app.post('/api/admin-auth', (req, res) => {
-  const ip = (req.headers['x-forwarded-for']?.split(',')[0].trim())
-    || req.socket?.remoteAddress
-    || 'unknown';
-  const now = Date.now();
+    const cleanEmail = email.toLowerCase().trim();
+    const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase().trim();
 
-  const record = adminAttempts.get(ip) || { count: 0, lockedUntil: 0 };
+    if (adminEmail && cleanEmail !== adminEmail) {
+      return res.status(403).json({ error: 'Accès non autorisé' });
+    }
 
-  if (record.lockedUntil > now) {
-    const retryAfter = Math.ceil((record.lockedUntil - now) / 1000);
-    return res.status(429).json({
-      success: false,
-      error: `Trop de tentatives. Réessayez dans ${retryAfter} secondes.`,
-      retryAfter,
-    });
-  }
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = Date.now() + 10 * 60 * 1000;
 
-  const { pin } = req.body || {};
-  if (!pin) return res.status(400).json({ success: false, error: 'PIN manquant' });
+    await sql`DELETE FROM magic_link_tokens WHERE email = ${cleanEmail} AND LENGTH(token) = 6`;
+    await sql`DELETE FROM magic_link_tokens WHERE expires_at < ${Date.now()}`;
+    await sql`INSERT INTO magic_link_tokens (token, email, expires_at, used) VALUES (${code}, ${cleanEmail}, ${expiresAt}, false)`;
 
-  const adminPin = process.env.ADMIN_PIN;
+    if (!process.env.BREVO_API_KEY) {
+      console.log(`\n🔑 Code admin pour ${cleanEmail} : ${code}\n`);
+      return res.json({ success: true });
+    }
 
-  // Dev bypass: if ADMIN_PIN not set, accept any non-empty PIN
-  if (!adminPin || pin === adminPin) {
-    adminAttempts.delete(ip);
+    const brevo = await import('@getbrevo/brevo');
+    const apiInstance = new brevo.TransactionalEmailsApi();
+    apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+    const mail = new brevo.SendSmtpEmail();
+    mail.subject = `${code} — Code administrateur TrustiScore`;
+    mail.to = [{ email: cleanEmail }];
+    mail.sender = { name: process.env.BREVO_FROM_NAME || 'TrustiScore', email: process.env.BREVO_FROM_EMAIL || 'noreply@trustiscore.fr' };
+    mail.htmlContent = `<div style="font-family:monospace;font-size:40px;font-weight:900;letter-spacing:10px;color:#1e293b;text-align:center;padding:40px;">${code}</div><p style="text-align:center;color:#94a3b8;font-size:13px;">Valable 10 minutes</p>`;
+    await apiInstance.sendTransacEmail(mail);
+
     return res.json({ success: true });
+  } catch (error) {
+    console.error('admin-auth error:', error);
+    return res.status(500).json({ error: "Erreur lors de l'envoi du code" });
   }
 
-  const newCount = record.count + 1;
-  const lockedUntil = newCount >= ADMIN_MAX_ATTEMPTS ? now + ADMIN_LOCKOUT_DURATION : 0;
-  adminAttempts.set(ip, { count: newCount, lockedUntil });
-
-  const remaining = ADMIN_MAX_ATTEMPTS - newCount;
-  const error = remaining > 0
-    ? `Code incorrect. ${remaining} tentative${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}.`
-    : 'Trop de tentatives. Réessayez dans 30 secondes.';
-
-  return res.status(401).json({
-    success: false,
-    error,
-    retryAfter: lockedUntil > 0 ? 30 : 0,
-  });
 });
 
 // Health check endpoint

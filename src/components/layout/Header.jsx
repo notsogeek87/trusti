@@ -1,6 +1,7 @@
 import React from 'react';
 import { HelpCircle, LogOut, User, RotateCcw, Settings, Lock } from 'lucide-react';
 
+
 /**
  * Header de l'application
  */
@@ -14,9 +15,6 @@ const Header = ({
   isAdminUnlocked,
   onRequestAdminUnlock,
 }) => {
-  // Détection de l'environnement local
-  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  
   return (
     <header className="bg-white border-b border-slate-100 sticky top-0 z-30 shadow-sm">
       <div className="max-w-full md:max-w-none px-4 md:px-6 py-1 flex items-center justify-between gap-2">
@@ -85,17 +83,6 @@ const Header = ({
                 <User size={16} />
                 Se connecter
               </button>
-              
-              {/* Cadenas visible en local même sans connexion */}
-              {isLocal && (
-                <button
-                  onClick={onRequestAdminUnlock}
-                  className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-all"
-                  title="Mode Admin (connexion requise)"
-                >
-                  <Lock size={18} />
-                </button>
-              )}
             </div>
           )}
           
