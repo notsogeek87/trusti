@@ -1,254 +1,340 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Check, ShieldCheck, Search } from 'lucide-react';
-import ScoreIndicator from './ui/ScoreIndicator';
-import LoadingSpinner from './ui/LoadingSpinner';
+import React, { useState, useEffect, useRef } from 'react';
+import { Check, Search, ChevronRight, ChevronLeft, X, Sparkles } from 'lucide-react';
 
-/**
- * Page d'onboarding pour sélectionner les applications utilisées
- */
-const OnboardingApps = ({ allApps, onComplete, pagination = {}, onLoadMore }) => {
-  const [selectedApps, setSelectedApps] = useState(new Set());
+const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+
+// Étapes guidées par catégorie
+const STEPS = [
+  {
+    id: 'messagerie',
+    emoji: '💬',
+    question: 'Pour communiquer avec tes proches ?',
+    categories: ['Messagerie', 'Email', 'Visioconférence', 'Communication'],
+  },
+  {
+    id: 'social',
+    emoji: '📱',
+    question: 'Sur quels réseaux sociaux tu es ?',
+    categories: ['Réseaux sociaux', 'Rencontres'],
+  },
+  {
+    id: 'media',
+    emoji: '🎵',
+    question: 'Pour la musique et les vidéos ?',
+    categories: ['Multimédia', 'Streaming Musical', 'Streaming Vidéo', 'Podcasts', 'Lecteurs Multimédia'],
+  },
+  {
+    id: 'work',
+    emoji: '💼',
+    question: 'Pour travailler et t\'organiser ?',
+    categories: ['Productivité/Organisation', 'Stockage Cloud', 'Bureautique', 'Prise de Notes', 'IA'],
+  },
+  {
+    id: 'navigation',
+    emoji: '🗺️',
+    question: 'Pour te déplacer ?',
+    categories: ['Navigation', 'Navigation GPS', 'Cartographie', 'Transport & Voyage', 'Transport & Mobilité'],
+  },
+  {
+    id: 'finance',
+    emoji: '💳',
+    question: 'Pour gérer ton argent ?',
+    categories: ['Finance', 'Banque & Finance', 'Paiement Mobile'],
+  },
+];
+
+// step -1 = intro
+// step 0..N-1 = catégories
+// step N = recherche libre
+const LAST_STEP = STEPS.length; // step de recherche
+
+const GRADE_DOT = {
+  A: 'bg-emerald-500',
+  B: 'bg-green-400',
+  C: 'bg-amber-400',
+  D: 'bg-orange-500',
+  E: 'bg-red-500',
+};
+
+const SLIDE_IN = {
+  forward: 'onbSlideRight 0.26s cubic-bezier(0.22,1,0.36,1)',
+  back: 'onbSlideLeft 0.26s cubic-bezier(0.22,1,0.36,1)',
+};
+
+const ANIM_CSS = `
+  @keyframes onbSlideRight {
+    from { opacity: 0; transform: translateX(40px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes onbSlideLeft {
+    from { opacity: 0; transform: translateX(-40px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes onbFadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+`;
+
+const AppTile = ({ app, selected, onToggle }) => (
+  <button
+    onClick={() => onToggle(app.id)}
+    className={`relative flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-150 active:scale-95 border-2
+      ${selected
+        ? 'bg-indigo-600 border-indigo-500 shadow-lg shadow-indigo-200'
+        : 'bg-white border-transparent shadow-sm hover:border-indigo-200 hover:shadow-md'
+      }`}
+  >
+    {selected && (
+      <div className="absolute top-1.5 right-1.5 bg-white rounded-full w-5 h-5 flex items-center justify-center">
+        <Check size={12} className="text-indigo-600" strokeWidth={3} />
+      </div>
+    )}
+    {app.icon && app.icon.startsWith('http') ? (
+      <img src={app.icon} alt={app.name} className="w-12 h-12 rounded-xl object-cover" loading="lazy" />
+    ) : (
+      <div className={`w-12 h-12 rounded-xl ${app.color || 'bg-slate-400'} flex items-center justify-center text-2xl`}>
+        {app.icon || app.name.charAt(0)}
+      </div>
+    )}
+    <span className={`text-[11px] font-bold leading-tight text-center line-clamp-2 w-full ${selected ? 'text-white' : 'text-slate-800'}`}>
+      {app.name}
+    </span>
+    <span className={`w-2 h-2 rounded-full ${GRADE_DOT[app.grade] || 'bg-slate-300'}`} title={`TrustiScore ${app.grade}`} />
+  </button>
+);
+
+const OnboardingApps = ({ allApps, onComplete }) => {
+  const [step, setStep] = useState(-1); // -1 = intro
+  const [direction, setDirection] = useState('forward');
+  const [selected, setSelected] = useState(new Set());
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Effectuer une recherche API quand searchTerm change
-  useEffect(() => {
-    if (!searchTerm.trim()) {
-      setSearchResults([]);
-      setIsSearching(false);
-      return;
-    }
+  const toggleApp = (id) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
 
-    // Debounce: attendre que l'utilisateur arrête de taper
-    const timeoutId = setTimeout(async () => {
+  const goNext = () => { setDirection('forward'); setStep(s => s + 1); };
+  const goBack = () => { setDirection('back'); setStep(s => s - 1); };
+
+  // Search debounce
+  useEffect(() => {
+    if (!searchTerm.trim()) { setSearchResults([]); return; }
+    const t = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const API_URL = import.meta.env.PROD 
-          ? '/api'
-          : 'http://localhost:3001/api';
-        
-        const url = `${API_URL}/apps?search=${encodeURIComponent(searchTerm)}`;
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        if (data.success) {
-          setSearchResults(data.apps);
-        }
-      } catch (error) {
-        console.error('Erreur lors de la recherche:', error);
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
-      }
-    }, 300); // Attendre 300ms après la dernière frappe
-
-    return () => clearTimeout(timeoutId);
+        const res = await fetch(`${API_URL}/apps?search=${encodeURIComponent(searchTerm)}`);
+        const data = await res.json();
+        if (data.success) setSearchResults(data.apps);
+      } catch { setSearchResults([]); }
+      finally { setIsSearching(false); }
+    }, 300);
+    return () => clearTimeout(t);
   }, [searchTerm]);
 
-  // Utiliser searchResults si recherche active, sinon allApps
-  const filteredApps = searchTerm.trim() ? searchResults : allApps;
+  // Apps pour l'étape courante
+  const stepApps = step >= 0 && step < STEPS.length
+    ? allApps
+        .filter(a => STEPS[step].categories.some(cat =>
+          a.category === cat || a.category?.includes(cat)
+        ))
+        .slice(0, 9)
+    : [];
 
-  // Pagination : afficher le bouton "Voir plus" uniquement si pas de recherche active
-  const showPagination = !searchTerm.trim() && pagination.hasMore;
-  const isLoadingMore = pagination.isLoadingMore;
+  const progress = step < 0 ? 0 : Math.round(((step + 1) / (LAST_STEP + 1)) * 100);
 
-  // Toggle une app
-  const toggleApp = (appId) => {
-    const newSelected = new Set(selectedApps);
-    if (newSelected.has(appId)) {
-      newSelected.delete(appId);
-    } else {
-      newSelected.add(appId);
-    }
-    setSelectedApps(newSelected);
-  };
-
-  // Valider la sélection
-  const handleComplete = () => {
-    onComplete(selectedApps);
-  };
-
-  return (
-    <div className="min-h-screen bg-slate-50 overflow-y-auto">
-      {/* En-tête fixe avec recherche */}
-      <div className="sticky top-0 z-10 bg-white border-b border-slate-100 shadow-sm">
-        <div className="max-w-md mx-auto px-4 py-3">
-          <div className="flex items-center justify-between gap-2 mb-2.5">
-            <div className="flex items-center gap-2 min-w-0">
-              <img 
-                src="/assets/logo.png" 
-                alt="TrustiScore" 
-                className="w-8 flex-shrink-0"
-              />
-              <div className="min-w-0">
-                <h1 className="text-sm font-black tracking-tight text-slate-900">Configuration</h1>
-              </div>
-            </div>
-            <div className="text-right flex-shrink-0">
-              <div className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full">
-                <span className="text-xs font-bold">{selectedApps.size}</span>
-              </div>
-            </div>
+  // ── INTRO ─────────────────────────────────────────────────────────────
+  if (step === -1) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-white to-purple-50 flex flex-col items-center justify-center px-6 text-center">
+        <style>{ANIM_CSS}</style>
+        <div style={{ animation: 'onbFadeUp 0.4s ease-out' }}>
+          <div className="w-20 h-20 bg-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-200">
+            <Sparkles size={36} className="text-white" />
           </div>
-          
-          {/* Barre de recherche */}
-          <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Rechercher une app..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-            />
-            {isSearching && searchTerm && (
-              <div className="absolute right-10 top-1/2 -translate-y-1/2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
-              </div>
-            )}
-            {searchTerm && !isSearching && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Contenu principal */}
-      <div className="max-w-md mx-auto px-4 py-4">
-        {/* Message d'invitation compact */}
-        {!searchTerm && (
-          <div className="mb-4 bg-indigo-50 rounded-xl p-3 border border-indigo-100">
-            <p className="text-xs text-indigo-700 text-center font-semibold">
-              💡 Sélectionnez les apps que vous utilisez
-            </p>
-          </div>
-        )}
-        
-        {/* Message de chargement pendant la recherche */}
-        {searchTerm && isSearching && (
-          <div className="mb-4">
-            <LoadingSpinner message="Recherche en cours..." size="small" />
-          </div>
-        )}
-        
-        {/* Message si aucun résultat */}
-        {searchTerm && !isSearching && filteredApps.length === 0 && (
-          <div className="mb-4 bg-white rounded-xl p-6 text-center border border-slate-100">
-            <div className="text-3xl mb-2">🔍</div>
-            <p className="text-sm text-slate-500">Aucune app trouvée</p>
-          </div>
-        )}
-
-        {/* Grille d'applications */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          {filteredApps.map((app) => {
-            const isSelected = selectedApps.has(app.id);
-            return (
-              <button
-                key={app.id}
-                onClick={() => toggleApp(app.id)}
-                className={`
-                  relative p-3.5 rounded-2xl transition-all duration-200 active:scale-95
-                  ${isSelected 
-                    ? 'bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg border-2 border-indigo-400' 
-                    : 'bg-white hover:shadow-md border border-slate-200 hover:border-slate-300'
-                  }
-                `}
-              >
-                {/* Icône de sélection */}
-                {isSelected && (
-                  <div className="absolute top-2 right-2 bg-white rounded-full p-1">
-                    <Check size={14} className="text-indigo-600" strokeWidth={3} />
-                  </div>
-                )}
-
-                {/* Logo de l'app */}
-                <div className="mb-2.5 flex items-center justify-center">
-                  {app.icon && app.icon.startsWith('http') ? (
-                    <img 
-                      src={app.icon} 
-                      alt={app.name}
-                      className="w-12 h-12 rounded-xl object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className={`w-12 h-12 rounded-xl ${app.color || 'bg-slate-400'} flex items-center justify-center text-white font-bold text-xl`}>
-                      {app.icon || app.name.charAt(0)}
-                    </div>
-                  )}
-                </div>
-
-                {/* Nom de l'app */}
-                <div className={`text-xs font-black mb-2 truncate leading-tight ${isSelected ? 'text-white' : 'text-slate-900'}`}>
-                  {app.name}
-                </div>
-
-                {/* Score */}
-                <div className="flex justify-center">
-                  <ScoreIndicator grade={app.grade} size="small" />
-                </div>
-              </button>
-            );
-          })}
-        </div>
-        
-        {/* Bouton "Voir plus" pour la pagination */}
-        {showPagination && (
-          <div className="text-center py-6 mb-36">
-            <button
-              onClick={onLoadMore}
-              disabled={isLoadingMore}
-              className="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 disabled:bg-indigo-300 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-sm transition-all shadow-md hover:shadow-lg active:scale-95"
-            >
-              {isLoadingMore ? (
-                <span className="flex items-center gap-2">
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Chargement...
-                </span>
-              ) : (
-                `Voir plus (${pagination.total - allApps.length} restantes)`
-              )}
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Bouton flottant de validation */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-100 px-4 py-4 shadow-lg">
-        <div className="max-w-md mx-auto">
+          <h1 className="text-2xl font-black text-slate-900 mb-3">Personnalise ton espace</h1>
+          <p className="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto mb-8">
+            En <strong className="text-slate-700">30 secondes</strong>, dis-nous quelles apps tu utilises.
+            On te montrera leur score de confidentialité.
+          </p>
           <button
-            onClick={handleComplete}
-            disabled={selectedApps.size === 0}
-            className={`
-              w-full py-4 px-6 rounded-2xl font-bold text-base
-              transition-all duration-200
-              ${selectedApps.size > 0
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg active:scale-[0.98]'
-                : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-              }
-            `}
+            onClick={goNext}
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-indigo-200 transition-all active:scale-95 mx-auto"
           >
-            {selectedApps.size === 0 
-              ? 'Sélectionnez au moins une app' 
-              : `Continuer avec ${selectedApps.size} app${selectedApps.size > 1 ? 's' : ''}`
-            }
+            C'est parti <ChevronRight size={18} />
           </button>
-          
-          {/* Bouton skip */}
           <button
             onClick={() => onComplete(new Set())}
-            className="w-full mt-3 py-2.5 text-xs text-slate-500 hover:text-slate-700 font-semibold transition-colors"
+            className="mt-4 text-xs text-slate-400 hover:text-slate-600 transition-colors"
           >
             Passer cette étape
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── RECHERCHE LIBRE (dernier step) ───────────────────────────────────
+  if (step === LAST_STEP) {
+    const displayApps = searchTerm.trim() ? searchResults : [];
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col">
+        <style>{ANIM_CSS}</style>
+
+        {/* Header */}
+        <div className="sticky top-0 z-10 bg-white border-b border-slate-100 shadow-sm px-4 py-3">
+          <div className="max-w-md mx-auto">
+            {/* Progress */}
+            <div className="flex items-center gap-3 mb-3">
+              <button onClick={goBack} className="p-1 text-slate-400 hover:text-slate-700 transition-colors">
+                <ChevronLeft size={20} />
+              </button>
+              <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-full bg-indigo-500 rounded-full transition-all duration-500" style={{ width: '100%' }} />
+              </div>
+              <span className="text-[11px] font-bold text-slate-400 shrink-0">{selected.size} app{selected.size !== 1 ? 's' : ''}</span>
+            </div>
+            <p className="text-base font-black text-slate-800 mb-3">🔍 D'autres apps que tu utilises ?</p>
+            <div className="relative">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                autoFocus
+                type="text"
+                placeholder="Rechercher une app..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-8 py-2.5 bg-slate-100 rounded-xl text-sm border-0 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              />
+              {searchTerm && (
+                <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Résultats */}
+        <div className="flex-1 overflow-y-auto max-w-md mx-auto w-full px-4 pt-4 pb-36">
+          {!searchTerm && (
+            <p className="text-center text-sm text-slate-400 py-8">
+              Tape le nom d'une app pour la trouver
+            </p>
+          )}
+          {isSearching && (
+            <div className="flex justify-center py-8">
+              <div className="w-6 h-6 rounded-full border-2 border-indigo-400 border-t-transparent animate-spin" />
+            </div>
+          )}
+          {!isSearching && displayApps.length > 0 && (
+            <div className="grid grid-cols-3 gap-3">
+              {displayApps.map(app => (
+                <AppTile key={app.id} app={app} selected={selected.has(app.id)} onToggle={toggleApp} />
+              ))}
+            </div>
+          )}
+          {searchTerm && !isSearching && displayApps.length === 0 && (
+            <p className="text-center text-sm text-slate-400 py-8">Aucune app trouvée</p>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-4 py-4 shadow-lg">
+          <div className="max-w-md mx-auto">
+            <button
+              onClick={() => onComplete(selected)}
+              className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm shadow-lg transition-all active:scale-[0.98]"
+            >
+              {selected.size === 0
+                ? 'Terminer sans sélection'
+                : `Voir mes ${selected.size} app${selected.size !== 1 ? 's' : ''} →`}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── ÉTAPE CATÉGORIE ───────────────────────────────────────────────────
+  const currentStepData = STEPS[step];
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <style>{ANIM_CSS}</style>
+
+      {/* Header fixe */}
+      <div className="sticky top-0 z-10 bg-white border-b border-slate-100 shadow-sm px-4 py-3">
+        <div className="max-w-md mx-auto flex items-center gap-3">
+          <button
+            onClick={goBack}
+            className="p-1 text-slate-400 hover:text-slate-700 transition-colors"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-indigo-500 rounded-full transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <span className="text-[11px] font-bold text-slate-400 shrink-0">
+            {step + 1}/{LAST_STEP}
+          </span>
+        </div>
+      </div>
+
+      {/* Contenu animé */}
+      <div
+        key={step}
+        className="flex-1 max-w-md mx-auto w-full px-4 pb-40"
+        style={{ animation: SLIDE_IN[direction] }}
+      >
+        {/* Question */}
+        <div className="pt-8 pb-6 text-center">
+          <span className="text-4xl mb-3 block">{currentStepData.emoji}</span>
+          <h2 className="text-lg font-black text-slate-900 leading-snug">
+            {currentStepData.question}
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">Sélectionne tout ce que tu utilises</p>
+        </div>
+
+        {/* Grille d'apps */}
+        {stepApps.length > 0 ? (
+          <div className="grid grid-cols-3 gap-3">
+            {stepApps.map(app => (
+              <AppTile key={app.id} app={app} selected={selected.has(app.id)} onToggle={toggleApp} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-sm text-slate-400 py-12">
+            Aucune app dans cette catégorie pour l'instant
+          </p>
+        )}
+      </div>
+
+      {/* Footer fixe */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-4 py-4 shadow-lg">
+        <div className="max-w-md mx-auto space-y-2">
+          <button
+            onClick={goNext}
+            className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98]"
+          >
+            {selected.size > 0
+              ? `Continuer (${selected.size} sélectionnée${selected.size !== 1 ? 's' : ''})`
+              : 'Passer cette catégorie'}
+            <ChevronRight size={16} />
+          </button>
+          <button
+            onClick={() => onComplete(selected)}
+            className="w-full py-2 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            Terminer maintenant
           </button>
         </div>
       </div>
