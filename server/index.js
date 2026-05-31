@@ -875,6 +875,16 @@ app.post('/api/admin-auth', async (req, res) => {
 
 });
 
+// Check if an email has admin rights
+app.get('/api/check-admin', (req, res) => {
+  const { email } = req.query;
+  if (!email) return res.status(400).json({ isAdmin: false });
+  const cleanEmail = email.toLowerCase().trim();
+  const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase().trim();
+  const isAdmin = !adminEmail || cleanEmail === adminEmail;
+  return res.json({ isAdmin });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

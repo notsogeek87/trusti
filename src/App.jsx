@@ -282,9 +282,18 @@ const App = () => {
   const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
 
-  // Réinitialiser l'état admin quand l'utilisateur se déconnecte
+  // Auto-déverrouiller l'admin si l'email correspond à ADMIN_EMAIL
   useEffect(() => {
-    if (!currentUser) setIsAdminUnlocked(false);
+    if (!currentUser) {
+      setIsAdminUnlocked(false);
+      return;
+    }
+    const email = currentUser?.email || currentUser;
+    const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+    fetch(`${API_URL}/check-admin?email=${encodeURIComponent(email)}`)
+      .then(r => r.json())
+      .then(data => { if (data.isAdmin) setIsAdminUnlocked(true); })
+      .catch(() => {});
   }, [currentUser]);
 
   // Scroller en haut lors du changement d'onglet ou de catégorie
