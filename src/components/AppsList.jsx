@@ -3,6 +3,7 @@ import AppCard from './AppCard';
 import LoadingSpinner from './ui/LoadingSpinner';
 import { TABS } from '../constants/tabs';
 import { CATEGORY_MAPPING } from '../constants/categories';
+import { useIsMobile } from '../contexts/ViewModeContext';
 
 /**
  * Normalise une catégorie vers sa catégorie principale
@@ -32,6 +33,8 @@ const AppsList = ({
   isLoadingAwards = false,
   isLoadingMyApps = false
 }) => {
+  const isMobile = useIsMobile();
+
   // Filtrer par catégorie dans l'onglet APPLICATIONS
   let displayApps = apps;
   if (activeTab === TABS.APPLICATIONS && selectedCategory !== 'Toutes') {
@@ -81,7 +84,7 @@ const AppsList = ({
             </div>
             
             {/* Apps de cette catégorie */}
-            <div className="space-y-3">
+            <div className={isMobile ? 'space-y-3' : 'grid grid-cols-2 xl:grid-cols-3 gap-3'}>
               {appsByCategory[category].map((app) => (
                 <AppCard
                   key={app.id}
@@ -106,7 +109,7 @@ const AppsList = ({
 
   // Affichage normal pour les autres onglets
   return (
-    <div className="space-y-4">
+    <div className={isMobile ? 'space-y-4' : 'grid grid-cols-2 xl:grid-cols-3 gap-4'}>
       {displayApps.length === 0 && activeTab === TABS.APPLICATIONS && selectedCategory !== 'Toutes' && (
         <div className="text-center py-8 px-4">
           <p className="text-slate-500 text-sm mb-2">Aucune application dans cette catégorie</p>

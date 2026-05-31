@@ -1,465 +1,505 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  ChevronLeft, ChevronRight, Search, X, Loader2,
+  Plus, Pencil, Trash2, Check,
+} from 'lucide-react';
 import { CATEGORIES } from '../../constants/categories';
+import { useToast } from '../../contexts/ToastContext';
 
-const API_URL = import.meta.env.PROD 
+const API_URL = import.meta.env.PROD
   ? '/api'
   : 'http://localhost:3001/api';
 
+// ─── Grade display helpers ───────────────────────────────────────────────────
+
+const GRADE_BADGE = {
+  A: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
+  B: 'bg-lime-100    text-lime-800    border border-lime-200',
+  C: 'bg-amber-100   text-amber-800   border border-amber-200',
+  D: 'bg-orange-100  text-orange-800  border border-orange-200',
+  E: 'bg-red-100     text-red-800     border border-red-200',
+};
+
+const GRADE_PILL_ACTIVE = {
+  A: 'bg-[#006837] text-white',
+  B: 'bg-[#8dc63f] text-white',
+  C: 'bg-[#fbb03b] text-slate-900',
+  D: 'bg-[#f7931e] text-white',
+  E: 'bg-[#c1272d] text-white',
+};
+
+const GRADE_LABELS = {
+  A: 'Souverain & Privé',
+  B: 'Sécurisé',
+  C: 'Usage Hybride',
+  D: 'Risque élevé',
+  E: 'Critique',
+};
+
+// ─── Empty app template ──────────────────────────────────────────────────────
+
+const EMPTY_APP = {
+  name: '', category: '', grade: 'C',
+  reason: '', description: '',
+  developer: '', license: '',
+  is_open_source: false, is_european: false, jurisdiction: '',
+  app_type: 'regular',
+  playStoreUrl: '', appleStoreUrl: '', fDroidUrl: '', githubUrl: '', website: '',
+  show_in_awards: 0, popularity: 0,
+  icon: '', color: 'bg-slate-500',
+};
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+const toBool = (v) => v === true || v === 1 || v === '1' || v === 't' || v === 'true';
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+const Toggle = ({ checked, onChange }) => (
+  <button
+    type="button"
+    role="switch"
+    aria-checked={checked}
+    onClick={() => onChange(!checked)}
+    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${checked ? 'bg-indigo-500' : 'bg-slate-200'}`}
+  >
+    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${checked ? 'translate-x-4' : 'translate-x-0'}`} />
+  </button>
+);
+
+const Section = ({ title, children }) => (
+  <div className="space-y-3">
+    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-1.5">{title}</p>
+    {children}
+  </div>
+);
+
+const Field = ({ label, required, children }) => (
+  <div>
+    <label className="block text-xs font-semibold text-slate-600 mb-1">
+      {label}{required && <span className="text-rose-500 ml-0.5">*</span>}
+    </label>
+    {children}
+  </div>
+);
+
+const inputCls = 'w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent bg-white placeholder:text-slate-300';
+const monoInputCls = `${inputCls} font-mono text-xs`;
+
+const COLOR_SWATCHES = [
+  'bg-slate-500', 'bg-indigo-500', 'bg-blue-500', 'bg-sky-500',
+  'bg-emerald-500', 'bg-teal-500', 'bg-rose-500', 'bg-pink-500',
+  'bg-amber-500', 'bg-orange-500', 'bg-purple-500', 'bg-cyan-500',
+];
+
+function AppIcon({ icon, name, color, size = 'md' }) {
+  const dim = size === 'sm'
+    ? 'w-7 h-7 rounded-lg text-sm'
+    : 'w-10 h-10 rounded-xl text-xl';
+  const isUrl = icon && (icon.startsWith('http') || icon.startsWith('/'));
+  return (
+    <div className={`${dim} flex items-center justify-center flex-shrink-0 overflow-hidden ${color || 'bg-slate-500'}`}>
+      {isUrl
+        ? <img src={icon} alt={name} className="w-full h-full object-cover" onError={e => { e.target.style.display = 'none'; }} />
+        : icon
+        ? <span>{icon}</span>
+        : <span className="text-white text-xs font-bold">{name?.[0]?.toUpperCase() || '?'}</span>
+      }
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
 const AdminSimpleTableModal = ({ onClose }) => {
+  const toast = useToast();
+
+  // Table state
   const [apps, setApps] = useState([]);
-  const [editedApps, setEditedApps] = useState([]);
-  const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalApps, setTotalApps] = useState(0);
-  const itemsPerPage = 50;
-  
-  // Recherche
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  
-  // Modal d'ajout d'app
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newApp, setNewApp] = useState({
-    name: '',
-    category: '',
-    grade: 'C',
-    reason: '',
-    playStoreUrl: '',
-    appleStoreUrl: '',
-    fDroidUrl: '',
-    githubUrl: '',
-    website: '',
-    show_in_awards: 0
-  });
+  const [filterGrade, setFilterGrade] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+  const itemsPerPage = 50;
 
-  // Charger les apps
+  // Drawer state
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerMode, setDrawerMode] = useState('edit');
+  const [selectedApp, setSelectedApp] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const drawerScrollRef = useRef(null);
+
+  // ─── Load apps ────────────────────────────────────────────────────────────
+
   const loadApps = async (page = 1, search = '') => {
     setIsLoading(true);
     try {
-      let url;
-      if (search.trim()) {
-        // Mode recherche : pas de pagination
-        url = `${API_URL}/apps?search=${encodeURIComponent(search)}`;
-        setIsSearching(true);
-      } else {
-        // Mode normal : avec pagination
-        url = `${API_URL}/apps?limit=${itemsPerPage}&page=${page}`;
-        setIsSearching(false);
-      }
-      
+      const url = search.trim()
+        ? `${API_URL}/apps?search=${encodeURIComponent(search)}`
+        : `${API_URL}/apps?limit=${itemsPerPage}&page=${page}`;
+      setIsSearching(!!search.trim());
       const res = await fetch(url);
       const data = await res.json();
-      
       if (data.success) {
         setApps(data.apps);
-        setTotalApps(data.pagination.total);
-        setTotalPages(data.pagination.totalPages);
+        setTotalApps(data.pagination?.total ?? data.apps.length);
+        setTotalPages(data.pagination?.totalPages ?? 1);
         setCurrentPage(page);
       }
-    } catch (error) {
-      console.error('Erreur lors du chargement des apps:', error);
+    } catch {
+      toast.error('Erreur de chargement des applications');
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadApps(1);
-  }, []);
+  useEffect(() => { loadApps(1); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Recherche avec debounce
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchTerm !== undefined) {
-        loadApps(1, searchTerm);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+    const t = setTimeout(() => loadApps(1, searchTerm), 300);
+    return () => clearTimeout(t);
+  }, [searchTerm]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Raccourcis clavier
+  // ─── Keyboard shortcuts ───────────────────────────────────────────────────
+
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      // Ctrl+S : Sauvegarder
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault();
-        if (editedApps.length > 0 && !isSaving) {
-          handleSave();
-        }
-      }
-      // Échap : Fermer
+    const handler = (e) => {
       if (e.key === 'Escape') {
+        if (showDeleteConfirm) { setShowDeleteConfirm(false); return; }
+        if (drawerOpen) { closeDrawer(); return; }
         onClose();
       }
-      // Flèche gauche : Page précédente (si pas de focus dans un input)
-      if (e.key === 'ArrowLeft' && !isSearching && currentPage > 1 && !isLoading) {
-        if (!['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
-          e.preventDefault();
-          handlePreviousPage();
+      if (!drawerOpen) {
+        const active = document.activeElement?.tagName;
+        if (['INPUT', 'TEXTAREA', 'SELECT'].includes(active)) return;
+        if (e.key === 'ArrowLeft' && !isSearching && currentPage > 1 && !isLoading) {
+          e.preventDefault(); loadApps(currentPage - 1, searchTerm);
         }
-      }
-      // Flèche droite : Page suivante (si pas de focus dans un input)
-      if (e.key === 'ArrowRight' && !isSearching && currentPage < totalPages && !isLoading) {
-        if (!['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
-          e.preventDefault();
-          handleNextPage();
+        if (e.key === 'ArrowRight' && !isSearching && currentPage < totalPages && !isLoading) {
+          e.preventDefault(); loadApps(currentPage + 1, searchTerm);
         }
       }
     };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [drawerOpen, showDeleteConfirm, isSearching, currentPage, totalPages, isLoading, onClose, searchTerm]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editedApps.length, isSaving, currentPage, totalPages, isSearching, isLoading]);
+  // ─── Drawer helpers ───────────────────────────────────────────────────────
 
-  const handleChange = (index, field, value) => {
-    const updated = [...apps];
-    updated[index][field] = value;
-    setApps(updated);
-    setEditedApps(prev => {
-      const already = prev.find(a => a.id === updated[index].id);
-      if (already) {
-        return prev.map(a => a.id === updated[index].id ? updated[index] : a);
-      } else {
-        return [...prev, updated[index]];
-      }
+  const openEdit = (app, startWithDelete = false) => {
+    setSelectedApp({
+      ...app,
+      is_open_source: toBool(app.is_open_source ?? app.isOpenSource),
+      is_european: toBool(app.is_european ?? app.isEuropean),
+      show_in_awards: toBool(app.show_in_awards ?? app.showInAwards) ? 1 : 0,
+      app_type: app.app_type || app.appType || 'regular',
     });
+    setDrawerMode('edit');
+    setShowDeleteConfirm(startWithDelete);
+    setDrawerOpen(true);
+    drawerScrollRef.current?.scrollTo(0, 0);
   };
+
+  const openAdd = () => {
+    setSelectedApp({ ...EMPTY_APP });
+    setDrawerMode('add');
+    setShowDeleteConfirm(false);
+    setDrawerOpen(true);
+    drawerScrollRef.current?.scrollTo(0, 0);
+  };
+
+  const closeDrawer = () => {
+    setDrawerOpen(false);
+    setShowDeleteConfirm(false);
+    setTimeout(() => setSelectedApp(null), 300);
+  };
+
+  const updateField = (field, value) =>
+    setSelectedApp(prev => ({ ...prev, [field]: value }));
+
+  // ─── Save ─────────────────────────────────────────────────────────────────
 
   const handleSave = async () => {
+    if (!selectedApp?.name?.trim()) { toast.error('Le nom est obligatoire'); return; }
+    if (!selectedApp?.category)     { toast.error('La catégorie est obligatoire'); return; }
+
     setIsSaving(true);
-    for (const app of editedApps) {
-      // Forcer la valeur sur les deux formats pour compatibilité
-      const showValue = typeof app.show_in_awards !== 'undefined' ? Number(app.show_in_awards) : (typeof app.showInAwards !== 'undefined' ? Number(app.showInAwards) : 0);
-      const appToSend = {
-        ...app,
-        show_in_awards: showValue,
-        showInAwards: showValue
+    try {
+      const payload = {
+        ...selectedApp,
+        show_in_awards: selectedApp.show_in_awards ? 1 : 0,
+        showInAwards:   selectedApp.show_in_awards ? 1 : 0,
       };
-      await fetch(`${API_URL}/apps?id=${app.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(appToSend)
-      });
-    }
-    setIsSaving(false);
-    setEditedApps([]);
-    alert('Modifications enregistrées !');
-    // Recharger la page actuelle
-    loadApps(currentPage, searchTerm);
-  };
 
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      loadApps(currentPage - 1, searchTerm);
-    }
-  };
+      const res = drawerMode === 'add'
+        ? await fetch(`${API_URL}/apps`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          })
+        : await fetch(`${API_URL}/apps?id=${selectedApp.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      loadApps(currentPage + 1, searchTerm);
-    }
-  };
-
-  const handleClearSearch = () => {
-    setSearchTerm('');
-    loadApps(1, '');
-  };
-  
-  const handleDeleteApp = async (appId, appName) => {
-    if (!confirm(`⚠️ Voulez-vous vraiment supprimer l'application "${appName}" ?\n\nCette action est irréversible !`)) {
-      return;
-    }
-    
-    setIsSaving(true);
-    try {
-      const response = await fetch(`${API_URL}/apps?id=${appId}`, {
-        method: 'DELETE'
-      });
-      
-      if (response.ok) {
-        alert(`✅ Application "${appName}" supprimée avec succès !`);
-        // Recharger la liste
-        loadApps(currentPage, searchTerm);
+      if (res.ok) {
+        if (drawerMode === 'add') {
+          toast.success(`« ${selectedApp.name} » ajoutée avec succès`);
+          await loadApps(currentPage, searchTerm);
+        } else {
+          setApps(prev => prev.map(a => a.id === selectedApp.id ? { ...a, ...selectedApp } : a));
+          toast.success(`« ${selectedApp.name} » mise à jour`);
+        }
+        closeDrawer();
       } else {
-        alert('❌ Erreur lors de la suppression de l\'application');
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || 'Erreur lors de l\'enregistrement');
       }
-    } catch (error) {
-      console.error('Erreur:', error);
-      alert('❌ Erreur lors de la suppression de l\'application');
+    } catch {
+      toast.error('Erreur réseau');
     } finally {
       setIsSaving(false);
     }
   };
-  
-  const handleAddApp = async () => {
-    if (!newApp.name.trim()) {
-      alert('Le nom de l\'application est obligatoire');
-      return;
-    }
-    if (!newApp.category) {
-      alert('La catégorie est obligatoire');
-      return;
-    }
-    
-    setIsSaving(true);
+
+  // ─── Delete ───────────────────────────────────────────────────────────────
+
+  const handleDelete = async () => {
+    if (!selectedApp?.id) return;
+    setIsDeleting(true);
     try {
-      const response = await fetch(`${API_URL}/apps`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newApp)
-      });
-      
-      if (response.ok) {
-        alert('Application ajoutée avec succès !');
-        setShowAddModal(false);
-        // Réinitialiser le formulaire
-        setNewApp({
-          name: '',
-          category: '',
-          grade: 'C',
-          reason: '',
-          playStoreUrl: '',
-          appleStoreUrl: '',
-          fDroidUrl: '',
-          githubUrl: '',
-          website: '',
-          show_in_awards: 0
-        });
-        // Recharger la liste
-        loadApps(currentPage, searchTerm);
+      const res = await fetch(`${API_URL}/apps?id=${selectedApp.id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setApps(prev => prev.filter(a => a.id !== selectedApp.id));
+        setTotalApps(prev => prev - 1);
+        toast.success(`« ${selectedApp.name} » supprimée`);
+        closeDrawer();
       } else {
-        alert('Erreur lors de l\'ajout de l\'application');
+        toast.error('Erreur lors de la suppression');
+        setShowDeleteConfirm(false);
       }
-    } catch (error) {
-      console.error('Erreur:', error);
-      alert('Erreur lors de l\'ajout de l\'application');
+    } catch {
+      toast.error('Erreur réseau');
     } finally {
-      setIsSaving(false);
+      setIsDeleting(false);
     }
   };
+
+  // ─── Filtered view ────────────────────────────────────────────────────────
+
+  const filteredApps = apps.filter(app => {
+    if (filterGrade && app.grade !== filterGrade) return false;
+    if (filterCategory && app.category !== filterCategory) return false;
+    return true;
+  });
+
+  const filtersActive = filterGrade || filterCategory;
+
+  // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full h-[96vh] flex flex-col">
-        {/* Header */}
-        <div className="flex justify-between items-center px-6 py-3 border-b bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-2xl">
-          <div className="flex items-center gap-4">
-            <h2 className="text-xl font-bold">Console d'administration</h2>
-            <span className="text-xs bg-white/20 px-3 py-1 rounded-full">
-              {isSearching 
-                ? `${apps.length} résultat${apps.length > 1 ? 's' : ''}`
-                : `${totalApps} app${totalApps > 1 ? 's' : ''} total`
-              }
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-2 md:p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full h-[96vh] flex flex-col relative overflow-hidden">
+
+        {/* ── Header ── */}
+        <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-2xl flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <h2 className="text-base font-bold">Console d'administration</h2>
+            <span className="text-xs bg-white/20 px-2.5 py-0.5 rounded-full">
+              {isSearching
+                ? `${filteredApps.length} résultat${filteredApps.length !== 1 ? 's' : ''}`
+                : `${totalApps} apps`}
             </span>
+          </div>
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => setShowAddModal(true)}
-              className="bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
-              title="Ajouter une nouvelle application"
+              onClick={openAdd}
+              className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
             >
-              <span className="text-lg leading-none">+</span> Ajouter une app
+              <Plus size={14} /> Ajouter
+            </button>
+            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/20 transition-colors" title="Fermer (Échap)">
+              <X size={18} />
             </button>
           </div>
-          <button 
-            onClick={onClose} 
-            className="text-white hover:bg-white/20 rounded-lg p-2 transition-colors"
-            title="Fermer (Échap)"
-          >
-            ✕
-          </button>
         </div>
 
-        {/* Barre de recherche et pagination */}
-        <div className="px-4 py-2 border-b bg-slate-50 flex items-center justify-between gap-4">
-          {/* Recherche */}
-          <div className="flex-1 max-w-md relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+        {/* ── Toolbar ── */}
+        <div className="px-4 py-2 border-b bg-slate-50 flex items-center gap-2 flex-wrap flex-shrink-0">
+          {/* Search */}
+          <div className="relative min-w-[160px] max-w-xs flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
             <input
               type="text"
-              placeholder="Rechercher une app..."
+              placeholder="Rechercher…"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full pl-8 pr-7 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white"
             />
             {searchTerm && (
-              <button
-                onClick={handleClearSearch}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-              >
-                ✕
+              <button onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                <X size={12} />
               </button>
             )}
           </div>
 
-          {/* Contrôles de pagination */}
-          {!isSearching && (
-            <div className="flex items-center gap-3 bg-white px-3 py-1.5 rounded-lg border">
+          {/* Grade filter pills */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setFilterGrade('')}
+              className={`px-2 py-1 rounded-md text-xs font-semibold transition-all ${!filterGrade ? 'bg-slate-700 text-white' : 'bg-white border text-slate-500 hover:bg-slate-100'}`}
+            >
+              Tous
+            </button>
+            {['A', 'B', 'C', 'D', 'E'].map(g => (
               <button
-                onClick={handlePreviousPage}
-                disabled={currentPage <= 1 || isLoading}
-                className="p-1.5 rounded hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                title="Page précédente (←)"
+                key={g}
+                onClick={() => setFilterGrade(g === filterGrade ? '' : g)}
+                className={`w-7 h-7 rounded-lg text-xs font-bold transition-all ${filterGrade === g ? GRADE_PILL_ACTIVE[g] : `${GRADE_BADGE[g]} hover:opacity-80`}`}
               >
-                <ChevronLeft size={18} />
+                {g}
               </button>
-              <span className="text-sm font-medium min-w-[90px] text-center tabular-nums">
-                Page {currentPage} / {totalPages}
+            ))}
+          </div>
+
+          {/* Category filter */}
+          <select
+            value={filterCategory}
+            onChange={e => setFilterCategory(e.target.value)}
+            className="py-1.5 pl-2 pr-6 text-xs border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 text-slate-600"
+          >
+            <option value="">Toutes catégories</option>
+            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+
+          {filtersActive && (
+            <button
+              onClick={() => { setFilterGrade(''); setFilterCategory(''); }}
+              className="text-xs text-slate-400 hover:text-rose-500 underline transition-colors"
+            >
+              Réinitialiser
+            </button>
+          )}
+
+          {/* Pagination */}
+          {!isSearching && (
+            <div className="ml-auto flex items-center gap-1.5 bg-white border rounded-lg px-2 py-1">
+              <button
+                onClick={() => loadApps(currentPage - 1, searchTerm)}
+                disabled={currentPage <= 1 || isLoading}
+                className="p-0.5 rounded hover:bg-slate-100 disabled:opacity-30 transition-colors"
+              >
+                <ChevronLeft size={15} />
+              </button>
+              <span className="text-xs font-medium text-slate-600 tabular-nums whitespace-nowrap px-1">
+                {currentPage} / {totalPages}
               </span>
               <button
-                onClick={handleNextPage}
+                onClick={() => loadApps(currentPage + 1, searchTerm)}
                 disabled={currentPage >= totalPages || isLoading}
-                className="p-1.5 rounded hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                title="Page suivante (→)"
+                className="p-0.5 rounded hover:bg-slate-100 disabled:opacity-30 transition-colors"
               >
-                <ChevronRight size={18} />
+                <ChevronRight size={15} />
               </button>
             </div>
           )}
         </div>
 
-        {/* Table */}
+        {/* ── Table ── */}
         <div className="flex-1 overflow-auto">
           {isLoading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-slate-500 text-sm">Chargement...</div>
+            <div className="flex items-center justify-center h-full gap-2 text-slate-400">
+              <Loader2 size={18} className="animate-spin" />
+              <span className="text-sm">Chargement…</span>
+            </div>
+          ) : filteredApps.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-slate-400 gap-2 select-none">
+              <span className="text-4xl">🔍</span>
+              <p className="text-sm">Aucune application trouvée</p>
+              {filtersActive && (
+                <button onClick={() => { setFilterGrade(''); setFilterCategory(''); }} className="text-xs text-indigo-500 underline">
+                  Effacer les filtres
+                </button>
+              )}
             </div>
           ) : (
-            <table className="w-full text-xs border-collapse">
-              <thead className="sticky top-0 bg-slate-100 shadow-sm z-10">
+            <table className="w-full text-sm border-collapse">
+              <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10">
                 <tr>
-                  <th className="border border-slate-200 px-2 py-2 text-left font-semibold w-[180px]">Nom</th>
-                  <th className="border border-slate-200 px-2 py-2 text-center font-semibold w-[50px]">Grade</th>
-                  <th className="border border-slate-200 px-2 py-2 text-left font-semibold w-[130px]">Catégorie</th>
-                  <th className="border border-slate-200 px-2 py-2 text-left font-semibold w-[250px]">Description/Raison</th>
-                  <th className="border border-slate-200 px-2 py-2 text-center font-semibold w-[60px]" title="Show in Awards">Awards</th>
-                  <th className="border border-slate-200 px-2 py-2 text-left font-semibold w-[200px]">Play Store URL</th>
-                  <th className="border border-slate-200 px-2 py-2 text-left font-semibold w-[200px]">App Store URL</th>
-                  <th className="border border-slate-200 px-2 py-2 text-left font-semibold w-[200px]">F-Droid URL</th>
-                  <th className="border border-slate-200 px-2 py-2 text-left font-semibold w-[200px]">Github URL</th>
-                  <th className="border border-slate-200 px-2 py-2 text-left font-semibold w-[200px]">Site Web</th>
-                  <th className="border border-slate-200 px-2 py-2 text-center font-semibold w-[80px]">Actions</th>
+                  <th className="px-4 py-2.5 text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Application</th>
+                  <th className="px-3 py-2.5 text-center text-[11px] font-semibold text-slate-400 uppercase tracking-wide w-20">Grade</th>
+                  <th className="px-3 py-2.5 text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Catégorie</th>
+                  <th className="px-3 py-2.5 text-center text-[11px] font-semibold text-slate-400 uppercase tracking-wide w-24">Liens</th>
+                  <th className="px-3 py-2.5 w-20" />
                 </tr>
               </thead>
-              <tbody>
-                {apps.map((app, idx) => (
-                  <tr key={app.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="border border-slate-200 px-2 py-1.5">
-                      <input 
-                        value={app.name} 
-                        onChange={e => handleChange(idx, 'name', e.target.value)} 
-                        className="w-full px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 text-xs"
-                      />
+              <tbody className="divide-y divide-slate-100">
+                {filteredApps.map(app => (
+                  <tr
+                    key={app.id}
+                    className="hover:bg-indigo-50/40 transition-colors cursor-pointer group"
+                    onClick={() => openEdit(app)}
+                  >
+                    {/* Icon + Name */}
+                    <td className="px-4 py-2.5">
+                      <div className="flex items-center gap-3">
+                        <AppIcon icon={app.icon} name={app.name} color={app.color} size="sm" />
+                        <div className="min-w-0">
+                          <p className="font-semibold text-slate-800 text-sm leading-tight truncate">{app.name}</p>
+                          {app.developer && (
+                            <p className="text-xs text-slate-400 leading-tight truncate">{app.developer}</p>
+                          )}
+                        </div>
+                      </div>
                     </td>
-                    <td className="border border-slate-200 px-2 py-1.5">
-                      <select
-                        value={app.grade}
-                        onChange={e => handleChange(idx, 'grade', e.target.value)}
-                        className="w-full px-1 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 text-xs text-center font-semibold"
-                      >
-                        <option value="A" className="text-green-600">A</option>
-                        <option value="B" className="text-lime-600">B</option>
-                        <option value="C" className="text-yellow-600">C</option>
-                        <option value="D" className="text-orange-600">D</option>
-                        <option value="E" className="text-red-600">E</option>
-                      </select>
+                    {/* Grade badge */}
+                    <td className="px-3 py-2.5 text-center">
+                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg text-sm font-bold ${GRADE_BADGE[app.grade] || 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
+                        {app.grade || '—'}
+                      </span>
                     </td>
-                    <td className="border border-slate-200 px-2 py-1.5">
-                      <select
-                        value={app.category || ''} 
-                        onChange={e => handleChange(idx, 'category', e.target.value)} 
-                        className="w-full px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 text-xs"
-                      >
-                        <option value="">Sélectionner...</option>
-                        {/* Afficher la catégorie actuelle si elle n'est pas dans la liste standard */}
-                        {app.category && !CATEGORIES.includes(app.category) && (
-                          <option value={app.category} className="text-orange-600">
-                            {app.category} (ancienne)
-                          </option>
-                        )}
-                        {/* Liste des catégories standards */}
-                        {CATEGORIES.map(cat => (
-                          <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                      </select>
+                    {/* Category */}
+                    <td className="px-3 py-2.5">
+                      <span className="text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full whitespace-nowrap">
+                        {app.category || '—'}
+                      </span>
                     </td>
-                    <td className="border border-slate-200 px-2 py-1.5">
-                      <textarea
-                        value={app.reason || ''} 
-                        onChange={e => handleChange(idx, 'reason', e.target.value)} 
-                        className="w-full px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 text-xs resize-none"
-                        rows="2"
-                      />
+                    {/* Links dots */}
+                    <td className="px-3 py-2.5">
+                      <div className="flex items-center justify-center gap-1.5">
+                        {app.playStoreUrl  && <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" title="Play Store" />}
+                        {app.appleStoreUrl && <span className="w-2 h-2 rounded-full bg-slate-500 flex-shrink-0" title="App Store" />}
+                        {app.fDroidUrl     && <span className="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0" title="F-Droid" />}
+                        {app.githubUrl     && <span className="w-2 h-2 rounded-full bg-slate-800 flex-shrink-0" title="GitHub" />}
+                        {app.website       && <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"  title="Site Web" />}
+                      </div>
                     </td>
-                    <td className="border border-slate-200 px-2 py-1.5 text-center">
-                      <input
-                        type="number"
-                        min="0"
-                        max="1"
-                        value={
-                          typeof app.show_in_awards !== 'undefined' && app.show_in_awards !== null
-                            ? app.show_in_awards
-                            : (typeof app.showInAwards !== 'undefined' && app.showInAwards !== null
-                                ? (app.showInAwards === true ? 1 : app.showInAwards === false ? 0 : app.showInAwards)
-                                : 0)
-                        }
-                        onChange={e => handleChange(idx, 'show_in_awards', e.target.value === '' ? 0 : Number(e.target.value))}
-                        className="w-full px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 text-xs text-center"
-                      />
-                    </td>
-                    <td className="border border-slate-200 px-2 py-1.5">
-                      <input 
-                        value={app.playStoreUrl || ''} 
-                        onChange={e => handleChange(idx, 'playStoreUrl', e.target.value)} 
-                        className="w-full px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 text-xs font-mono"
-                        placeholder="https://play.google.com/..."
-                      />
-                    </td>
-                    <td className="border border-slate-200 px-2 py-1.5">
-                      <input 
-                        value={app.appleStoreUrl || ''} 
-                        onChange={e => handleChange(idx, 'appleStoreUrl', e.target.value)} 
-                        className="w-full px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 text-xs font-mono"
-                        placeholder="https://apps.apple.com/..."
-                      />
-                    </td>
-                    <td className="border border-slate-200 px-2 py-1.5">
-                      <input 
-                        value={app.fDroidUrl || ''} 
-                        onChange={e => handleChange(idx, 'fDroidUrl', e.target.value)} 
-                        className="w-full px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 text-xs font-mono"
-                        placeholder="https://f-droid.org/..."
-                      />
-                    </td>
-                    <td className="border border-slate-200 px-2 py-1.5">
-                      <input 
-                        value={app.githubUrl || ''} 
-                        onChange={e => handleChange(idx, 'githubUrl', e.target.value)} 
-                        className="w-full px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 text-xs font-mono"
-                        placeholder="https://github.com/..."
-                      />
-                    </td>
-                    <td className="border border-slate-200 px-2 py-1.5">
-                      <input 
-                        value={app.website || ''} 
-                        onChange={e => handleChange(idx, 'website', e.target.value)} 
-                        className="w-full px-2 py-1 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-400 text-xs font-mono"
-                        placeholder="https://..."
-                      />
-                    </td>
-                    <td className="border border-slate-200 px-2 py-1.5 text-center">
-                      <button
-                        onClick={() => handleDeleteApp(app.id, app.name)}
-                        disabled={isSaving}
-                        className="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded border border-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs font-semibold"
-                        title="Supprimer cette application"
-                      >
-                        🗑️ Suppr.
-                      </button>
+                    {/* Actions */}
+                    <td className="px-3 py-2.5" onClick={e => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => openEdit(app)}
+                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                          title="Modifier"
+                        >
+                          <Pencil size={13} />
+                        </button>
+                        <button
+                          onClick={() => openEdit(app, true)}
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                          title="Supprimer"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -468,221 +508,323 @@ const AdminSimpleTableModal = ({ onClose }) => {
           )}
         </div>
 
-        {/* Footer */}
-        <div className="flex justify-between items-center px-4 py-3 border-t bg-slate-50">
-          <div className="text-xs text-slate-600 flex items-center gap-4">
-            {editedApps.length > 0 ? (
-              <span className="text-orange-600 font-semibold bg-orange-50 px-3 py-1.5 rounded-full">
-                ⚠️ {editedApps.length} modification{editedApps.length > 1 ? 's' : ''} non enregistrée{editedApps.length > 1 ? 's' : ''}
-              </span>
-            ) : (
-              <span className="text-slate-500">Aucune modification en attente</span>
+        {/* ── Footer ── */}
+        <div className="flex items-center justify-between px-5 py-2.5 border-t bg-slate-50 flex-shrink-0 text-xs text-slate-400">
+          <span>
+            {filtersActive
+              ? `${filteredApps.length} / ${apps.length} apps (filtres actifs)`
+              : `${apps.length} apps affichées · ${totalApps} total`}
+          </span>
+          <span>
+            <kbd className="px-1.5 py-0.5 bg-white border rounded text-[10px]">Échap</kbd> Fermer
+            {' · '}
+            <kbd className="px-1.5 py-0.5 bg-white border rounded text-[10px]">← →</kbd> Pages
+          </span>
+        </div>
+
+        {/* ── Drawer backdrop ── */}
+        <div
+          className={`absolute inset-0 bg-black/20 z-10 rounded-2xl transition-opacity duration-300 ${drawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+          onClick={closeDrawer}
+        />
+
+        {/* ── Drawer panel ── */}
+        <div
+          className={`absolute top-0 right-0 h-full w-[440px] max-w-[95%] bg-white shadow-2xl z-20 flex flex-col transition-transform duration-300 ease-out rounded-r-2xl ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        >
+          {/* Drawer header */}
+          <div className="flex items-center gap-3 px-5 py-4 border-b flex-shrink-0 bg-white">
+            {selectedApp && (
+              <AppIcon icon={selectedApp.icon} name={selectedApp.name} color={selectedApp.color} size="md" />
             )}
-            <span className="text-slate-400">|</span>
-            <span className="text-slate-500">Raccourcis : <kbd className="px-1.5 py-0.5 bg-white border rounded text-xs">Ctrl+S</kbd> Sauver · <kbd className="px-1.5 py-0.5 bg-white border rounded text-xs">Échap</kbd> Fermer</span>
-          </div>
-          <div className="flex gap-2">
-            <button 
-              onClick={handleSave} 
-              disabled={isSaving || editedApps.length === 0} 
-              className="bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md"
-              title="Enregistrer (Ctrl+S)"
-            >
-              {isSaving ? (
-                <span className="flex items-center gap-2">
-                  <span className="animate-spin">⏳</span> Enregistrement...
-                </span>
-              ) : (
-                '💾 Enregistrer'
-              )}
-            </button>
-            <button 
-              onClick={onClose} 
-              className="bg-slate-200 text-slate-700 px-5 py-2 rounded-lg text-sm font-semibold hover:bg-slate-300 transition-colors"
-              title="Fermer (Échap)"
-            >
-              Fermer
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      {/* Modal d'ajout d'application */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-4 rounded-t-2xl">
-              <h3 className="text-xl font-bold">➕ Ajouter une nouvelle application</h3>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-slate-900 text-sm leading-tight truncate">
+                {drawerMode === 'add' ? 'Nouvelle application' : (selectedApp?.name || '…')}
+              </h3>
+              <p className="text-xs text-slate-400">
+                {drawerMode === 'add' ? 'Créer une nouvelle entrée' : `ID : ${selectedApp?.id ?? '…'}`}
+              </p>
             </div>
-            
-            <div className="p-6 space-y-4">
-              {/* Nom (obligatoire) */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                  Nom de l'application <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={newApp.name}
-                  onChange={e => setNewApp({...newApp, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-                  placeholder="Ex: Signal, ProtonMail..."
-                />
-              </div>
-              
-              {/* Catégorie (obligatoire) */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                  Catégorie <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={newApp.category}
-                  onChange={e => setNewApp({...newApp, category: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-                >
-                  <option value="">Sélectionner une catégorie...</option>
-                  {CATEGORIES.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
+            <button onClick={closeDrawer} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all flex-shrink-0">
+              <X size={16} />
+            </button>
+          </div>
+
+          {/* Drawer scrollable content */}
+          <div ref={drawerScrollRef} className="flex-1 overflow-y-auto p-5 space-y-7">
+            {selectedApp && (
+              <>
+                {/* ─ Identité ─ */}
+                <Section title="Identité">
+                  <Field label="Nom" required>
+                    <input
+                      value={selectedApp.name}
+                      onChange={e => updateField('name', e.target.value)}
+                      className={inputCls}
+                      placeholder="Ex : Signal, ProtonMail…"
+                      autoFocus
+                    />
+                  </Field>
+                  <Field label="Catégorie" required>
+                    <select
+                      value={selectedApp.category}
+                      onChange={e => updateField('category', e.target.value)}
+                      className={inputCls}
+                    >
+                      <option value="">Sélectionner…</option>
+                      {selectedApp.category && !CATEGORIES.includes(selectedApp.category) && (
+                        <option value={selectedApp.category}>{selectedApp.category} (existante)</option>
+                      )}
+                      {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </Field>
+                  <Field label="Grade TrustiScore">
+                    <div className="flex gap-2 mb-1">
+                      {['A', 'B', 'C', 'D', 'E'].map(g => (
+                        <button
+                          key={g}
+                          type="button"
+                          onClick={() => updateField('grade', g)}
+                          title={GRADE_LABELS[g]}
+                          className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${selectedApp.grade === g ? GRADE_PILL_ACTIVE[g] : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                        >
+                          {g}
+                        </button>
+                      ))}
+                    </div>
+                    {selectedApp.grade && (
+                      <p className="text-xs text-slate-400">{GRADE_LABELS[selectedApp.grade]}</p>
+                    )}
+                  </Field>
+                </Section>
+
+                {/* ─ Description ─ */}
+                <Section title="Description">
+                  <Field label="Raison du score">
+                    <textarea
+                      value={selectedApp.reason || ''}
+                      onChange={e => updateField('reason', e.target.value)}
+                      className={`${inputCls} resize-none`}
+                      rows={3}
+                      placeholder="Pourquoi ce score ? Points forts/faibles…"
+                    />
+                  </Field>
+                  <Field label="Description longue">
+                    <textarea
+                      value={selectedApp.description || ''}
+                      onChange={e => updateField('description', e.target.value)}
+                      className={`${inputCls} resize-none`}
+                      rows={3}
+                      placeholder="Description complète de l'application…"
+                    />
+                  </Field>
+                </Section>
+
+                {/* ─ Détails ─ */}
+                <Section title="Détails">
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field label="Développeur">
+                      <input
+                        value={selectedApp.developer || ''}
+                        onChange={e => updateField('developer', e.target.value)}
+                        className={inputCls}
+                        placeholder="Ex : Signal Foundation"
+                      />
+                    </Field>
+                    <Field label="Licence">
+                      <input
+                        value={selectedApp.license || ''}
+                        onChange={e => updateField('license', e.target.value)}
+                        className={inputCls}
+                        placeholder="Ex : GPL-3.0"
+                      />
+                    </Field>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field label="Type">
+                      <select
+                        value={selectedApp.app_type || 'regular'}
+                        onChange={e => updateField('app_type', e.target.value)}
+                        className={inputCls}
+                      >
+                        <option value="regular">Régulière</option>
+                        <option value="trusti">Trusti App</option>
+                        <option value="star">Star App</option>
+                      </select>
+                    </Field>
+                    <Field label="Juridiction">
+                      <input
+                        value={selectedApp.jurisdiction || ''}
+                        onChange={e => updateField('jurisdiction', e.target.value)}
+                        className={inputCls}
+                        placeholder="Ex : EU, US…"
+                      />
+                    </Field>
+                  </div>
+                  <div className="flex gap-6 pt-1">
+                    <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                      <Toggle
+                        checked={toBool(selectedApp.is_open_source)}
+                        onChange={v => updateField('is_open_source', v)}
+                      />
+                      <span className="text-sm text-slate-600">Open source</span>
+                    </label>
+                    <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                      <Toggle
+                        checked={toBool(selectedApp.is_european)}
+                        onChange={v => updateField('is_european', v)}
+                      />
+                      <span className="text-sm text-slate-600">Européen</span>
+                    </label>
+                  </div>
+                </Section>
+
+                {/* ─ Liens ─ */}
+                <Section title="Liens">
+                  {[
+                    { key: 'playStoreUrl',  label: 'Play Store',  placeholder: 'https://play.google.com/store/apps/details?id=…' },
+                    { key: 'appleStoreUrl', label: 'App Store',   placeholder: 'https://apps.apple.com/…' },
+                    { key: 'fDroidUrl',     label: 'F-Droid',     placeholder: 'https://f-droid.org/packages/…' },
+                    { key: 'githubUrl',     label: 'GitHub',      placeholder: 'https://github.com/…' },
+                    { key: 'website',       label: 'Site Web',    placeholder: 'https://…' },
+                  ].map(({ key, label, placeholder }) => (
+                    <Field key={key} label={label}>
+                      <input
+                        type="url"
+                        value={selectedApp[key] || ''}
+                        onChange={e => updateField(key, e.target.value)}
+                        className={monoInputCls}
+                        placeholder={placeholder}
+                      />
+                    </Field>
                   ))}
-                </select>
-              </div>
-              
-              {/* Grade */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                  TrustiScore <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={newApp.grade}
-                  onChange={e => setNewApp({...newApp, grade: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-                >
-                  <option value="A">A - Excellent</option>
-                  <option value="B">B - Très bon</option>
-                  <option value="C">C - Bon</option>
-                  <option value="D">D - Moyen</option>
-                  <option value="E">E - Mauvais</option>
-                </select>
-              </div>
-              
-              {/* Raison/Description */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                  Description / Raison du score
-                </label>
-                <textarea
-                  value={newApp.reason}
-                  onChange={e => setNewApp({...newApp, reason: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 resize-none"
-                  rows="3"
-                  placeholder="Pourquoi ce score ? Points forts/faibles..."
-                />
-              </div>
-              
-              {/* URLs */}
-              <div className="grid grid-cols-1 gap-3">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">
-                    Play Store URL
-                  </label>
-                  <input
-                    type="url"
-                    value={newApp.playStoreUrl}
-                    onChange={e => setNewApp({...newApp, playStoreUrl: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-xs font-mono"
-                    placeholder="https://play.google.com/store/apps/details?id=..."
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">
-                    App Store URL
-                  </label>
-                  <input
-                    type="url"
-                    value={newApp.appleStoreUrl}
-                    onChange={e => setNewApp({...newApp, appleStoreUrl: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-xs font-mono"
-                    placeholder="https://apps.apple.com/..."
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">
-                    F-Droid URL
-                  </label>
-                  <input
-                    type="url"
-                    value={newApp.fDroidUrl}
-                    onChange={e => setNewApp({...newApp, fDroidUrl: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-xs font-mono"
-                    placeholder="https://f-droid.org/packages/..."
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">
-                    GitHub URL
-                  </label>
-                  <input
-                    type="url"
-                    value={newApp.githubUrl}
-                    onChange={e => setNewApp({...newApp, githubUrl: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-xs font-mono"
-                    placeholder="https://github.com/..."
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">
-                    Site Web
-                  </label>
-                  <input
-                    type="url"
-                    value={newApp.website}
-                    onChange={e => setNewApp({...newApp, website: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-xs font-mono"
-                    placeholder="https://..."
-                  />
-                </div>
-              </div>
-              
-              {/* Show in Awards */}
-              <div>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={newApp.show_in_awards === 1}
-                    onChange={e => setNewApp({...newApp, show_in_awards: e.target.checked ? 1 : 0})}
-                    className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-2 focus:ring-green-400"
-                  />
-                  <span className="text-sm font-semibold text-slate-700">
-                    Afficher dans les Awards (Nos recommandations)
-                  </span>
-                </label>
-              </div>
-            </div>
-            
-            {/* Footer */}
-            <div className="sticky bottom-0 bg-slate-50 px-6 py-4 border-t flex justify-end gap-3 rounded-b-2xl">
-              <button
-                onClick={() => setShowAddModal(false)}
-                disabled={isSaving}
-                className="px-5 py-2 bg-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-300 transition-colors disabled:opacity-50"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleAddApp}
-                disabled={isSaving || !newApp.name.trim() || !newApp.category}
-                className="px-5 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSaving ? '⏳ Ajout...' : '✅ Ajouter l\'application'}
-              </button>
-            </div>
+                </Section>
+
+                {/* ─ Options ─ */}
+                <Section title="Options">
+                  <div className="flex items-center justify-between py-1">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-700">Afficher dans les Awards</p>
+                      <p className="text-xs text-slate-400">Apparaît dans « Nos recommandations »</p>
+                    </div>
+                    <Toggle
+                      checked={toBool(selectedApp.show_in_awards)}
+                      onChange={v => updateField('show_in_awards', v ? 1 : 0)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field label="Popularité (rang)">
+                      <input
+                        type="number"
+                        min="0"
+                        value={selectedApp.popularity ?? 0}
+                        onChange={e => updateField('popularity', Number(e.target.value) || 0)}
+                        className={inputCls}
+                      />
+                    </Field>
+                    <Field label="Icône (URL ou emoji)">
+                      <div className="flex gap-2 items-center">
+                        <input
+                          value={selectedApp.icon || ''}
+                          onChange={e => updateField('icon', e.target.value)}
+                          className={`${inputCls} flex-1`}
+                          placeholder="https://… ou 📱"
+                        />
+                        {selectedApp.icon && (
+                          <AppIcon icon={selectedApp.icon} name={selectedApp.name} color={selectedApp.color} size="sm" />
+                        )}
+                      </div>
+                    </Field>
+                  </div>
+                  <Field label="Couleur de fond">
+                    <div className="flex gap-2 flex-wrap mb-2">
+                      {COLOR_SWATCHES.map(c => (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => updateField('color', c)}
+                          className={`w-6 h-6 rounded-md ${c} transition-all hover:scale-110 ${selectedApp.color === c ? 'ring-2 ring-offset-1 ring-indigo-500 scale-110' : ''}`}
+                          title={c}
+                        />
+                      ))}
+                    </div>
+                    <input
+                      value={selectedApp.color || ''}
+                      onChange={e => updateField('color', e.target.value)}
+                      className={inputCls}
+                      placeholder="bg-slate-500"
+                    />
+                  </Field>
+                </Section>
+
+                {/* ─ Zone dangereuse (edit only) ─ */}
+                {drawerMode === 'edit' && (
+                  <Section title="Zone dangereuse">
+                    {showDeleteConfirm ? (
+                      <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl space-y-3">
+                        <p className="text-sm font-bold text-rose-700">
+                          Supprimer « {selectedApp.name} » ?
+                        </p>
+                        <p className="text-xs text-rose-500">Cette action est irréversible.</p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                            className="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold rounded-lg transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+                          >
+                            {isDeleting
+                              ? <Loader2 size={14} className="animate-spin" />
+                              : <Trash2 size={14} />}
+                            Supprimer définitivement
+                          </button>
+                          <button
+                            onClick={() => setShowDeleteConfirm(false)}
+                            disabled={isDeleting}
+                            className="flex-1 py-2 bg-white border border-slate-200 text-slate-600 text-sm rounded-lg hover:bg-slate-50 transition-all"
+                          >
+                            Annuler
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="flex items-center gap-2 text-sm text-rose-400 hover:text-rose-600 font-semibold transition-colors"
+                      >
+                        <Trash2 size={14} />
+                        Supprimer cette application
+                      </button>
+                    )}
+                  </Section>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Drawer footer */}
+          <div className="flex items-center gap-3 px-5 py-4 border-t bg-white flex-shrink-0">
+            <button
+              onClick={handleSave}
+              disabled={isSaving || !selectedApp?.name?.trim() || !selectedApp?.category}
+              className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isSaving
+                ? <><Loader2 size={15} className="animate-spin" /> Enregistrement…</>
+                : drawerMode === 'add'
+                ? <><Plus size={15} /> Créer l'application</>
+                : <><Check size={15} /> Enregistrer</>}
+            </button>
+            <button
+              onClick={closeDrawer}
+              disabled={isSaving}
+              className="px-4 py-2.5 bg-white border border-slate-200 text-slate-600 font-semibold rounded-xl text-sm hover:bg-slate-50 transition-all disabled:opacity-40"
+            >
+              Annuler
+            </button>
           </div>
         </div>
-      )}
+
+      </div>
     </div>
   );
 };

@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAppManagement } from './hooks/useAppManagement';
 import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
 import { TABS } from './constants/tabs';
 import { CATEGORIES } from './constants/categories';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Smartphone, Monitor } from 'lucide-react';
+import { ViewModeContext } from './contexts/ViewModeContext';
 
 // Layout
 import Header from './components/layout/Header';
 
 // UI Components
 import LoadingSpinner from './components/ui/LoadingSpinner';
+import TrustiLogo from './components/ui/TrustiLogo';
 import Navigation from './components/layout/Navigation';
 
 // UI Components
@@ -32,6 +34,17 @@ import LoginModal from './components/modals/LoginModal';
 import AdminAppsModal from './components/modals/AdminAppsModal';
 import PinModal from './components/modals/PinModal';
 import WelcomeModal from './components/modals/WelcomeModal';
+
+const useIsSmallViewport = () => {
+  const [isSmall, setIsSmall] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const handler = (e) => setIsSmall(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return isSmall;
+};
 
 // Fonction pour trier les apps par popularité (utilise le champ popularity de la BDD)
 const sortAppsByPopularity = (apps) => {
@@ -277,16 +290,10 @@ const App = () => {
   const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
 
-  // Charger l'état de déverrouillage admin au changement d'utilisateur
+  // Réinitialiser l'état admin quand l'utilisateur se déconnecte
   useEffect(() => {
-    if (currentUser && getUserData) {
-      const adminUnlocked = getUserData('admin_unlocked');
-      setIsAdminUnlocked(!!adminUnlocked);
-    } else {
-      // Réinitialiser l'état admin quand on se déconnecte
-      setIsAdminUnlocked(false);
-    }
-  }, [currentUser, getUserData]);
+    if (!currentUser) setIsAdminUnlocked(false);
+  }, [currentUser]);
 
   // Scroller en haut lors du changement d'onglet ou de catégorie
   useEffect(() => {
@@ -346,24 +353,73 @@ const App = () => {
     }
   }, [selectedApp, showMigrationSelector, activeTab]);
 
-  // Gérer le déverrouillage admin après validation du code PIN
+  // Appelé par PinModal après validation serveur réussie
   const handleUnlockAdmin = async () => {
-    // En local sans utilisateur connecté, connecter automatiquement un admin local
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    
     if (isLocal && !currentUser) {
-      // Connexion automatique en tant qu'admin local
       await login('admin@local');
     }
-    
-    // Déverrouiller l'admin (après validation du PIN)
     setIsAdminUnlocked(true);
-    if (saveUserData) {
-      saveUserData('admin_unlocked', true);
-    }
-    
-    // Fermer le modal PIN
     setShowPinModal(false);
+  };
+
+  // ── Toggle mobile / desktop ─────────────────────────────────────────
+  const isSmallViewport = useIsSmallViewport();
+  const [forceMobile, setForceMobile] = useState(
+    () => localStorage.getItem('trusti_force_mobile') === 'true'
+  );
+  const toggleForceMobile = useCallback(() => {
+    setForceMobile(prev => {
+      const next = !prev;
+      localStorage.setItem('trusti_force_mobile', String(next));
+      return next;
+    });
+  }, []);
+
+  // isMobile = vrai viewport étroit OU mode forcé manuellement
+  const isMobile = isSmallViewport || forceMobile;
+
+  // Bouton flottant uniquement sur vrai écran large (pas sur mobile réel)
+  const FloatingToggle = () => {
+    if (isSmallViewport) return null;
+    return (
+      <button
+        onClick={toggleForceMobile}
+        className="fixed z-[9999] flex items-center gap-2 text-xs font-bold shadow-xl transition-all"
+        style={{
+          top: 16,
+          right: 16,
+          padding: '8px 14px',
+          borderRadius: 999,
+          background: forceMobile ? '#4f46e5' : '#1e293b',
+          color: '#fff',
+        }}
+        title={forceMobile ? 'Quitter le mode mobile' : 'Aperçu mobile'}
+      >
+        {forceMobile ? <Monitor size={14} /> : <Smartphone size={14} />}
+        <span>{forceMobile ? 'Desktop' : 'Mobile'}</span>
+      </button>
+    );
+  };
+
+  // Cadre phone visuel (purement décoratif, le layout est contrôlé via context)
+  const MobileFrame = ({ children }) => {
+    if (!forceMobile) return children;
+    return (
+      <div className="min-h-screen bg-slate-300 flex flex-col items-center py-6 gap-3">
+        <div
+          className="bg-white shadow-2xl"
+          style={{
+            width: 430,
+            borderRadius: '2.8rem',
+            border: '8px solid #1e293b',
+            overflow: 'hidden',
+          }}
+        >
+          {children}
+        </div>
+      </div>
+    );
   };
 
   // Afficher la landing page en premier si c'est la première visite
@@ -398,20 +454,28 @@ const App = () => {
   // Affichage du détail d'une application
   if (selectedApp) {
     return (
-      <AppDetailModal
-        app={selectedApp}
-        isInMyApps={myApps.has(selectedApp.id)}
-        onToggleMyApp={toggleMyApp}
-        onClose={() => setSelectedApp(null)}
-        onSelectApp={setSelectedApp}
-        allApps={apps}
-      />
+      <ViewModeContext.Provider value={isMobile}>
+        <FloatingToggle />
+        <MobileFrame>
+          <AppDetailModal
+            app={selectedApp}
+            isInMyApps={myApps.has(selectedApp.id)}
+            onToggleMyApp={toggleMyApp}
+            onClose={() => setSelectedApp(null)}
+            onSelectApp={setSelectedApp}
+            allApps={apps}
+          />
+        </MobileFrame>
+      </ViewModeContext.Provider>
     );
   }
 
   // Vue principale
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-24">
+    <ViewModeContext.Provider value={isMobile}>
+    <FloatingToggle />
+    <MobileFrame>
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       {/* Mode vérification de token */}
       {isVerifying && (
         <VerifyAuth onLogin={login} />
@@ -422,12 +486,42 @@ const App = () => {
         <>
       {/* Écran de chargement initial */}
       {isInitialLoading && (
-        <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
-          <LoadingSpinner message="Chargement de TrustiScore..." size="large" />
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-indigo-50 via-white to-purple-50">
+          <div style={{ animation: 'splashFadeIn 0.5s ease-out both' }}>
+            <TrustiLogo className="w-20 h-20 mb-5" />
+          </div>
+
+          <p className="text-2xl font-black text-slate-800 tracking-tight mb-1" style={{ animation: 'splashFadeIn 0.5s 0.1s ease-out both', opacity: 0 }}>
+            TrustiScore
+          </p>
+          <p className="text-sm text-slate-400 font-medium mb-10" style={{ animation: 'splashFadeIn 0.5s 0.2s ease-out both', opacity: 0 }}>
+            Votre guide de confidentialité
+          </p>
+
+          <div className="flex items-center gap-2" style={{ animation: 'splashFadeIn 0.5s 0.35s ease-out both', opacity: 0 }}>
+            {[0, 1, 2].map(i => (
+              <span
+                key={i}
+                className="w-2 h-2 rounded-full bg-indigo-400"
+                style={{ animation: `splashBounce 1.2s ease-in-out ${i * 0.18}s infinite` }}
+              />
+            ))}
+          </div>
+
+          <style>{`
+            @keyframes splashFadeIn {
+              from { opacity: 0; transform: translateY(8px); }
+              to   { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes splashBounce {
+              0%, 80%, 100% { transform: translateY(0);    opacity: 0.35; }
+              40%            { transform: translateY(-8px); opacity: 1; }
+            }
+          `}</style>
         </div>
       )}
       
-      <Header 
+      <Header
         currentUser={currentUser}
         onLogout={logout}
         onLogin={() => setShowLoginModal(true)}
@@ -438,7 +532,16 @@ const App = () => {
         onRequestAdminUnlock={() => setShowPinModal(true)}
       />
 
-      <main className="max-w-md mx-auto px-4 py-3">
+      <div className={isMobile ? '' : 'flex items-start'}>
+      <Navigation
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        myAppsCount={myApps.size}
+      />
+      <main className={isMobile
+        ? 'max-w-md mx-auto px-4 py-3 pb-28'
+        : 'flex-1 min-w-0 px-6 py-3 pb-6'
+      }>
         <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
         {/* Titre pour l'onglet Applications */}
@@ -485,7 +588,7 @@ const App = () => {
               Mes applications
             </p>
             <div className="bg-gradient-to-r from-rose-50 to-amber-50 rounded-lg p-2 border border-rose-100">
-              <p className="text-[10px] text-rose-700 font-bold">
+              <p className="text-[11px] text-rose-700 font-bold">
                 ⚠️ Apps à migrer en priorité en haut
               </p>
             </div>
@@ -504,7 +607,7 @@ const App = () => {
               )}
             </div>
             <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-2 border border-emerald-100">
-              <p className="text-[10px] text-emerald-700 font-bold">
+              <p className="text-[11px] text-emerald-700 font-bold">
                 ✨ Nos conseils d'apps avec un TrustiScore respectueux (A, B ou C) par catégorie
               </p>
             </div>
@@ -535,13 +638,7 @@ const App = () => {
           isLoadingMyApps={isLoadingMyApps}
         />
       </main>
-
-      {/* Navigation */}
-      <Navigation
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        myAppsCount={myApps.size}
-      />
+      </div>
 
       {/* Modal de partage des migrations */}
       {showShareModal && (
@@ -626,6 +723,8 @@ const App = () => {
         }
       `}</style>
     </div>
+    </MobileFrame>
+    </ViewModeContext.Provider>
   );
 };
 

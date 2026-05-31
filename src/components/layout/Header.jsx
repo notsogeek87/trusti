@@ -4,22 +4,22 @@ import { HelpCircle, LogOut, User, RotateCcw, Settings, Lock } from 'lucide-reac
 /**
  * Header de l'application
  */
-const Header = ({ 
-  currentUser, 
-  onLogout, 
-  onLogin, 
-  onResetUserData, 
-  onOpenAdmin, 
+const Header = ({
+  currentUser,
+  onLogout,
+  onLogin,
+  onResetUserData,
+  onOpenAdmin,
   onShowLandingPage,
   isAdminUnlocked,
-  onRequestAdminUnlock
+  onRequestAdminUnlock,
 }) => {
   // Détection de l'environnement local
   const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   
   return (
     <header className="bg-white border-b border-slate-100 sticky top-0 z-30 shadow-sm">
-      <div className="max-w-md mx-auto px-4 py-1 flex items-center justify-between gap-2">
+      <div className="max-w-full md:max-w-none px-4 md:px-6 py-1 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 flex-shrink-0">
           <img 
             src="/assets/logo.png" 
@@ -100,8 +100,8 @@ const Header = ({
           )}
           
           {/* Bouton d'aide */}
-          <button 
-            onClick={onShowLandingPage} 
+          <button
+            onClick={onShowLandingPage}
             className="p-2.5 rounded-full transition-all duration-300 shadow-sm bg-indigo-500 text-white hover:bg-indigo-600"
             aria-label="Aide et explications"
             title="À propos de TrustiScore"

@@ -734,6 +734,58 @@ app.post('/api/apps', async (req, res) => {
   }
 });
 
+// ==============================
+// ADMIN AUTH
+// ==============================
+
+const adminAttempts = new Map();
+const ADMIN_LOCKOUT_DURATION = 30 * 1000;
+const ADMIN_MAX_ATTEMPTS = 3;
+
+app.post('/api/admin-auth', (req, res) => {
+  const ip = (req.headers['x-forwarded-for']?.split(',')[0].trim())
+    || req.socket?.remoteAddress
+    || 'unknown';
+  const now = Date.now();
+
+  const record = adminAttempts.get(ip) || { count: 0, lockedUntil: 0 };
+
+  if (record.lockedUntil > now) {
+    const retryAfter = Math.ceil((record.lockedUntil - now) / 1000);
+    return res.status(429).json({
+      success: false,
+      error: `Trop de tentatives. Réessayez dans ${retryAfter} secondes.`,
+      retryAfter,
+    });
+  }
+
+  const { pin } = req.body || {};
+  if (!pin) return res.status(400).json({ success: false, error: 'PIN manquant' });
+
+  const adminPin = process.env.ADMIN_PIN;
+
+  // Dev bypass: if ADMIN_PIN not set, accept any non-empty PIN
+  if (!adminPin || pin === adminPin) {
+    adminAttempts.delete(ip);
+    return res.json({ success: true });
+  }
+
+  const newCount = record.count + 1;
+  const lockedUntil = newCount >= ADMIN_MAX_ATTEMPTS ? now + ADMIN_LOCKOUT_DURATION : 0;
+  adminAttempts.set(ip, { count: newCount, lockedUntil });
+
+  const remaining = ADMIN_MAX_ATTEMPTS - newCount;
+  const error = remaining > 0
+    ? `Code incorrect. ${remaining} tentative${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}.`
+    : 'Trop de tentatives. Réessayez dans 30 secondes.';
+
+  return res.status(401).json({
+    success: false,
+    error,
+    retryAfter: lockedUntil > 0 ? 30 : 0,
+  });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

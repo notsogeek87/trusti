@@ -36,14 +36,16 @@ const LandingPage = ({ onClose }) => {
           </div>
 
           <div className="max-w-md animate-in slide-in-from-bottom duration-700 delay-300">
-            <div className="flex items-center justify-center gap-2 mb-4 text-indigo-400">
-              <ShieldCheck size={24} />
-              <h1 className="font-black text-sm uppercase tracking-widest">TrustiScore</h1>
+            <div className="flex justify-center mb-6">
+              <div className="inline-flex items-center gap-2 bg-indigo-500/20 border border-indigo-500/40 px-4 py-1.5 rounded-full">
+                <ShieldCheck size={14} className="text-indigo-400" />
+                <span className="font-black text-xs uppercase tracking-widest text-indigo-300">TrustiScore</span>
+              </div>
             </div>
-            
-            <h2 className="text-3xl font-black mb-4 text-white leading-tight">
+
+            <h1 className="text-4xl font-black mb-4 text-white leading-tight">
               Reprenez votre souveraineté numérique européenne
-            </h2>
+            </h1>
             
             <p className="text-base leading-relaxed text-slate-400 font-medium mb-8">
               TrustiScore évalue la confiance que vous pouvez accorder à vos applications. 
@@ -98,7 +100,7 @@ const LandingPage = ({ onClose }) => {
                     </div>
                     <div className="flex flex-col text-left">
                       <span className="text-xs font-bold text-white">{title}</span>
-                      <p className="text-[10px] leading-tight text-slate-400 mt-0.5">{description}</p>
+                      <p className="text-[11px] leading-tight text-slate-400 mt-0.5">{description}</p>
                     </div>
                   </div>
                 ))}
@@ -124,7 +126,7 @@ const LandingPage = ({ onClose }) => {
               <ArrowRight size={18} className="text-indigo-400 group-hover:text-indigo-300 group-hover:translate-x-1 transition-transform" />
             </a>
 
-            <p className="text-[10px] text-slate-500 mt-6 italic">
+            <p className="text-[11px] text-slate-500 mt-6 italic">
               Basé sur 12 critères : RGPD, Cloud Act, Open Source, Localisation des données, et plus encore.
             </p>
           </div>

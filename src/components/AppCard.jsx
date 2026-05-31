@@ -1,5 +1,5 @@
 import React from 'react';
-import { PlusCircle, CheckCircle, CheckCircle2, Trash2, Sparkles, ExternalLink } from 'lucide-react';
+import { PlusCircle, CheckCircle, CheckCircle2, Trash2, Sparkles, ExternalLink, ShieldCheck, Search, Star } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
 import { TABS } from '../constants/tabs';
 
@@ -45,7 +45,7 @@ const AppCard = React.memo(({
         
         <div className="flex-grow min-w-0">
           <h3 className={`font-black text-sm truncate ${isLoadingSkeleton ? 'text-slate-400' : ''}`}>{app.name}</h3>
-          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
             {isLoadingSkeleton ? 'Chargement...' : app.category}
           </p>
         </div>
@@ -108,7 +108,7 @@ const AppCard = React.memo(({
             <p className="text-xs font-bold text-slate-600">
               Recherche d'alternatives...
             </p>
-            <p className="text-[10px] text-slate-500">
+            <p className="text-[11px] text-slate-500">
               Analyse des meilleures options disponibles
             </p>
           </div>
@@ -117,12 +117,12 @@ const AppCard = React.memo(({
       
       {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade === "A" && (
         <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2">
-          <div className="text-2xl">✅</div>
+          <ShieldCheck size={20} className="text-emerald-600 shrink-0" />
           <div className="flex-grow">
             <p className="text-xs font-bold text-emerald-700">
               TrustiScore au max, tout va bien !
             </p>
-            <p className="text-[10px] text-emerald-600">
+            <p className="text-[11px] text-emerald-600">
               Cette application respecte votre souveraineté numérique
             </p>
           </div>
@@ -138,19 +138,19 @@ const AppCard = React.memo(({
                 <p className="text-xs font-bold text-slate-600">
                   Recherche d'alternatives...
                 </p>
-                <p className="text-[10px] text-slate-500">
+                <p className="text-[11px] text-slate-500">
                   Analyse des meilleures options disponibles
                 </p>
               </div>
             </>
           ) : (
             <>
-              <div className="text-xl">🔍</div>
+              <Search size={16} className="text-slate-400 shrink-0" />
               <div className="flex-grow">
                 <p className="text-xs font-bold text-slate-600">
                   Alternative inconnue pour le moment
                 </p>
-                <p className="text-[10px] text-slate-500">
+                <p className="text-[11px] text-slate-500">
                   Nous travaillons à identifier les meilleures alternatives
                 </p>
               </div>
@@ -173,7 +173,7 @@ const AppCard = React.memo(({
             )}
             {!app.altIcon && <Sparkles size={14} className="text-emerald-600 shrink-0" />}
             <div className="flex-grow">
-              <p className="text-[10px] font-black text-emerald-800 uppercase tracking-tight">
+              <p className="text-[11px] font-black text-emerald-800 uppercase tracking-tight">
                 Migrer vers :
               </p>
               <button
@@ -186,12 +186,12 @@ const AppCard = React.memo(({
                 {app.alternative ? (
                   <span>
                     {app.alternative}
-                    <span className="text-[8px] ml-1 opacity-70">⭐ Recommandé</span>
+                    <span className="inline-flex items-center gap-0.5 text-[10px] ml-1 opacity-70"><Star size={8} className="fill-current" /> Recommandé</span>
                   </span>
                 ) : customMigration ? (
                   <span>
                     {customMigration} 
-                    <span className="text-[8px] ml-1 opacity-70">(cliquez pour changer)</span>
+                    <span className="text-[10px] ml-1 opacity-70">(cliquez pour changer)</span>
                   </span>
                 ) : (
                   <span>Sélectionner une alternative ▼</span>
