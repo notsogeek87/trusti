@@ -49,6 +49,12 @@ export default async function handler(req, res) {
       VALUES (${code}, ${cleanEmail}, ${expiresAt}, false)
     `;
 
+    // Dev sans Brevo → console
+    if (!process.env.BREVO_API_KEY) {
+      console.log(`\n🔑 Code OTP pour ${cleanEmail} : ${code}\n`);
+      return res.status(200).json({ success: true });
+    }
+
     // Envoyer via Brevo
     const apiInstance = new brevo.TransactionalEmailsApi();
     apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
