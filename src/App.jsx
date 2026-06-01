@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAppManagement } from './hooks/useAppManagement';
 import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
@@ -91,6 +91,7 @@ const App = () => {
   // État pour la landing page
   // La landing page ne s'affiche plus automatiquement, seulement sur demande
   const [showLandingPage, setShowLandingPage] = useState(false);
+  const savedScrollY = useRef(0);
 
   const handleCloseLandingPage = () => {
     setShowLandingPage(false);
@@ -347,6 +348,19 @@ const App = () => {
     return <OnboardingApps onComplete={handleOnboardingComplete} />;
   }
 
+  const openAppDetail = useCallback((app) => {
+    savedScrollY.current = window.scrollY;
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    setSelectedApp(app);
+  }, [setSelectedApp]);
+
+  const closeAppDetail = useCallback(() => {
+    setSelectedApp(null);
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: savedScrollY.current, behavior: 'instant' });
+    });
+  }, [setSelectedApp]);
+
   // Affichage du détail d'une application
   if (selectedApp) {
     return (
@@ -358,8 +372,8 @@ const App = () => {
             app={selectedApp}
             isInMyApps={myApps.has(selectedApp.id)}
             onToggleMyApp={toggleMyApp}
-            onClose={() => setSelectedApp(null)}
-            onSelectApp={setSelectedApp}
+            onClose={closeAppDetail}
+            onSelectApp={openAppDetail}
             allApps={apps}
           />
         </MobileFrame>
@@ -523,7 +537,7 @@ const App = () => {
           customMigrations={customMigrations}
           onToggleMyApp={toggleMyApp}
           onToggleMigrate={toggleMigrate}
-          onSelectApp={setSelectedApp}
+          onSelectApp={openAppDetail}
           onSelectMigration={setShowMigrationSelector}
           selectedCategory={selectedCategory}
           searchTerm={searchTerm}
@@ -564,7 +578,7 @@ const App = () => {
           onClose={() => setShowMigrationSelector(null)}
           onSelectApp={(app) => {
             setShowMigrationSelector(null);
-            setSelectedApp(app);
+            openAppDetail(app);
           }}
           allApps={apps}
         />
