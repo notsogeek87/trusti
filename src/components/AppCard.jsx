@@ -48,16 +48,11 @@ const AppCard = React.memo(({
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
             {isLoadingSkeleton ? 'Chargement...' : app.category}
           </p>
-          {!isLoadingSkeleton && (
-            <p className="text-[10px] font-semibold text-indigo-400 flex items-center gap-0.5 mt-0.5">
-              Voir l'analyse <ChevronRight size={9} strokeWidth={3} />
-            </p>
-          )}
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <ScoreIndicator grade={app.grade} />
-          
+
           {activeTab === TABS.MY_APPS ? (
             <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-100 items-center">
               <button 
@@ -88,19 +83,23 @@ const AppCard = React.memo(({
               </button>
             </div>
           ) : (
-            <button 
+            <button
               onClick={(e) => !isLoadingSkeleton && onToggleMyApp(e, app.id)}
               disabled={isLoadingSkeleton}
               className={`p-2 rounded-full transition-all ${
                 isLoadingSkeleton
                   ? 'text-slate-200 cursor-not-allowed'
-                  : isInMyApps 
-                  ? 'bg-indigo-100 text-indigo-600' 
+                  : isInMyApps
+                  ? 'bg-indigo-100 text-indigo-600'
                   : 'text-slate-200 hover:text-indigo-400'
               }`}
             >
               {isInMyApps ? <CheckCircle size={20} /> : <PlusCircle size={20} />}
             </button>
+          )}
+
+          {!isLoadingSkeleton && (
+            <ChevronRight size={15} className="text-slate-300 group-hover:text-indigo-400 transition-colors shrink-0" />
           )}
         </div>
       </div>
