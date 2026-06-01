@@ -125,37 +125,43 @@ const OnboardingApps = ({ onComplete }) => {
   const goNext = () => { setDirection('forward'); setStep(s => s + 1); };
   const goBack = () => { setDirection('back'); setStep(s => s - 1); };
 
-  // Précharge tous les steps en parallèle dès le montage (pendant l'écran d'intro)
+  // Précharge toutes les catégories de tous les steps en parallèle
+  // Une requête par catégorie → affichage progressif dès les premières réponses
   useEffect(() => {
     STEPS.forEach((stepData, idx) => {
-      if (cache.current[idx] !== undefined) return;
-      cache.current[idx] = null; // marque "en cours" pour éviter les doublons
-      const cats = stepData.categories.map(c => encodeURIComponent(c)).join(',');
-      fetch(`${API_URL}/apps?onboarding=true&categories=${cats}`)
-        .then(r => r.json())
-        .then(data => {
-          const apps = data.success ? data.apps : [];
-          cache.current[idx] = apps;
-          // Si l'utilisateur est déjà sur ce step, mettre à jour l'affichage
-          if (stepRef.current === idx) {
-            setStepApps(apps);
-            setIsLoadingStep(false);
-          }
-        })
-        .catch(() => { cache.current[idx] = []; });
+      if (cache.current[idx] === undefined) cache.current[idx] = [];
+
+      stepData.categories.forEach(cat => {
+        fetch(`${API_URL}/apps?onboarding=true&categories=${encodeURIComponent(cat)}`)
+          .then(r => r.json())
+          .then(data => {
+            if (!data.success || data.apps.length === 0) return;
+            const existingIds = new Set(cache.current[idx].map(a => a.id));
+            const newApps = data.apps.filter(a => !existingIds.has(a.id));
+            if (newApps.length === 0) return;
+            cache.current[idx] = [...cache.current[idx], ...newApps];
+            // Si l'utilisateur est déjà sur ce step, on ajoute les apps au fil de l'eau
+            if (stepRef.current === idx) {
+              setStepApps([...cache.current[idx]]);
+              setIsLoadingStep(false);
+            }
+          })
+          .catch(() => {});
+      });
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Affiche les apps du step courant (instantané si déjà en cache)
   useEffect(() => {
     if (step < 0 || step >= STEPS.length) { setStepApps([]); return; }
-    if (cache.current[step]) {
+    if (cache.current[step]?.length > 0) {
       setStepApps(cache.current[step]);
       setIsLoadingStep(false);
       return;
     }
     // Pas encore prêt → spinner ; le prefetch mettra à jour quand il termine
     setIsLoadingStep(true);
+    setStepApps([]);
   }, [step]);
 
   const progress = step < 0 ? 0 : Math.round(((step + 1) / STEPS.length) * 100);
