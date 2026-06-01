@@ -243,9 +243,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
             </div>
             <h2 className="text-2xl font-black text-slate-900 mb-1">{app.name}</h2>
             {app.category && (
-              <div className="mb-4 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold uppercase tracking-wide">
-                {app.category}
-              </div>
+              <p className="text-sm font-semibold text-slate-400 mb-3">{app.category}</p>
             )}
             <ScoreIndicator grade={app.grade} size="large" />
           </div>
