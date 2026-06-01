@@ -93,19 +93,6 @@ const App = () => {
   const [showLandingPage, setShowLandingPage] = useState(false);
   const savedScrollY = useRef(0);
 
-  const openAppDetail = useCallback((app) => {
-    savedScrollY.current = window.scrollY;
-    window.scrollTo({ top: 0, behavior: 'instant' });
-    setSelectedApp(app);
-  }, [setSelectedApp]);
-
-  const closeAppDetail = useCallback(() => {
-    setSelectedApp(null);
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: savedScrollY.current, behavior: 'instant' });
-    });
-  }, [setSelectedApp]);
-
   const handleCloseLandingPage = () => {
     setShowLandingPage(false);
   };
@@ -188,6 +175,19 @@ const App = () => {
     setSelectedApp,
     loadMoreApps,
   } = useAppManagement(currentUser, saveUserData, getUserData, selectedCategory);
+
+  const openAppDetail = useCallback((app) => {
+    savedScrollY.current = window.scrollY;
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    setSelectedApp(app);
+  }, [setSelectedApp]);
+
+  const closeAppDetail = useCallback(() => {
+    setSelectedApp(null);
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: savedScrollY.current, behavior: 'instant' });
+    });
+  }, [setSelectedApp]);
 
   // Gestion des modales
   const {
