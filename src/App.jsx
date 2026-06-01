@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import { useAppManagement } from './hooks/useAppManagement';
 import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
@@ -229,8 +229,9 @@ const App = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeTab, selectedCategory]);
 
-  // Restaurer la position de scroll après fermeture du détail (une fois la liste remontée dans le DOM)
-  useEffect(() => {
+  // Restaurer la position de scroll après fermeture du détail
+  // useLayoutEffect = synchrone avant le paint, évite le flash "retour en haut"
+  useLayoutEffect(() => {
     if (!selectedApp && shouldRestoreScroll.current) {
       shouldRestoreScroll.current = false;
       window.scrollTo({ top: savedScrollY.current, behavior: 'instant' });
@@ -250,6 +251,7 @@ const App = () => {
       // Si un modal de détails est ouvert
       if (selectedApp) {
         event.preventDefault();
+        shouldRestoreScroll.current = true;
         setSelectedApp(null);
         return;
       }
