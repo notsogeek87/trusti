@@ -110,7 +110,9 @@ const OnboardingApps = ({ onComplete }) => {
   const [selected, setSelected] = useState(new Set());
   const [stepApps, setStepApps] = useState([]);
   const [isLoadingStep, setIsLoadingStep] = useState(false);
-  const cache = useRef({}); // cache par step index
+  const cache = useRef({});
+  const stepRef = useRef(step); // ref pour lire le step courant dans les callbacks async
+  useEffect(() => { stepRef.current = step; }, [step]);
 
   const toggleApp = (id) => {
     setSelected(prev => {
@@ -123,22 +125,37 @@ const OnboardingApps = ({ onComplete }) => {
   const goNext = () => { setDirection('forward'); setStep(s => s + 1); };
   const goBack = () => { setDirection('back'); setStep(s => s - 1); };
 
-  // Fetch apps pour l'étape courante (avec cache)
+  // Précharge tous les steps en parallèle dès le montage (pendant l'écran d'intro)
+  useEffect(() => {
+    STEPS.forEach((stepData, idx) => {
+      if (cache.current[idx] !== undefined) return;
+      cache.current[idx] = null; // marque "en cours" pour éviter les doublons
+      const cats = stepData.categories.map(c => encodeURIComponent(c)).join(',');
+      fetch(`${API_URL}/apps?onboarding=true&categories=${cats}`)
+        .then(r => r.json())
+        .then(data => {
+          const apps = data.success ? data.apps : [];
+          cache.current[idx] = apps;
+          // Si l'utilisateur est déjà sur ce step, mettre à jour l'affichage
+          if (stepRef.current === idx) {
+            setStepApps(apps);
+            setIsLoadingStep(false);
+          }
+        })
+        .catch(() => { cache.current[idx] = []; });
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Affiche les apps du step courant (instantané si déjà en cache)
   useEffect(() => {
     if (step < 0 || step >= STEPS.length) { setStepApps([]); return; }
-    if (cache.current[step]) { setStepApps(cache.current[step]); return; }
-
+    if (cache.current[step]) {
+      setStepApps(cache.current[step]);
+      setIsLoadingStep(false);
+      return;
+    }
+    // Pas encore prêt → spinner ; le prefetch mettra à jour quand il termine
     setIsLoadingStep(true);
-    const cats = STEPS[step].categories.map(c => encodeURIComponent(c)).join(',');
-    fetch(`${API_URL}/apps?onboarding=true&categories=${cats}`)
-      .then(r => r.json())
-      .then(data => {
-        const apps = data.success ? data.apps : [];
-        cache.current[step] = apps;
-        setStepApps(apps);
-      })
-      .catch(() => setStepApps([]))
-      .finally(() => setIsLoadingStep(false));
   }, [step]);
 
   const progress = step < 0 ? 0 : Math.round(((step + 1) / STEPS.length) * 100);
