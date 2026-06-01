@@ -218,7 +218,6 @@ const OnboardingApps = ({ onComplete }) => {
             <div className="relative">
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
-                autoFocus
                 type="text"
                 placeholder="Rechercher une app..."
                 value={searchTerm}
