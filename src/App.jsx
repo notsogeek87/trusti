@@ -176,6 +176,8 @@ const App = () => {
     loadMoreApps,
   } = useAppManagement(currentUser, saveUserData, getUserData, selectedCategory);
 
+  const shouldRestoreScroll = useRef(false);
+
   const openAppDetail = useCallback((app) => {
     savedScrollY.current = window.scrollY;
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -183,10 +185,8 @@ const App = () => {
   }, [setSelectedApp]);
 
   const closeAppDetail = useCallback(() => {
+    shouldRestoreScroll.current = true;
     setSelectedApp(null);
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: savedScrollY.current, behavior: 'instant' });
-    });
   }, [setSelectedApp]);
 
   // Gestion des modales
@@ -228,6 +228,14 @@ const App = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeTab, selectedCategory]);
+
+  // Restaurer la position de scroll après fermeture du détail (une fois la liste remontée dans le DOM)
+  useEffect(() => {
+    if (!selectedApp && shouldRestoreScroll.current) {
+      shouldRestoreScroll.current = false;
+      window.scrollTo({ top: savedScrollY.current, behavior: 'instant' });
+    }
+  }, [selectedApp]);
 
   // Réinitialiser la catégorie lors du changement d'onglet
   useEffect(() => {
