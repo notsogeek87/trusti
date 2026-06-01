@@ -1,5 +1,5 @@
 import React from 'react';
-import { PlusCircle, CheckCircle, CheckCircle2, Trash2, Sparkles, ExternalLink, ShieldCheck, Search, Star } from 'lucide-react';
+import { PlusCircle, CheckCircle, CheckCircle2, Trash2, Sparkles, ExternalLink, ShieldCheck, Search, Star, ChevronRight } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
 import { TABS } from '../constants/tabs';
 
@@ -48,6 +48,11 @@ const AppCard = React.memo(({
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
             {isLoadingSkeleton ? 'Chargement...' : app.category}
           </p>
+          {!isLoadingSkeleton && (
+            <p className="text-[10px] font-semibold text-indigo-400 flex items-center gap-0.5 mt-0.5">
+              Voir l'analyse <ChevronRight size={9} strokeWidth={3} />
+            </p>
+          )}
         </div>
         
         <div className="flex items-center gap-3">
