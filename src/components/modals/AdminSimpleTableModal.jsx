@@ -45,7 +45,7 @@ const EMPTY_APP = {
   is_open_source: false, is_european: false, jurisdiction: '',
   app_type: 'regular',
   playStoreUrl: '', appleStoreUrl: '', fDroidUrl: '', githubUrl: '', website: '',
-  show_in_awards: 0, popularity: 0,
+  show_in_awards: 0, show_in_onboarding: 1, popularity: 0,
   icon: '', color: 'bg-slate-500',
 };
 
@@ -199,6 +199,9 @@ const AdminSimpleTableModal = ({ onClose }) => {
       is_open_source: toBool(app.is_open_source ?? app.isOpenSource),
       is_european: toBool(app.is_european ?? app.isEuropean),
       show_in_awards: toBool(app.show_in_awards ?? app.showInAwards) ? 1 : 0,
+      show_in_onboarding: app.show_in_onboarding !== undefined
+        ? (toBool(app.show_in_onboarding ?? app.showInOnboarding) ? 1 : 0)
+        : 1,
       app_type: app.app_type || app.appType || 'regular',
     });
     setDrawerMode('edit');
@@ -236,6 +239,8 @@ const AdminSimpleTableModal = ({ onClose }) => {
         ...selectedApp,
         show_in_awards: selectedApp.show_in_awards ? 1 : 0,
         showInAwards:   selectedApp.show_in_awards ? 1 : 0,
+        show_in_onboarding: selectedApp.show_in_onboarding ? 1 : 0,
+        showInOnboarding:   selectedApp.show_in_onboarding ? 1 : 0,
       };
 
       const res = drawerMode === 'add'
@@ -702,6 +707,16 @@ const AdminSimpleTableModal = ({ onClose }) => {
 
                 {/* ─ Options ─ */}
                 <Section title="Options">
+                  <div className="flex items-center justify-between py-1">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-700">Afficher dans l'onboarding</p>
+                      <p className="text-xs text-slate-400">Proposée lors de la configuration initiale</p>
+                    </div>
+                    <Toggle
+                      checked={toBool(selectedApp.show_in_onboarding)}
+                      onChange={v => updateField('show_in_onboarding', v ? 1 : 0)}
+                    />
+                  </div>
                   <div className="flex items-center justify-between py-1">
                     <div>
                       <p className="text-sm font-semibold text-slate-700">Afficher dans les Awards</p>

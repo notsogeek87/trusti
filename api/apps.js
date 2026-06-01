@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 
   try {
     // Extraire le type depuis l'URL ou le body
-    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, ids } = req.query;
+    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, onboarding, ids } = req.query;
     
     if (req.method === 'GET') {
       // GET /api/apps?type=trusti
@@ -62,6 +62,28 @@ export default async function handler(req, res) {
         });
       }
       
+      // Si onboarding est demandé
+      const requestOnboarding = onboarding === 'true' || onboarding === '1';
+      if (requestOnboarding) {
+        const paginationOptions = {
+          limit: parseInt(limit) || 0,
+          offset: parseInt(offset) || 0,
+        };
+        const result = await dbService.getOnboardingApps(paginationOptions);
+        return res.status(200).json({
+          success: true,
+          apps: result.apps,
+          pagination: {
+            total: result.total,
+            limit: result.limit,
+            offset: result.offset,
+            page: 1,
+            totalPages: 1,
+            hasMore: false
+          }
+        });
+      }
+
       // Si awards/showInAwards est demandé, utiliser getAwardsApps
       const requestAwards = awards === 'true' || awards === '1' || showInAwards === 'true' || showInAwards === '1';
       if (requestAwards) {
