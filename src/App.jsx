@@ -125,8 +125,8 @@ const App = () => {
             ? '/api'
             : 'http://localhost:3001/api';
           
-          // Charger les apps triées par popularité avec pagination
-          const url = `${API_URL}/apps?limit=${onboardingPagination.limit}&offset=0&sortBy=popularity`;
+          // Charger les apps marquées "show_in_onboarding"
+          const url = `${API_URL}/apps?onboarding=true&limit=${onboardingPagination.limit}&offset=0`;
           
           const response = await fetch(url);
           const data = await response.json();
@@ -168,7 +168,7 @@ const App = () => {
         : 'http://localhost:3001/api';
       
       const newOffset = onboardingPagination.offset + onboardingPagination.limit;
-      const url = `${API_URL}/apps?limit=${onboardingPagination.limit}&offset=${newOffset}&sortBy=popularity`;
+      const url = `${API_URL}/apps?onboarding=true&limit=${onboardingPagination.limit}&offset=${newOffset}`;
       
       const response = await fetch(url);
       const data = await response.json();

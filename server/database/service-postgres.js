@@ -218,6 +218,12 @@ export async function initDatabase() {
     await sql`CREATE INDEX IF NOT EXISTS idx_trusti_score ON applications(trusti_score)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_app_relations_app_id ON app_relations(app_id)`;
 
+    // Migration: colonne show_in_onboarding (ajout idempotent)
+    await sql`
+      ALTER TABLE applications
+      ADD COLUMN IF NOT EXISTS show_in_onboarding INTEGER DEFAULT 1
+    `;
+
     console.log('✅ Database initialized successfully');
     return true;
   } catch (error) {
@@ -408,6 +414,42 @@ export async function getAppsByType(appType, options = {}) {
 }
 
 /**
+ * Obtenir les applications pour l'onboarding (show_in_onboarding = 1)
+ */
+export async function getOnboardingApps(options = {}) {
+  try {
+    const { limit = 0, offset = 0 } = options;
+
+    const totalResult = await sql`
+      SELECT COUNT(*) as count FROM applications WHERE show_in_onboarding = 1
+    `;
+    const total = parseInt(totalResult[0].count);
+
+    let apps;
+    if (limit > 0) {
+      apps = await sql`
+        SELECT * FROM applications
+        WHERE show_in_onboarding = 1
+        ORDER BY popularity ASC, name ASC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+    } else {
+      apps = await sql`
+        SELECT * FROM applications
+        WHERE show_in_onboarding = 1
+        ORDER BY popularity ASC, name ASC
+      `;
+    }
+
+    const formatted = await Promise.all(apps.map(formatAppFromDB));
+    return { apps: formatted, total, limit, offset };
+  } catch (error) {
+    console.error('Error getting onboarding apps:', error);
+    throw error;
+  }
+}
+
+/**
  * Obtenir les applications pour les Awards (show_in_awards = 1)
  * @param {Object} options - Options de pagination
  * @param {number} options.limit - Nombre d'apps à retourner (0 = toutes)
@@ -565,7 +607,7 @@ export async function createApp(appData) {
         id, name, trusti_score, grade, category, icon, color, reason,
         play_store_url, apple_store_url, github_url, other_store_url,
         website, description, developer, license,
-        is_open_source, is_european, jurisdiction, app_type, show_in_awards, popularity, privacy_features, permissions
+        is_open_source, is_european, jurisdiction, app_type, show_in_awards, show_in_onboarding, popularity, privacy_features, permissions
       )
       VALUES (
         ${id}, ${appData.name}, ${trustiScore}, ${grade},
@@ -578,6 +620,7 @@ export async function createApp(appData) {
         ${appData.isOpenSource || false}, ${appData.isEuropean || false},
         ${appData.jurisdiction || null}, ${appData.appType || 'regular'},
         ${appData.show_in_awards !== undefined ? Number(appData.show_in_awards) : (appData.showInAwards !== false ? 1 : 0)},
+        ${appData.show_in_onboarding !== undefined ? Number(appData.show_in_onboarding) : (appData.showInOnboarding !== false ? 1 : 0)},
         ${appData.popularity !== undefined ? appData.popularity : 9999},
         ${JSON.stringify(appData.privacyFeatures || {})},
         ${JSON.stringify(appData.permissions || [])}
@@ -630,9 +673,13 @@ export async function updateApp(id, appData) {
         jurisdiction = COALESCE(${appData.jurisdiction}, jurisdiction),
         app_type = COALESCE(${appData.appType}, app_type),
         show_in_awards = COALESCE(${
-          appData.show_in_awards !== undefined ? Number(appData.show_in_awards) : 
+          appData.show_in_awards !== undefined ? Number(appData.show_in_awards) :
           (appData.showInAwards !== undefined ? (appData.showInAwards ? 1 : 0) : null)
         }, show_in_awards),
+        show_in_onboarding = COALESCE(${
+          appData.show_in_onboarding !== undefined ? Number(appData.show_in_onboarding) :
+          (appData.showInOnboarding !== undefined ? (appData.showInOnboarding ? 1 : 0) : null)
+        }, show_in_onboarding),
         popularity = COALESCE(${appData.popularity !== undefined ? appData.popularity : null}, popularity),
         privacy_features = COALESCE(${JSON.stringify(appData.privacyFeatures || {})}, privacy_features),
         permissions = COALESCE(${JSON.stringify(appData.permissions || [])}, permissions),
@@ -998,6 +1045,7 @@ async function formatAppFromDB(app) {
     jurisdiction: app.jurisdiction,
     appType: appType,
     showInAwards: app.show_in_awards !== 0,
+    showInOnboarding: app.show_in_onboarding !== 0,
     popularity: app.popularity ?? 9999,
     privacyFeatures: typeof app.privacy_features === 'string' 
       ? JSON.parse(app.privacy_features) 
@@ -1015,6 +1063,7 @@ export default {
   getAllApps,
   getAppsByType,
   getAwardsApps,
+  getOnboardingApps,
   getAppById,
   getAppsByIds,
   createApp,

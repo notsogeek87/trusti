@@ -537,8 +537,8 @@ app.delete('/api/star-apps', async (req, res) => {
 app.get('/api/apps', async (req, res) => {
   try {
     // Extraire les paramètres de pagination et de recherche
-    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, ids } = req.query;
-    
+    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, onboarding, ids } = req.query;
+
     // Si des IDs spécifiques sont demandés, utiliser getAppsByIds
     if (ids) {
       const idsArray = ids.split(',').map(id => id.trim()).filter(id => id);
@@ -575,6 +575,27 @@ app.get('/api/apps', async (req, res) => {
       });
     }
     
+    // Si onboarding est demandé
+    const requestOnboarding = onboarding === 'true' || onboarding === '1';
+    if (requestOnboarding) {
+      const result = await dbService.getOnboardingApps({
+        limit: parseInt(limit) || 0,
+        offset: parseInt(offset) || 0,
+      });
+      return res.json({
+        success: true,
+        apps: result.apps,
+        pagination: {
+          total: result.total,
+          limit: result.limit,
+          offset: result.offset,
+          page: 1,
+          totalPages: 1,
+          hasMore: false
+        }
+      });
+    }
+
     // Si awards/showInAwards est demandé, utiliser getAwardsApps
     const requestAwards = awards === 'true' || awards === '1' || showInAwards === 'true' || showInAwards === '1';
     if (requestAwards) {
