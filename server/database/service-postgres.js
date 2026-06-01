@@ -427,38 +427,38 @@ export async function getOnboardingApps(options = {}) {
       // Filtre par catégories (pour le lazy loading par étape)
       const countResult = await sql`
         SELECT COUNT(*) as count FROM applications
-        WHERE show_in_onboarding = 1 AND category = ANY(${categories})
+        WHERE COALESCE(show_in_onboarding, 1) = 1 AND category = ANY(${categories})
       `;
       total = parseInt(countResult[0].count);
 
       apps = limit > 0
         ? await sql`
             SELECT * FROM applications
-            WHERE show_in_onboarding = 1 AND category = ANY(${categories})
+            WHERE COALESCE(show_in_onboarding, 1) = 1 AND category = ANY(${categories})
             ORDER BY popularity ASC, name ASC
             LIMIT ${limit} OFFSET ${offset}
           `
         : await sql`
             SELECT * FROM applications
-            WHERE show_in_onboarding = 1 AND category = ANY(${categories})
+            WHERE COALESCE(show_in_onboarding, 1) = 1 AND category = ANY(${categories})
             ORDER BY popularity ASC, name ASC
           `;
     } else {
       const countResult = await sql`
-        SELECT COUNT(*) as count FROM applications WHERE show_in_onboarding = 1
+        SELECT COUNT(*) as count FROM applications WHERE COALESCE(show_in_onboarding, 1) = 1
       `;
       total = parseInt(countResult[0].count);
 
       apps = limit > 0
         ? await sql`
             SELECT * FROM applications
-            WHERE show_in_onboarding = 1
+            WHERE COALESCE(show_in_onboarding, 1) = 1
             ORDER BY popularity ASC, name ASC
             LIMIT ${limit} OFFSET ${offset}
           `
         : await sql`
             SELECT * FROM applications
-            WHERE show_in_onboarding = 1
+            WHERE COALESCE(show_in_onboarding, 1) = 1
             ORDER BY popularity ASC, name ASC
           `;
     }
