@@ -1,14 +1,13 @@
-import React from 'react';
-import { PlusCircle, CheckCircle, CheckCircle2, Trash2, Sparkles, ExternalLink, ShieldCheck, Search, Star, ChevronRight } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { PlusCircle, CheckCircle, Trash2, Sparkles, ShieldCheck, Search, Star, ChevronRight } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
 import { TABS } from '../constants/tabs';
 
-/**
- * Carte d'application dans la liste
- * Mémoïsé pour éviter les re-rendus inutiles
- */
-const AppCard = React.memo(({ 
-  app, 
+const SWIPE_THRESHOLD = 72;
+const SWIPE_MAX = 88;
+
+const AppCard = React.memo(({
+  app,
   activeTab,
   isInMyApps,
   isMigrated,
@@ -19,195 +18,203 @@ const AppCard = React.memo(({
   onSelectMigration,
   isLoadingMyApps = false
 }) => {
-  // Détecter si c'est un skeleton de chargement
   const isLoadingSkeleton = app.isLoadingSkeleton === true;
-  
+
+  const [swipeX, setSwipeX] = useState(0);
+  const [swiping, setSwiping] = useState(false);
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
+  const didSwipe = useRef(false);
+
+  const handleTouchStart = (e) => {
+    if (activeTab !== TABS.MY_APPS || isLoadingSkeleton) return;
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    didSwipe.current = false;
+  };
+
+  const handleTouchMove = (e) => {
+    if (touchStartX.current === null) return;
+    const dx = e.touches[0].clientX - touchStartX.current;
+    const dy = e.touches[0].clientY - touchStartY.current;
+    if (Math.abs(dx) > Math.abs(dy) && dx < 0) {
+      didSwipe.current = true;
+      setSwiping(true);
+      setSwipeX(Math.max(dx, -SWIPE_MAX));
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (swipeX < -SWIPE_THRESHOLD) {
+      onToggleMyApp({ stopPropagation: () => {} }, app.id);
+    }
+    setSwipeX(0);
+    setSwiping(false);
+    touchStartX.current = null;
+  };
+
+  const handleCardClick = () => {
+    if (didSwipe.current) { didSwipe.current = false; return; }
+    if (swipeX !== 0) { setSwipeX(0); return; }
+    if (!isLoadingSkeleton) onSelectApp(app);
+  };
+
   return (
-    <div 
-      onClick={() => !isLoadingSkeleton && onSelectApp(app)} 
-      className={`bg-white rounded-2xl border border-slate-100 p-4 flex flex-col gap-3 ${isLoadingSkeleton ? 'cursor-default' : 'cursor-pointer hover:shadow-md hover:border-indigo-100 active:scale-[0.98] active:shadow-none'} transition-all group`}
-    >
-      <div className="flex items-center gap-3">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 ${isLoadingSkeleton ? 'bg-slate-200 animate-pulse' : 'bg-slate-100'}`}>
-          {!isLoadingSkeleton && app.icon && app.icon.startsWith('http') ? (
-            <img 
-              src={app.icon} 
-              alt={app.name} 
-              loading="lazy"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className={`${isLoadingSkeleton ? 'text-slate-400' : app.color} w-full h-full flex items-center justify-center text-xl text-white`}>
-              {app.icon}
-            </div>
-          )}
+    <div className="relative overflow-hidden rounded-2xl">
+      {/* Zone rouge révélée au slide */}
+      {activeTab === TABS.MY_APPS && !isLoadingSkeleton && (
+        <div
+          className="absolute inset-y-0 right-0 bg-rose-500 flex flex-col items-center justify-center gap-1 px-5"
+          aria-hidden="true"
+        >
+          <Trash2 size={18} className="text-white" />
+          <span className="text-white text-[10px] font-bold">Retirer</span>
         </div>
-        
-        <div className="flex-grow min-w-0">
-          <h3 className={`font-black text-sm truncate ${isLoadingSkeleton ? 'text-slate-400' : ''}`}>{app.name}</h3>
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-            {isLoadingSkeleton ? 'Chargement...' : app.category}
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <ScoreIndicator grade={app.grade} />
+      )}
 
-          {activeTab === TABS.MY_APPS ? (
-            <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-100 items-center">
-              <button 
-                onClick={(e) => !isLoadingSkeleton && onToggleMigrate(e, app.id)}
-                disabled={isLoadingSkeleton}
-                className={`p-1.5 rounded-lg transition-all ${
-                  isLoadingSkeleton 
-                    ? 'text-slate-200 cursor-not-allowed' 
-                    : isMigrated 
-                    ? 'bg-emerald-500 text-white shadow-sm' 
-                    : 'text-slate-300 hover:text-emerald-500'
-                }`}
-                title="Marquer comme migré"
-              >
-                <CheckCircle2 size={18} />
-              </button>
-              <button 
-                onClick={(e) => !isLoadingSkeleton && onToggleMyApp(e, app.id)}
-                disabled={isLoadingSkeleton}
-                className={`p-1.5 transition-all ${
-                  isLoadingSkeleton 
-                    ? 'text-slate-200 cursor-not-allowed'
-                    : 'text-slate-300 hover:text-rose-500'
-                }`}
-                title="Supprimer"
-              >
-                <Trash2 size={18} />
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={(e) => !isLoadingSkeleton && onToggleMyApp(e, app.id)}
-              disabled={isLoadingSkeleton}
-              className={`p-2 rounded-full transition-all ${
-                isLoadingSkeleton
-                  ? 'text-slate-200 cursor-not-allowed'
-                  : isInMyApps
-                  ? 'bg-indigo-100 text-indigo-600'
-                  : 'text-slate-200 hover:text-indigo-400'
-              }`}
-            >
-              {isInMyApps ? <CheckCircle size={20} /> : <PlusCircle size={20} />}
-            </button>
-          )}
-
-          {!isLoadingSkeleton && (
-            <ChevronRight size={15} className="text-slate-300 group-hover:text-indigo-400 transition-colors shrink-0" />
-          )}
-        </div>
-      </div>
-      
-      {/* Section migration pour "Mes Apps" */}
-      {activeTab === TABS.MY_APPS && isLoadingSkeleton && (
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center gap-2">
-          <div className="w-5 h-5 rounded-full border-2 border-slate-300 border-t-indigo-600 animate-spin"></div>
-          <div className="flex-grow">
-            <p className="text-xs font-bold text-slate-600">
-              Recherche d'alternatives...
-            </p>
-            <p className="text-[11px] text-slate-500">
-              Analyse des meilleures options disponibles
-            </p>
-          </div>
-        </div>
-      )}
-      
-      {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade === "A" && (
-        <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2">
-          <ShieldCheck size={20} className="text-emerald-600 shrink-0" />
-          <div className="flex-grow">
-            <p className="text-xs font-bold text-emerald-700">
-              TrustiScore au max, tout va bien !
-            </p>
-            <p className="text-[11px] text-emerald-600">
-              Cette application respecte votre souveraineté numérique
-            </p>
-          </div>
-        </div>
-      )}
-      
-      {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade !== "A" && !app.alternative && !customMigration && (
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center gap-2">
-          {app.isLoadingAlternative ? (
-            <>
-              <div className="w-5 h-5 rounded-full border-2 border-slate-300 border-t-indigo-600 animate-spin"></div>
-              <div className="flex-grow">
-                <p className="text-xs font-bold text-slate-600">
-                  Recherche d'alternatives...
-                </p>
-                <p className="text-[11px] text-slate-500">
-                  Analyse des meilleures options disponibles
-                </p>
-              </div>
-            </>
-          ) : (
-            <>
-              <Search size={16} className="text-slate-400 shrink-0" />
-              <div className="flex-grow">
-                <p className="text-xs font-bold text-slate-600">
-                  Alternative inconnue pour le moment
-                </p>
-                <p className="text-[11px] text-slate-500">
-                  Nous travaillons à identifier les meilleures alternatives
-                </p>
-              </div>
-            </>
-          )}
-        </div>
-      )}
-      
-      {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade !== "A" && (app.alternative || customMigration) && (
-        <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex items-center justify-between animate-pulse-subtle">
-          <div className="flex items-center gap-3 flex-grow min-w-0">
-            {app.altIcon && (
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-white border border-emerald-200">
-                {app.altIcon.startsWith('http') ? (
-                  <img src={app.altIcon} alt="Alternative" className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-lg">{app.altIcon}</span>
-                )}
+      {/* Carte coulissante */}
+      <div
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onClick={handleCardClick}
+        style={{
+          transform: `translateX(${swipeX}px)`,
+          transition: swiping ? 'none' : 'transform 0.3s cubic-bezier(0.25,1,0.5,1)',
+        }}
+        className={`bg-white border border-slate-100 p-4 flex flex-col gap-3 rounded-2xl ${
+          isLoadingSkeleton ? 'cursor-default' : 'cursor-pointer hover:shadow-md hover:border-indigo-100'
+        } transition-shadow group`}
+      >
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 ${isLoadingSkeleton ? 'bg-slate-200 animate-pulse' : 'bg-slate-100'}`}>
+            {!isLoadingSkeleton && app.icon && app.icon.startsWith('http') ? (
+              <img src={app.icon} alt={app.name} loading="lazy" className="w-full h-full object-cover" />
+            ) : (
+              <div className={`${isLoadingSkeleton ? 'text-slate-400' : app.color} w-full h-full flex items-center justify-center text-xl text-white`}>
+                {app.icon}
               </div>
             )}
-            {!app.altIcon && <Sparkles size={14} className="text-emerald-600 shrink-0" />}
-            <div className="flex-grow">
-              <p className="text-[11px] font-black text-emerald-800 uppercase tracking-tight">
-                Migrer vers :
-              </p>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSelectMigration(app.id);
-                }}
-                className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline mt-1"
-              >
-                {app.alternative ? (
-                  <span>
-                    {app.alternative}
-                    <span className="inline-flex items-center gap-0.5 text-[10px] ml-1 opacity-70"><Star size={8} className="fill-current" /> Recommandé</span>
-                  </span>
-                ) : customMigration ? (
-                  <span>
-                    {customMigration} 
-                    <span className="text-[10px] ml-1 opacity-70">(cliquez pour changer)</span>
-                  </span>
-                ) : (
-                  <span>Sélectionner une alternative ▼</span>
-                )}
-              </button>
-            </div>
           </div>
-          <div className="shrink-0 ml-2">
-            <ScoreIndicator grade={app.altGrade || 'A'} />
+
+          <div className="flex-grow min-w-0">
+            <h3 className={`font-black text-sm truncate ${isLoadingSkeleton ? 'text-slate-400' : ''}`}>{app.name}</h3>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+              {isLoadingSkeleton ? 'Chargement...' : app.category}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <ScoreIndicator grade={app.grade} />
+
+            {activeTab !== TABS.MY_APPS && (
+              <button
+                onClick={(e) => { e.stopPropagation(); !isLoadingSkeleton && onToggleMyApp(e, app.id); }}
+                disabled={isLoadingSkeleton}
+                className={`p-2 rounded-full transition-all ${
+                  isLoadingSkeleton
+                    ? 'text-slate-200 cursor-not-allowed'
+                    : isInMyApps
+                    ? 'bg-indigo-100 text-indigo-600'
+                    : 'text-slate-200 hover:text-indigo-400'
+                }`}
+              >
+                {isInMyApps ? <CheckCircle size={20} /> : <PlusCircle size={20} />}
+              </button>
+            )}
+
+            {!isLoadingSkeleton && (
+              <ChevronRight size={15} className="text-slate-300 group-hover:text-indigo-400 transition-colors shrink-0" />
+            )}
           </div>
         </div>
-      )}
+
+        {/* Skeleton loading */}
+        {activeTab === TABS.MY_APPS && isLoadingSkeleton && (
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center gap-2">
+            <div className="w-5 h-5 rounded-full border-2 border-slate-300 border-t-indigo-600 animate-spin" />
+            <div className="flex-grow">
+              <p className="text-xs font-bold text-slate-600">Recherche d'alternatives...</p>
+              <p className="text-[11px] text-slate-500">Analyse des meilleures options disponibles</p>
+            </div>
+          </div>
+        )}
+
+        {/* Grade A — tout va bien */}
+        {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade === 'A' && (
+          <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2">
+            <ShieldCheck size={20} className="text-emerald-600 shrink-0" />
+            <div className="flex-grow">
+              <p className="text-xs font-bold text-emerald-700">TrustiScore au max, tout va bien !</p>
+              <p className="text-[11px] text-emerald-600">Cette application respecte votre souveraineté numérique</p>
+            </div>
+          </div>
+        )}
+
+        {/* Pas d'alternative connue */}
+        {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade !== 'A' && !app.alternative && !customMigration && (
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center gap-2">
+            {app.isLoadingAlternative ? (
+              <>
+                <div className="w-5 h-5 rounded-full border-2 border-slate-300 border-t-indigo-600 animate-spin" />
+                <div className="flex-grow">
+                  <p className="text-xs font-bold text-slate-600">Recherche d'alternatives...</p>
+                  <p className="text-[11px] text-slate-500">Analyse des meilleures options disponibles</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <Search size={16} className="text-slate-400 shrink-0" />
+                <div className="flex-grow">
+                  <p className="text-xs font-bold text-slate-600">Alternative inconnue pour le moment</p>
+                  <p className="text-[11px] text-slate-500">Nous travaillons à identifier les meilleures alternatives</p>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Alternative disponible */}
+        {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade !== 'A' && (app.alternative || customMigration) && (
+          <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex items-center justify-between animate-pulse-subtle">
+            <div className="flex items-center gap-3 flex-grow min-w-0">
+              {app.altIcon && (
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-white border border-emerald-200">
+                  {app.altIcon.startsWith('http') ? (
+                    <img src={app.altIcon} alt="Alternative" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-lg">{app.altIcon}</span>
+                  )}
+                </div>
+              )}
+              {!app.altIcon && <Sparkles size={14} className="text-emerald-600 shrink-0" />}
+              <div className="flex-grow">
+                <p className="text-[11px] font-black text-emerald-800 uppercase tracking-tight">Migrer vers :</p>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onSelectMigration(app.id); }}
+                  className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline mt-1"
+                >
+                  {app.alternative ? (
+                    <span>
+                      {app.alternative}
+                      <span className="inline-flex items-center gap-0.5 text-[10px] ml-1 opacity-70">
+                        <Star size={8} className="fill-current" /> Recommandé
+                      </span>
+                    </span>
+                  ) : customMigration ? (
+                    <span>{customMigration} <span className="text-[10px] ml-1 opacity-70">(cliquez pour changer)</span></span>
+                  ) : (
+                    <span>Sélectionner une alternative ▼</span>
+                  )}
+                </button>
+              </div>
+            </div>
+            <div className="shrink-0 ml-2">
+              <ScoreIndicator grade={app.altGrade || 'A'} />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 });
