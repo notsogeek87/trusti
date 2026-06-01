@@ -135,7 +135,7 @@ const OnboardingApps = ({ onComplete }) => {
 
     setIsLoadingStep(true);
     const cats = STEPS[step].categories.map(c => encodeURIComponent(c)).join(',');
-    fetch(`${API_URL}/apps?onboarding=true&categories=${cats}&limit=9`)
+    fetch(`${API_URL}/apps?onboarding=true&categories=${cats}&limit=12`)
       .then(r => r.json())
       .then(data => {
         const apps = data.success ? data.apps : [];
