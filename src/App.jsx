@@ -109,7 +109,7 @@ const App = () => {
   const [isLoadingOnboardingApps, setIsLoadingOnboardingApps] = useState(false);
   const [onboardingPagination, setOnboardingPagination] = useState({
     total: 0,
-    limit: 50,
+    limit: 0,
     offset: 0,
     hasMore: false,
     isLoadingMore: false
