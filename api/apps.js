@@ -70,16 +70,18 @@ export default async function handler(req, res) {
           offset: parseInt(offset) || 0,
         };
         const result = await dbService.getOnboardingApps(paginationOptions);
+        const paginationLimit = result.limit || 0;
+        const paginationOffset = result.offset || 0;
         return res.status(200).json({
           success: true,
           apps: result.apps,
           pagination: {
             total: result.total,
-            limit: result.limit,
-            offset: result.offset,
-            page: 1,
-            totalPages: 1,
-            hasMore: false
+            limit: paginationLimit,
+            offset: paginationOffset,
+            page: paginationLimit > 0 ? Math.floor(paginationOffset / paginationLimit) + 1 : 1,
+            totalPages: paginationLimit > 0 ? Math.ceil(result.total / paginationLimit) : 1,
+            hasMore: paginationLimit > 0 ? (paginationOffset + paginationLimit) < result.total : false
           }
         });
       }

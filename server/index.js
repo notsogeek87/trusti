@@ -582,16 +582,18 @@ app.get('/api/apps', async (req, res) => {
         limit: parseInt(limit) || 0,
         offset: parseInt(offset) || 0,
       });
+      const paginationLimit = result.limit || 0;
+      const paginationOffset = result.offset || 0;
       return res.json({
         success: true,
         apps: result.apps,
         pagination: {
           total: result.total,
-          limit: result.limit,
-          offset: result.offset,
-          page: 1,
-          totalPages: 1,
-          hasMore: false
+          limit: paginationLimit,
+          offset: paginationOffset,
+          page: paginationLimit > 0 ? Math.floor(paginationOffset / paginationLimit) + 1 : 1,
+          totalPages: paginationLimit > 0 ? Math.ceil(result.total / paginationLimit) : 1,
+          hasMore: paginationLimit > 0 ? (paginationOffset + paginationLimit) < result.total : false
         }
       });
     }
