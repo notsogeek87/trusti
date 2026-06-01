@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Check, Search, ChevronRight, ChevronLeft, X, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Check, ChevronRight, ChevronLeft, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
 
 const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
 
@@ -45,10 +45,8 @@ const STEPS = [
 
 // step -1 = intro
 // step 0..N-1 = catégories
-// step N = recherche libre
-// step N+1 = écran succès
-const LAST_STEP = STEPS.length;     // recherche libre
-const SUCCESS_STEP = LAST_STEP + 1; // écran succès
+// step N = écran succès
+const SUCCESS_STEP = STEPS.length;
 
 const GRADE_DOT = {
   A: 'bg-emerald-500',
@@ -110,9 +108,6 @@ const OnboardingApps = ({ onComplete }) => {
   const [step, setStep] = useState(-1); // -1 = intro
   const [direction, setDirection] = useState('forward');
   const [selected, setSelected] = useState(new Set());
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [isSearching, setIsSearching] = useState(false);
   const [stepApps, setStepApps] = useState([]);
   const [isLoadingStep, setIsLoadingStep] = useState(false);
   const cache = useRef({}); // cache par step index
@@ -146,22 +141,7 @@ const OnboardingApps = ({ onComplete }) => {
       .finally(() => setIsLoadingStep(false));
   }, [step]);
 
-  // Search debounce
-  useEffect(() => {
-    if (!searchTerm.trim()) { setSearchResults([]); return; }
-    const t = setTimeout(async () => {
-      setIsSearching(true);
-      try {
-        const res = await fetch(`${API_URL}/apps?search=${encodeURIComponent(searchTerm)}`);
-        const data = await res.json();
-        if (data.success) setSearchResults(data.apps);
-      } catch { setSearchResults([]); }
-      finally { setIsSearching(false); }
-    }, 300);
-    return () => clearTimeout(t);
-  }, [searchTerm]);
-
-  const progress = step < 0 ? 0 : Math.round(((step + 1) / (LAST_STEP + 1)) * 100);
+  const progress = step < 0 ? 0 : Math.round(((step + 1) / STEPS.length) * 100);
 
   // ── INTRO ─────────────────────────────────────────────────────────────
   if (step === -1) {
@@ -189,86 +169,6 @@ const OnboardingApps = ({ onComplete }) => {
           >
             Passer cette étape
           </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ── RECHERCHE LIBRE (dernier step) ───────────────────────────────────
-  if (step === LAST_STEP) {
-    const displayApps = searchTerm.trim() ? searchResults : [];
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col">
-        <style>{ANIM_CSS}</style>
-
-        {/* Header */}
-        <div className="sticky top-0 z-10 bg-white border-b border-slate-100 shadow-sm px-4 py-3">
-          <div className="max-w-md mx-auto">
-            {/* Progress */}
-            <div className="flex items-center gap-3 mb-3">
-              <button onClick={goBack} className="p-1 text-slate-400 hover:text-slate-700 transition-colors">
-                <ChevronLeft size={20} />
-              </button>
-              <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-indigo-500 rounded-full transition-all duration-500" style={{ width: '100%' }} />
-              </div>
-              <span className="text-[11px] font-bold text-slate-400 shrink-0">{selected.size} app{selected.size !== 1 ? 's' : ''}</span>
-            </div>
-            <p className="text-base font-black text-slate-800 mb-3">🔍 D'autres apps que tu utilises ?</p>
-            <div className="relative">
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Rechercher une app..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-8 py-2.5 bg-slate-100 rounded-xl text-sm border-0 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-              />
-              {searchTerm && (
-                <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-                  <X size={14} />
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Résultats */}
-        <div className="flex-1 overflow-y-auto max-w-md mx-auto w-full px-4 pt-4 pb-36">
-          {!searchTerm && (
-            <p className="text-center text-sm text-slate-400 py-8">
-              Tape le nom d'une app pour la trouver
-            </p>
-          )}
-          {isSearching && (
-            <div className="flex justify-center py-8">
-              <div className="w-6 h-6 rounded-full border-2 border-indigo-400 border-t-transparent animate-spin" />
-            </div>
-          )}
-          {!isSearching && displayApps.length > 0 && (
-            <div className="grid grid-cols-3 gap-3">
-              {displayApps.map(app => (
-                <AppTile key={app.id} app={app} selected={selected.has(app.id)} onToggle={toggleApp} />
-              ))}
-            </div>
-          )}
-          {searchTerm && !isSearching && displayApps.length === 0 && (
-            <p className="text-center text-sm text-slate-400 py-8">Aucune app trouvée</p>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-4 py-4 shadow-lg">
-          <div className="max-w-md mx-auto">
-            <button
-              onClick={goNext}
-              className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm shadow-lg transition-all active:scale-[0.98]"
-            >
-              {selected.size === 0
-                ? 'Terminer sans sélection'
-                : `Continuer avec ${selected.size} app${selected.size !== 1 ? 's' : ''} →`}
-            </button>
-          </div>
         </div>
       </div>
     );
@@ -350,7 +250,7 @@ const OnboardingApps = ({ onComplete }) => {
             />
           </div>
           <span className="text-[11px] font-bold text-slate-400 shrink-0">
-            {step + 1}/{LAST_STEP}
+            {step + 1}/{STEPS.length}
           </span>
         </div>
       </div>
