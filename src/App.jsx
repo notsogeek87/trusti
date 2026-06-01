@@ -105,92 +105,6 @@ const App = () => {
   
   // État pour la page d'onboarding
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [allAppsForOnboarding, setAllAppsForOnboarding] = useState([]);
-  const [isLoadingOnboardingApps, setIsLoadingOnboardingApps] = useState(false);
-  const [onboardingPagination, setOnboardingPagination] = useState({
-    total: 0,
-    limit: 0,
-    offset: 0,
-    hasMore: false,
-    isLoadingMore: false
-  });
-
-  // Charger TOUTES les apps pour l'onboarding (avec tri par popularité)
-  useEffect(() => {
-    if (showOnboarding && allAppsForOnboarding.length === 0 && !isLoadingOnboardingApps) {
-      const loadAllApps = async () => {
-        setIsLoadingOnboardingApps(true);
-        try {
-          const API_URL = import.meta.env.PROD 
-            ? '/api'
-            : 'http://localhost:3001/api';
-          
-          // Charger les apps marquées "show_in_onboarding"
-          const url = `${API_URL}/apps?onboarding=true&limit=${onboardingPagination.limit}&offset=0`;
-          
-          const response = await fetch(url);
-          const data = await response.json();
-          const appsArray = data.success ? data.apps : [];
-          
-          setAllAppsForOnboarding(appsArray);
-          
-          // Mettre à jour l'état de pagination
-          if (data.pagination) {
-            setOnboardingPagination({
-              total: data.pagination.total,
-              limit: data.pagination.limit,
-              offset: 0,
-              hasMore: data.pagination.hasMore,
-              isLoadingMore: false
-            });
-          }
-        } catch (error) {
-        } finally {
-          setIsLoadingOnboardingApps(false);
-        }
-      };
-      
-      loadAllApps();
-    }
-  }, [showOnboarding, allAppsForOnboarding.length, isLoadingOnboardingApps]);
-
-  // Fonction pour charger plus d'apps pour l'onboarding
-  const loadMoreOnboardingApps = async () => {
-    if (onboardingPagination.isLoadingMore || !onboardingPagination.hasMore) {
-      return;
-    }
-
-    setOnboardingPagination(prev => ({ ...prev, isLoadingMore: true }));
-
-    try {
-      const API_URL = import.meta.env.PROD 
-        ? '/api'
-        : 'http://localhost:3001/api';
-      
-      const newOffset = onboardingPagination.offset + onboardingPagination.limit;
-      const url = `${API_URL}/apps?onboarding=true&limit=${onboardingPagination.limit}&offset=${newOffset}`;
-      
-      const response = await fetch(url);
-      const data = await response.json();
-      const appsArray = data.success ? data.apps : [];
-      
-      // Ajouter les nouvelles apps à la liste existante
-      setAllAppsForOnboarding(prev => [...prev, ...appsArray]);
-      
-      // Mettre à jour la pagination
-      if (data.pagination) {
-        setOnboardingPagination({
-          total: data.pagination.total,
-          limit: data.pagination.limit,
-          offset: newOffset,
-          hasMore: data.pagination.hasMore,
-          isLoadingMore: false
-        });
-      }
-    } catch (error) {
-      setOnboardingPagination(prev => ({ ...prev, isLoadingMore: false }));
-    }
-  };
 
   // Afficher le modal de bienvenue si l'utilisateur n'est pas connecté
   useEffect(() => {
@@ -430,26 +344,7 @@ const App = () => {
 
   // Afficher la page d'onboarding de sélection des apps
   if (showOnboarding) {
-    // Afficher un loader pendant le chargement
-    if (isLoadingOnboardingApps || allAppsForOnboarding.length === 0) {
-      return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-          <LoadingSpinner message="Chargement des applications..." size="large" />
-        </div>
-      );
-    }
-    
-    // Toutes les apps disponibles triées par popularité (le tri est déjà fait côté serveur)
-    const allApps = allAppsForOnboarding;
-    
-    return (
-      <OnboardingApps 
-        allApps={allApps}
-        onComplete={handleOnboardingComplete}
-        pagination={onboardingPagination}
-        onLoadMore={loadMoreOnboardingApps}
-      />
-    );
+    return <OnboardingApps onComplete={handleOnboardingComplete} />;
   }
 
   // Affichage du détail d'une application

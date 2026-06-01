@@ -418,27 +418,49 @@ export async function getAppsByType(appType, options = {}) {
  */
 export async function getOnboardingApps(options = {}) {
   try {
-    const { limit = 0, offset = 0 } = options;
-
-    const totalResult = await sql`
-      SELECT COUNT(*) as count FROM applications WHERE show_in_onboarding = 1
-    `;
-    const total = parseInt(totalResult[0].count);
+    const { limit = 0, offset = 0, categories = [] } = options;
 
     let apps;
-    if (limit > 0) {
-      apps = await sql`
-        SELECT * FROM applications
-        WHERE show_in_onboarding = 1
-        ORDER BY popularity ASC, name ASC
-        LIMIT ${limit} OFFSET ${offset}
+    let total;
+
+    if (categories.length > 0) {
+      // Filtre par catégories (pour le lazy loading par étape)
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM applications
+        WHERE show_in_onboarding = 1 AND category = ANY(${categories})
       `;
+      total = parseInt(countResult[0].count);
+
+      apps = limit > 0
+        ? await sql`
+            SELECT * FROM applications
+            WHERE show_in_onboarding = 1 AND category = ANY(${categories})
+            ORDER BY popularity ASC, name ASC
+            LIMIT ${limit} OFFSET ${offset}
+          `
+        : await sql`
+            SELECT * FROM applications
+            WHERE show_in_onboarding = 1 AND category = ANY(${categories})
+            ORDER BY popularity ASC, name ASC
+          `;
     } else {
-      apps = await sql`
-        SELECT * FROM applications
-        WHERE show_in_onboarding = 1
-        ORDER BY popularity ASC, name ASC
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM applications WHERE show_in_onboarding = 1
       `;
+      total = parseInt(countResult[0].count);
+
+      apps = limit > 0
+        ? await sql`
+            SELECT * FROM applications
+            WHERE show_in_onboarding = 1
+            ORDER BY popularity ASC, name ASC
+            LIMIT ${limit} OFFSET ${offset}
+          `
+        : await sql`
+            SELECT * FROM applications
+            WHERE show_in_onboarding = 1
+            ORDER BY popularity ASC, name ASC
+          `;
     }
 
     const formatted = await Promise.all(apps.map(formatAppFromDB));

@@ -537,7 +537,7 @@ app.delete('/api/star-apps', async (req, res) => {
 app.get('/api/apps', async (req, res) => {
   try {
     // Extraire les paramètres de pagination et de recherche
-    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, onboarding, ids } = req.query;
+    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, onboarding, categories, ids } = req.query;
 
     // Si des IDs spécifiques sont demandés, utiliser getAppsByIds
     if (ids) {
@@ -581,6 +581,7 @@ app.get('/api/apps', async (req, res) => {
       const result = await dbService.getOnboardingApps({
         limit: parseInt(limit) || 0,
         offset: parseInt(offset) || 0,
+        categories: categories ? categories.split(',').map(c => decodeURIComponent(c).trim()).filter(Boolean) : [],
       });
       const paginationLimit = result.limit || 0;
       const paginationOffset = result.offset || 0;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Check, Search, ChevronRight, ChevronLeft, X, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
 
 const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
@@ -106,13 +106,16 @@ const AppTile = ({ app, selected, onToggle }) => (
   </button>
 );
 
-const OnboardingApps = ({ allApps, onComplete }) => {
+const OnboardingApps = ({ onComplete }) => {
   const [step, setStep] = useState(-1); // -1 = intro
   const [direction, setDirection] = useState('forward');
   const [selected, setSelected] = useState(new Set());
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [stepApps, setStepApps] = useState([]);
+  const [isLoadingStep, setIsLoadingStep] = useState(false);
+  const cache = useRef({}); // cache par step index
 
   const toggleApp = (id) => {
     setSelected(prev => {
@@ -124,6 +127,24 @@ const OnboardingApps = ({ allApps, onComplete }) => {
 
   const goNext = () => { setDirection('forward'); setStep(s => s + 1); };
   const goBack = () => { setDirection('back'); setStep(s => s - 1); };
+
+  // Fetch apps pour l'étape courante (avec cache)
+  useEffect(() => {
+    if (step < 0 || step >= STEPS.length) { setStepApps([]); return; }
+    if (cache.current[step]) { setStepApps(cache.current[step]); return; }
+
+    setIsLoadingStep(true);
+    const cats = STEPS[step].categories.map(c => encodeURIComponent(c)).join(',');
+    fetch(`${API_URL}/apps?onboarding=true&categories=${cats}&limit=9`)
+      .then(r => r.json())
+      .then(data => {
+        const apps = data.success ? data.apps : [];
+        cache.current[step] = apps;
+        setStepApps(apps);
+      })
+      .catch(() => setStepApps([]))
+      .finally(() => setIsLoadingStep(false));
+  }, [step]);
 
   // Search debounce
   useEffect(() => {
@@ -139,15 +160,6 @@ const OnboardingApps = ({ allApps, onComplete }) => {
     }, 300);
     return () => clearTimeout(t);
   }, [searchTerm]);
-
-  // Apps pour l'étape courante
-  const stepApps = step >= 0 && step < STEPS.length
-    ? allApps
-        .filter(a => STEPS[step].categories.some(cat =>
-          a.category === cat || a.category?.includes(cat)
-        ))
-        .slice(0, 9)
-    : [];
 
   const progress = step < 0 ? 0 : Math.round(((step + 1) / (LAST_STEP + 1)) * 100);
 
@@ -360,7 +372,11 @@ const OnboardingApps = ({ allApps, onComplete }) => {
         </div>
 
         {/* Grille d'apps */}
-        {stepApps.length > 0 ? (
+        {isLoadingStep ? (
+          <div className="flex justify-center py-12">
+            <div className="w-7 h-7 rounded-full border-2 border-indigo-400 border-t-transparent animate-spin" />
+          </div>
+        ) : stepApps.length > 0 ? (
           <div className="grid grid-cols-3 gap-3">
             {stepApps.map(app => (
               <AppTile key={app.id} app={app} selected={selected.has(app.id)} onToggle={toggleApp} />

@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 
   try {
     // Extraire le type depuis l'URL ou le body
-    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, onboarding, ids } = req.query;
+    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, onboarding, categories, ids } = req.query;
     
     if (req.method === 'GET') {
       // GET /api/apps?type=trusti
@@ -68,6 +68,7 @@ export default async function handler(req, res) {
         const paginationOptions = {
           limit: parseInt(limit) || 0,
           offset: parseInt(offset) || 0,
+          categories: categories ? categories.split(',').map(c => decodeURIComponent(c).trim()).filter(Boolean) : [],
         };
         const result = await dbService.getOnboardingApps(paginationOptions);
         const paginationLimit = result.limit || 0;
