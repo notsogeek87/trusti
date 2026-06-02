@@ -139,7 +139,8 @@ const OnboardingApps = ({ onComplete }) => {
             const existingIds = new Set(cache.current[idx].map(a => a.id));
             const newApps = data.apps.filter(a => !existingIds.has(a.id));
             if (newApps.length === 0) return;
-            cache.current[idx] = [...cache.current[idx], ...newApps];
+            cache.current[idx] = [...cache.current[idx], ...newApps]
+              .sort((a, b) => (a.popularity ?? 9999) - (b.popularity ?? 9999));
             // Si l'utilisateur est déjà sur ce step, on ajoute les apps au fil de l'eau
             if (stepRef.current === idx) {
               setStepApps([...cache.current[idx]]);
