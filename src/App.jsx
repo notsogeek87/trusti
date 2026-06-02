@@ -122,6 +122,7 @@ const App = () => {
   // Handler pour "Non, je connais déjà"
   const handleFirstTimeNo = () => {
     setShowWelcomeModal(false);
+    setShowLoginModal(true);
   };
 
   // Handler pour la fin de l'onboarding
