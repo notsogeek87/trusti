@@ -28,18 +28,18 @@ const Header = ({
           </h1>
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink min-w-0">
+        <div className="flex items-center gap-1 md:gap-2 flex-shrink min-w-0">
           {currentUser ? (
-            <div className="flex items-center gap-2">
-              <div className="bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full flex items-center gap-2 max-w-[140px]">
+            <div className="flex items-center gap-1 md:gap-2">
+              <div className="bg-indigo-100 text-indigo-700 px-2 md:px-3 py-1.5 rounded-full flex items-center gap-1.5">
                 <User size={14} className="flex-shrink-0" />
-                <span className="text-xs font-bold truncate">{currentUser.email || currentUser}</span>
+                <span className="hidden md:block text-xs font-bold truncate max-w-[120px]">{currentUser.email || currentUser}</span>
               </div>
 
               {isAdminUnlocked ? (
                 <button
                   onClick={onOpenAdmin}
-                  className="p-2.5 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-full transition-all"
+                  className="p-1.5 md:p-2.5 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-full transition-all"
                   title="Administration des Applications"
                 >
                   <Settings size={18} />
@@ -47,7 +47,7 @@ const Header = ({
               ) : (
                 <button
                   onClick={onRequestAdminUnlock}
-                  className="p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-all"
+                  className="p-1.5 md:p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-all"
                   title="Déverrouiller l'administration"
                 >
                   <Lock size={18} />
@@ -57,7 +57,7 @@ const Header = ({
               {!isMobile && (
                 <button
                   onClick={onResetUserData}
-                  className="p-2.5 text-slate-300 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-all"
+                  className="p-1.5 md:p-2.5 text-slate-300 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-all"
                   title="Réinitialiser mes données (démo)"
                 >
                   <RotateCcw size={16} />
@@ -66,7 +66,7 @@ const Header = ({
 
               <button
                 onClick={onLogout}
-                className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-all"
+                className="p-1.5 md:p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-all"
                 title="Se déconnecter"
               >
                 <LogOut size={18} />
@@ -86,11 +86,11 @@ const Header = ({
 
           <button
             onClick={onShowLandingPage}
-            className="p-2.5 rounded-full transition-all duration-300 shadow-sm bg-indigo-500 text-white hover:bg-indigo-600"
+            className="p-1.5 md:p-2.5 rounded-full transition-all duration-300 shadow-sm bg-indigo-500 text-white hover:bg-indigo-600"
             aria-label="Aide et explications"
             title="À propos de TrustiScore"
           >
-            <HelpCircle size={22} />
+            <HelpCircle size={20} />
           </button>
         </div>
       </div>
