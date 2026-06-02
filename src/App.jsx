@@ -368,7 +368,7 @@ const App = () => {
 
   // Afficher la page d'onboarding de sélection des apps
   if (showOnboarding) {
-    return <OnboardingApps onComplete={handleOnboardingComplete} />;
+    return <OnboardingApps onComplete={handleOnboardingComplete} onSignUp={currentUser ? undefined : () => setShowLoginModal(true)} />;
   }
 
   // Affichage du détail d'une application

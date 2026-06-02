@@ -104,7 +104,7 @@ const AppTile = ({ app, selected, onToggle }) => (
   </button>
 );
 
-const OnboardingApps = ({ onComplete }) => {
+const OnboardingApps = ({ onComplete, onSignUp }) => {
   const [step, setStep] = useState(-1); // -1 = intro
   const [direction, setDirection] = useState('forward');
   const [selected, setSelected] = useState(new Set());
@@ -237,7 +237,7 @@ const OnboardingApps = ({ onComplete }) => {
             </div>
           )}
 
-          {/* CTA */}
+          {/* CTA principal */}
           <button
             onClick={() => onComplete(selected)}
             className="flex items-center gap-2 bg-white text-indigo-700 hover:bg-indigo-50 px-8 py-4 rounded-2xl font-black text-base shadow-xl transition-all active:scale-95"
@@ -246,6 +246,25 @@ const OnboardingApps = ({ onComplete }) => {
             {count === 0 ? 'Explorer le catalogue' : 'Voir mon score de confidentialité'}
             <ArrowRight size={18} />
           </button>
+
+          {/* Nudge inscription — discret, sous le CTA */}
+          {onSignUp && (
+            <div
+              className="mt-5 bg-white/10 rounded-2xl px-5 py-4 max-w-xs w-full text-left"
+              style={{ animation: 'onbFadeUp 0.4s 0.35s ease-out both' }}
+            >
+              <p className="text-sm font-black text-white mb-1">💾 Ne perds pas ta sélection</p>
+              <p className="text-xs text-white/65 leading-relaxed mb-3">
+                Crée un compte gratuit pour retrouver tes apps sur tous tes appareils.
+              </p>
+              <button
+                onClick={() => { onComplete(selected); onSignUp(); }}
+                className="text-xs font-bold text-white border border-white/30 rounded-xl px-4 py-2 hover:bg-white/10 transition-colors active:scale-95"
+              >
+                S'inscrire gratuitement →
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
