@@ -170,6 +170,7 @@ const App = () => {
     setActiveTab,
     setSearchTerm,
     toggleMyApp,
+    addMyApps,
     toggleMigrate,
     setCustomMigration,
     setSelectedApp,
@@ -237,6 +238,22 @@ const App = () => {
       window.scrollTo({ top: savedScrollY.current, behavior: 'instant' });
     }
   }, [selectedApp]);
+
+  // Appliquer les apps sélectionnées en onboarding après connexion
+  useEffect(() => {
+    if (!currentUser) return;
+    const pending = localStorage.getItem('trusti_pending_onboarding_apps');
+    if (!pending) return;
+    try {
+      const pendingIds = JSON.parse(pending);
+      localStorage.removeItem('trusti_pending_onboarding_apps');
+      if (pendingIds.length > 0) {
+        // Délai > 100ms (délai interne de useAppManagement pour setIsInitialized)
+        // pour que la sauvegarde se déclenche après le chargement initial
+        setTimeout(() => addMyApps(pendingIds.map(String)), 150);
+      }
+    } catch {}
+  }, [currentUser]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Réinitialiser la catégorie lors du changement d'onglet
   useEffect(() => {

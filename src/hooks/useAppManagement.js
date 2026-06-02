@@ -577,6 +577,15 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     });
   };
 
+  // Ajouter plusieurs apps sans risque de toggle (toujours additive)
+  const addMyApps = (ids) => {
+    setMyApps(prev => {
+      const next = new Set(prev);
+      ids.forEach(id => next.add(String(id)));
+      return next;
+    });
+  };
+
   // Marquer/démarquer comme migré
   const toggleMigrate = (e, id) => {
     e.stopPropagation();
@@ -661,6 +670,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     setActiveTab,
     setSearchTerm,
     toggleMyApp,
+    addMyApps,
     toggleMigrate,
     setCustomMigration,
     setSelectedApp,

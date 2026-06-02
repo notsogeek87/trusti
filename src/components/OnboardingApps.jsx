@@ -258,7 +258,13 @@ const OnboardingApps = ({ onComplete, onSignUp }) => {
                 Crée un compte gratuit pour retrouver tes apps sur tous tes appareils.
               </p>
               <button
-                onClick={() => { onComplete(selected); onSignUp(); }}
+                onClick={() => {
+                  if (selected.size > 0) {
+                    localStorage.setItem('trusti_pending_onboarding_apps', JSON.stringify([...selected]));
+                  }
+                  onComplete(selected);
+                  onSignUp();
+                }}
                 className="text-xs font-bold text-white border border-white/30 rounded-xl px-4 py-2 hover:bg-white/10 transition-colors active:scale-95"
               >
                 S'inscrire gratuitement →
