@@ -1,32 +1,37 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, X } from 'lucide-react';
 
+// Input non-contrôlé : React ne touche jamais la valeur dans le DOM,
+// ce qui empêche le clavier mobile de se fermer lors des re-renders parent.
 const SearchBar = ({ searchTerm, onSearchChange }) => {
-  const [localValue, setLocalValue] = useState(searchTerm);
-  const localValueRef = useRef(localValue);
-  localValueRef.current = localValue;
+  const inputRef = useRef(null);
+  const [hasValue, setHasValue] = useState(!!searchTerm);
+  const debounceRef = useRef(null);
 
-  // Sync depuis le parent uniquement si la valeur diffère vraiment
-  // (ex: clear externe) — évite le re-render inutile qui ferme le clavier
+  // Sync depuis le parent (ex: clear externe)
   useEffect(() => {
-    if (searchTerm !== localValueRef.current) {
-      setLocalValue(searchTerm);
+    if (inputRef.current && inputRef.current.value !== searchTerm) {
+      inputRef.current.value = searchTerm;
+      setHasValue(!!searchTerm);
     }
   }, [searchTerm]);
 
-  // Debounce : propager au parent après 300ms d'inactivité
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (localValue !== searchTerm) {
-        onSearchChange(localValue);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localValue]);
+  useEffect(() => () => clearTimeout(debounceRef.current), []);
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setHasValue(!!value);
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => onSearchChange(value), 300);
+  };
 
   const handleClear = () => {
-    setLocalValue('');
+    if (inputRef.current) {
+      inputRef.current.value = '';
+      inputRef.current.focus();
+    }
+    setHasValue(false);
+    clearTimeout(debounceRef.current);
     onSearchChange('');
   };
 
@@ -34,18 +39,18 @@ const SearchBar = ({ searchTerm, onSearchChange }) => {
     <div className="relative mb-3">
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
       <input
-        type="search"
-        inputMode="search"
+        ref={inputRef}
+        type="text"
+        defaultValue={searchTerm}
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="none"
         spellCheck={false}
         placeholder="Rechercher une app..."
         className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-100 rounded-xl shadow-sm outline-none font-bold text-sm focus:ring-2 focus:ring-indigo-100 transition-all"
-        value={localValue}
-        onChange={(e) => setLocalValue(e.target.value)}
+        onChange={handleChange}
       />
-      {localValue && (
+      {hasValue && (
         <button
           onClick={handleClear}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
