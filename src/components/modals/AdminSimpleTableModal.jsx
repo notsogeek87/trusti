@@ -315,23 +315,26 @@ const AdminSimpleTableModal = ({ onClose }) => {
       <div className="bg-white rounded-2xl shadow-2xl w-full h-[96vh] flex flex-col relative overflow-hidden">
 
         {/* ── Header ── */}
-        <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-2xl flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <h2 className="text-base font-bold">Console d'administration</h2>
-            <span className="text-xs bg-white/20 px-2.5 py-0.5 rounded-full">
+        <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-2xl flex-shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <h2 className="text-base font-bold truncate">
+              <span className="hidden sm:inline">Console d'</span>administration
+            </h2>
+            <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full flex-shrink-0">
               {isSearching
-                ? `${filteredApps.length} résultat${filteredApps.length !== 1 ? 's' : ''}`
+                ? `${filteredApps.length} rés.`
                 : `${totalApps} apps`}
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             <button
               onClick={openAdd}
-              className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all"
             >
-              <Plus size={14} /> Ajouter
+              <Plus size={14} />
+              <span className="hidden sm:inline">Ajouter</span>
             </button>
-            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/20 transition-colors" title="Fermer (Échap)">
+            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/20 transition-colors" title="Fermer">
               <X size={18} />
             </button>
           </div>
