@@ -318,6 +318,15 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                   </div>
                 )}
                 <p className="text-sm text-slate-600 leading-relaxed">{app.reason}</p>
+                <a
+                  href="https://trusti-score.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 mt-2 text-xs text-indigo-600 hover:text-indigo-800 font-semibold transition-colors"
+                >
+                  <ExternalLink size={12} />
+                  En savoir plus sur notre méthodologie
+                </a>
                 {app.updatedAt && (
                   <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-400">
                     <Calendar size={12} />
