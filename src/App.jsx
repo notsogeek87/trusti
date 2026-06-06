@@ -7,6 +7,36 @@ import { CATEGORIES } from './constants/categories';
 import { Sparkles, Smartphone, Monitor } from 'lucide-react';
 import { ViewModeContext } from './contexts/ViewModeContext';
 
+// Composants définis hors du render pour éviter le remontage à chaque re-render
+const FloatingToggle = ({ isSmallViewport, forceMobile, onToggle }) => {
+  if (isSmallViewport) return null;
+  return (
+    <button
+      onClick={onToggle}
+      className="fixed z-[9999] flex items-center gap-2 text-xs font-bold shadow-xl transition-all"
+      style={{
+        top: 16, right: 16, padding: '8px 14px', borderRadius: 999,
+        background: forceMobile ? '#4f46e5' : '#1e293b', color: '#fff',
+      }}
+      title={forceMobile ? 'Quitter le mode mobile' : 'Aperçu mobile'}
+    >
+      {forceMobile ? <Monitor size={14} /> : <Smartphone size={14} />}
+      <span>{forceMobile ? 'Desktop' : 'Mobile'}</span>
+    </button>
+  );
+};
+
+const MobileFrame = ({ forceMobile, children }) => {
+  if (!forceMobile) return children;
+  return (
+    <div className="min-h-screen bg-slate-300 flex flex-col items-center py-6 gap-3">
+      <div className="bg-white shadow-2xl" style={{ width: 430, borderRadius: '2.8rem', border: '8px solid #1e293b', overflow: 'hidden' }}>
+        {children}
+      </div>
+    </div>
+  );
+};
+
 // Layout
 import Header from './components/layout/Header';
 
@@ -337,47 +367,6 @@ const App = () => {
   const isMobile = isSmallViewport || forceMobile;
 
   // Bouton flottant uniquement sur vrai écran large (pas sur mobile réel)
-  const FloatingToggle = () => {
-    if (isSmallViewport) return null;
-    return (
-      <button
-        onClick={toggleForceMobile}
-        className="fixed z-[9999] flex items-center gap-2 text-xs font-bold shadow-xl transition-all"
-        style={{
-          top: 16,
-          right: 16,
-          padding: '8px 14px',
-          borderRadius: 999,
-          background: forceMobile ? '#4f46e5' : '#1e293b',
-          color: '#fff',
-        }}
-        title={forceMobile ? 'Quitter le mode mobile' : 'Aperçu mobile'}
-      >
-        {forceMobile ? <Monitor size={14} /> : <Smartphone size={14} />}
-        <span>{forceMobile ? 'Desktop' : 'Mobile'}</span>
-      </button>
-    );
-  };
-
-  // Cadre phone visuel (purement décoratif, le layout est contrôlé via context)
-  const MobileFrame = ({ children }) => {
-    if (!forceMobile) return children;
-    return (
-      <div className="min-h-screen bg-slate-300 flex flex-col items-center py-6 gap-3">
-        <div
-          className="bg-white shadow-2xl"
-          style={{
-            width: 430,
-            borderRadius: '2.8rem',
-            border: '8px solid #1e293b',
-            overflow: 'hidden',
-          }}
-        >
-          {children}
-        </div>
-      </div>
-    );
-  };
 
   // Afficher la landing page en premier si c'est la première visite
   if (showLandingPage) {
@@ -393,8 +382,8 @@ const App = () => {
   if (selectedApp) {
     return (
       <ViewModeContext.Provider value={isMobile}>
-        <FloatingToggle />
-        <MobileFrame>
+        <FloatingToggle isSmallViewport={isSmallViewport} forceMobile={forceMobile} onToggle={toggleForceMobile} />
+        <MobileFrame forceMobile={forceMobile}>
           <AppDetailModal
             key={selectedApp?.id}
             app={selectedApp}
@@ -412,8 +401,8 @@ const App = () => {
   // Vue principale
   return (
     <ViewModeContext.Provider value={isMobile}>
-    <FloatingToggle />
-    <MobileFrame>
+    <FloatingToggle isSmallViewport={isSmallViewport} forceMobile={forceMobile} onToggle={toggleForceMobile} />
+    <MobileFrame forceMobile={forceMobile}>
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       <>
       {/* Écran de chargement initial */}
