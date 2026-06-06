@@ -24,6 +24,47 @@ export const CATEGORIES = [
   'Divers'
 ];
 
+// Catégories complètes (CATEGORIES + sous-catégories détaillées) pour l'interface admin
+export const ADMIN_CATEGORIES = [
+  ...new Set([
+    ...CATEGORIES,
+    'Email',
+    'Visioconférence',
+    'Communication',
+    'Rencontres',
+    'Navigateurs Web',
+    'Moteurs de Recherche',
+    'VPN',
+    'Gestionnaires de Mots de Passe',
+    'Chiffrement & Sécurité',
+    'Stockage Cloud',
+    'Productivité',
+    'Bureautique',
+    'Prise de Notes',
+    'Streaming Musical',
+    'Streaming Vidéo',
+    'Podcasts',
+    'Lecteurs Multimédia',
+    'Photo & Vidéo',
+    'Banque & Finance',
+    'Paiement Mobile',
+    'Transport & Mobilité',
+    'Voyages & Hébergement',
+    'E-commerce',
+    'Petites Annonces',
+    'Anti-gaspillage',
+    'Livraison de Repas',
+    'Santé & Médical',
+    'Méditation & Bien-être',
+    'Sport & Fitness',
+    'Navigation GPS',
+    'Cartographie',
+    'Développement',
+    'Design',
+    'Agrégateurs RSS',
+  ]).values(),
+].sort((a, b) => a.localeCompare(b, 'fr'));
+
 /**
  * Mapping des catégories détaillées vers les catégories principales
  * Permet de regrouper automatiquement les apps
