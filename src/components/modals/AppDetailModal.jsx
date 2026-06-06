@@ -251,7 +251,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
           </div>
 
           {/* Télécharger */}
-          {(app.playStoreUrl || app.appleStoreUrl || app.fDroidUrl || app.websiteUrl) && (
+          {(app.playStoreUrl || app.appleStoreUrl || app.fDroidUrl || app.website) && (
             <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl p-4 border border-emerald-200 mb-4">
               <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 mb-3 flex items-center gap-2">
                 <ExternalLink size={16} className="text-emerald-600" /> Télécharger
@@ -278,8 +278,8 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                     F-Droid
                   </a>
                 )}
-                {app.websiteUrl && (
-                  <a href={app.websiteUrl} target="_blank" rel="noopener noreferrer"
+                {app.website && (
+                  <a href={app.website} target="_blank" rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 bg-white hover:bg-purple-100 text-purple-700 font-bold text-xs py-2.5 px-3 rounded-xl transition-all border-2 border-purple-200 hover:border-purple-400 shadow-sm">
                     <span className="text-lg">🌐</span>
                     Site Web
