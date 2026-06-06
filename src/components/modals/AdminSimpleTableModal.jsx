@@ -338,84 +338,83 @@ const AdminSimpleTableModal = ({ onClose }) => {
         </div>
 
         {/* ── Toolbar ── */}
-        <div className="px-4 py-2 border-b bg-slate-50 flex items-center gap-2 flex-wrap flex-shrink-0">
-          {/* Search */}
-          <div className="relative min-w-[160px] max-w-xs flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
-            <input
-              type="text"
-              placeholder="Rechercher…"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-8 pr-7 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white"
-            />
-            {searchTerm && (
-              <button onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                <X size={12} />
-              </button>
+        <div className="px-4 py-2 border-b bg-slate-50 flex flex-col gap-2 flex-shrink-0">
+          {/* Ligne 1 : recherche + pagination */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
+              <input
+                type="text"
+                placeholder="Rechercher…"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="w-full pl-8 pr-7 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white"
+              />
+              {searchTerm && (
+                <button onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  <X size={12} />
+                </button>
+              )}
+            </div>
+            {!isSearching && (
+              <div className="flex items-center gap-1 bg-white border rounded-lg px-2 py-1 flex-shrink-0">
+                <button
+                  onClick={() => loadApps(currentPage - 1, searchTerm)}
+                  disabled={currentPage <= 1 || isLoading}
+                  className="p-1.5 rounded hover:bg-slate-100 disabled:opacity-30 transition-colors"
+                >
+                  <ChevronLeft size={15} />
+                </button>
+                <span className="text-xs font-medium text-slate-600 tabular-nums whitespace-nowrap px-1">
+                  {currentPage} / {totalPages}
+                </span>
+                <button
+                  onClick={() => loadApps(currentPage + 1, searchTerm)}
+                  disabled={currentPage >= totalPages || isLoading}
+                  className="p-1.5 rounded hover:bg-slate-100 disabled:opacity-30 transition-colors"
+                >
+                  <ChevronRight size={15} />
+                </button>
+              </div>
             )}
           </div>
 
-          {/* Grade filter pills */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setFilterGrade('')}
-              className={`px-2 py-1 rounded-md text-xs font-semibold transition-all ${!filterGrade ? 'bg-slate-700 text-white' : 'bg-white border text-slate-500 hover:bg-slate-100'}`}
-            >
-              Tous
-            </button>
-            {['A', 'B', 'C', 'D', 'E'].map(g => (
+          {/* Ligne 2 : filtres grade + catégorie + reset */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1">
               <button
-                key={g}
-                onClick={() => setFilterGrade(g === filterGrade ? '' : g)}
-                className={`w-7 h-7 rounded-lg text-xs font-bold transition-all ${filterGrade === g ? GRADE_PILL_ACTIVE[g] : `${GRADE_BADGE[g]} hover:opacity-80`}`}
+                onClick={() => setFilterGrade('')}
+                className={`px-2 py-1 rounded-md text-xs font-semibold transition-all ${!filterGrade ? 'bg-slate-700 text-white' : 'bg-white border text-slate-500 hover:bg-slate-100'}`}
               >
-                {g}
+                Tous
               </button>
-            ))}
-          </div>
-
-          {/* Category filter */}
-          <select
-            value={filterCategory}
-            onChange={e => setFilterCategory(e.target.value)}
-            className="py-1.5 pl-2 pr-6 text-xs border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 text-slate-600"
-          >
-            <option value="">Toutes catégories</option>
-            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-
-          {filtersActive && (
-            <button
-              onClick={() => { setFilterGrade(''); setFilterCategory(''); }}
-              className="text-xs text-slate-400 hover:text-rose-500 underline transition-colors"
-            >
-              Réinitialiser
-            </button>
-          )}
-
-          {/* Pagination */}
-          {!isSearching && (
-            <div className="ml-auto flex items-center gap-1.5 bg-white border rounded-lg px-2 py-1">
-              <button
-                onClick={() => loadApps(currentPage - 1, searchTerm)}
-                disabled={currentPage <= 1 || isLoading}
-                className="p-0.5 rounded hover:bg-slate-100 disabled:opacity-30 transition-colors"
-              >
-                <ChevronLeft size={15} />
-              </button>
-              <span className="text-xs font-medium text-slate-600 tabular-nums whitespace-nowrap px-1">
-                {currentPage} / {totalPages}
-              </span>
-              <button
-                onClick={() => loadApps(currentPage + 1, searchTerm)}
-                disabled={currentPage >= totalPages || isLoading}
-                className="p-0.5 rounded hover:bg-slate-100 disabled:opacity-30 transition-colors"
-              >
-                <ChevronRight size={15} />
-              </button>
+              {['A', 'B', 'C', 'D', 'E'].map(g => (
+                <button
+                  key={g}
+                  onClick={() => setFilterGrade(g === filterGrade ? '' : g)}
+                  className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${filterGrade === g ? GRADE_PILL_ACTIVE[g] : `${GRADE_BADGE[g]} hover:opacity-80`}`}
+                >
+                  {g}
+                </button>
+              ))}
             </div>
-          )}
+            <select
+              value={filterCategory}
+              onChange={e => setFilterCategory(e.target.value)}
+              className="flex-1 py-1.5 pl-2 pr-6 text-xs border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 text-slate-600"
+            >
+              <option value="">Toutes catégories</option>
+              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            {filtersActive && (
+              <button
+                onClick={() => { setFilterGrade(''); setFilterCategory(''); }}
+                className="text-xs text-slate-400 hover:text-rose-500 underline transition-colors flex-shrink-0"
+              >
+                Réinitialiser
+              </button>
+            )}
+          </div>
         </div>
 
         {/* ── Table ── */}
@@ -441,8 +440,8 @@ const AdminSimpleTableModal = ({ onClose }) => {
                 <tr>
                   <th className="px-4 py-2.5 text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Application</th>
                   <th className="px-3 py-2.5 text-center text-[11px] font-semibold text-slate-400 uppercase tracking-wide w-20">Grade</th>
-                  <th className="px-3 py-2.5 text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Catégorie</th>
-                  <th className="px-3 py-2.5 text-center text-[11px] font-semibold text-slate-400 uppercase tracking-wide w-24">Liens</th>
+                  <th className="hidden sm:table-cell px-3 py-2.5 text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Catégorie</th>
+                  <th className="hidden sm:table-cell px-3 py-2.5 text-center text-[11px] font-semibold text-slate-400 uppercase tracking-wide w-24">Liens</th>
                   <th className="px-3 py-2.5 w-20" />
                 </tr>
               </thead>
@@ -472,13 +471,13 @@ const AdminSimpleTableModal = ({ onClose }) => {
                       </span>
                     </td>
                     {/* Category */}
-                    <td className="px-3 py-2.5">
+                    <td className="hidden sm:table-cell px-3 py-2.5">
                       <span className="text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full whitespace-nowrap">
                         {app.category || '—'}
                       </span>
                     </td>
                     {/* Links dots */}
-                    <td className="px-3 py-2.5">
+                    <td className="hidden sm:table-cell px-3 py-2.5">
                       <div className="flex items-center justify-center gap-1.5">
                         {app.playStoreUrl  && <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" title="Play Store" />}
                         {app.appleStoreUrl && <span className="w-2 h-2 rounded-full bg-slate-500 flex-shrink-0" title="App Store" />}
@@ -487,22 +486,22 @@ const AdminSimpleTableModal = ({ onClose }) => {
                         {app.website       && <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"  title="Site Web" />}
                       </div>
                     </td>
-                    {/* Actions */}
+                    {/* Actions — toujours visibles sur mobile, hover sur desktop */}
                     <td className="px-3 py-2.5" onClick={e => e.stopPropagation()}>
-                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center justify-end gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => openEdit(app)}
-                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                          className="p-2 sm:p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
                           title="Modifier"
                         >
-                          <Pencil size={13} />
+                          <Pencil size={15} />
                         </button>
                         <button
                           onClick={() => openEdit(app, true)}
-                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                          className="p-2 sm:p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
                           title="Supprimer"
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </td>
@@ -520,7 +519,7 @@ const AdminSimpleTableModal = ({ onClose }) => {
               ? `${filteredApps.length} / ${apps.length} apps (filtres actifs)`
               : `${apps.length} apps affichées · ${totalApps} total`}
           </span>
-          <span>
+          <span className="hidden sm:block">
             <kbd className="px-1.5 py-0.5 bg-white border rounded text-[10px]">Échap</kbd> Fermer
             {' · '}
             <kbd className="px-1.5 py-0.5 bg-white border rounded text-[10px]">← →</kbd> Pages
