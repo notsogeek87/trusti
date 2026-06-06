@@ -3,7 +3,7 @@ import {
   ChevronLeft, ChevronRight, Search, X, Loader2,
   Plus, Pencil, Trash2, Check,
 } from 'lucide-react';
-import { CATEGORIES } from '../../constants/categories';
+import { CATEGORIES, ADMIN_CATEGORIES } from '../../constants/categories';
 import { useToast } from '../../contexts/ToastContext';
 
 const API_URL = import.meta.env.PROD
@@ -576,10 +576,10 @@ const AdminSimpleTableModal = ({ onClose }) => {
                       className={inputCls}
                     >
                       <option value="">Sélectionner…</option>
-                      {selectedApp.category && !CATEGORIES.includes(selectedApp.category) && (
+                      {selectedApp.category && !ADMIN_CATEGORIES.includes(selectedApp.category) && (
                         <option value={selectedApp.category}>{selectedApp.category} (existante)</option>
                       )}
-                      {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      {ADMIN_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </Field>
                   <Field label="Grade TrustiScore">
