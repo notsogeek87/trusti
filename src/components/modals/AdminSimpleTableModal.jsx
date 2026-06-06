@@ -311,15 +311,13 @@ const AdminSimpleTableModal = ({ onClose }) => {
   // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-2 md:p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full h-[96vh] flex flex-col relative overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 sm:p-4">
+      <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full h-[92dvh] sm:h-[96vh] flex flex-col relative overflow-hidden">
 
         {/* ── Header ── */}
-        <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-2xl flex-shrink-0">
+        <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-3xl sm:rounded-t-2xl flex-shrink-0">
           <div className="flex items-center gap-2 min-w-0">
-            <h2 className="text-base font-bold truncate">
-              <span className="hidden sm:inline">Console d'</span>administration
-            </h2>
+            <h2 className="text-base font-bold truncate">Administration</h2>
             <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full flex-shrink-0">
               {isSearching
                 ? `${filteredApps.length} rés.`
@@ -329,10 +327,9 @@ const AdminSimpleTableModal = ({ onClose }) => {
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <button
               onClick={openAdd}
-              className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
             >
-              <Plus size={14} />
-              <span className="hidden sm:inline">Ajouter</span>
+              <Plus size={14} /> Ajouter
             </button>
             <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/20 transition-colors" title="Fermer">
               <X size={18} />
