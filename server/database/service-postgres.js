@@ -985,6 +985,66 @@ async function getAppRelations(appId) {
 }
 
 /**
+ * Obtenir les applications filtrées par note (grade)
+ * @param {string|string[]} grades - Une note ou un tableau de notes (ex: 'A' ou ['A','B'])
+ * @param {Object} options - Options de pagination
+ */
+export async function getAppsByGrade(grades, options = {}) {
+  try {
+    const { limit = 0, offset = 0 } = options;
+    const gradesArray = Array.isArray(grades) ? grades : [grades];
+
+    const totalResult = await sql`
+      SELECT COUNT(*) as count FROM applications
+      WHERE trusti_score = ANY(${gradesArray})
+    `;
+    const total = parseInt(totalResult[0].count);
+
+    let apps;
+    if (limit > 0) {
+      apps = await sql`
+        SELECT * FROM applications
+        WHERE trusti_score = ANY(${gradesArray})
+        ORDER BY trusti_score ASC, name ASC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `;
+    } else {
+      apps = await sql`
+        SELECT * FROM applications
+        WHERE trusti_score = ANY(${gradesArray})
+        ORDER BY trusti_score ASC, name ASC
+      `;
+    }
+
+    const formattedApps = await Promise.all(apps.map(app => formatAppFromDB(app)));
+    return { apps: formattedApps, total, limit, offset };
+  } catch (error) {
+    console.error('Error getting apps by grade:', error);
+    throw error;
+  }
+}
+
+/**
+ * Obtenir les applications alternatives pour une app donnée
+ * (apps de même catégorie avec une meilleure note)
+ * @param {string} appId - ID de l'application
+ * @returns {Promise<Array>} Liste des alternatives complètes
+ */
+export async function getAlternativesForApp(appId) {
+  try {
+    const { alternativeAppIds } = await getAppRelations(appId);
+    if (!alternativeAppIds || alternativeAppIds.length === 0) {
+      return [];
+    }
+    return await getAppsByIds(alternativeAppIds);
+  } catch (error) {
+    console.error('Error getting alternatives for app:', error);
+    throw error;
+  }
+}
+
+/**
  * Calculer le type d'application basé sur le trustiScore
  * @param {string} trustiScore - Score A, B, C, D ou E
  * @returns {string} 'trusti' (A/B/C), 'star' (D/E), ou 'regular'
@@ -1084,10 +1144,12 @@ export default {
   initDatabase,
   getAllApps,
   getAppsByType,
+  getAppsByGrade,
   getAwardsApps,
   getOnboardingApps,
   getAppById,
   getAppsByIds,
+  getAlternativesForApp,
   createApp,
   updateApp,
   deleteApp,

@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 
   try {
     // Extraire le type depuis l'URL ou le body
-    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, onboarding, categories, ids } = req.query;
+    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, onboarding, categories, ids, grade, alternatives_for } = req.query;
     
     if (req.method === 'GET') {
       // GET /api/apps?type=trusti
@@ -44,6 +44,51 @@ export default async function handler(req, res) {
         });
       }
       
+      // GET /api/apps?alternatives_for=:id — alternatives pour une app
+      if (alternatives_for) {
+        const app = await dbService.getAppById(alternatives_for);
+        if (!app) {
+          return res.status(404).json({ success: false, error: 'App not found' });
+        }
+        const alternatives = await dbService.getAlternativesForApp(alternatives_for);
+        return res.status(200).json({
+          success: true,
+          app,
+          alternatives,
+          pagination: {
+            total: alternatives.length,
+            limit: 0,
+            offset: 0,
+            page: 1,
+            totalPages: 1,
+            hasMore: false
+          }
+        });
+      }
+
+      // GET /api/apps?grade=A ou ?grade=A,B,C — filtrer par note
+      if (grade) {
+        const gradesArray = grade.split(',').map(g => g.trim().toUpperCase()).filter(Boolean);
+        const paginationLimit = parseInt(limit) || 0;
+        let paginationOffset = parseInt(offset) || 0;
+        if (page && paginationLimit > 0) {
+          paginationOffset = (parseInt(page) - 1) * paginationLimit;
+        }
+        const result = await dbService.getAppsByGrade(gradesArray, { limit: paginationLimit, offset: paginationOffset });
+        return res.status(200).json({
+          success: true,
+          apps: result.apps,
+          pagination: {
+            total: result.total,
+            limit: paginationLimit,
+            offset: paginationOffset,
+            page: paginationLimit > 0 ? Math.floor(paginationOffset / paginationLimit) + 1 : 1,
+            totalPages: paginationLimit > 0 ? Math.ceil(result.total / paginationLimit) : 1,
+            hasMore: paginationLimit > 0 ? (paginationOffset + paginationLimit) < result.total : false
+          }
+        });
+      }
+
       // Si une recherche est demandée, utiliser searchApps
       const searchQuery = search || q;
       if (searchQuery && searchQuery.trim()) {
