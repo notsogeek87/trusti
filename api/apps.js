@@ -1,15 +1,35 @@
 // Vercel Serverless Function - Apps Management (Trusti & Star)
 import dbService from '../server/database/service-postgres.js';
 
+const INTERNAL_ORIGINS = [
+  'trusti-alpha.vercel.app',
+  'trusti-notsogeeks-projects.vercel.app',
+  'localhost',
+  '127.0.0.1',
+];
+
+function isInternalRequest(req) {
+  const origin = req.headers['origin'] || req.headers['referer'] || '';
+  return INTERNAL_ORIGINS.some(o => origin.includes(o));
+}
+
 export default async function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+
+  // Auth : les requêtes externes (n8n, etc.) doivent fournir x-api-key
+  if (!isInternalRequest(req)) {
+    const apiKey = req.headers['x-api-key'];
+    if (!apiKey || apiKey !== process.env.API_KEY) {
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
+    }
   }
 
   try {
