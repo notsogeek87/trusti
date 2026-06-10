@@ -50,7 +50,7 @@ const WelcomeModal = ({ onFirstTimeYes, onFirstTimeNo }) => {
             >
               <span className="flex items-center justify-center gap-2">
                 <span>👍</span>
-                <span>Non, je connais déjà</span>
+                <span>Non, je connais et souhaite me connecter</span>
               </span>
             </button>
           </div>
