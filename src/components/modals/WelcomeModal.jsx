@@ -46,7 +46,7 @@ const WelcomeModal = ({ onFirstTimeYes, onFirstTimeNo }) => {
 
             <button
               onClick={onFirstTimeNo}
-              className="w-full bg-slate-700 active:bg-slate-600 text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-200 border border-slate-600 active:scale-[0.98]"
+              className="w-full bg-slate-700 active:bg-slate-600 text-white font-medium py-2.5 px-4 rounded-xl transition-all duration-200 border border-slate-600 active:scale-[0.98] text-sm"
             >
               <span className="flex items-center justify-center gap-2">
                 <span>👍</span>
