@@ -62,7 +62,7 @@ const AppCard = React.memo(({
   return (
     <div className="relative overflow-hidden rounded-2xl">
       {/* Zone rouge révélée au slide */}
-      {activeTab === TABS.MY_APPS && !isLoadingSkeleton && (
+      {activeTab === TABS.MY_APPS && !isLoadingSkeleton && swipeX < 0 && (
         <div
           className="absolute inset-y-0 right-0 bg-rose-500 flex flex-col items-center justify-center gap-1 px-5"
           aria-hidden="true"
