@@ -604,6 +604,36 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
   const setCustomMigration = (appId, alternativeName) => {
     setCustomMigrations(prev => new Map(prev).set(appId, alternativeName));
   };
+
+  // Importer un lot de migrations partagées (toujours additif)
+  // entries = [{ id, customAlt? }]
+  const importMigrations = (entries = []) => {
+    if (!entries.length) return;
+    const ids = entries.map(({ id }) => String(id));
+
+    // Les apps migrées font aussi partie de "Mes Apps"
+    setMyApps(prev => {
+      const next = new Set(prev);
+      ids.forEach(id => next.add(id));
+      return next;
+    });
+
+    setMigratedApps(prev => {
+      const next = new Set(prev);
+      ids.forEach(id => next.add(id));
+      return next;
+    });
+
+    // Appliquer les alternatives personnalisées éventuelles
+    const withCustom = entries.filter(({ customAlt }) => Boolean(customAlt));
+    if (withCustom.length) {
+      setCustomMigrations(prev => {
+        const next = new Map(prev);
+        withCustom.forEach(({ id, customAlt }) => next.set(String(id), customAlt));
+        return next;
+      });
+    }
+  };
   
   // Charger plus d'applications
   const loadMoreApps = async () => {
@@ -673,6 +703,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     addMyApps,
     toggleMigrate,
     setCustomMigration,
+    importMigrations,
     setSelectedApp,
     loadMoreApps,
   };

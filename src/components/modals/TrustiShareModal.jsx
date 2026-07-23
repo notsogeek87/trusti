@@ -1,23 +1,25 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
-import { shareText, copyToClipboard } from '../../utils/shareUtils';
+import { shareText, copyToClipboard, buildShareUrl } from '../../utils/shareUtils';
 
 /**
  * Modal de partage des TrustiApp
  */
 const TrustiShareModal = ({ selectedApps, onClose }) => {
+  const shareUrl = buildShareUrl({ apps: selectedApps.map(a => a.id) });
+
   const generateShareText = () => {
     const appsList = selectedApps.map(a => `${a.name} (Grade ${a.grade})`).join('\n• ');
     return `⭐ Mes TrustiApp:\n\n• ${appsList}`;
   };
 
   const handleShare = () => {
-    shareText('Mes TrustiApp', generateShareText());
+    shareText('Mes TrustiApp', generateShareText(), shareUrl);
   };
 
   const handleCopy = () => {
-    copyToClipboard(generateShareText());
+    copyToClipboard(`${generateShareText()}\n\n${shareUrl}`);
   };
 
   return (

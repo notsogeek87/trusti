@@ -6,6 +6,7 @@ import { TABS } from './constants/tabs';
 import { CATEGORIES } from './constants/categories';
 import { Sparkles, Smartphone, Monitor } from 'lucide-react';
 import { ViewModeContext } from './contexts/ViewModeContext';
+import { parseShareParams, clearShareParams } from './utils/shareUtils';
 
 // Composants définis hors du render pour éviter le remontage à chaque re-render
 const FloatingToggle = ({ isSmallViewport, forceMobile, onToggle }) => {
@@ -58,6 +59,7 @@ import OnboardingApps from './components/OnboardingApps';
 import AppDetailModal from './components/modals/AppDetailModal';
 import ShareModal from './components/modals/ShareModal';
 import TrustiShareModal from './components/modals/TrustiShareModal';
+import ImportAppsModal from './components/modals/ImportAppsModal';
 import MigrationSelectorModal from './components/modals/MigrationSelectorModal';
 import LoginModal from './components/modals/LoginModal';
 import AdminAppsModal from './components/modals/AdminAppsModal';
@@ -204,9 +206,13 @@ const App = () => {
     addMyApps,
     toggleMigrate,
     setCustomMigration,
+    importMigrations,
     setSelectedApp,
     loadMoreApps,
   } = useAppManagement(currentUser, saveUserData, getUserData, selectedCategory);
+
+  // Import via lien de partage (?apps=... et/ou ?mig=...)
+  const [pendingImport, setPendingImport] = useState(null);
 
   const shouldRestoreScroll = useRef(false);
 
@@ -285,6 +291,50 @@ const App = () => {
       }
     } catch {}
   }, [currentUser]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Détecter un lien de partage au chargement (?apps=... et/ou ?mig=...)
+  // et ouvrir la modal d'import, puis nettoyer l'URL.
+  useEffect(() => {
+    const { appIds, migrations } = parseShareParams();
+    if (appIds.length > 0 || migrations.length > 0) {
+      setPendingImport({ appIds, migrations });
+      clearShareParams();
+    }
+  }, []);
+
+  // Appliquer une sélection partagée en attente après connexion
+  useEffect(() => {
+    if (!currentUser) return;
+    const pending = localStorage.getItem('trusti_pending_shared_selection');
+    if (!pending) return;
+    try {
+      const { appIds = [], migrations = [] } = JSON.parse(pending);
+      localStorage.removeItem('trusti_pending_shared_selection');
+      // Délai > 100ms (setIsInitialized dans useAppManagement) pour que la
+      // sauvegarde utilisateur se déclenche après le chargement initial.
+      setTimeout(() => {
+        if (appIds.length > 0) addMyApps(appIds.map(String));
+        if (migrations.length > 0) importMigrations(migrations);
+      }, 150);
+    } catch {}
+  }, [currentUser]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Confirmer l'import depuis la modal de partage
+  const handleImportShared = ({ appIds = [], migrations = [] }) => {
+    if (currentUser) {
+      if (appIds.length > 0) addMyApps(appIds.map(String));
+      if (migrations.length > 0) importMigrations(migrations);
+    } else {
+      // Non connecté : on met en attente et on invite à se connecter
+      localStorage.setItem(
+        'trusti_pending_shared_selection',
+        JSON.stringify({ appIds, migrations })
+      );
+      setShowLoginModal(true);
+    }
+    setActiveTab(TABS.MY_APPS);
+    setPendingImport(null);
+  };
 
   // Réinitialiser la catégorie lors du changement d'onglet
   useEffect(() => {
@@ -583,6 +633,17 @@ const App = () => {
           selectedApps={filteredApps.filter(a => myApps.has(a.id))}
           allApps={apps}
           onClose={() => setShowTrustiShareModal(false)}
+        />
+      )}
+
+      {/* Modal d'import via lien de partage */}
+      {pendingImport && (
+        <ImportAppsModal
+          appIds={pendingImport.appIds}
+          migrations={pendingImport.migrations}
+          isLoggedIn={Boolean(currentUser)}
+          onConfirm={handleImportShared}
+          onClose={() => setPendingImport(null)}
         />
       )}
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
-import { shareText, copyToClipboard } from '../../utils/shareUtils';
+import { shareText, copyToClipboard, buildShareUrl } from '../../utils/shareUtils';
 
 /**
  * Modal de partage des migrations
@@ -20,20 +20,29 @@ const ShareModal = ({ migratedApps, customMigrations, allApps = [], onClose }) =
     return { app, customAlt, altApp };
   }).filter(({ app }) => app);
 
+  const shareUrl = buildShareUrl({
+    migrations: migratedList.map(({ app, customAlt }) => ({
+      id: app.id,
+      // On ne transmet que l'alternative personnalisée ; sinon le destinataire
+      // résout l'alternative par défaut depuis la base.
+      customAlt: customAlt || undefined,
+    })),
+  });
+
   const generateShareText = () => {
-    const migrations = migratedList.map(({ app, customAlt }) => 
+    const migrations = migratedList.map(({ app, customAlt }) =>
       `${app?.name} → ${customAlt || app?.alternative}`
     ).join('\n• ');
-    
+
     return `✅ Mes migrations TrustiScore:\n\n• ${migrations}`;
   };
 
   const handleShare = () => {
-    shareText('Mes migrations TrustiScore', generateShareText());
+    shareText('Mes migrations TrustiScore', generateShareText(), shareUrl);
   };
 
   const handleCopy = () => {
-    copyToClipboard(generateShareText());
+    copyToClipboard(`${generateShareText()}\n\n${shareUrl}`);
   };
 
   return (
