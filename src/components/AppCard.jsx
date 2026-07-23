@@ -82,7 +82,7 @@ const AppCard = React.memo(({
           transform: `translateX(${swipeX}px)`,
           transition: swiping ? 'none' : 'transform 0.3s cubic-bezier(0.25,1,0.5,1)',
         }}
-        className={`bg-white border border-slate-100 p-4 flex flex-col gap-3 rounded-2xl ${
+        className={`bg-white border border-slate-100 p-4 flex flex-col gap-2.5 rounded-2xl ${
           isLoadingSkeleton ? 'cursor-default' : 'cursor-pointer hover:shadow-md hover:border-indigo-100'
         } transition-shadow group`}
       >
@@ -142,33 +142,24 @@ const AppCard = React.memo(({
 
         {/* Grade A — tout va bien */}
         {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade === 'A' && (
-          <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2">
-            <ShieldCheck size={20} className="text-emerald-600 shrink-0" />
-            <div className="flex-grow">
-              <p className="text-xs font-bold text-emerald-700">TrustiScore au max, tout va bien !</p>
-              <p className="text-[11px] text-emerald-600">Cette application respecte votre souveraineté numérique</p>
-            </div>
+          <div className="flex items-center gap-2 pl-0.5">
+            <ShieldCheck size={16} className="text-emerald-500 shrink-0" />
+            <p className="text-[11px] font-bold text-emerald-600">TrustiScore au max, tout va bien</p>
           </div>
         )}
 
         {/* Pas d'alternative connue */}
         {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade !== 'A' && !app.alternative && !customMigration && (
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center gap-2">
+          <div className="flex items-center gap-2 pl-0.5">
             {app.isLoadingAlternative ? (
               <>
-                <div className="w-5 h-5 rounded-full border-2 border-slate-300 border-t-indigo-600 animate-spin" />
-                <div className="flex-grow">
-                  <p className="text-xs font-bold text-slate-600">Recherche d'alternatives...</p>
-                  <p className="text-[11px] text-slate-500">Analyse des meilleures options disponibles</p>
-                </div>
+                <div className="w-4 h-4 rounded-full border-2 border-slate-300 border-t-indigo-600 animate-spin shrink-0" />
+                <p className="text-[11px] font-semibold text-slate-500">Recherche d'alternatives...</p>
               </>
             ) : (
               <>
-                <Search size={16} className="text-slate-400 shrink-0" />
-                <div className="flex-grow">
-                  <p className="text-xs font-bold text-slate-600">Alternative inconnue pour le moment</p>
-                  <p className="text-[11px] text-slate-500">Nous travaillons à identifier les meilleures alternatives</p>
-                </div>
+                <Search size={14} className="text-slate-400 shrink-0" />
+                <p className="text-[11px] text-slate-400">Alternative inconnue pour le moment</p>
               </>
             )}
           </div>
@@ -176,7 +167,7 @@ const AppCard = React.memo(({
 
         {/* Alternative disponible */}
         {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade !== 'A' && (app.alternative || customMigration) && (
-          <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex items-center justify-between animate-pulse-subtle">
+          <div className="bg-emerald-50/60 border border-emerald-100 rounded-xl p-2.5 flex items-center justify-between">
             <div className="flex items-center gap-3 flex-grow min-w-0">
               {app.altIcon && (
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-white border border-emerald-200">

@@ -4,7 +4,7 @@ import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
 import { TABS } from './constants/tabs';
 import { CATEGORIES } from './constants/categories';
-import { Sparkles, Smartphone, Monitor } from 'lucide-react';
+import { Sparkles, Smartphone, Monitor, Share2 } from 'lucide-react';
 import { ViewModeContext } from './contexts/ViewModeContext';
 import { parseShareParams, clearShareParams, hasShareParams } from './utils/shareUtils';
 
@@ -50,7 +50,6 @@ import Navigation from './components/layout/Navigation';
 import SearchBar from './components/ui/SearchBar';
 import ExplainerPanel from './components/ExplainerPanel';
 import AppsList from './components/AppsList';
-import ShareButton from './components/ShareButton';
 import LandingPage from './components/LandingPage';
 import TrustiChatWidget from './components/TrustiChatWidget';
 import OnboardingApps from './components/OnboardingApps';
@@ -565,34 +564,30 @@ const App = () => {
 
         {/* Titre pour l'onglet Mes Apps */}
         {activeTab === TABS.MY_APPS && myApps.size > 0 && (
-          <div className="mb-3">
-            <div className="text-center">
-              <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2">
-                Mes applications
-              </p>
-              <div className="bg-gradient-to-r from-rose-50 to-amber-50 rounded-lg p-2 border border-rose-100 mb-3">
-                <p className="text-[11px] text-rose-700 font-bold">
-                  ⚠️ Apps à migrer en priorité en haut
+          <div className="mb-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="text-sm font-black text-slate-800 leading-tight">Mes applications</h2>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  {myApps.size} app{myApps.size > 1 ? 's' : ''} · à migrer en priorité en haut
                 </p>
               </div>
+              <button
+                onClick={() => setShowTrustiShareModal(true)}
+                className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 rounded-full transition-colors"
+              >
+                <Share2 size={14} />
+                Partager
+              </button>
             </div>
 
-            <ShareButton
-              title="Partager ma sélection"
-              description="Envoie tes apps à un proche — il pourra les importer en un clic"
-              count={myApps.size}
-              onShare={() => setShowTrustiShareModal(true)}
-            />
-
             {migratedApps.size > 0 && (
-              <div className="-mt-4 mb-2 text-center">
-                <button
-                  onClick={() => setShowShareModal(true)}
-                  className="text-xs font-bold text-emerald-700 hover:text-emerald-800 underline underline-offset-2"
-                >
-                  Partager aussi mes migrations ({migratedApps.size})
-                </button>
-              </div>
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="mt-2 text-[11px] font-semibold text-emerald-600 hover:text-emerald-700 underline underline-offset-2"
+              >
+                Partager aussi mes migrations ({migratedApps.size})
+              </button>
             )}
           </div>
         )}
@@ -608,11 +603,9 @@ const App = () => {
                 <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
               )}
             </div>
-            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-2 border border-emerald-100">
-              <p className="text-[11px] text-emerald-700 font-bold">
-                ✨ Nos conseils d'apps avec un TrustiScore respectueux (A, B ou C) par catégorie
-              </p>
-            </div>
+            <p className="text-[11px] text-slate-400 px-2 leading-relaxed">
+              Nos conseils d'apps avec un TrustiScore respectueux (A, B ou C) par catégorie
+            </p>
           </div>
         )}
 
