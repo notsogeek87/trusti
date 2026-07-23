@@ -1,5 +1,14 @@
 import React from 'react';
-import { GRADES, GRADE_COLORS } from '../../constants/grades';
+import { GRADE_COLORS } from '../../constants/grades';
+
+// Les grades C et D ont un fond clair : texte foncé pour rester lisible.
+const GRADE_TEXT_COLORS = {
+  A: 'text-white',
+  B: 'text-slate-900',
+  C: 'text-slate-900',
+  D: 'text-slate-900',
+  E: 'text-white',
+};
 
 /**
  * Indicateur de score (note A, B, C, D, E)
@@ -17,29 +26,12 @@ const ScoreIndicator = ({ grade, size = "small" }) => {
     );
   }
 
+  // Badge lettre unique, compact et lisible
   return (
-    <div className="flex items-center bg-slate-100 rounded-full p-0.5 h-8 w-24 relative overflow-hidden">
-      {GRADES.map((g) => (
-        <div
-          key={g}
-          className="relative flex-1 h-full flex items-center justify-center"
-        >
-          {grade === g && (
-            <div
-              className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${
-                GRADE_COLORS[g]
-              } w-5 h-6 rounded-full shadow-sm pointer-events-none`}
-            />
-          )}
-          <span
-            className={`relative z-10 text-[10px] font-black leading-none transition-colors duration-200 ${
-              grade === g ? 'text-white' : 'text-slate-400'
-            }`}
-          >
-            {g}
-          </span>
-        </div>
-      ))}
+    <div
+      className={`${GRADE_COLORS[grade]} ${GRADE_TEXT_COLORS[grade] || 'text-white'} w-7 h-7 rounded-lg flex items-center justify-center shrink-0`}
+    >
+      <span className="text-sm font-black leading-none">{grade}</span>
     </div>
   );
 };
