@@ -6,7 +6,7 @@ import { TABS } from './constants/tabs';
 import { CATEGORIES } from './constants/categories';
 import { Sparkles, Smartphone, Monitor } from 'lucide-react';
 import { ViewModeContext } from './contexts/ViewModeContext';
-import { parseShareParams, clearShareParams } from './utils/shareUtils';
+import { parseShareParams, clearShareParams, hasShareParams } from './utils/shareUtils';
 
 // Composants définis hors du render pour éviter le remontage à chaque re-render
 const FloatingToggle = ({ isSmallViewport, forceMobile, onToggle }) => {
@@ -139,10 +139,16 @@ const App = () => {
   // État pour la page d'onboarding
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  // Afficher le modal de bienvenue si l'utilisateur n'est pas connecté
+  // Est-on arrivé via un lien de partage ? (évalué une seule fois au montage,
+  // avant que l'URL ne soit nettoyée). Dans ce cas on court-circuite le
+  // welcome/onboarding pour aller droit à la modal d'import.
+  const [arrivedViaShare] = useState(() => hasShareParams());
+
+  // Afficher le modal de bienvenue si l'utilisateur n'est pas connecté,
+  // sauf s'il ouvre un lien de partage (il verra la modal d'import à la place).
   useEffect(() => {
-    setShowWelcomeModal(!currentUser);
-  }, [currentUser]);
+    setShowWelcomeModal(!currentUser && !arrivedViaShare);
+  }, [currentUser, arrivedViaShare]);
 
   // Handler pour "Oui, c'est ma première fois"
   const handleFirstTimeYes = () => {
@@ -319,18 +325,18 @@ const App = () => {
     } catch {}
   }, [currentUser]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Confirmer l'import depuis la modal de partage
+  // Confirmer l'import depuis la modal de partage.
+  // On applique directement, sans forcer la connexion. Si l'utilisateur n'est
+  // pas connecté, on garde la sélection en attente pour la ré-appliquer s'il se
+  // connecte plus tard (via le useEffect ci-dessus), mais sans popup imposée.
   const handleImportShared = ({ appIds = [], migrations = [] }) => {
-    if (currentUser) {
-      if (appIds.length > 0) addMyApps(appIds.map(String));
-      if (migrations.length > 0) importMigrations(migrations);
-    } else {
-      // Non connecté : on met en attente et on invite à se connecter
+    if (appIds.length > 0) addMyApps(appIds.map(String));
+    if (migrations.length > 0) importMigrations(migrations);
+    if (!currentUser) {
       localStorage.setItem(
         'trusti_pending_shared_selection',
         JSON.stringify({ appIds, migrations })
       );
-      setShowLoginModal(true);
     }
     setActiveTab(TABS.MY_APPS);
     setPendingImport(null);
