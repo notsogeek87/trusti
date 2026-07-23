@@ -559,15 +559,35 @@ const App = () => {
 
         {/* Titre pour l'onglet Mes Apps */}
         {activeTab === TABS.MY_APPS && myApps.size > 0 && (
-          <div className="mb-3 text-center">
-            <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2">
-              Mes applications
-            </p>
-            <div className="bg-gradient-to-r from-rose-50 to-amber-50 rounded-lg p-2 border border-rose-100">
-              <p className="text-[11px] text-rose-700 font-bold">
-                ⚠️ Apps à migrer en priorité en haut
+          <div className="mb-3">
+            <div className="text-center">
+              <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                Mes applications
               </p>
+              <div className="bg-gradient-to-r from-rose-50 to-amber-50 rounded-lg p-2 border border-rose-100 mb-3">
+                <p className="text-[11px] text-rose-700 font-bold">
+                  ⚠️ Apps à migrer en priorité en haut
+                </p>
+              </div>
             </div>
+
+            <ShareButton
+              title="Partager ma sélection"
+              description="Envoie tes apps à un proche — il pourra les importer en un clic"
+              count={myApps.size}
+              onShare={() => setShowTrustiShareModal(true)}
+            />
+
+            {migratedApps.size > 0 && (
+              <div className="-mt-4 mb-2 text-center">
+                <button
+                  onClick={() => setShowShareModal(true)}
+                  className="text-xs font-bold text-emerald-700 hover:text-emerald-800 underline underline-offset-2"
+                >
+                  Partager aussi mes migrations ({migratedApps.size})
+                </button>
+              </div>
+            )}
           </div>
         )}
 
