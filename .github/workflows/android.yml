@@ -6,6 +6,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -34,3 +37,19 @@ jobs:
         with:
           name: trustiscore-debug-${{ github.run_number }}
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      # Les artifacts d'Actions sont hébergés sur Azure Blob Storage, souvent
+      # bloqué par des politiques réseau restrictives. Une release GitHub
+      # (objects.githubusercontent.com) reste accessible dans ces cas et sert
+      # de lien stable pour installer le dernier APK debug.
+      - name: Publier l'APK debug en release GitHub
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete debug-latest --yes --cleanup-tag || true
+          gh release create debug-latest \
+            android/app/build/outputs/apk/debug/app-debug.apk \
+            --title "TrustiScore — APK debug (dernier build)" \
+            --notes "Build automatique non signé, run #${{ github.run_number }} (${{ github.sha }})." \
+            --prerelease \
+            --target "${{ github.sha }}"
