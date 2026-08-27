@@ -1,5 +1,11 @@
 # 📋 Audit des Données en Dur dans le Code
 
+> 🗄️ **Archivé dans `/legacy`** : snapshot d'audit du 18/02/2026, non
+> maintenu depuis. Utile comme référence historique sur les décisions de
+> migration (ex. relations automatiques vs manuelles), mais les listes de
+> fichiers/lignes peuvent avoir dérivé du code actuel — vérifier avant de
+> s'y fier pour une nouvelle migration.
+
 Ce document liste tous les endroits où des données sont codées en dur dans le code plutôt que stockées en base de données.
 
 **Date:** 18/02/2026  
@@ -424,7 +430,7 @@ node server/database/cleanup-relations-table.js
 - [ ] Supprimer les duplications de `scoreOrder`
 
 ### Documentation & Tests
-- [x] **Documentation mise à jour** (DONNEES_EN_DUR.md)
+- [x] **Documentation mise à jour** (docs/legacy/donnees-en-dur-audit.md)
 - [ ] Tests de régression
 - [ ] Documentation API
 

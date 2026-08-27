@@ -1,4 +1,11 @@
-# Configuration de l'authentification par Magic Link
+# [OBSOLÈTE] Configuration de l'authentification par Magic Link (Resend)
+
+> ⚠️ **Ce document ne décrit plus le comportement actuel.**
+> L'authentification est passée d'un lien magique envoyé via Resend à un
+> **code OTP à 6 chiffres envoyé via Brevo** (`api/send-otp.js`,
+> `api/verify-otp.js`). Voir la doc à jour :
+> [`../guides/authentication.md`](../guides/authentication.md).
+> Conservé ici pour l'historique du choix technique.
 
 ## Vue d'ensemble
 

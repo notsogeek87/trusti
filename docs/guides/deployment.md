@@ -224,7 +224,7 @@ Si tu veux changer (ex: Supabase, PlanetScale):
 
 - [Documentation Vercel](https://vercel.com/docs)
 - [Documentation Neon](https://neon.tech/docs)
-- [Guide PostgreSQL](POSTGRES_MIGRATION.md)
+- [Guide PostgreSQL](postgres-migration.md)
 - [Troubleshooting Vercel](https://vercel.com/support)
 
 ## ✅ Checklist post-déploiement
