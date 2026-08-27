@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { TABS } from '../constants/tabs';
 import { API_URL } from '../utils/apiConfig';
+import { pickBestAlternative } from '../utils/alternatives';
 
 /**
  * Hook personnalisé pour gérer l'état des applications
@@ -419,20 +420,22 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
         const allAvailableApps = [...new Map([...myAppsData, ...apps].map(a => [a.id, a])).values()];
         const availableIds = new Set(allAvailableApps.map(a => String(a.id)));
         
-        const replacement = allAvailableApps.find(replacementApp => {
+        const candidates = allAvailableApps.filter(replacementApp => {
           // L'app de remplacement doit avoir un meilleur grade (A, B, C)
           const goodGrades = ['A', 'B', 'C'];
           if (!goodGrades.includes(replacementApp.grade)) {
             return false;
           }
-          
+
           // Vérifier si elle remplace cette app
           if (replacementApp.replacesAppIds && Array.isArray(replacementApp.replacesAppIds)) {
             return replacementApp.replacesAppIds.includes(app.id);
           }
           return replacementApp.replacesAppId === app.id;
         });
-        
+        // S'il y a plusieurs candidates, on met en avant la mieux notée (puis la plus populaire)
+        const replacement = pickBestAlternative(candidates);
+
         if (replacement) {
           return {
             ...app,
@@ -495,20 +498,22 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
         .filter(app => myApps.has(app.id))
         .map(app => {
           // Chercher si une app avec meilleur grade remplace cette app (alternative)
-          const replacement = apps.find(replacementApp => {
+          const candidates = apps.filter(replacementApp => {
             // L'app de remplacement doit avoir un meilleur grade (A, B, C)
             const goodGrades = ['A', 'B', 'C'];
             if (!goodGrades.includes(replacementApp.grade)) {
               return false;
             }
-            
+
             // Vérifier si elle remplace cette app
             if (replacementApp.replacesAppIds && Array.isArray(replacementApp.replacesAppIds)) {
               return replacementApp.replacesAppIds.includes(app.id);
             }
             return replacementApp.replacesAppId === app.id;
           });
-          
+          // S'il y a plusieurs candidates, on met en avant la mieux notée (puis la plus populaire)
+          const replacement = pickBestAlternative(candidates);
+
           if (replacement) {
             return {
               ...app,

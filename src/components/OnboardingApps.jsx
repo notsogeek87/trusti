@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Check, ChevronRight, ChevronLeft, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
 import { API_URL } from '../utils/apiConfig';
+import { pickBestAlternative } from '../utils/alternatives';
 
 const GOOD_GRADES = ['A', 'B', 'C'];
 
@@ -8,10 +9,12 @@ const GOOD_GRADES = ['A', 'B', 'C'];
 // "app à risque → sa bonne alternative", quand les deux sont présentes dans
 // la même liste (ex: Facebook + Mastodon trouvés ensemble) — pour qu'on
 // puisse le signaler visuellement plutôt que de laisser l'utilisateur
-// deviner qu'il a déjà migré.
+// deviner qu'il a déjà migré. Si plusieurs bonnes apps du scan remplacent la
+// même app à risque, on ne retient que la mieux notée (pickBestAlternative),
+// pour rester cohérent avec la même règle utilisée dans "Mes Apps".
 export function computeReplacementMap(apps) {
   const idsPresent = new Set(apps.map(a => String(a.id)));
-  const map = new Map(); // id (string) de l'app à risque -> app alternative
+  const candidatesByTarget = new Map(); // id (string) de l'app à risque -> apps alternatives candidates
   apps.forEach(app => {
     if (!GOOD_GRADES.includes(app.grade)) return;
     const targets = Array.isArray(app.replacesAppIds) && app.replacesAppIds.length > 0
@@ -19,10 +22,15 @@ export function computeReplacementMap(apps) {
       : (app.replacesAppId ? [app.replacesAppId] : []);
     targets.forEach(targetId => {
       const key = String(targetId);
-      if (key !== String(app.id) && idsPresent.has(key)) {
-        map.set(key, app);
-      }
+      if (key === String(app.id) || !idsPresent.has(key)) return;
+      const existing = candidatesByTarget.get(key) || [];
+      candidatesByTarget.set(key, [...existing, app]);
     });
+  });
+
+  const map = new Map();
+  candidatesByTarget.forEach((candidates, targetId) => {
+    map.set(targetId, pickBestAlternative(candidates));
   });
   return map;
 }
