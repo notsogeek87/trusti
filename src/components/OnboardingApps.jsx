@@ -1,6 +1,31 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Check, ChevronRight, ChevronLeft, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
 import { API_URL } from '../utils/apiConfig';
+
+const GOOD_GRADES = ['A', 'B', 'C'];
+
+// Pour une liste d'apps donnée (ex: résultats d'un scan), repère les paires
+// "app à risque → sa bonne alternative", quand les deux sont présentes dans
+// la même liste (ex: Facebook + Mastodon trouvés ensemble) — pour qu'on
+// puisse le signaler visuellement plutôt que de laisser l'utilisateur
+// deviner qu'il a déjà migré.
+export function computeReplacementMap(apps) {
+  const idsPresent = new Set(apps.map(a => String(a.id)));
+  const map = new Map(); // id (string) de l'app à risque -> app alternative
+  apps.forEach(app => {
+    if (!GOOD_GRADES.includes(app.grade)) return;
+    const targets = Array.isArray(app.replacesAppIds) && app.replacesAppIds.length > 0
+      ? app.replacesAppIds
+      : (app.replacesAppId ? [app.replacesAppId] : []);
+    targets.forEach(targetId => {
+      const key = String(targetId);
+      if (key !== String(app.id) && idsPresent.has(key)) {
+        map.set(key, app);
+      }
+    });
+  });
+  return map;
+}
 
 // Étapes guidées par catégorie
 const STEPS = [
@@ -75,14 +100,23 @@ export const ANIM_CSS = `
   }
 `;
 
-export const AppTile = ({ app, selected, onToggle }) => (
+// `replacedBy` : app alternative déjà trouvée dans le même scan pour CETTE
+// app à risque (ex: sur la tuile Facebook → { name: 'Mastodon', ... }).
+// `isChosenAlternative` : cette app EST l'alternative déjà trouvée pour une
+// autre app à risque du scan (ex: sur la tuile Mastodon).
+export const AppTile = ({ app, selected, onToggle, replacedBy, isChosenAlternative }) => (
   <button
     onClick={() => onToggle(app.id)}
-    className={`relative flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-150 active:scale-95 border-2
+    className={`relative flex flex-col items-center gap-1 p-3 rounded-2xl transition-all duration-150 active:scale-95 border-2
       ${selected
         ? 'bg-indigo-600 border-indigo-500 shadow-lg shadow-indigo-200'
         : 'bg-white border-transparent shadow-sm hover:border-indigo-200 hover:shadow-md'
-      }`}
+      }
+      ${replacedBy && !selected ? 'bg-amber-50' : ''}
+      ${isChosenAlternative && !selected ? 'bg-emerald-50' : ''}
+      ${replacedBy ? 'ring-2 ring-amber-400 ring-offset-1' : ''}
+      ${isChosenAlternative ? 'ring-2 ring-emerald-400 ring-offset-1' : ''}
+    `}
   >
     {selected && (
       <div className="absolute top-1.5 right-1.5 bg-white rounded-full w-5 h-5 flex items-center justify-center">
@@ -100,6 +134,18 @@ export const AppTile = ({ app, selected, onToggle }) => (
       {app.name}
     </span>
     <span className={`w-2 h-2 rounded-full ${GRADE_DOT[app.grade] || 'bg-slate-300'}`} title={`TrustiScore ${app.grade}`} />
+    {replacedBy && (
+      <span className={`flex items-center gap-0.5 text-[9px] font-bold leading-none ${selected ? 'text-amber-100' : 'text-amber-600'}`} title={`Déjà remplacée par ${replacedBy.name}`}>
+        <ArrowRight size={9} strokeWidth={3} />
+        <span className="truncate max-w-[64px]">{replacedBy.name}</span>
+      </span>
+    )}
+    {isChosenAlternative && (
+      <span className={`flex items-center gap-0.5 text-[9px] font-bold leading-none ${selected ? 'text-emerald-100' : 'text-emerald-600'}`} title="Déjà utilisée à la place d'une app moins respectueuse trouvée dans le scan">
+        <Sparkles size={9} />
+        <span>Déjà migré</span>
+      </span>
+    )}
   </button>
 );
 
@@ -165,6 +211,16 @@ const OnboardingApps = ({ onComplete, onSignUp }) => {
   }, [step]);
 
   const progress = step < 0 ? 0 : Math.round(((step + 1) / STEPS.length) * 100);
+
+  // Repère, parmi les apps de l'étape courante, celles déjà remplacées par
+  // une alternative également proposée ici (ex: Facebook + Mastodon).
+  // Calculé avant les `return` conditionnels ci-dessous pour respecter les
+  // règles des Hooks (toujours appelés dans le même ordre).
+  const replacementMap = useMemo(() => computeReplacementMap(stepApps), [stepApps]);
+  const alternativeIds = useMemo(
+    () => new Set([...replacementMap.values()].map(a => String(a.id))),
+    [replacementMap]
+  );
 
   // ── INTRO ─────────────────────────────────────────────────────────────
   if (step === -1) {
@@ -326,7 +382,14 @@ const OnboardingApps = ({ onComplete, onSignUp }) => {
         ) : stepApps.length > 0 ? (
           <div className="grid grid-cols-3 gap-3">
             {stepApps.map(app => (
-              <AppTile key={app.id} app={app} selected={selected.has(app.id)} onToggle={toggleApp} />
+              <AppTile
+                key={app.id}
+                app={app}
+                selected={selected.has(app.id)}
+                onToggle={toggleApp}
+                replacedBy={replacementMap.get(String(app.id))}
+                isChosenAlternative={alternativeIds.has(String(app.id))}
+              />
             ))}
           </div>
         ) : (

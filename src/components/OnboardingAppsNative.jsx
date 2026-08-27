@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ScanSearch, ShieldCheck, ArrowRight, ListChecks, Globe, Lock, Eye } from 'lucide-react';
 import InstalledApps from '../native/InstalledApps';
-import { AppTile, ANIM_CSS } from './OnboardingApps';
+import { AppTile, ANIM_CSS, computeReplacementMap } from './OnboardingApps';
 import { API_URL } from '../utils/apiConfig';
 
 function extractPackageId(playStoreUrl) {
@@ -129,6 +129,16 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
       return next;
     });
   };
+
+  // Repère, parmi les apps trouvées, celles déjà remplacées par une
+  // alternative également trouvée sur le téléphone (ex: Facebook + Mastodon
+  // installés tous les deux). Calculé avant les `return` conditionnels
+  // ci-dessous pour respecter les règles des Hooks.
+  const replacementMap = useMemo(() => computeReplacementMap(matches), [matches]);
+  const alternativeIds = useMemo(
+    () => new Set([...replacementMap.values()].map(a => String(a.id))),
+    [replacementMap]
+  );
 
   // Petite transition "magique" (icônes qui convergent + étincelles) entre la
   // validation et l'écran final, plutôt qu'un cut brutal vers la liste d'apps.
@@ -412,7 +422,14 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
         {matches.length > 0 && (
           <div className="grid grid-cols-3 gap-3">
             {matches.map(app => (
-              <AppTile key={app.id} app={app} selected={selected.has(app.id)} onToggle={toggleApp} />
+              <AppTile
+                key={app.id}
+                app={app}
+                selected={selected.has(app.id)}
+                onToggle={toggleApp}
+                replacedBy={replacementMap.get(String(app.id))}
+                isChosenAlternative={alternativeIds.has(String(app.id))}
+              />
             ))}
           </div>
         )}
