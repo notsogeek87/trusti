@@ -566,6 +566,11 @@ const AdminSimpleTableModal = ({ onClose }) => {
                       placeholder="Ex : Signal, ProtonMail…"
                       autoFocus
                     />
+                    {selectedApp.playStoreUrl && (
+                      <p className="mt-1 text-xs text-slate-400">
+                        Sera remplacé par le nom officiel du Play Store à l'enregistrement, si l'app y est trouvée.
+                      </p>
+                    )}
                   </Field>
                   <Field label="Catégorie" required>
                     <select
@@ -684,20 +689,21 @@ const AdminSimpleTableModal = ({ onClose }) => {
                 {/* ─ Liens ─ */}
                 <Section title="Liens">
                   {[
-                    { key: 'playStoreUrl',  label: 'Play Store',  placeholder: 'https://play.google.com/store/apps/details?id=…' },
+                    { key: 'playStoreUrl',  label: 'Play Store',  placeholder: 'https://play.google.com/store/apps/details?id=… ou juste com.exemple.app', hint: "Le nom et l'icône seront synchronisés automatiquement depuis le Play Store à l'enregistrement." },
                     { key: 'appleStoreUrl', label: 'App Store',   placeholder: 'https://apps.apple.com/…' },
                     { key: 'fDroidUrl',     label: 'F-Droid',     placeholder: 'https://f-droid.org/packages/…' },
                     { key: 'githubUrl',     label: 'GitHub',      placeholder: 'https://github.com/…' },
                     { key: 'website',       label: 'Site Web',    placeholder: 'https://…' },
-                  ].map(({ key, label, placeholder }) => (
+                  ].map(({ key, label, placeholder, hint }) => (
                     <Field key={key} label={label}>
                       <input
-                        type="url"
+                        type={key === 'playStoreUrl' ? 'text' : 'url'}
                         value={selectedApp[key] || ''}
                         onChange={e => updateField(key, e.target.value)}
                         className={monoInputCls}
                         placeholder={placeholder}
                       />
+                      {hint && <p className="mt-1 text-xs text-slate-400">{hint}</p>}
                     </Field>
                   ))}
                 </Section>
@@ -734,7 +740,7 @@ const AdminSimpleTableModal = ({ onClose }) => {
                         className={inputCls}
                       />
                     </Field>
-                    <Field label="Icône (URL ou emoji)">
+                    <Field label={selectedApp.playStoreUrl ? "Icône de repli (URL ou emoji)" : "Icône (URL ou emoji)"}>
                       <div className="flex gap-2 items-center">
                         <input
                           value={selectedApp.icon || ''}
@@ -746,6 +752,11 @@ const AdminSimpleTableModal = ({ onClose }) => {
                           <AppIcon icon={selectedApp.icon} name={selectedApp.name} color={selectedApp.color} size="sm" />
                         )}
                       </div>
+                      {selectedApp.playStoreUrl && (
+                        <p className="mt-1 text-xs text-slate-400">
+                          Utilisée seulement si l'icône Play Store est introuvable.
+                        </p>
+                      )}
                     </Field>
                   </div>
                   <Field label="Couleur de fond">

@@ -18,16 +18,41 @@ if (process.env.NODE_ENV !== 'production') {
 // Initialiser la connexion Neon
 const sql = neon(process.env.DATABASE_URL);
 
-// Cache pour les icônes
-const iconCache = {};
+// Cache des infos Play Store (nom + icône), partagé pour éviter les appels réseau redondants
+const playStoreCache = {};
 
 /**
- * Helper: Extraire le package ID depuis une URL Play Store
+ * Helper: Extraire le package ID depuis une URL Play Store, ou accepter
+ * directement un package name saisi à la main (ex: "com.example.app")
  */
 function extractPackageId(playStoreUrl) {
   if (!playStoreUrl) return null;
-  const match = playStoreUrl.match(/id=([a-zA-Z0-9._]+)/);
-  return match ? match[1] : null;
+  const trimmed = playStoreUrl.trim();
+  const match = trimmed.match(/[?&]id=([a-zA-Z0-9._]+)/);
+  if (match) return match[1];
+  if (/^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/.test(trimmed)) {
+    return trimmed;
+  }
+  return null;
+}
+
+/**
+ * Helper: Récupérer les infos Play Store d'un package (mise en cache des succès)
+ */
+async function getPlayStoreAppInfo(packageName) {
+  if (!packageName) return null;
+  if (playStoreCache[packageName]) return playStoreCache[packageName];
+
+  try {
+    const appInfo = await gplay.app({ appId: packageName });
+    if (appInfo) {
+      playStoreCache[packageName] = appInfo;
+      return appInfo;
+    }
+  } catch (error) {
+    // App introuvable sur le Play Store (retiré, ID invalide, etc.)
+  }
+  return null;
 }
 
 /**
@@ -82,62 +107,37 @@ async function getFDroidUrl(packageName) {
 }
 
 /**
- * Helper: Récupérer l'icône dynamiquement (Play Store puis F-Droid)
+ * Helper: Récupérer l'icône dynamiquement (Play Store puis F-Droid).
+ * Le Play Store fait foi ; l'icône saisie à la main ne sert que de repli.
  */
 async function getAppIcon(playStoreUrl, currentIcon) {
-  // Si pas de playStoreUrl, garder l'icône actuelle
-  if (!playStoreUrl) return currentIcon;
-
-  // Extraire le package ID
   const packageName = extractPackageId(playStoreUrl);
   if (!packageName) return currentIcon;
 
-  // Vérifier le cache
-  if (iconCache[packageName]) {
-    return iconCache[packageName];
-  }
+  const appInfo = await getPlayStoreAppInfo(packageName);
+  if (appInfo?.icon) return appInfo.icon;
 
-  // 1. Essayer Play Store
-  try {
-    const appInfo = await gplay.app({ appId: packageName });
-    if (appInfo && appInfo.icon) {
-      iconCache[packageName] = appInfo.icon;
-      return appInfo.icon;
-    }
-  } catch (error) {
-    // App probablement pas sur Play Store
-  }
-
-  // 2. Essayer F-Droid
   try {
     const fdroidIcon = await getFDroidIcon(packageName);
-    if (fdroidIcon) {
-      iconCache[packageName] = fdroidIcon;
-      return fdroidIcon;
-    }
+    if (fdroidIcon) return fdroidIcon;
   } catch (error) {
     // App probablement pas sur F-Droid non plus
   }
 
-  // 3. Garder l'icône actuelle
   return currentIcon;
 }
 
 /**
- * Helper: Récupérer les informations complètes depuis Play Store
+ * Helper: Récupérer le nom officiel depuis le Play Store.
+ * Le Play Store fait foi ; le nom saisi à la main ne sert que de repli
+ * (app absente du Play Store, retirée, ou URL invalide).
  */
-async function getPlayStoreInfo(playStoreUrl) {
-  if (!playStoreUrl) return null;
-  
+async function getAppName(playStoreUrl, currentName) {
   const packageName = extractPackageId(playStoreUrl);
-  if (!packageName) return null;
+  if (!packageName) return currentName;
 
-  try {
-    const appInfo = await gplay.app({ appId: packageName });
-    return appInfo;
-  } catch (error) {
-    return null;
-  }
+  const appInfo = await getPlayStoreAppInfo(packageName);
+  return appInfo?.title || currentName;
 }
 
 /**
@@ -146,6 +146,25 @@ async function getPlayStoreInfo(playStoreUrl) {
 function buildPlayStoreUrl(packageName) {
   if (!packageName) return null;
   return `https://play.google.com/store/apps/details?id=${packageName}`;
+}
+
+/**
+ * Helper: Fiabiliser le nom, l'icône et l'URL Play Store d'une app à partir
+ * du package Android fourni par l'admin (URL complète ou simple package name).
+ * Le Play Store fait foi ; les valeurs saisies à la main ne servent que de
+ * repli si l'app n'y est pas trouvée (ou si aucun package n'est renseigné).
+ */
+async function enrichFromPlayStore(appData) {
+  const packageName = extractPackageId(appData.playStoreUrl);
+  if (!packageName) return appData;
+
+  const appInfo = await getPlayStoreAppInfo(packageName);
+  return {
+    ...appData,
+    name: appInfo?.title || appData.name,
+    icon: appInfo?.icon || appData.icon,
+    playStoreUrl: appInfo?.url || buildPlayStoreUrl(packageName),
+  };
 }
 
 /**
@@ -621,6 +640,7 @@ export async function getAppsByIds(ids) {
  */
 export async function createApp(appData) {
   try {
+    appData = await enrichFromPlayStore(appData);
     const id = appData.id || String(Date.now());
     const trustiScore = appData.trustiScore || appData.grade || 'C';
     const grade = appData.grade || appData.trustiScore || 'C';
@@ -671,6 +691,7 @@ export async function createApp(appData) {
  */
 export async function updateApp(id, appData) {
   try {
+    appData = await enrichFromPlayStore(appData);
     const trustiScore = appData.trustiScore || appData.grade;
     const grade = appData.grade || appData.trustiScore;
     
@@ -1066,9 +1087,11 @@ async function formatAppFromDB(app) {
   // Charger les relations
   const relations = await getAppRelations(app.id);
   
-  // Récupérer l'icône dynamiquement depuis Play Store / F-Droid
+  // Récupérer le nom et l'icône dynamiquement depuis le Play Store (fiabilise
+  // les entrées historiques saisies à la main, même sans re-sauvegarde admin)
+  let name = await getAppName(app.play_store_url, app.name);
   let icon = await getAppIcon(app.play_store_url, app.icon);
-  
+
   // Récupérer les infos depuis Play Store si disponible
   let playStoreUrl = app.play_store_url;
   let appleStoreUrl = app.apple_store_url;
@@ -1091,8 +1114,8 @@ async function formatAppFromDB(app) {
     packageName.startsWith('io.github.')
   );
   
-  if (!appleStoreUrl && app.name && !isFDroidOnly) {
-    appleStoreUrl = await searchAppStore(app.name);
+  if (!appleStoreUrl && name && !isFDroidOnly) {
+    appleStoreUrl = await searchAppStore(name);
   }
   
   // Pour les TrustiApps (A/B/C), vérifier si l'app existe sur F-Droid
@@ -1107,7 +1130,7 @@ async function formatAppFromDB(app) {
   
   return {
     id: app.id,
-    name: app.name,
+    name: name,
     trustiScore: trustiScore,
     grade: app.grade,
     category: app.category,
