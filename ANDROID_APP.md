@@ -1,8 +1,10 @@
 # App Android native — scan automatique des apps installées
 
-Trusti reste un site web (React + Vite, servi sur Vercel). Ce document décrit
-la couche ajoutée **uniquement pour packager une app Android native** (via
-[Capacitor](https://capacitorjs.com)) qui, à l'onboarding, scanne les apps
+Trusti reste un site web (React + Vite, servi sur Vercel). L'app Android
+([Capacitor](https://capacitorjs.com), `capacitor.config.json`, `android/`,
+CI `.github/workflows/android.yml`) qui empaquette ce même site en APK existe
+déjà. Ce document décrit la couche ajoutée **par-dessus cet empaquetage**
+pour que l'onboarding, une fois dans l'app Android, scanne les apps
 installées sur le téléphone au lieu de demander une sélection manuelle.
 
 **Le mode web n'est pas affecté** : `OnboardingApps.jsx` (sélection manuelle
@@ -35,23 +37,24 @@ l'intersection avec son propre catalogue.
 ## Architecture
 
 ```
-android/                                  Projet Android natif (généré par `cap add android`)
+android/                                  Projet Android natif (Capacitor)
   app/src/main/
     AndroidManifest.xml                   Bloc <queries> généré (marqueurs TRUSTI_CATALOG_START/END)
     res/values/trusti_catalog.xml         string-array des package names connus (généré)
-    java/app/trusti/mobile/
+    java/com/trusti/app/
       MainActivity.java                   Enregistre InstalledAppsPlugin
       InstalledAppsPlugin.java            Plugin Capacitor : getInstalledPackages()
 
 scripts/generate-android-catalog.js       Génère les 2 fichiers ci-dessus depuis la DB (ou apps.json en secours)
 
 src/
+  utils/apiConfig.js                      API_URL — bascule sur l'URL Vercel absolue en natif (pas de backend co-localisé dans l'APK)
   utils/platform.js                       isNativeAndroid (Capacitor.isNativePlatform() && platform === 'android')
   native/InstalledApps.js                 Wrapper JS du plugin Capacitor
   components/OnboardingAppsNative.jsx     Onboarding "scan auto" (Android natif)
   components/OnboardingApps.jsx           Onboarding "sélection manuelle" (web, inchangé)
 
-capacitor.config.json                     appId app.trusti.mobile, webDir dist
+capacitor.config.json                     appId com.trusti.app, appName TrustiScore, webDir dist
 ```
 
 Flow de `OnboardingAppsNative.jsx` :
@@ -67,14 +70,12 @@ Flow de `OnboardingAppsNative.jsx` :
 ## Workflow de développement
 
 ```bash
-# 1. Régénérer le catalogue de paquets connus (nécessite DATABASE_URL, sinon
-#    bascule sur server/database/data/apps.json en secours)
-npm run android:generate-catalog
+# Régénère le catalogue de paquets connus (nécessite DATABASE_URL, sinon
+# bascule sur server/database/data/apps.json en secours), build le web,
+# puis sync vers le projet Android — c'est ce que lance aussi la CI.
+npm run cap:sync
 
-# 2. Build web + sync vers le projet Android (fait aussi l'étape 1)
-npm run android:sync
-
-# 3. Ouvrir dans Android Studio pour builder/lancer sur device ou émulateur
+# Ouvrir dans Android Studio pour builder/lancer sur device ou émulateur
 npm run android:open
 ```
 
@@ -87,6 +88,6 @@ que l'APK n'est pas reconstruit.
 - Même sans `QUERY_ALL_PACKAGES`, Google Play peut demander une justification
   pour un usage massif de `<queries>` — garder le formulaire de déclaration
   Play Console à jour si le catalogue grossit beaucoup.
-- `appId` actuel : `app.trusti.mobile` (à changer dans `capacitor.config.json`
+- `appId` actuel : `com.trusti.app` (à changer dans `capacitor.config.json`
   + `android/app/build.gradle` si un autre identifiant est souhaité avant la
   première publication — il ne peut plus être changé après).

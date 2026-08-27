@@ -1,6 +1,6 @@
 {
-  "appId": "app.trusti.mobile",
-  "appName": "Trusti",
+  "appId": "com.trusti.app",
+  "appName": "TrustiScore",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"

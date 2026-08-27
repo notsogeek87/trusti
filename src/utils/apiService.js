@@ -2,11 +2,7 @@
  * Service API pour récupérer les données des applications
  */
 import { sanitizeApplication, migrateFromOldFormat } from '../models';
-
-// Détection automatique de l'environnement
-const API_URL = import.meta.env.PROD 
-  ? '/api'  // Production (Vercel) - utilise les API routes
-  : 'http://localhost:3001/api';  // Développement local
+import { API_URL } from './apiConfig';
 
 /**
  * Normalise et valide une application en utilisant le nouveau modèle

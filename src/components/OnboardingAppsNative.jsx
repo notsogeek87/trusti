@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ScanSearch, ShieldCheck, ArrowRight, ListChecks } from 'lucide-react';
 import InstalledApps from '../native/InstalledApps';
 import { AppTile, ANIM_CSS } from './OnboardingApps';
-
-const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+import { API_URL } from '../utils/apiConfig';
 
 function extractPackageId(playStoreUrl) {
   if (!playStoreUrl) return null;

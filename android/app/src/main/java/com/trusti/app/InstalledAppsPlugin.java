@@ -1,4 +1,4 @@
-package app.trusti.mobile;
+package com.trusti.app;
 
 import android.content.pm.PackageManager;
 import com.getcapacitor.JSArray;

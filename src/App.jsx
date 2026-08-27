@@ -7,6 +7,7 @@ import { CATEGORIES } from './constants/categories';
 import { Sparkles, Smartphone, Monitor, Share2 } from 'lucide-react';
 import { ViewModeContext } from './contexts/ViewModeContext';
 import { parseShareParams, clearShareParams, hasShareParams } from './utils/shareUtils';
+import { API_URL } from './utils/apiConfig';
 
 // Composants définis hors du render pour éviter le remontage à chaque re-render
 const FloatingToggle = ({ isSmallViewport, forceMobile, onToggle }) => {
@@ -264,7 +265,6 @@ const App = () => {
       return;
     }
     const email = currentUser?.email || currentUser;
-    const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
     fetch(`${API_URL}/check-admin?email=${encodeURIComponent(email)}`)
       .then(r => r.json())
       .then(data => { if (data.isAdmin) setIsAdminUnlocked(true); })
