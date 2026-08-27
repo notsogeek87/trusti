@@ -163,9 +163,15 @@ régénérer à la main.
 - Compiler l'APK réclame le SDK Android (absent de cet environnement de dev
   Claude — `dl.google.com` est bloqué) : `cd android && ./gradlew
   assembleDebug`. C'est `.github/workflows/android.yml` qui le fait en CI à
-  chaque push sur `main`/PR, et publie l'APK debug en artifact — pas encore de
-  build signé (à ajouter plus tard via des secrets keystore le jour où une
-  vraie release est prévue).
+  chaque push sur `main`/`staging`/PR — pas encore de build signé (à ajouter
+  plus tard via des secrets keystore le jour où une vraie release est
+  prévue).
+- **Récupérer le dernier APK** : les artifacts d'Actions (Azure Blob Storage)
+  sont bloqués par certaines politiques réseau restrictives — la CI publie
+  donc aussi l'APK en **release GitHub**, taguée par branche
+  (`debug-main`, `debug-staging`, `debug-<branche-de-PR>`, slash remplacé par
+  un tiret) pour qu'un build sur une branche n'écrase pas celui d'une autre.
+  Toujours à `github.com/notsogeek87/trusti/releases/tag/debug-<branche>`.
 - **Limite connue, non résolue dans cette passe** : le flux de connexion par
   lien magique (email → `?token=` → `VerifyAuth.jsx`) ouvre le navigateur du
   téléphone, pas l'APK (aucun deep link configuré). Le flux OTP (code saisi à
