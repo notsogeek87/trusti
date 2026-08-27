@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import * as brevo from '@getbrevo/brevo';
 import { neon } from '@neondatabase/serverless';
+import { checkSendRateLimit } from '../server/otpRateLimit.js';
 
 const sql = neon(process.env.DATABASE_URL);
 
@@ -21,6 +22,12 @@ export default async function handler(req, res) {
     // Vérifier que l'email est autorisé (dev bypass si ADMIN_EMAIL non défini)
     if (adminEmail && cleanEmail !== adminEmail) {
       return res.status(403).json({ error: 'Accès non autorisé' });
+    }
+
+    // Rate limit: 3 OTP max par email sur 5 minutes
+    const withinLimit = await checkSendRateLimit(sql, cleanEmail);
+    if (!withinLimit) {
+      return res.status(429).json({ error: 'Trop de demandes. Réessayez dans quelques minutes.' });
     }
 
     // Générer le code

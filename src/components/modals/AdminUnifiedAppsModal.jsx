@@ -3,6 +3,7 @@ import { X, Plus, Save, Trash2, Upload, Filter } from 'lucide-react';
 import { GRADE_INFO } from '../../constants/grades';
 import { CATEGORIES } from '../../constants/categories';
 import { API_URL } from '../../utils/apiConfig';
+import { adminFetch } from '../../utils/adminAuth';
 
 /**
  * Modal d'administration unifiée pour gérer toutes les applications
@@ -132,7 +133,7 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
       // Si on modifie une app existante, utiliser son endpoint d'origine
       const finalEndpoint = editingApp.id ? getApiEndpoint(editingApp) : endpoint;
       
-      const response = await fetch(`${API_URL}/${finalEndpoint}`, {
+      const response = await adminFetch(`${API_URL}/${finalEndpoint}`, {
         method: method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newApp)
@@ -176,7 +177,7 @@ const AdminUnifiedAppsModal = ({ onClose, isEmbedded = false }) => {
       setIsSaving(true);
       
       const endpoint = getApiEndpoint(app);
-      const response = await fetch(`${API_URL}/${endpoint}?id=${app.id}`, {
+      const response = await adminFetch(`${API_URL}/${endpoint}?id=${app.id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' }
       });

@@ -3,6 +3,7 @@ import { X, Plus, Save, Trash2, Upload } from 'lucide-react';
 import { GRADE_INFO } from '../../constants/grades';
 import { CATEGORIES } from '../../constants/categories';
 import { API_URL } from '../../utils/apiConfig';
+import { adminFetch } from '../../utils/adminAuth';
 
 /**
  * Modal d'administration pour gérer les TrustiApps
@@ -75,7 +76,7 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
     try {
       setIsSaving(true);
       const method = editingApp.id ? 'PUT' : 'POST';
-      const response = await fetch(`${API_URL}/custom-trusti-apps`, {
+      const response = await adminFetch(`${API_URL}/custom-trusti-apps`, {
         method: method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newApp)
@@ -116,7 +117,7 @@ const AdminTrustiAppsModal = ({ onClose, onSave, isEmbedded = false }) => {
     try {
       setIsSaving(true);
       
-      const response = await fetch(`${API_URL}/custom-trusti-apps?id=${id}`, {
+      const response = await adminFetch(`${API_URL}/custom-trusti-apps?id=${id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' }
       });

@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import * as brevo from '@getbrevo/brevo';
 import { neon } from '@neondatabase/serverless';
+import { checkSendRateLimit } from '../server/otpRateLimit.js';
 
 const sql = neon(process.env.DATABASE_URL);
 
@@ -20,13 +21,8 @@ export default async function handler(req, res) {
     const cleanEmail = email.toLowerCase().trim();
 
     // Rate limit: 3 OTP max par email sur 5 minutes
-    const recentResult = await sql`
-      SELECT COUNT(*) AS count FROM magic_link_tokens
-      WHERE email = ${cleanEmail}
-        AND LENGTH(token) = 6
-        AND expires_at > ${Date.now() - 5 * 60 * 1000}
-    `;
-    if (parseInt(recentResult[0].count) >= 3) {
+    const withinLimit = await checkSendRateLimit(sql, cleanEmail);
+    if (!withinLimit) {
       return res.status(429).json({ error: 'Trop de demandes. Réessayez dans quelques minutes.' });
     }
 

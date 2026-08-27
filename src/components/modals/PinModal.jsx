@@ -80,14 +80,14 @@ const PinModal = ({ isOpen, onClose, onSuccess, userEmail }) => {
     setIsVerifying(true);
     setError('');
     try {
-      const res = await fetch(`${API_URL}/verify-otp`, {
+      const res = await fetch(`${API_URL}/verify-admin-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: userEmail, code }),
       });
       const data = await res.json();
       if (data.success) {
-        onSuccess();
+        onSuccess(data.token);
         onClose();
       } else {
         setError(data.error || 'Code incorrect');

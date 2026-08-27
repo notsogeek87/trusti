@@ -3,6 +3,7 @@
 // Source: https://siksik.org/applications-alternatives-pour-android-plus-respectueuses-de-la-vie-privee/
 
 import gplay from 'google-play-scraper';
+import { fetchWithTimeout } from '../server/fetchWithTimeout.js';
 
 // Cache pour les icônes
 const iconCache = {};
@@ -10,7 +11,7 @@ const iconCache = {};
 // Helper: Vérifier si une URL d'image est valide
 const isValidImageUrl = async (url) => {
   try {
-    const response = await fetch(url, { method: 'HEAD' });
+    const response = await fetchWithTimeout(url, { method: 'HEAD' }, 3000);
     return response.ok && response.headers.get('content-type')?.startsWith('image/');
   } catch {
     return false;
@@ -184,7 +185,6 @@ const getCategoryIcon = (category) => {
 
 export default async function handler(req, res) {
   // Enable CORS
-  res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');

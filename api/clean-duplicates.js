@@ -3,6 +3,7 @@
  * Usage: GET /api/clean-duplicates?action=list ou GET /api/clean-duplicates?action=delete
  */
 import dbService from '../server/database/service-postgres.js';
+import { isAuthorizedAdminRequest } from '../server/adminToken.js';
 
 /**
  * Normalise un nom d'application pour la comparaison
@@ -75,10 +76,9 @@ function findExactDuplicates(apps) {
 
 export default async function handler(req, res) {
   // CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key, Authorization');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -86,6 +86,12 @@ export default async function handler(req, res) {
 
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Outil de maintenance interne : jamais appelé par le front, peut supprimer
+  // des données en masse (action=delete). Auth obligatoire pour tout accès.
+  if (!isAuthorizedAdminRequest(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   const { action } = req.query;

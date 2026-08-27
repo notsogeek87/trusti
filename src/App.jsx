@@ -7,7 +7,7 @@ import { CATEGORIES } from './constants/categories';
 import { Sparkles, Smartphone, Monitor, Share2 } from 'lucide-react';
 import { ViewModeContext } from './contexts/ViewModeContext';
 import { parseShareParams, clearShareParams, hasShareParams } from './utils/shareUtils';
-import { API_URL } from './utils/apiConfig';
+import { getAdminTokenEmail, clearAdminToken, setAdminToken } from './utils/adminAuth';
 
 // Composants définis hors du render pour éviter le remontage à chaque re-render
 const FloatingToggle = ({ isSmallViewport, forceMobile, onToggle }) => {
@@ -113,12 +113,14 @@ const App = () => {
   // Wrapper pour logout qui réinitialise aussi l'état admin
   const logout = () => {
     setIsAdminUnlocked(false);
+    clearAdminToken();
     authLogout();
   };
-  
+
   // Wrapper pour resetUserData qui réinitialise aussi l'état admin
   const resetUserData = () => {
     setIsAdminUnlocked(false);
+    clearAdminToken();
     authResetUserData();
   };
 
@@ -258,17 +260,19 @@ const App = () => {
   const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
 
-  // Auto-déverrouiller l'admin si l'email correspond à ADMIN_EMAIL
+  // Déverrouiller l'admin si un jeton de session valide existe déjà pour cet
+  // utilisateur (évite de redemander le PIN à chaque visite). Le jeton n'est
+  // obtenu qu'après vérification OTP réelle (voir handleUnlockAdmin) : on ne
+  // peut pas se fier à /api/check-admin seul pour accorder l'accès, il ne
+  // fait que comparer un email fourni par le client sans preuve d'identité.
   useEffect(() => {
     if (!currentUser) {
       setIsAdminUnlocked(false);
       return;
     }
-    const email = currentUser?.email || currentUser;
-    fetch(`${API_URL}/check-admin?email=${encodeURIComponent(email)}`)
-      .then(r => r.json())
-      .then(data => { if (data.isAdmin) setIsAdminUnlocked(true); })
-      .catch(() => {});
+    const email = (currentUser?.email || currentUser || '').toLowerCase();
+    const tokenEmail = getAdminTokenEmail();
+    setIsAdminUnlocked(!!tokenEmail && tokenEmail === email);
   }, [currentUser]);
 
   // Scroller en haut lors du changement d'onglet ou de catégorie
@@ -400,11 +404,12 @@ const App = () => {
   }, [selectedApp, showMigrationSelector, activeTab]);
 
   // Appelé par PinModal après validation serveur réussie
-  const handleUnlockAdmin = async () => {
+  const handleUnlockAdmin = async (token) => {
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     if (isLocal && !currentUser) {
       await login('admin@local');
     }
+    setAdminToken(token);
     setIsAdminUnlocked(true);
     setShowPinModal(false);
   };

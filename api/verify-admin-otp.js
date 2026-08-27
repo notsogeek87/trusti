@@ -1,10 +1,10 @@
+// Vercel Serverless Function - Vérification OTP admin (émet un jeton de session)
 import 'dotenv/config';
 import { neon } from '@neondatabase/serverless';
 import { getOtpLock, registerOtpFailure, clearOtpFailures } from '../server/otpRateLimit.js';
+import { createAdminToken } from '../server/adminToken.js';
 
 const sql = neon(process.env.DATABASE_URL);
-
-const MAX_ATTEMPTS = 5;
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -23,14 +23,17 @@ export default async function handler(req, res) {
     const cleanCode = String(code).trim();
     const now = Date.now();
 
-    // Rate limit par email (persistant en base, fiable sur instances serverless multiples)
+    const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase().trim();
+    if (adminEmail && cleanEmail !== adminEmail) {
+      return res.status(403).json({ error: 'Accès non autorisé' });
+    }
+
     const lock = await getOtpLock(sql, cleanEmail);
     if (lock.lockedUntil > now) {
       const retryAfter = Math.ceil((lock.lockedUntil - now) / 1000 / 60);
       return res.status(429).json({ error: `Trop de tentatives. Réessayez dans ${retryAfter} min.` });
     }
 
-    // Chercher le code en DB
     const result = await sql`
       SELECT * FROM magic_link_tokens
       WHERE email = ${cleanEmail}
@@ -41,9 +44,8 @@ export default async function handler(req, res) {
     `;
 
     if (result.length === 0) {
-      // Incrémenter les échecs
-      const { count } = await registerOtpFailure(sql, cleanEmail, { maxAttempts: MAX_ATTEMPTS });
-      const remaining = MAX_ATTEMPTS - count;
+      const { count } = await registerOtpFailure(sql, cleanEmail);
+      const remaining = 5 - count;
       return res.status(401).json({
         error: remaining > 0
           ? `Code incorrect. ${remaining} tentative${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}.`
@@ -53,24 +55,21 @@ export default async function handler(req, res) {
 
     const tokenData = result[0];
 
-    // Vérifier expiration
     if (now > tokenData.expires_at) {
       await sql`DELETE FROM magic_link_tokens WHERE token = ${cleanCode} AND email = ${cleanEmail}`;
       return res.status(401).json({ error: 'Code expiré. Demandez un nouveau code.' });
     }
 
-    // Marquer comme utilisé
     await sql`
       UPDATE magic_link_tokens SET used = true
       WHERE token = ${cleanCode} AND email = ${cleanEmail}
     `;
-
-    // Réinitialiser le compteur d'échecs
     await clearOtpFailures(sql, cleanEmail);
 
-    return res.status(200).json({ success: true, email: cleanEmail });
+    const token = createAdminToken(cleanEmail);
+    return res.status(200).json({ success: true, email: cleanEmail, token });
   } catch (error) {
-    console.error('Error verifying OTP:', error);
+    console.error('Error verifying admin OTP:', error);
     return res.status(500).json({ error: 'Erreur lors de la vérification du code' });
   }
 }

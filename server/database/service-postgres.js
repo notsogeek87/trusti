@@ -3,6 +3,7 @@
  */
 import { neon } from '@neondatabase/serverless';
 import gplay from 'google-play-scraper';
+import { fetchWithTimeout } from '../fetchWithTimeout.js';
 
 // Charger .env en développement local
 if (process.env.NODE_ENV !== 'production') {
@@ -34,7 +35,7 @@ function extractPackageId(playStoreUrl) {
  */
 async function isValidImageUrl(url) {
   try {
-    const response = await fetch(url, { method: 'HEAD', timeout: 3000 });
+    const response = await fetchWithTimeout(url, { method: 'HEAD' }, 3000);
     return response.ok && response.headers.get('content-type')?.startsWith('image/');
   } catch {
     return false;
@@ -68,7 +69,7 @@ async function getFDroidUrl(packageName) {
   
   try {
     const fdroidPageUrl = `https://f-droid.org/packages/${packageName}`;
-    const response = await fetch(fdroidPageUrl, { method: 'HEAD', timeout: 3000 });
+    const response = await fetchWithTimeout(fdroidPageUrl, { method: 'HEAD' }, 3000);
     
     if (response.ok) {
       return fdroidPageUrl;

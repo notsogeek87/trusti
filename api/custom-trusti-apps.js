@@ -1,15 +1,19 @@
 // Vercel Serverless Function - Custom TrustiApps Management
 import dbService from '../server/database/service-postgres.js';
+import { isAuthorizedAdminRequest } from '../server/adminToken.js';
 
 export default async function handler(req, res) {
   // CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key, Authorization');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+
+  if (req.method !== 'GET' && !isAuthorizedAdminRequest(req)) {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
   }
 
   try {

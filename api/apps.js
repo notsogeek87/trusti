@@ -1,35 +1,22 @@
 // Vercel Serverless Function - Apps Management (Trusti & Star)
 import dbService from '../server/database/service-postgres.js';
-
-const INTERNAL_ORIGINS = [
-  'trusti-alpha.vercel.app',
-  'trusti-notsogeeks-projects.vercel.app',
-  'localhost',
-  '127.0.0.1',
-];
-
-function isInternalRequest(req) {
-  const origin = req.headers['origin'] || req.headers['referer'] || '';
-  return INTERNAL_ORIGINS.some(o => origin.includes(o));
-}
+import { isAuthorizedAdminRequest } from '../server/adminToken.js';
 
 export default async function handler(req, res) {
   // CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key, Authorization');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
-  // Auth : les requêtes externes (n8n, etc.) doivent fournir x-api-key
-  if (!isInternalRequest(req)) {
-    const apiKey = req.headers['x-api-key'];
-    if (!apiKey || apiKey !== process.env.API_KEY) {
-      return res.status(401).json({ success: false, error: 'Unauthorized' });
-    }
+  // Lecture publique (catalogue), mutations réservées à l'admin (jeton) ou
+  // aux intégrations externes (x-api-key). Ni Origin ni Referer ne sont des
+  // preuves d'identité fiables : un client non-navigateur peut les falsifier.
+  if (req.method !== 'GET' && !isAuthorizedAdminRequest(req)) {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
   }
 
   try {

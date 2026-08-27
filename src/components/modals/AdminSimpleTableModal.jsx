@@ -6,6 +6,7 @@ import {
 import { CATEGORIES, ADMIN_CATEGORIES } from '../../constants/categories';
 import { useToast } from '../../contexts/ToastContext';
 import { API_URL } from '../../utils/apiConfig';
+import { adminFetch } from '../../utils/adminAuth';
 
 // ─── Grade display helpers ───────────────────────────────────────────────────
 
@@ -241,12 +242,12 @@ const AdminSimpleTableModal = ({ onClose }) => {
       };
 
       const res = drawerMode === 'add'
-        ? await fetch(`${API_URL}/apps`, {
+        ? await adminFetch(`${API_URL}/apps`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
           })
-        : await fetch(`${API_URL}/apps?id=${selectedApp.id}`, {
+        : await adminFetch(`${API_URL}/apps?id=${selectedApp.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
@@ -278,7 +279,7 @@ const AdminSimpleTableModal = ({ onClose }) => {
     if (!selectedApp?.id) return;
     setIsDeleting(true);
     try {
-      const res = await fetch(`${API_URL}/apps?id=${selectedApp.id}`, { method: 'DELETE' });
+      const res = await adminFetch(`${API_URL}/apps?id=${selectedApp.id}`, { method: 'DELETE' });
       if (res.ok) {
         setApps(prev => prev.filter(a => a.id !== selectedApp.id));
         setTotalApps(prev => prev - 1);
