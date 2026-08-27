@@ -1,12 +1,14 @@
 {
   "name": "trustiscore",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "server": "node server/index.js",
     "dev:all": "concurrently \"npm run server\" \"npm run dev\"",
+    "cap:sync": "vite build && npx cap sync android",
+    "android:open": "npx cap open android",
     "db:init": "node server/database/migrate-json.js",
     "db:migrate-to-postgres": "node server/database/migrate-to-postgres.js",
     "db:add-popularity": "node server/database/add-popularity-column.js",
@@ -20,6 +22,8 @@
     "vercel-build": "vite build"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
     "@getbrevo/brevo": "^3.0.1",
     "@neondatabase/serverless": "^1.0.2",
     "cors": "^2.8.6",
@@ -32,6 +36,8 @@
     "resend": "^6.9.1"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.0",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "@vitejs/plugin-react": "^4.2.1",

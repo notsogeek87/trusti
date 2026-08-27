@@ -5,10 +5,7 @@ import {
 } from 'lucide-react';
 import { CATEGORIES, ADMIN_CATEGORIES } from '../../constants/categories';
 import { useToast } from '../../contexts/ToastContext';
-
-const API_URL = import.meta.env.PROD
-  ? '/api'
-  : 'http://localhost:3001/api';
+import { API_URL } from '../../utils/apiConfig';
 
 // ─── Grade display helpers ───────────────────────────────────────────────────
 

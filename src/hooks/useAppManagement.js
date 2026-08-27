@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { TABS } from '../constants/tabs';
+import { API_URL } from '../utils/apiConfig';
 
 /**
  * Hook personnalisé pour gérer l'état des applications
@@ -92,9 +93,6 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
   useEffect(() => {
     const loadApps = async (append = false) => {
       try {
-        const API_URL = import.meta.env.PROD 
-          ? '/api'
-          : 'http://localhost:3001/api';
         
         // Utiliser une pagination avec limit=20 pour améliorer les performances
         // et permettre le chargement progressif des applications
@@ -167,9 +165,6 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
       setIsLoadingAwards(true);
       
       try {
-        const API_URL = import.meta.env.PROD 
-          ? '/api'
-          : 'http://localhost:3001/api';
         
         // Ajouter un timestamp pour éviter le cache
         const url = `${API_URL}/apps?awards=true&_t=${Date.now()}`;
@@ -220,9 +215,6 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
       setIsLoadingMyApps(true);
       
       try {
-        const API_URL = import.meta.env.PROD 
-          ? '/api'
-          : 'http://localhost:3001/api';
         
         // Convertir le Set en tableau d'IDs
         const idsArray = Array.from(myApps);
@@ -285,9 +277,6 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
       setIsLoadingApps(true);
       
       try {
-        const API_URL = import.meta.env.PROD 
-          ? '/api'
-          : 'http://localhost:3001/api';
         
         let allApps = [...apps]; // Commencer avec les apps déjà chargées
         let offset = apps.length;
@@ -362,9 +351,6 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     const performSearch = async () => {
       setIsSearching(true);
       try {
-        const API_URL = import.meta.env.PROD 
-          ? '/api'
-          : 'http://localhost:3001/api';
         
         const url = `${API_URL}/apps?search=${encodeURIComponent(searchTerm)}`;
         const response = await fetch(url);
@@ -642,9 +628,6 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     setPagination(prev => ({ ...prev, isLoadingMore: true }));
     
     try {
-      const API_URL = import.meta.env.PROD 
-        ? '/api'
-        : 'http://localhost:3001/api';
       
       // Charger la page suivante
       const nextOffset = pagination.offset + pagination.limit;

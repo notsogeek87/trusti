@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { X } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
+import { API_URL } from '../../utils/apiConfig';
 
 /**
  * Modal d'import : s'affiche quand l'utilisateur ouvre un lien de partage
@@ -27,7 +28,6 @@ const ImportAppsModal = ({ appIds = [], migrations = [], isLoggedIn, onConfirm, 
         return;
       }
       try {
-        const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
         const url = `${API_URL}/apps?ids=${encodeURIComponent(allIds.join(','))}&_t=${Date.now()}`;
         const response = await fetch(url);
         const data = await response.json();
