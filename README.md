@@ -79,41 +79,9 @@ npm run preview
 
 ## 🔐 Authentification
 
-TrustiScore utilise l'authentification par **Magic Link** avec [Resend](https://resend.com). Les utilisateurs reçoivent un lien sécurisé par email pour se connecter sans mot de passe.
+TrustiScore utilise l'authentification par **code OTP à 6 chiffres** envoyé par email via [Brevo](https://www.brevo.com) — plus de mot de passe.
 
-### Configuration rapide
-
-```bash
-# Vérifier votre configuration actuelle
-npm run check:resend
-
-# Tester l'envoi à un email
-npm run test:email votre@email.com
-```
-
-### 📚 Guides de configuration
-
-- **[RESEND_ADD_EMAIL.md](./RESEND_ADD_EMAIL.md)** - Guide étape par étape pour ajouter des emails vérifiés
-- **[RESEND_CONFIGURATION.md](./RESEND_CONFIGURATION.md)** - Configuration complète pour dev et production
-- **[MAGIC_LINK_SETUP.md](./MAGIC_LINK_SETUP.md)** - Détails techniques de l'implémentation
-
-### Configuration en mode développement
-
-En mode sandbox, vous devez vérifier les emails dans Resend :
-
-1. Allez sur https://resend.com/settings
-2. Trouvez "Verified emails" ou "Domains" → `onboarding@resend.dev`
-3. Ajoutez et vérifiez vos emails de test
-4. Voir le guide complet : [RESEND_ADD_EMAIL.md](./RESEND_ADD_EMAIL.md)
-
-### Configuration pour la production
-
-Pour envoyer à n'importe quel email, vérifiez votre domaine :
-
-1. Ajoutez votre domaine dans Resend
-2. Configurez les enregistrements DNS (SPF, DKIM)
-3. Mettez à jour `.env` avec votre domaine
-4. Voir le guide complet : [RESEND_CONFIGURATION.md](./RESEND_CONFIGURATION.md)
+Détails complets (flow, sécurité, dépannage) : **[docs/guides/authentication.md](./docs/guides/authentication.md)**.
 
 ## 🗄️ Base de données
 
@@ -134,7 +102,7 @@ npm run db:backup
 
 ### Documentation
 
-- **[POSTGRES_MIGRATION.md](./POSTGRES_MIGRATION.md)** - Guide de migration vers PostgreSQL
+- **[docs/guides/postgres-migration.md](./docs/guides/postgres-migration.md)** - Guide de migration vers PostgreSQL
 
 ## 📝 Bonnes Pratiques Implémentées
 
@@ -145,7 +113,7 @@ npm run db:backup
 ✅ Documentation JSDoc
 ✅ Structure de dossiers claire et scalable
 ✅ Nommage cohérent et explicite
-✅ Authentification sécurisée par Magic Link
+✅ Authentification sécurisée par code OTP (Brevo)
 ✅ Base de données PostgreSQL avec Neon
 
 ## 🚢 Déploiement
@@ -156,10 +124,22 @@ L'application est déployée sur **Vercel**.
 
 ```env
 DATABASE_URL=postgresql://...
-RESEND_API_KEY=re_...
-RESEND_FROM_EMAIL=TrustiScore <noreply@votredomaine.com>
+BREVO_API_KEY=xkeysib-...
+BREVO_FROM_EMAIL=noreply@votredomaine.com
+BREVO_FROM_NAME=TrustiScore
 FRONTEND_URL=https://votreapp.vercel.app
+ADMIN_EMAIL=votre@email.com
 NODE_ENV=production
 ```
 
 Voir [.env.example](./.env.example) pour un modèle complet.
+
+## 📚 Documentation
+
+Toute la documentation détaillée (architecture, référence API, guides) vit
+dans **[/docs](./docs/README.md)** :
+
+- [Architecture](./docs/architecture/) — dont l'[app Android native](./docs/architecture/android-native-app-scan.md)
+- [Référence API](./docs/api/README.md)
+- [Guides](./docs/guides/) — déploiement, migration PostgreSQL, authentification, icônes
+- [Legacy](./docs/legacy/) — documentation obsolète conservée pour l'historique
