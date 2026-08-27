@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ScanSearch, ShieldCheck, ArrowRight, ListChecks } from 'lucide-react';
+import {
+  ScanSearch, ShieldCheck, ArrowRight, ListChecks,
+  MessageCircle, Camera, Music, ShoppingBag, Wallet, Gamepad2,
+  Video, Heart, Mail, MapPin, Users, Bell,
+} from 'lucide-react';
 import InstalledApps from '../native/InstalledApps';
 import { AppTile, ANIM_CSS } from './OnboardingApps';
 import { API_URL } from '../utils/apiConfig';
@@ -38,38 +42,50 @@ const FLOAT_CSS = `
   }
 `;
 
-// Icônes du catalogue qui dérivent en fond pendant le scan natif (qui renvoie
-// tout d'un coup, sans flux progressif) : donne l'impression d'un scan actif
-// même si on ne sait pas encore lesquelles sont vraiment installées.
-const FloatingApps = ({ apps }) => {
+// Icônes génériques (pas les vraies apps du téléphone : indépendant du
+// catalogue réseau, donc toujours visible même si ce fetch est lent/échoue)
+// qui dérivent en fond pendant le scan pour rendre l'attente plus vivante.
+const FLOATING_ICONS = [
+  { Icon: MessageCircle, color: 'bg-rose-400' },
+  { Icon: Camera, color: 'bg-amber-400' },
+  { Icon: Music, color: 'bg-emerald-400' },
+  { Icon: ShoppingBag, color: 'bg-sky-400' },
+  { Icon: Wallet, color: 'bg-violet-400' },
+  { Icon: Gamepad2, color: 'bg-pink-400' },
+  { Icon: Video, color: 'bg-orange-400' },
+  { Icon: Heart, color: 'bg-teal-400' },
+  { Icon: Mail, color: 'bg-fuchsia-400' },
+  { Icon: MapPin, color: 'bg-lime-500' },
+  { Icon: Users, color: 'bg-cyan-400' },
+  { Icon: Bell, color: 'bg-indigo-400' },
+];
+
+const FloatingApps = () => {
   const layout = useMemo(() => (
-    [...apps]
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 12)
-      .map(app => {
-        const duration = rand(4.5, 8);
-        return {
-          app,
-          ...randomFloatPosition(),
-          size: Math.round(rand(34, 50)),
-          duration,
-          fadeDelay: rand(0, 1.2),
-          driftDelay: -rand(0, duration),
-          opacity: rand(0.35, 0.7),
-          fx1: `${rand(-35, 35)}px`, fy1: `${rand(-35, 35)}px`, fr1: `${rand(-18, 18)}deg`,
-          fx2: `${rand(-35, 35)}px`, fy2: `${rand(-35, 35)}px`, fr2: `${rand(-18, 18)}deg`,
-          fx3: `${rand(-35, 35)}px`, fy3: `${rand(-35, 35)}px`, fr3: `${rand(-18, 18)}deg`,
-        };
-      })
-  ), [apps]);
+    FLOATING_ICONS.map(entry => {
+      const duration = rand(4.5, 8);
+      return {
+        ...entry,
+        ...randomFloatPosition(),
+        size: Math.round(rand(34, 50)),
+        duration,
+        fadeDelay: rand(0, 1.2),
+        driftDelay: -rand(0, duration),
+        opacity: rand(0.35, 0.7),
+        fx1: `${rand(-35, 35)}px`, fy1: `${rand(-35, 35)}px`, fr1: `${rand(-18, 18)}deg`,
+        fx2: `${rand(-35, 35)}px`, fy2: `${rand(-35, 35)}px`, fr2: `${rand(-18, 18)}deg`,
+        fx3: `${rand(-35, 35)}px`, fy3: `${rand(-35, 35)}px`, fr3: `${rand(-18, 18)}deg`,
+      };
+    })
+  ), []);
 
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
       <style>{FLOAT_CSS}</style>
-      {layout.map(({ app, top, left, size, duration, fadeDelay, driftDelay, opacity, fx1, fy1, fr1, fx2, fy2, fr2, fx3, fy3, fr3 }) => (
+      {layout.map(({ Icon, color, top, left, size, duration, fadeDelay, driftDelay, opacity, fx1, fy1, fr1, fx2, fy2, fr2, fx3, fy3, fr3 }, i) => (
         <div
-          key={app.id}
-          className="absolute rounded-xl overflow-hidden shadow-md"
+          key={i}
+          className={`absolute rounded-xl shadow-md flex items-center justify-center ${color}`}
           style={{
             top: `${top}%`,
             left: `${left}%`,
@@ -83,13 +99,7 @@ const FloatingApps = ({ apps }) => {
             animation: `onbFloatIn 0.5s ease-out ${fadeDelay}s forwards, onbFloatDrift ${duration}s ease-in-out ${driftDelay}s infinite`,
           }}
         >
-          {app.icon && app.icon.startsWith('http') ? (
-            <img src={app.icon} alt="" className="w-full h-full object-cover" loading="lazy" />
-          ) : (
-            <div className={`w-full h-full ${app.color || 'bg-slate-400'} flex items-center justify-center text-lg`}>
-              {app.icon || app.name.charAt(0)}
-            </div>
-          )}
+          <Icon size={Math.round(size * 0.5)} className="text-white" />
         </div>
       ))}
     </div>
@@ -104,7 +114,6 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
   const [phase, setPhase] = useState('intro');
   const [matches, setMatches] = useState([]); // apps du catalogue trouvées installées
   const [selected, setSelected] = useState(new Set());
-  const [floatingApps, setFloatingApps] = useState([]); // catalogue complet, pour l'animation de fond pendant le scan
 
   const toggleApp = (id) => {
     setSelected(prev => {
@@ -116,13 +125,11 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
 
   const runScan = async () => {
     setPhase('scanning');
-    setFloatingApps([]);
     const scanStartedAt = Date.now();
     try {
       const installedPromise = InstalledApps.getInstalledPackages();
       const catalogRes = await fetch(`${API_URL}/apps?onboarding=true`).then(r => r.json());
       if (!catalogRes.success) throw new Error('catalog fetch failed');
-      setFloatingApps(catalogRes.apps); // affiche l'animation de fond dès que le catalogue arrive, pendant que le scan natif finit
 
       const installedRes = await installedPromise;
       const installedPackages = new Set(installedRes.packages || []);
@@ -158,7 +165,7 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
     return (
       <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-white to-purple-50 flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
         <style>{ANIM_CSS}</style>
-        {floatingApps.length > 0 && <FloatingApps apps={floatingApps} />}
+        <FloatingApps />
         <div className="relative z-10" style={{ animation: 'onbFadeUp 0.4s ease-out' }}>
           <div className="w-20 h-20 bg-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-200">
             <ScanSearch size={36} className="text-white" />
