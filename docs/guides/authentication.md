@@ -40,6 +40,8 @@ BREVO_API_KEY=xxx
 BREVO_FROM_NAME=TrustiScore
 BREVO_FROM_EMAIL=noreply@trustiscore.fr
 ADMIN_EMAIL=admin@example.com   # protège /api/admin-auth (bypass si absent)
+ADMIN_SESSION_SECRET=xxx        # signe les jetons admin (voir section Admin)
+API_KEY=xxx                     # x-api-key requis pour les mutations via intégrations externes
 DATABASE_URL=postgresql://...
 ```
 
@@ -50,20 +52,35 @@ serveur (`console.log`).
 ## Sécurité
 
 - **Rate limit d'envoi** : 3 codes max par email sur une fenêtre de 5 minutes
-  (`send-otp`).
+  (`send-otp`, `admin-auth`).
 - **Rate limit de vérification** : 5 tentatives échouées → verrouillage de
-  15 minutes pour cet email (`verify-otp`, en mémoire process — donc
-  réinitialisé si le serverless redémarre).
+  15 minutes pour cet email (`verify-otp`, `verify-admin-otp`). Persistant en
+  base (table `otp_attempts`, `server/otpRateLimit.js`) — contrairement à un
+  compteur en mémoire, ce verrou reste effectif même si les requêtes
+  atterrissent sur des instances serverless différentes.
 - **Expiration** : un code expire après 10 minutes.
 - Un nouveau code invalide automatiquement les précédents pour le même
   email (suppression avant insertion).
 
 ## Admin
 
-`/api/admin-auth` réutilise exactement le même mécanisme OTP/Brevo, mais
-restreint l'envoi à l'adresse définie par `ADMIN_EMAIL`. Protège l'accès à
-l'interface `/admin` (gestion des Custom Trusti Apps / Star Apps, voir
-[../api/README.md](../api/README.md)).
+`/api/admin-auth` réutilise exactement le même mécanisme OTP/Brevo (y compris
+le rate-limit d'envoi), mais restreint l'envoi à l'adresse définie par
+`ADMIN_EMAIL`. Le code reçu doit ensuite être soumis à `POST
+/api/verify-admin-otp` (et non `verify-otp`) : sur succès, celui-ci émet un
+**jeton de session admin** signé (HMAC-SHA256, `server/adminToken.js`,
+12h de durée de vie, secret `ADMIN_SESSION_SECRET`).
+
+Ce jeton est stocké côté client dans `localStorage`
+(`src/utils/adminAuth.js`, clé `trusti_admin_token`) et envoyé en
+`Authorization: Bearer <jeton>` sur chaque mutation admin via `adminFetch` —
+les modales `Admin*Modal.jsx` l'utilisent à la place de `fetch` brut. C'est ce
+jeton (ou l'en-tête `x-api-key` pour les intégrations externes) qui protège
+réellement `/api/apps`, `/api/custom-trusti-apps`, `/api/star-apps` et
+`/api/clean-duplicates` en écriture : `PinModal` déverrouille l'UI, mais
+l'autorisation effective est toujours revérifiée côté serveur
+(`isAuthorizedAdminRequest`). `/api/check-admin` ne sert qu'à décider
+d'afficher l'entrée « Admin » dans l'UI, jamais à autoriser une action.
 
 ## Dépannage
 

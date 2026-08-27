@@ -17,10 +17,13 @@ En local, ces mêmes fonctions ne tournent pas nativement — voir
 
 Endpoint principal, backé par PostgreSQL (`service-postgres.js`).
 
-- **Auth** : les requêtes internes (origine `trusti-alpha.vercel.app`,
-  `trusti-notsogeeks-projects.vercel.app`, `localhost`) passent sans clé ;
-  toute autre origine doit fournir l'en-tête `x-api-key` égal à
-  `process.env.API_KEY` (utilisé par exemple par des automations n8n).
+- **Auth** : `GET` est public (catalogue en lecture). `POST`/`PUT`/`DELETE`
+  exigent soit l'en-tête `x-api-key` égal à `process.env.API_KEY` (automations
+  externes type n8n), soit `Authorization: Bearer <jeton admin>` valide (voir
+  [../guides/authentication.md](../guides/authentication.md)). Vérification
+  faite par `isAuthorizedAdminRequest` (`server/adminToken.js`) — ni `Origin`
+  ni `Referer` ne sont utilisés comme preuve d'identité (falsifiables par tout
+  client non-navigateur).
 - **GET** `?type=trusti|star`, plus filtres optionnels : `limit`, `offset`,
   `page`, `search`/`q`, `sortBy`, `awards`, `showInAwards`, `onboarding`,
   `categories`, `ids`, `grade`, `alternatives_for`.
@@ -30,12 +33,14 @@ Endpoint principal, backé par PostgreSQL (`service-postgres.js`).
 ### `GET/POST/PUT/DELETE /api/custom-trusti-apps` — `api/custom-trusti-apps.js`
 
 Gestion des « Custom Trusti Apps » (apps notées A/B/C par l'équipe Trusti,
-utilisées par l'interface admin `/admin`).
+utilisées par l'interface admin `/admin`). Même règle d'auth que `/api/apps` :
+mutations réservées à `x-api-key` ou jeton admin.
 
 ### `GET/POST/PUT/DELETE /api/star-apps` — `api/star-apps.js`
 
 Même contrat CRUD que `custom-trusti-apps`, pour les « Star Apps »
 (apps grand public notées D/E, généralement les alternatives à remplacer).
+Même règle d'auth (mutations protégées).
 
 ### `GET /api/top-apps` — `api/top-apps.js`
 
@@ -50,10 +55,12 @@ avec résolution d'icônes (cache + F-Droid + Play Store).
 Voir aussi l'audit [../legacy/donnees-en-dur-audit.md](../legacy/donnees-en-dur-audit.md)
 qui documente pourquoi cette liste est encore codée en dur plutôt qu'en base.
 
-### `POST /api/clean-duplicates` — `api/clean-duplicates.js`
+### `GET /api/clean-duplicates?action=list|delete` — `api/clean-duplicates.js`
 
-Utilitaire de maintenance : détecte/supprime les doublons d'applications
-en base.
+Utilitaire de maintenance : détecte (`list`) ou supprime (`delete`) les
+doublons d'applications en base. Jamais appelé par le front — entièrement
+protégé par la même auth que les mutations de `/api/apps` (`x-api-key` ou
+jeton admin), y compris pour `list`.
 
 ## Authentification
 
@@ -70,18 +77,31 @@ au lieu d'être envoyé.
 
 ### `POST /api/verify-otp` — `api/verify-otp.js`
 
-Vérifie le couple `(email, code)`. Rate-limit anti-bruteforce en mémoire :
-5 tentatives échouées → verrouillage 15 min pour cet email.
+Vérifie le couple `(email, code)` pour la connexion utilisateur standard.
+Rate-limit anti-bruteforce persistant en base (table `otp_attempts`, voir
+`server/otpRateLimit.js`) : 5 tentatives échouées → verrouillage 15 min pour
+cet email. Ne délivre aucun jeton (session gérée côté client par `useAuth`).
 
 ### `POST /api/admin-auth` — `api/admin-auth.js`
 
-Même mécanisme OTP que `send-otp`, restreint à `process.env.ADMIN_EMAIL`
-(bypass si la variable n'est pas définie, pratique en dev). Protège l'accès
-à l'interface `/admin`.
+Même mécanisme OTP que `send-otp` (y compris le rate-limit d'envoi), restreint
+à `process.env.ADMIN_EMAIL` (bypass si la variable n'est pas définie, pratique
+en dev). Envoie le code que l'admin doit soumettre à `verify-admin-otp`.
+
+### `POST /api/verify-admin-otp` — `api/verify-admin-otp.js`
+
+Vérifie le couple `(email, code)` émis par `admin-auth` et, si valide, émet un
+**jeton de session admin** signé (HMAC, `server/adminToken.js`, 12h de durée
+de vie, `ADMIN_SESSION_SECRET`). Ce jeton est stocké côté client
+(`src/utils/adminAuth.js`) et envoyé en `Authorization: Bearer` sur chaque
+mutation admin (`adminFetch`). Même rate-limit anti-bruteforce que
+`verify-otp`.
 
 ### `GET /api/check-admin` — `api/check-admin.js`
 
-Vérifie si une session est admin.
+Indique si un email correspond à `ADMIN_EMAIL` (ou tout email si la variable
+n'est pas définie). Sert uniquement à décider d'afficher l'entrée « Admin »
+dans l'UI — ne prouve rien et n'autorise aucune action seule.
 
 ## Notes
 
