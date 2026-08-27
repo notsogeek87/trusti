@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">TrustiScore</string>
+    <string name="title_activity_main">TrustiScore</string>
+    <string name="package_name">com.trusti.app</string>
+    <string name="custom_url_scheme">com.trusti.app</string>
+</resources>

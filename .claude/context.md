@@ -14,6 +14,7 @@ Comparateur d'applications privacy-first. Évalue la souveraineté numérique de
 | Base de données | PostgreSQL via Neon | — |
 | Email | Brevo (principal) + Resend (backup) | — |
 | Déploiement | Vercel → branch `main` | — |
+| Android | Capacitor (wrap du build Vite) | 8.x |
 
 ## Commandes
 
@@ -21,6 +22,7 @@ Comparateur d'applications privacy-first. Évalue la souveraineté numérique de
 npm run dev:all      # Frontend (5173) + backend (3001) simultanément
 npm run build        # Build Vite → /dist
 npm run vercel-build # Build production Vercel
+npm run cap:sync     # Build Vite puis cap sync android (avant tout build Gradle)
 ```
 
 ## Architecture
@@ -123,7 +125,11 @@ trusti_{email}_admin_unlocked    → true/false (PIN admin)
 - **Composants** : PascalCase, Tailwind pur, mémoïsés si dans une liste (`React.memo`)
 - **Hooks** : préfixe `use`, custom hooks dans `/hooks/`
 - **Constantes** : UPPER_SNAKE_CASE dans `/constants/`
-- **API_URL** : auto-détecté (`/api` en prod, `http://localhost:3001/api` en dev)
+- **API_URL** : centralisé dans `src/utils/apiConfig.js` (unique source de vérité,
+  ne pas redéclarer ailleurs) — `/api` en web prod (same-origin Vercel),
+  `http://localhost:3001/api` en dev, et une URL **absolue**
+  (`https://trusti-alpha.vercel.app/api`) dès que `Capacitor.isNativePlatform()`
+  est vrai (APK), puisque le paquet natif n'a aucun backend co-localisé
 - **Pas de router** : navigation par `activeTab` state dans `App.jsx`
 - **Mobile-first** : max-width `max-w-md`, bottom nav fixe, `scrollbar-hide`
 - **Pas de CSS modules** : uniquement Tailwind + animations custom dans `index.css`
@@ -135,6 +141,36 @@ trusti_{email}_admin_unlocked    → true/false (PIN admin)
 - L'admin est protégé par PIN (localStorage), pas de rôle serveur
 - Les tokens magic link expirent en 15 min
 - `App.jsx` est le fichier le plus complexe (631L) — éviter d'y ajouter de la logique, préférer des hooks
+
+## Android / APK (Capacitor)
+
+Trusti est une SPA Vite classique — c'est le cas d'usage le plus simple pour
+Capacitor : `webDir` pointe directement sur `dist/`, pas de mirroir à
+régénérer à la main.
+
+- `capacitor.config.json` : `appId com.trusti.app`, `webDir: "dist"`.
+- `android/` : projet natif généré par `npx cap add android`. Aucune
+  personnalisation Java/Kotlin — `MainActivity` reste la sous-classe
+  `BridgeActivity` par défaut, pas de plugin natif custom (contrairement à un
+  projet qui aurait besoin d'un lecteur intégré ou d'un bridge spécifique).
+- `assets/` (racine du repo, hors `public/`) : sources carrées utilisées par
+  `@capacitor/assets` (`icon.png`, `icon-foreground.png`,
+  `icon-background.png`) pour régénérer les icônes Android et l'écran de
+  démarrage — `npx capacitor-assets generate --android`. Ne pas confondre
+  avec `public/assets/` (assets web historiques, logo portrait non carré).
+- `npm run cap:sync` = `vite build && npx cap sync android`, à lancer avant
+  tout build Gradle (sinon `android/` contient encore le build précédent).
+- Compiler l'APK réclame le SDK Android (absent de cet environnement de dev
+  Claude — `dl.google.com` est bloqué) : `cd android && ./gradlew
+  assembleDebug`. C'est `.github/workflows/android.yml` qui le fait en CI à
+  chaque push sur `main`/PR, et publie l'APK debug en artifact — pas encore de
+  build signé (à ajouter plus tard via des secrets keystore le jour où une
+  vraie release est prévue).
+- **Limite connue, non résolue dans cette passe** : le flux de connexion par
+  lien magique (email → `?token=` → `VerifyAuth.jsx`) ouvre le navigateur du
+  téléphone, pas l'APK (aucun deep link configuré). Le flux OTP (code saisi à
+  la main, `LoginModal`/`PinModal`) fonctionne nativement sans rien changer —
+  c'est celui à privilégier dans l'app installée.
 
 ## Workflow git
 

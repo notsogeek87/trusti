@@ -46,7 +46,12 @@ export const useAuth = () => {
     const userEmail = currentUser.email || currentUser;
     const userDataKey = `trusti_${userEmail}_${key}`;
     const data = localStorage.getItem(userDataKey);
-    return data ? JSON.parse(data) : null;
+    if (!data) return null;
+    try {
+      return JSON.parse(data);
+    } catch {
+      return null;
+    }
   }, [currentUser]);
 
   // Sauvegarder les données de l'utilisateur

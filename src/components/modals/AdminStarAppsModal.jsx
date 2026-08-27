@@ -2,11 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Plus, Save, Trash2, Upload } from 'lucide-react';
 import { GRADE_INFO } from '../../constants/grades';
 import { CATEGORIES } from '../../constants/categories';
-
-// Détection de l'environnement
-const API_URL = import.meta.env.PROD 
-  ? '/api'
-  : 'http://localhost:3001/api';
+import { API_URL } from '../../utils/apiConfig';
 
 /**
  * Modal d'administration pour gérer les StarApps (Sélection)

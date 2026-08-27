@@ -1,9 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Mail, Loader2, CheckCircle2, ArrowLeft } from 'lucide-react';
-
-const API_URL = import.meta.env.PROD
-  ? '/api'
-  : 'http://localhost:3001/api';
+import { API_URL } from '../../utils/apiConfig';
 
 const RESEND_COOLDOWN = 60; // secondes
 

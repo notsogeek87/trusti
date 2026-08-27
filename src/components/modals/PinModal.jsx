@@ -1,9 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, ShieldCheck, Loader2 } from 'lucide-react';
-
-const API_URL = import.meta.env.PROD
-  ? '/api'
-  : 'http://localhost:3001/api';
+import { API_URL } from '../../utils/apiConfig';
 
 const PinModal = ({ isOpen, onClose, onSuccess, userEmail }) => {
   const [step, setStep] = useState('sending'); // 'sending' | 'otp' | 'error'
