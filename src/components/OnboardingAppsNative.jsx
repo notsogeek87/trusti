@@ -117,6 +117,7 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
   const runScan = async () => {
     setPhase('scanning');
     setFloatingApps([]);
+    const scanStartedAt = Date.now();
     try {
       const installedPromise = InstalledApps.getInstalledPackages();
       const catalogRes = await fetch(`${API_URL}/apps?onboarding=true`).then(r => r.json());
@@ -129,6 +130,14 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
         const pkg = extractPackageId(app.playStoreUrl);
         return pkg && installedPackages.has(pkg);
       });
+
+      // Le scan natif est quasi instantané : sans ce délai, l'écran "scanning"
+      // (et donc l'animation) ne serait jamais peint avant de passer aux résultats.
+      const MIN_SCAN_MS = 1800;
+      const elapsed = Date.now() - scanStartedAt;
+      if (elapsed < MIN_SCAN_MS) {
+        await new Promise(resolve => setTimeout(resolve, MIN_SCAN_MS - elapsed));
+      }
 
       setMatches(found);
       setSelected(new Set(found.map(a => a.id)));
