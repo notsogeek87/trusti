@@ -16,7 +16,26 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // Clé debug FIXE, committée dans le repo (android/debug.keystore).
+    // Sans ça, chaque runner CI neuf régénère sa propre clé debug aléatoire
+    // (~/.android/debug.keystore n'existe pas encore) : deux builds
+    // successifs sont alors signés différemment, et Android refuse
+    // d'installer la mise à jour par-dessus l'ancienne ("app non installée")
+    // tant qu'on n'a pas désinstallé à la main. Une clé debug n'a rien de
+    // secret (mot de passe "android" documenté par Google) — la committer
+    // est la pratique standard pour des builds CI reproductibles.
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
     buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
