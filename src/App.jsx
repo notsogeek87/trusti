@@ -4,10 +4,11 @@ import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
 import { TABS } from './constants/tabs';
 import { CATEGORIES } from './constants/categories';
-import { Sparkles, Smartphone, Monitor, Share2 } from 'lucide-react';
+import { Sparkles, Smartphone, Monitor, Share2, ScanSearch } from 'lucide-react';
 import { ViewModeContext } from './contexts/ViewModeContext';
 import { parseShareParams, clearShareParams, hasShareParams } from './utils/shareUtils';
 import { getAdminTokenEmail, clearAdminToken, setAdminToken } from './utils/adminAuth';
+import { hasCompletedOnboarding, markOnboardingComplete } from './utils/onboardingStorage';
 
 // Composants définis hors du render pour éviter le remontage à chaque re-render
 const FloatingToggle = ({ isSmallViewport, forceMobile, onToggle }) => {
@@ -137,27 +138,32 @@ const App = () => {
     setShowLandingPage(true);
   };
 
-  // État pour le modal de bienvenue (première visite)
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-  
-  // État pour la page d'onboarding
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  // Sur Android natif, l'utilisateur peut basculer du scan auto vers la sélection manuelle classique
-  const [forceManualOnboarding, setForceManualOnboarding] = useState(false);
-
   // Est-on arrivé via un lien de partage ? (évalué une seule fois au montage,
   // avant que l'URL ne soit nettoyée). Dans ce cas on court-circuite le
   // welcome/onboarding pour aller droit à la modal d'import.
   const [arrivedViaShare] = useState(() => hasShareParams());
 
-  // Afficher le modal de bienvenue si l'utilisateur n'est pas connecté,
-  // sauf s'il ouvre un lien de partage (il verra la modal d'import à la place).
+  // Onboarding (welcome + sélection/scan des apps) : une seule fois par
+  // appareil, indépendamment de la connexion — PWA/APK sauvegardent en local
+  // (voir useAuth) donc pas besoin de compte pour retrouver ses choix.
+  const [showWelcomeModal, setShowWelcomeModal] = useState(
+    () => !hasCompletedOnboarding() && !arrivedViaShare
+  );
+
+  // État pour la page d'onboarding
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  // Sur Android natif, l'utilisateur peut basculer du scan auto vers la sélection manuelle classique
+  const [forceManualOnboarding, setForceManualOnboarding] = useState(false);
+
+  // Arrivée via lien de partage = engagement suffisant pour ne pas reproposer
+  // le welcome/onboarding ensuite sur cet appareil.
   useEffect(() => {
-    setShowWelcomeModal(!currentUser && !arrivedViaShare);
-  }, [currentUser, arrivedViaShare]);
+    if (arrivedViaShare) markOnboardingComplete();
+  }, [arrivedViaShare]);
 
   // Handler pour "Oui, c'est ma première fois"
   const handleFirstTimeYes = () => {
+    markOnboardingComplete();
     setShowWelcomeModal(false);
     // Afficher la page d'onboarding de sélection des apps
     setShowOnboarding(true);
@@ -165,6 +171,7 @@ const App = () => {
 
   // Handler pour "Non, je connais déjà"
   const handleFirstTimeNo = () => {
+    markOnboardingComplete();
     setShowWelcomeModal(false);
     setShowLoginModal(true);
   };
@@ -191,6 +198,21 @@ const App = () => {
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 100);
+  };
+
+  // Re-scan manuel depuis "Mes Apps" : relance le scan (Android natif) ou la
+  // sélection manuelle (PWA/web) pour repérer de nouvelles apps installées
+  // sans repasser par tout l'onboarding. Purement additif : n'enlève jamais
+  // une app déjà suivie, même si elle n'est plus cochée dans le résultat.
+  const [showRescan, setShowRescan] = useState(false);
+  const [forceManualRescan, setForceManualRescan] = useState(false);
+
+  const handleRescanComplete = (selectedAppIds) => {
+    if (selectedAppIds && selectedAppIds.size > 0) {
+      addMyApps([...selectedAppIds].map(String));
+    }
+    setShowRescan(false);
+    setForceManualRescan(false);
   };
 
   // État pour le filtre de catégorie dans l'onglet Applications
@@ -452,6 +474,20 @@ const App = () => {
     return <OnboardingApps onComplete={handleOnboardingComplete} onSignUp={onSignUp} />;
   }
 
+  // Re-scan manuel (déclenché depuis "Mes Apps") : même écran que l'onboarding
+  // mais purement additif, sans welcome/redirection de compte.
+  if (showRescan) {
+    if (isNativeAndroid && !forceManualRescan) {
+      return (
+        <OnboardingAppsNative
+          onComplete={handleRescanComplete}
+          onManualSelection={() => setForceManualRescan(true)}
+        />
+      );
+    }
+    return <OnboardingApps onComplete={handleRescanComplete} />;
+  }
+
   // Affichage du détail d'une application
   if (selectedApp) {
     return (
@@ -582,22 +618,36 @@ const App = () => {
         )}
 
         {/* Titre pour l'onglet Mes Apps */}
-        {activeTab === TABS.MY_APPS && myApps.size > 0 && (
+        {activeTab === TABS.MY_APPS && (
           <div className="mb-4">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <h2 className="text-sm font-black text-slate-800 leading-tight">Mes applications</h2>
                 <p className="text-[11px] text-slate-400 mt-0.5">
-                  {myApps.size} app{myApps.size > 1 ? 's' : ''} · à migrer en priorité en haut
+                  {myApps.size > 0
+                    ? `${myApps.size} app${myApps.size > 1 ? 's' : ''} · à migrer en priorité en haut`
+                    : 'Relance un scan pour repérer tes apps'}
                 </p>
               </div>
-              <button
-                onClick={() => setShowTrustiShareModal(true)}
-                className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 rounded-full transition-colors"
-              >
-                <Share2 size={14} />
-                Partager
-              </button>
+              <div className="shrink-0 flex items-center gap-2">
+                <button
+                  onClick={() => setShowRescan(true)}
+                  className="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-full transition-colors"
+                  title="Relancer un scan pour repérer de nouvelles apps"
+                >
+                  <ScanSearch size={14} />
+                  Scanner
+                </button>
+                {myApps.size > 0 && (
+                  <button
+                    onClick={() => setShowTrustiShareModal(true)}
+                    className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-2 rounded-full transition-colors"
+                  >
+                    <Share2 size={14} />
+                    Partager
+                  </button>
+                )}
+              </div>
             </div>
 
             {migratedApps.size > 0 && (
@@ -737,7 +787,7 @@ const App = () => {
       </>
 
       {/* Widget de chat Trusti (visible partout sauf pendant la vérification du token, la page de bienvenue, l'onboarding et la console admin) */}
-      {!showWelcomeModal && !showOnboarding && !showAdminModal && <TrustiChatWidget onOpenLandingPage={handleOpenLandingPage} />}
+      {!showWelcomeModal && !showOnboarding && !showRescan && !showAdminModal && <TrustiChatWidget onOpenLandingPage={handleOpenLandingPage} />}
 
       <style>{`
         @keyframes pulse-subtle {

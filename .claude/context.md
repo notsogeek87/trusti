@@ -97,10 +97,21 @@ TOP_ALTERNATIVES  → Awards (apps avec show_in_awards=1)
 ## Persistance localStorage
 
 ```
+trusti_onboarding_done           → true/false — onboarding (welcome + scan/sélection) fait une seule
+                                    fois par appareil, indépendamment de la connexion
 trusti_current_user              → { email, loginAt }
-trusti_{email}_apps              → { myApps: Set, migratedApps: Set, customMigrations: Map }
+trusti_guest_apps                → { myApps: Set, migratedApps: Set, customMigrations: Map }
+                                    (tant que non connecté — local-first PWA/APK, voir useAuth.js)
+trusti_{email}_apps              → idem, une fois connecté (récupère trusti_guest_apps à la 1ère connexion
+                                    si le compte n'a encore rien de sauvegardé)
 trusti_{email}_admin_unlocked    → true/false (PIN admin)
 ```
+
+Onboarding : `WelcomeModal` (première visite) ne se réaffiche plus une fois
+l'onboarding fait sur l'appareil (`trusti_onboarding_done`), qu'il y ait
+compte ou non. Depuis l'onglet "Mes Apps", un bouton "Scanner" (`showRescan`
+dans `App.jsx`) relance le même écran (scan natif Android ou sélection
+manuelle web) en mode purement additif, sans repasser par le welcome modal.
 
 ## Grades
 

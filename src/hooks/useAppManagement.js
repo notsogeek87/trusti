@@ -49,37 +49,30 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
   const [isLoadingMyApps, setIsLoadingMyApps] = useState(false);
   const [myAppsLoaded, setMyAppsLoaded] = useState(false);
 
-  // Charger les données de l'utilisateur connecté
+  // Charger les données sauvegardées (compte connecté, ou stockage local
+  // "invité" tant qu'il n'y a pas de compte — voir useAuth.getUserData)
   useEffect(() => {
     setIsInitialized(false); // Réinitialiser avant de charger
-    
-    if (currentUser && getUserData) {
-      const userData = getUserData('apps');
-      if (userData) {
-        // Utilisateur existant avec des données sauvegardées
-        setMyApps(new Set(userData.myApps || []));
-        setMigratedApps(new Set(userData.migratedApps || []));
-        setCustomMigrations(new Map(userData.customMigrations || []));
-      } else {
-        // Nouvel utilisateur : état vide
-        setMyApps(new Set());
-        setMigratedApps(new Set());
-        setCustomMigrations(new Map());
-      }
+
+    const userData = getUserData ? getUserData('apps') : null;
+    if (userData) {
+      setMyApps(new Set(userData.myApps || []));
+      setMigratedApps(new Set(userData.migratedApps || []));
+      setCustomMigrations(new Map(userData.customMigrations || []));
     } else {
-      // Mode non connecté : état vide
+      // Rien de sauvegardé encore : état vide
       setMyApps(new Set());
       setMigratedApps(new Set());
       setCustomMigrations(new Map());
     }
-    
+
     // Petite temporisation pour s'assurer que les states sont bien définis
     setTimeout(() => setIsInitialized(true), 100);
   }, [currentUser, getUserData]);
 
   // Sauvegarder les données quand elles changent (mais pas au premier chargement)
   useEffect(() => {
-    if (isInitialized && currentUser && saveUserData) {
+    if (isInitialized && saveUserData) {
       saveUserData('apps', {
         myApps: Array.from(myApps),
         migratedApps: Array.from(migratedApps),
