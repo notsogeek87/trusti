@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Check, ChevronRight, ChevronLeft, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
-
-const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+import { API_URL } from '../utils/apiConfig';
 
 // Étapes guidées par catégorie
 const STEPS = [

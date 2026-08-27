@@ -3,10 +3,7 @@ import { ChevronLeft, CheckCircle, PlusCircle, ShieldCheck, ArrowRight, Calendar
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { GRADE_INFO } from '../../constants/grades';
 import { useIsMobile } from '../../contexts/ViewModeContext';
-
-const API_URL = import.meta.env.PROD
-  ? '/api'
-  : 'http://localhost:3001/api';
+import { API_URL } from '../../utils/apiConfig';
 
 const ANIM_STYLES = `
   @keyframes detailSlideUp {

@@ -1,11 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { CheckCircle, X, AlertCircle } from 'lucide-react';
 import LoadingSpinner from './ui/LoadingSpinner';
-
-// Détection de l'environnement
-const API_URL = import.meta.env.PROD 
-  ? '/api'
-  : 'http://localhost:3001/api';
+import { API_URL } from '../utils/apiConfig';
 
 /**
  * Composant pour vérifier le token Magic Link et connecter l'utilisateur
