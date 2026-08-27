@@ -2,7 +2,7 @@ name: Android APK
 
 on:
   push:
-    branches: [main]
+    branches: [main, staging]
   pull_request:
   workflow_dispatch:
 
@@ -41,15 +41,25 @@ jobs:
       # Les artifacts d'Actions sont hébergés sur Azure Blob Storage, souvent
       # bloqué par des politiques réseau restrictives. Une release GitHub
       # (objects.githubusercontent.com) reste accessible dans ces cas et sert
-      # de lien stable pour installer le dernier APK debug.
+      # de lien stable pour installer le dernier APK debug. Un tag par branche
+      # évite qu'un build staging n'écrase le dernier build main (ou l'inverse).
+      - name: Déterminer le tag de release
+        id: reltag
+        run: |
+          BRANCH="${{ github.head_ref || github.ref_name }}"
+          SAFE_BRANCH=$(echo "$BRANCH" | tr '/' '-')
+          echo "tag=debug-$SAFE_BRANCH" >> "$GITHUB_OUTPUT"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+
       - name: Publier l'APK debug en release GitHub
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete debug-latest --yes --cleanup-tag || true
-          gh release create debug-latest \
+          TAG="${{ steps.reltag.outputs.tag }}"
+          gh release delete "$TAG" --yes --cleanup-tag || true
+          gh release create "$TAG" \
             android/app/build/outputs/apk/debug/app-debug.apk \
-            --title "TrustiScore — APK debug (dernier build)" \
+            --title "TrustiScore — APK debug (${{ steps.reltag.outputs.branch }})" \
             --notes "Build automatique non signé, run #${{ github.run_number }} (${{ github.sha }})." \
             --prerelease \
             --target "${{ github.sha }}"
