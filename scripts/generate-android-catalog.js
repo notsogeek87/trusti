@@ -7,8 +7,14 @@
  *   - android/app/src/main/AndroidManifest.xml (bloc <queries>, entre les marqueurs
  *     TRUSTI_CATALOG_START / TRUSTI_CATALOG_END)
  *
- * Source : la base Postgres (DATABASE_URL) si disponible, sinon
- * server/database/data/apps.json en secours (dev local sans DB).
+ * Source, par ordre de préférence :
+ *   1. La base Postgres (DATABASE_URL), la plus à jour.
+ *   2. L'API publique de prod (aucun secret requis — c'est ce qui alimente
+ *      la CI GitHub Actions, qui n'a pas DATABASE_URL).
+ *   3. server/database/data/apps.json en dernier recours (dev local hors
+ *      ligne). Ce fichier contient des entrées JSON malformées par endroits ;
+ *      on extrait les playStoreUrl par regex plutôt que par JSON.parse pour
+ *      rester tolérant à ça.
  *
  * À relancer (`npm run android:generate-catalog`) après toute mise à jour du
  * catalogue, avant de builder l'app Android.
@@ -41,18 +47,26 @@ async function getPlayStoreUrlsFromDb() {
   return rows.map(r => r.play_store_url);
 }
 
+const PROD_API_URL = 'https://trusti-alpha.vercel.app/api/apps?onboarding=true';
+
+async function getPlayStoreUrlsFromPublicApi() {
+  const res = await fetch(PROD_API_URL);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  if (!data.success || !Array.isArray(data.apps)) throw new Error('réponse API inattendue');
+  return data.apps.map(a => a.playStoreUrl).filter(Boolean);
+}
+
+// server/database/data/apps.json contient des entrées JSON malformées par
+// endroits (clés dupliquées, virgules manquantes) — on extrait les
+// playStoreUrl par regex sur le texte brut plutôt que via JSON.parse, pour
+// que ce dernier recours reste utilisable même sans corriger le fichier.
 function getPlayStoreUrlsFromJsonFallback() {
   const jsonPath = path.join(ROOT, 'server/database/data/apps.json');
   if (!fs.existsSync(jsonPath)) return [];
-  try {
-    const raw = fs.readFileSync(jsonPath, 'utf8');
-    const data = JSON.parse(raw);
-    const apps = Array.isArray(data) ? data : (data.applications || []);
-    return apps.map(a => a.playStoreUrl).filter(Boolean);
-  } catch (err) {
-    console.warn(`⚠️  Impossible de lire ${jsonPath} en secours (${err.message}). Catalogue vide.`);
-    return [];
-  }
+  const raw = fs.readFileSync(jsonPath, 'utf8');
+  const matches = [...raw.matchAll(/"playStoreUrl"\s*:\s*"([^"]+)"/g)];
+  return matches.map(m => m[1]);
 }
 
 function xmlEscape(str) {
@@ -60,14 +74,25 @@ function xmlEscape(str) {
 }
 
 async function main() {
-  let urls;
+  let urls = null;
+
   try {
     urls = await getPlayStoreUrlsFromDb();
   } catch (err) {
-    console.warn(`⚠️  Requête DB échouée (${err.message}), bascule sur le fallback JSON.`);
-    urls = null;
+    console.warn(`⚠️  Requête DB échouée (${err.message}).`);
   }
+
   if (!urls) {
+    try {
+      urls = await getPlayStoreUrlsFromPublicApi();
+      console.log(`ℹ️  Catalogue récupéré depuis l'API publique (${PROD_API_URL}).`);
+    } catch (err) {
+      console.warn(`⚠️  API publique injoignable (${err.message}).`);
+    }
+  }
+
+  if (!urls) {
+    console.warn('⚠️  Bascule sur server/database/data/apps.json en dernier recours.');
     urls = getPlayStoreUrlsFromJsonFallback();
   }
 
