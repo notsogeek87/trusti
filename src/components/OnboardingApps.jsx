@@ -48,7 +48,7 @@ const STEPS = [
 // step N = écran succès
 const SUCCESS_STEP = STEPS.length;
 
-const GRADE_DOT = {
+export const GRADE_DOT = {
   A: 'bg-emerald-500',
   B: 'bg-green-400',
   C: 'bg-amber-400',
@@ -61,7 +61,7 @@ const SLIDE_IN = {
   back: 'onbSlideLeft 0.26s cubic-bezier(0.22,1,0.36,1)',
 };
 
-const ANIM_CSS = `
+export const ANIM_CSS = `
   @keyframes onbSlideRight {
     from { opacity: 0; transform: translateX(40px); }
     to   { opacity: 1; transform: translateX(0); }
@@ -76,7 +76,7 @@ const ANIM_CSS = `
   }
 `;
 
-const AppTile = ({ app, selected, onToggle }) => (
+export const AppTile = ({ app, selected, onToggle }) => (
   <button
     onClick={() => onToggle(app.id)}
     className={`relative flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-150 active:scale-95 border-2

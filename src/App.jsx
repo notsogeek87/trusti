@@ -53,6 +53,8 @@ import AppsList from './components/AppsList';
 import LandingPage from './components/LandingPage';
 import TrustiChatWidget from './components/TrustiChatWidget';
 import OnboardingApps from './components/OnboardingApps';
+import OnboardingAppsNative from './components/OnboardingAppsNative';
+import { isNativeAndroid } from './utils/platform';
 
 // Modals
 import AppDetailModal from './components/modals/AppDetailModal';
@@ -137,6 +139,8 @@ const App = () => {
   
   // État pour la page d'onboarding
   const [showOnboarding, setShowOnboarding] = useState(false);
+  // Sur Android natif, l'utilisateur peut basculer du scan auto vers la sélection manuelle classique
+  const [forceManualOnboarding, setForceManualOnboarding] = useState(false);
 
   // Est-on arrivé via un lien de partage ? (évalué une seule fois au montage,
   // avant que l'URL ne soit nettoyée). Dans ce cas on court-circuite le
@@ -430,7 +434,17 @@ const App = () => {
 
   // Afficher la page d'onboarding de sélection des apps
   if (showOnboarding) {
-    return <OnboardingApps onComplete={handleOnboardingComplete} onSignUp={currentUser ? undefined : () => setShowLoginModal(true)} />;
+    const onSignUp = currentUser ? undefined : () => setShowLoginModal(true);
+    if (isNativeAndroid && !forceManualOnboarding) {
+      return (
+        <OnboardingAppsNative
+          onComplete={handleOnboardingComplete}
+          onSignUp={onSignUp}
+          onManualSelection={() => setForceManualOnboarding(true)}
+        />
+      );
+    }
+    return <OnboardingApps onComplete={handleOnboardingComplete} onSignUp={onSignUp} />;
   }
 
   // Affichage du détail d'une application
