@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { ScanSearch, ShieldCheck, ArrowRight, ListChecks, Globe, Lock, Eye } from 'lucide-react';
 import InstalledApps from '../native/InstalledApps';
 import { AppTile, ANIM_CSS, computeReplacementMap } from './OnboardingApps';
+import OnboardingSummary from './OnboardingSummary';
 import { API_URL } from '../utils/apiConfig';
 
 function extractPackageId(playStoreUrl) {
@@ -115,7 +116,7 @@ const FloatingApps = ({ apps, count }) => {
 // de demander une sélection manuelle. Ne s'affiche que dans l'app Android
 // packagée (voir src/utils/platform.js) — le web garde OnboardingApps.jsx.
 const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
-  // 'intro' | 'scanning' | 'results' | 'finalizing' | 'error'
+  // 'intro' | 'scanning' | 'results' | 'finalizing' | 'summary' | 'error'
   const [phase, setPhase] = useState('intro');
   const [matches, setMatches] = useState([]); // apps du catalogue trouvées installées
   const [selected, setSelected] = useState(new Set());
@@ -141,7 +142,7 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
   );
 
   // Petite transition "magique" (icônes qui convergent + étincelles) entre la
-  // validation et l'écran final, plutôt qu'un cut brutal vers la liste d'apps.
+  // validation et le récapitulatif, plutôt qu'un cut brutal vers la liste d'apps.
   const handleFinish = async () => {
     if (selected.size === 0) {
       onComplete(selected);
@@ -149,7 +150,7 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
     }
     setPhase('finalizing');
     await new Promise(resolve => setTimeout(resolve, 2200));
-    onComplete(selected);
+    setPhase('summary');
   };
 
   const runScan = async () => {
@@ -385,6 +386,16 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
           Scores et alternatives plus respectueuses de ta vie privée arrivent
         </p>
       </div>
+    );
+  }
+
+  // ── RÉCAPITULATIF (combien d'apps par TrustiScore, note du téléphone) ──
+  if (phase === 'summary') {
+    return (
+      <OnboardingSummary
+        apps={matches.filter(app => selected.has(app.id))}
+        onDetails={() => onComplete(selected)}
+      />
     );
   }
 

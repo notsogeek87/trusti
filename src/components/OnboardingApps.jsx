@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Check, ChevronRight, ChevronLeft, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
 import { API_URL } from '../utils/apiConfig';
 import { pickBestAlternative } from '../utils/alternatives';
+import OnboardingSummary from './OnboardingSummary';
 
 const GOOD_GRADES = ['A', 'B', 'C'];
 
@@ -78,7 +79,9 @@ const STEPS = [
 // step -1 = intro
 // step 0..N-1 = catégories
 // step N = écran succès
+// step N+1 = récapitulatif (combien d'apps par TrustiScore, note du téléphone)
 const SUCCESS_STEP = STEPS.length;
+const SUMMARY_STEP = STEPS.length + 1;
 
 export const GRADE_DOT = {
   A: 'bg-emerald-500',
@@ -178,6 +181,15 @@ const OnboardingApps = ({ onComplete, onSignUp }) => {
   const goNext = () => { setDirection('forward'); setStep(s => s + 1); };
   const goBack = () => { setDirection('back'); setStep(s => s - 1); };
 
+  const handleSeeScore = () => {
+    if (selected.size === 0) {
+      onComplete(selected);
+      return;
+    }
+    setDirection('forward');
+    setStep(SUMMARY_STEP);
+  };
+
   // Précharge toutes les catégories de tous les steps en parallèle
   // Une requête par catégorie → affichage progressif dès les premières réponses
   useEffect(() => {
@@ -230,6 +242,20 @@ const OnboardingApps = ({ onComplete, onSignUp }) => {
     [replacementMap]
   );
 
+  // Données complètes (avec grade) des apps sélectionnées, pour le
+  // récapitulatif final — reconstituées à partir de tout ce qui a été
+  // chargé en cache pendant les étapes (une app peut avoir été sélectionnée
+  // à une étape puis affichée dans une autre si elle appartient à plusieurs
+  // catégories).
+  const selectedAppsData = useMemo(() => {
+    if (step !== SUMMARY_STEP) return [];
+    const loaded = new Map();
+    Object.values(cache.current).forEach(list => {
+      list.forEach(app => { if (!loaded.has(app.id)) loaded.set(app.id, app); });
+    });
+    return [...selected].map(id => loaded.get(id)).filter(Boolean);
+  }, [step, selected]);
+
   // ── INTRO ─────────────────────────────────────────────────────────────
   if (step === -1) {
     return (
@@ -258,6 +284,16 @@ const OnboardingApps = ({ onComplete, onSignUp }) => {
           </button>
         </div>
       </div>
+    );
+  }
+
+  // ── RÉCAPITULATIF (combien d'apps par TrustiScore, note du téléphone) ──
+  if (step === SUMMARY_STEP) {
+    return (
+      <OnboardingSummary
+        apps={selectedAppsData}
+        onDetails={() => onComplete(selected)}
+      />
     );
   }
 
@@ -302,7 +338,7 @@ const OnboardingApps = ({ onComplete, onSignUp }) => {
 
           {/* CTA principal */}
           <button
-            onClick={() => onComplete(selected)}
+            onClick={handleSeeScore}
             className="flex items-center gap-2 bg-white text-indigo-700 hover:bg-indigo-50 px-8 py-4 rounded-2xl font-black text-base shadow-xl transition-all active:scale-95"
             style={{ animation: 'onbFadeUp 0.4s 0.2s ease-out both' }}
           >
