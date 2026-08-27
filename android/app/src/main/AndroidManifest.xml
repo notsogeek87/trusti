@@ -32,4 +32,18 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+      Visibilité des paquets pour le scan d'apps installées (onboarding natif Android).
+      On liste explicitement chaque app connue du catalogue Trusti plutôt que de demander
+      la permission QUERY_ALL_PACKAGES (très restreinte par Google Play depuis 2021 et
+      rarement accordée pour ce cas d'usage). Ce bloc est généré automatiquement par
+      `npm run android:generate-catalog` — ne pas éditer à la main, relancer le script
+      après toute mise à jour du catalogue.
+    -->
+    <queries>
+        <!-- TRUSTI_CATALOG_START -->
+
+        <!-- TRUSTI_CATALOG_END -->
+    </queries>
 </manifest>

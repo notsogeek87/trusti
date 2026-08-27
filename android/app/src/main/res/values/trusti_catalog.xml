@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Fichier généré automatiquement par `npm run android:generate-catalog`.
+  Ne pas éditer à la main : liste des package names Android du catalogue Trusti,
+  utilisée par InstalledAppsPlugin pour savoir quelles apps tester sur l'appareil.
+-->
+<resources>
+    <string-array name="trusti_catalog_packages">
+
+    </string-array>
+</resources>
