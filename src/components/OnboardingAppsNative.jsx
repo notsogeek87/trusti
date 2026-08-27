@@ -24,6 +24,25 @@ function randomFloatPosition() {
   return { top, left };
 }
 
+const SPARKLE_ANGLES = Array.from({ length: 10 }, (_, i) => i * 36);
+
+const FINALIZE_CSS = `
+  @keyframes onbConverge {
+    from { transform: translate(var(--sx), var(--sy)) scale(1); opacity: 1; }
+    to   { transform: translate(0, 0) scale(0.15); opacity: 0; }
+  }
+  @keyframes onbSparkle {
+    0%   { transform: rotate(var(--sangle)) translateX(0) scale(0); opacity: 1; }
+    60%  { opacity: 1; }
+    100% { transform: rotate(var(--sangle)) translateX(70px) scale(1); opacity: 0; }
+  }
+  @keyframes onbShieldPop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.25); }
+    100% { transform: scale(1); }
+  }
+`;
+
 const FLOAT_CSS = `
   @keyframes onbFloatIn {
     0%   { opacity: 0; transform: scale(0.3); }
@@ -96,7 +115,7 @@ const FloatingApps = ({ apps, count }) => {
 // de demander une sélection manuelle. Ne s'affiche que dans l'app Android
 // packagée (voir src/utils/platform.js) — le web garde OnboardingApps.jsx.
 const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
-  // 'intro' | 'scanning' | 'results' | 'error'
+  // 'intro' | 'scanning' | 'results' | 'finalizing' | 'error'
   const [phase, setPhase] = useState('intro');
   const [matches, setMatches] = useState([]); // apps du catalogue trouvées installées
   const [selected, setSelected] = useState(new Set());
@@ -109,6 +128,18 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
+  };
+
+  // Petite transition "magique" (icônes qui convergent + étincelles) entre la
+  // validation et l'écran final, plutôt qu'un cut brutal vers la liste d'apps.
+  const handleFinish = async () => {
+    if (selected.size === 0) {
+      onComplete(selected);
+      return;
+    }
+    setPhase('finalizing');
+    await new Promise(resolve => setTimeout(resolve, 2200));
+    onComplete(selected);
   };
 
   const runScan = async () => {
@@ -269,6 +300,84 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
     );
   }
 
+  // ── TRANSITION "MAGIQUE" AVANT L'ÉCRAN FINAL ──────────────────────────
+  if (phase === 'finalizing') {
+    const previewApps = matches.filter(app => selected.has(app.id)).slice(0, 8);
+    const n = previewApps.length;
+    const radius = 100;
+    const stagger = n > 0 ? Math.min(120, 900 / n) : 0;
+
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-indigo-600 to-purple-700 flex flex-col items-center justify-center px-6 text-center overflow-hidden">
+        <style>{ANIM_CSS}</style>
+        <style>{FINALIZE_CSS}</style>
+        <div className="relative w-64 h-64 flex items-center justify-center">
+          {previewApps.map((app, i) => {
+            const angle = (360 / n) * i - 90;
+            const rad = (angle * Math.PI) / 180;
+            const sx = Math.cos(rad) * radius;
+            const sy = Math.sin(rad) * radius;
+            return (
+              <div
+                key={app.id}
+                className="absolute rounded-xl shadow-lg overflow-hidden"
+                style={{
+                  top: '50%',
+                  left: '50%',
+                  width: 44,
+                  height: 44,
+                  marginTop: -22,
+                  marginLeft: -22,
+                  '--sx': `${sx}px`,
+                  '--sy': `${sy}px`,
+                  animation: `onbConverge 0.9s cubic-bezier(0.6, -0.28, 0.74, 0.05) ${i * stagger}ms forwards`,
+                }}
+              >
+                {app.icon && app.icon.startsWith('http') ? (
+                  <img src={app.icon} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className={`w-full h-full ${app.color || 'bg-slate-400'} flex items-center justify-center text-lg`}>
+                    {app.icon || app.name.charAt(0)}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {SPARKLE_ANGLES.map(angle => (
+            <div
+              key={angle}
+              className="absolute w-1.5 h-1.5 rounded-full bg-white"
+              style={{
+                top: '50%',
+                left: '50%',
+                marginTop: -3,
+                marginLeft: -3,
+                '--sangle': `${angle}deg`,
+                animation: 'onbSparkle 0.7s ease-out 1.3s forwards',
+                opacity: 0,
+              }}
+            />
+          ))}
+
+          <div
+            className="w-24 h-24 bg-white/15 backdrop-blur rounded-3xl flex items-center justify-center shadow-2xl"
+            style={{ animation: 'onbShieldPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.3s both' }}
+          >
+            <ShieldCheck size={44} className="text-white" />
+          </div>
+        </div>
+
+        <h2 className="text-white font-black text-xl mt-6" style={{ animation: 'onbFadeUp 0.4s ease-out' }}>
+          On prépare ton espace...
+        </h2>
+        <p className="text-indigo-100 text-sm mt-2 max-w-xs">
+          Scores et alternatives plus respectueuses de ta vie privée arrivent
+        </p>
+      </div>
+    );
+  }
+
   // ── RÉSULTATS ─────────────────────────────────────────────────────────
   const count = selected.size;
 
@@ -322,7 +431,7 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-4 py-4 shadow-lg">
         <div className="max-w-md mx-auto space-y-2">
           <button
-            onClick={() => onComplete(selected)}
+            onClick={handleFinish}
             className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98]"
           >
             {count > 0 ? `Ajouter mes ${count} app${count !== 1 ? 's' : ''}` : 'Continuer'}
