@@ -1,7 +1,51 @@
 import { useState, useMemo, useEffect } from 'react';
 import { TABS } from '../constants/tabs';
 import { API_URL } from '../utils/apiConfig';
-import { pickBestAlternative } from '../utils/alternatives';
+import { pickBestAlternative, isStrictlyBetterGrade } from '../utils/alternatives';
+
+const GOOD_GRADES = ['A', 'B', 'C'];
+
+// Pour une app à risque, détermine quelle alternative afficher par défaut.
+// Si l'utilisateur a déjà une des alternatives candidates dans "Mes Apps"
+// (même un grade B), on la met en avant comme "déjà migré" plutôt que la
+// meilleure du catalogue qu'il n'utilise pas — mais si une meilleure existe
+// quand même (ex: un A alors qu'il a un B), on le signale séparément
+// (`betterAlternative`) sans pour autant la substituer.
+const buildAlternativeInfo = (app, candidatePool, myAppsSet) => {
+  const candidates = candidatePool.filter(replacementApp => {
+    if (!GOOD_GRADES.includes(replacementApp.grade)) return false;
+    if (replacementApp.replacesAppIds && Array.isArray(replacementApp.replacesAppIds)) {
+      return replacementApp.replacesAppIds.includes(app.id);
+    }
+    return replacementApp.replacesAppId === app.id;
+  });
+  if (candidates.length === 0) return null;
+
+  const usedAlternative = pickBestAlternative(candidates.filter(c => myAppsSet.has(c.id)));
+  const bestOverall = pickBestAlternative(candidates);
+
+  if (usedAlternative) {
+    const betterAlternative =
+      bestOverall.id !== usedAlternative.id && isStrictlyBetterGrade(bestOverall.grade, usedAlternative.grade)
+        ? { id: bestOverall.id, name: bestOverall.name, grade: bestOverall.grade }
+        : null;
+    return {
+      alternative: usedAlternative.name,
+      altIcon: usedAlternative.icon,
+      altGrade: usedAlternative.grade,
+      alternativeAdopted: true,
+      betterAlternative,
+    };
+  }
+
+  return {
+    alternative: bestOverall.name,
+    altIcon: bestOverall.icon,
+    altGrade: bestOverall.grade,
+    alternativeAdopted: false,
+    betterAlternative: null,
+  };
+};
 
 /**
  * Hook personnalisé pour gérer l'état des applications
@@ -420,29 +464,10 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
         const allAvailableApps = [...new Map([...myAppsData, ...apps].map(a => [a.id, a])).values()];
         const availableIds = new Set(allAvailableApps.map(a => String(a.id)));
         
-        const candidates = allAvailableApps.filter(replacementApp => {
-          // L'app de remplacement doit avoir un meilleur grade (A, B, C)
-          const goodGrades = ['A', 'B', 'C'];
-          if (!goodGrades.includes(replacementApp.grade)) {
-            return false;
-          }
+        const alternativeInfo = buildAlternativeInfo(app, allAvailableApps, myApps);
 
-          // Vérifier si elle remplace cette app
-          if (replacementApp.replacesAppIds && Array.isArray(replacementApp.replacesAppIds)) {
-            return replacementApp.replacesAppIds.includes(app.id);
-          }
-          return replacementApp.replacesAppId === app.id;
-        });
-        // S'il y a plusieurs candidates, on met en avant la mieux notée (puis la plus populaire)
-        const replacement = pickBestAlternative(candidates);
-
-        if (replacement) {
-          return {
-            ...app,
-            alternative: replacement.name,
-            altIcon: replacement.icon,
-            altGrade: replacement.grade
-          };
+        if (alternativeInfo) {
+          return { ...app, ...alternativeInfo };
         }
         
         // Détecter si l'app a des relations qui ne sont pas encore chargées
@@ -498,31 +523,8 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
         .filter(app => myApps.has(app.id))
         .map(app => {
           // Chercher si une app avec meilleur grade remplace cette app (alternative)
-          const candidates = apps.filter(replacementApp => {
-            // L'app de remplacement doit avoir un meilleur grade (A, B, C)
-            const goodGrades = ['A', 'B', 'C'];
-            if (!goodGrades.includes(replacementApp.grade)) {
-              return false;
-            }
-
-            // Vérifier si elle remplace cette app
-            if (replacementApp.replacesAppIds && Array.isArray(replacementApp.replacesAppIds)) {
-              return replacementApp.replacesAppIds.includes(app.id);
-            }
-            return replacementApp.replacesAppId === app.id;
-          });
-          // S'il y a plusieurs candidates, on met en avant la mieux notée (puis la plus populaire)
-          const replacement = pickBestAlternative(candidates);
-
-          if (replacement) {
-            return {
-              ...app,
-              alternative: replacement.name,
-              altIcon: replacement.icon,
-              altGrade: replacement.grade
-            };
-          }
-          return app;
+          const alternativeInfo = buildAlternativeInfo(app, apps, myApps);
+          return alternativeInfo ? { ...app, ...alternativeInfo } : app;
         });
       
       // Trier par grade (E > D > C > B > A - du plus mauvais au meilleur) puis par nom

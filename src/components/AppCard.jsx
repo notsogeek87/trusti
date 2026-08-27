@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { PlusCircle, CheckCircle, Trash2, Sparkles, ShieldCheck, Search, Star, ChevronRight } from 'lucide-react';
+import { PlusCircle, CheckCircle, Trash2, Sparkles, ShieldCheck, Search, Star, ChevronRight, ArrowUpRight } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
 import { TABS } from '../constants/tabs';
 
@@ -167,42 +167,65 @@ const AppCard = React.memo(({
 
         {/* Alternative disponible */}
         {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade !== 'A' && (app.alternative || customMigration) && (
-          <div className="bg-emerald-50/60 border border-emerald-100 rounded-xl p-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-3 flex-grow min-w-0">
-              {app.altIcon && (
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-white border border-emerald-200">
-                  {app.altIcon.startsWith('http') ? (
-                    <img src={app.altIcon} alt="Alternative" className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-lg">{app.altIcon}</span>
-                  )}
-                </div>
-              )}
-              {!app.altIcon && <Sparkles size={14} className="text-emerald-600 shrink-0" />}
-              <div className="flex-grow">
-                <p className="text-[11px] font-black text-emerald-800 uppercase tracking-tight">Migrer vers :</p>
-                <button
-                  onClick={(e) => { e.stopPropagation(); onSelectMigration(app.id); }}
-                  className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline mt-1"
-                >
-                  {app.alternative ? (
-                    <span>
-                      {app.alternative}
-                      <span className="inline-flex items-center gap-0.5 text-[10px] ml-1 opacity-70">
-                        <Star size={8} className="fill-current" /> Recommandé
+          <div className="space-y-1.5">
+            <div className="bg-emerald-50/60 border border-emerald-100 rounded-xl p-2.5 flex items-center justify-between">
+              <div className="flex items-center gap-3 flex-grow min-w-0">
+                {app.altIcon && (
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-white border border-emerald-200">
+                    {app.altIcon.startsWith('http') ? (
+                      <img src={app.altIcon} alt="Alternative" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-lg">{app.altIcon}</span>
+                    )}
+                  </div>
+                )}
+                {!app.altIcon && (app.alternativeAdopted ? <CheckCircle size={14} className="text-emerald-600 shrink-0" /> : <Sparkles size={14} className="text-emerald-600 shrink-0" />)}
+                <div className="flex-grow">
+                  <p className="text-[11px] font-black text-emerald-800 uppercase tracking-tight">
+                    {app.alternativeAdopted ? 'Déjà migré vers :' : 'Migrer vers :'}
+                  </p>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onSelectMigration(app.id); }}
+                    className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline mt-1"
+                  >
+                    {app.alternative ? (
+                      <span>
+                        {app.alternative}
+                        {app.alternativeAdopted ? (
+                          <span className="inline-flex items-center gap-0.5 text-[10px] ml-1 opacity-70">
+                            <CheckCircle size={8} /> Dans vos apps
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-0.5 text-[10px] ml-1 opacity-70">
+                            <Star size={8} className="fill-current" /> Recommandé
+                          </span>
+                        )}
                       </span>
-                    </span>
-                  ) : customMigration ? (
-                    <span>{customMigration} <span className="text-[10px] ml-1 opacity-70">(cliquez pour changer)</span></span>
-                  ) : (
-                    <span>Sélectionner une alternative ▼</span>
-                  )}
-                </button>
+                    ) : customMigration ? (
+                      <span>{customMigration} <span className="text-[10px] ml-1 opacity-70">(cliquez pour changer)</span></span>
+                    ) : (
+                      <span>Sélectionner une alternative ▼</span>
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div className="shrink-0 ml-2">
+                <ScoreIndicator grade={app.altGrade || 'A'} />
               </div>
             </div>
-            <div className="shrink-0 ml-2">
-              <ScoreIndicator grade={app.altGrade || 'A'} />
-            </div>
+
+            {/* Une alternative encore mieux notée existe, mais n'est pas (encore) utilisée */}
+            {app.betterAlternative && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onSelectMigration(app.id); }}
+                className="w-full flex items-center gap-1.5 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1.5 hover:bg-amber-100 transition-colors"
+              >
+                <ArrowUpRight size={12} className="shrink-0" />
+                <span className="flex-grow text-left">
+                  Encore mieux noté : <span className="font-black">{app.betterAlternative.name}</span> (grade {app.betterAlternative.grade})
+                </span>
+              </button>
+            )}
           </div>
         )}
       </div>

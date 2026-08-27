@@ -8,7 +8,7 @@
 // grade égal (popularity = rang, plus petit = plus populaire). Choisir
 // simplement "la première trouvée dans le tableau" n'est pas déterministe :
 // l'ordre dépend de la pagination/du chargement de la liste d'apps.
-const GRADE_PRIORITY = { A: 1, B: 2, C: 3, D: 4, E: 5 };
+export const GRADE_PRIORITY = { A: 1, B: 2, C: 3, D: 4, E: 5 };
 
 export function pickBestAlternative(candidates) {
   if (!candidates || candidates.length === 0) return undefined;
@@ -17,4 +17,9 @@ export function pickBestAlternative(candidates) {
     if (gradeDiff !== 0) return gradeDiff;
     return (a.popularity ?? 9999) - (b.popularity ?? 9999);
   })[0];
+}
+
+// true si `a` a un grade strictement meilleur que `b` (A < B < ... au sens priorité)
+export function isStrictlyBetterGrade(a, b) {
+  return (GRADE_PRIORITY[a] || 999) < (GRADE_PRIORITY[b] || 999);
 }
