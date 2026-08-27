@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { TABS } from '../constants/tabs';
 import { API_URL } from '../utils/apiConfig';
 import { pickBestAlternative, isStrictlyBetterGrade } from '../utils/alternatives';
+import { hasCompletedOnboarding } from '../utils/onboardingStorage';
 
 const GOOD_GRADES = ['A', 'B', 'C'];
 
@@ -55,7 +56,11 @@ const buildAlternativeInfo = (app, candidatePool, myAppsSet) => {
  * Le filtrage se fait côté front selon les besoins
  */
 export const useAppManagement = (currentUser, saveUserData, getUserData, selectedCategory = 'Toutes') => {
-  const [activeTab, setActiveTab] = useState(TABS.APPLICATIONS);
+  // Un utilisateur qui rouvre l'app après avoir déjà fait l'onboarding
+  // retombe directement sur "Mes Apps" (1er onglet) plutôt que le catalogue.
+  const [activeTab, setActiveTab] = useState(
+    () => (hasCompletedOnboarding() ? TABS.MY_APPS : TABS.APPLICATIONS)
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [myApps, setMyApps] = useState(new Set());
   const [migratedApps, setMigratedApps] = useState(new Set());
