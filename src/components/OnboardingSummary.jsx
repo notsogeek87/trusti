@@ -1,16 +1,8 @@
 import React, { useMemo } from 'react';
 import { ArrowRight } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
-import { GRADE_INFO } from '../constants/grades';
+import { GRADE_INFO, PHONE_GRADE_LABEL } from '../constants/grades';
 import { computeTrustiSummary } from '../utils/trustiScore';
-
-const PHONE_GRADE_LABEL = {
-  A: 'Ton téléphone est plutôt souverain & privé',
-  B: 'Ton téléphone est plutôt sécurisé',
-  C: 'Ton téléphone a un usage hybride',
-  D: 'Ton téléphone présente un risque élevé',
-  E: 'Ton téléphone présente un risque critique',
-};
 
 // Écran de récapitulatif affiché après un scan (natif) ou une sélection
 // (manuelle/web), avant d'arriver sur "Mes Apps" : combien d'apps par

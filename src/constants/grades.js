@@ -11,6 +11,15 @@ export const GRADE_COLORS = {
   E: 'bg-[#c1272d]'
 };
 
+// Libellé du grade global déduit du téléphone (moyenne des apps installées)
+export const PHONE_GRADE_LABEL = {
+  A: 'Ton téléphone est plutôt souverain & privé',
+  B: 'Ton téléphone est plutôt sécurisé',
+  C: 'Ton téléphone a un usage hybride',
+  D: 'Ton téléphone présente un risque élevé',
+  E: 'Ton téléphone présente un risque critique',
+};
+
 export const GRADE_INFO = [
   {
     grade: 'A',

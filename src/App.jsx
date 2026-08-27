@@ -52,6 +52,7 @@ import Navigation from './components/layout/Navigation';
 import SearchBar from './components/ui/SearchBar';
 import ExplainerPanel from './components/ExplainerPanel';
 import AppsList from './components/AppsList';
+import MyAppsSummary from './components/MyAppsSummary';
 import LandingPage from './components/LandingPage';
 import TrustiChatWidget from './components/TrustiChatWidget';
 import OnboardingApps from './components/OnboardingApps';
@@ -659,6 +660,11 @@ const App = () => {
               </button>
             )}
           </div>
+        )}
+
+        {/* Résumé TrustiScore du téléphone + progression des migrations */}
+        {activeTab === TABS.MY_APPS && !searchTerm.trim() && (
+          <MyAppsSummary apps={filteredApps} />
         )}
 
         {/* Titre pour l'onglet Nos recommandations */}
