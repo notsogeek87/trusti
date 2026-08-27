@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ScanSearch, ShieldCheck, ArrowRight, ListChecks } from 'lucide-react';
 import InstalledApps from '../native/InstalledApps';
 import { AppTile, ANIM_CSS } from './OnboardingApps';
@@ -10,6 +10,92 @@ function extractPackageId(playStoreUrl) {
   return match ? match[1] : null;
 }
 
+const rand = (min, max) => Math.random() * (max - min) + min;
+
+// Positionne l'icône hors de la zone centrale (logo + texte + spinner).
+function randomFloatPosition() {
+  let top, left;
+  let guard = 0;
+  do {
+    top = rand(4, 88);
+    left = rand(4, 88);
+    guard += 1;
+  } while (guard < 12 && top > 28 && top < 76 && left > 18 && left < 82);
+  return { top, left };
+}
+
+const FLOAT_CSS = `
+  @keyframes onbFloatIn {
+    from { opacity: 0; transform: scale(0.5); }
+    to   { opacity: var(--fop, 0.6); transform: scale(1); }
+  }
+  @keyframes onbFloatDrift {
+    0%   { transform: translate(0, 0) rotate(0deg); }
+    25%  { transform: translate(var(--fx1), var(--fy1)) rotate(var(--fr1)); }
+    50%  { transform: translate(var(--fx2), var(--fy2)) rotate(var(--fr2)); }
+    75%  { transform: translate(var(--fx3), var(--fy3)) rotate(var(--fr3)); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+  }
+`;
+
+// Icônes du catalogue qui dérivent en fond pendant le scan natif (qui renvoie
+// tout d'un coup, sans flux progressif) : donne l'impression d'un scan actif
+// même si on ne sait pas encore lesquelles sont vraiment installées.
+const FloatingApps = ({ apps }) => {
+  const layout = useMemo(() => (
+    [...apps]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 12)
+      .map(app => {
+        const duration = rand(4.5, 8);
+        return {
+          app,
+          ...randomFloatPosition(),
+          size: Math.round(rand(34, 50)),
+          duration,
+          fadeDelay: rand(0, 1.2),
+          driftDelay: -rand(0, duration),
+          opacity: rand(0.35, 0.7),
+          fx1: `${rand(-35, 35)}px`, fy1: `${rand(-35, 35)}px`, fr1: `${rand(-18, 18)}deg`,
+          fx2: `${rand(-35, 35)}px`, fy2: `${rand(-35, 35)}px`, fr2: `${rand(-18, 18)}deg`,
+          fx3: `${rand(-35, 35)}px`, fy3: `${rand(-35, 35)}px`, fr3: `${rand(-18, 18)}deg`,
+        };
+      })
+  ), [apps]);
+
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      <style>{FLOAT_CSS}</style>
+      {layout.map(({ app, top, left, size, duration, fadeDelay, driftDelay, opacity, fx1, fy1, fr1, fx2, fy2, fr2, fx3, fy3, fr3 }) => (
+        <div
+          key={app.id}
+          className="absolute rounded-xl overflow-hidden shadow-md"
+          style={{
+            top: `${top}%`,
+            left: `${left}%`,
+            width: size,
+            height: size,
+            opacity: 0,
+            '--fop': opacity,
+            '--fx1': fx1, '--fy1': fy1, '--fr1': fr1,
+            '--fx2': fx2, '--fy2': fy2, '--fr2': fr2,
+            '--fx3': fx3, '--fy3': fy3, '--fr3': fr3,
+            animation: `onbFloatIn 0.5s ease-out ${fadeDelay}s forwards, onbFloatDrift ${duration}s ease-in-out ${driftDelay}s infinite`,
+          }}
+        >
+          {app.icon && app.icon.startsWith('http') ? (
+            <img src={app.icon} alt="" className="w-full h-full object-cover" loading="lazy" />
+          ) : (
+            <div className={`w-full h-full ${app.color || 'bg-slate-400'} flex items-center justify-center text-lg`}>
+              {app.icon || app.name.charAt(0)}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 // Onboarding Android natif : scanne les apps installées sur l'appareil au lieu
 // de demander une sélection manuelle. Ne s'affiche que dans l'app Android
 // packagée (voir src/utils/platform.js) — le web garde OnboardingApps.jsx.
@@ -18,6 +104,7 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
   const [phase, setPhase] = useState('intro');
   const [matches, setMatches] = useState([]); // apps du catalogue trouvées installées
   const [selected, setSelected] = useState(new Set());
+  const [floatingApps, setFloatingApps] = useState([]); // catalogue complet, pour l'animation de fond pendant le scan
 
   const toggleApp = (id) => {
     setSelected(prev => {
@@ -29,14 +116,14 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
 
   const runScan = async () => {
     setPhase('scanning');
+    setFloatingApps([]);
     try {
-      const [catalogRes, installedRes] = await Promise.all([
-        fetch(`${API_URL}/apps?onboarding=true`).then(r => r.json()),
-        InstalledApps.getInstalledPackages(),
-      ]);
-
+      const installedPromise = InstalledApps.getInstalledPackages();
+      const catalogRes = await fetch(`${API_URL}/apps?onboarding=true`).then(r => r.json());
       if (!catalogRes.success) throw new Error('catalog fetch failed');
+      setFloatingApps(catalogRes.apps); // affiche l'animation de fond dès que le catalogue arrive, pendant que le scan natif finit
 
+      const installedRes = await installedPromise;
       const installedPackages = new Set(installedRes.packages || []);
       const found = catalogRes.apps.filter(app => {
         const pkg = extractPackageId(app.playStoreUrl);
@@ -60,9 +147,10 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
   // ── INTRO / SCAN EN COURS ────────────────────────────────────────────
   if (phase === 'intro' || phase === 'scanning') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-white to-purple-50 flex flex-col items-center justify-center px-6 text-center">
+      <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-white to-purple-50 flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
         <style>{ANIM_CSS}</style>
-        <div style={{ animation: 'onbFadeUp 0.4s ease-out' }}>
+        {floatingApps.length > 0 && <FloatingApps apps={floatingApps} />}
+        <div className="relative z-10" style={{ animation: 'onbFadeUp 0.4s ease-out' }}>
           <div className="w-20 h-20 bg-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-200">
             <ScanSearch size={36} className="text-white" />
           </div>
