@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  ScanSearch, ShieldCheck, ArrowRight, ListChecks,
-  MessageCircle, Camera, Music, ShoppingBag, Wallet, Gamepad2,
-  Video, Heart, Mail, MapPin, Users, Bell,
-} from 'lucide-react';
+import { ScanSearch, ShieldCheck, ArrowRight, ListChecks } from 'lucide-react';
 import InstalledApps from '../native/InstalledApps';
 import { AppTile, ANIM_CSS } from './OnboardingApps';
 import { API_URL } from '../utils/apiConfig';
@@ -30,8 +26,9 @@ function randomFloatPosition() {
 
 const FLOAT_CSS = `
   @keyframes onbFloatIn {
-    from { opacity: 0; transform: scale(0.5); }
-    to   { opacity: var(--fop, 0.6); transform: scale(1); }
+    0%   { opacity: 0; transform: scale(0.3); }
+    60%  { opacity: 1; transform: scale(1.12); }
+    100% { opacity: var(--fop, 0.9); transform: scale(1); }
   }
   @keyframes onbFloatDrift {
     0%   { transform: translate(0, 0) rotate(0deg); }
@@ -42,64 +39,53 @@ const FLOAT_CSS = `
   }
 `;
 
-// Icônes génériques (pas les vraies apps du téléphone : indépendant du
-// catalogue réseau, donc toujours visible même si ce fetch est lent/échoue)
-// qui dérivent en fond pendant le scan pour rendre l'attente plus vivante.
-const FLOATING_ICONS = [
-  { Icon: MessageCircle, color: 'bg-rose-400' },
-  { Icon: Camera, color: 'bg-amber-400' },
-  { Icon: Music, color: 'bg-emerald-400' },
-  { Icon: ShoppingBag, color: 'bg-sky-400' },
-  { Icon: Wallet, color: 'bg-violet-400' },
-  { Icon: Gamepad2, color: 'bg-pink-400' },
-  { Icon: Video, color: 'bg-orange-400' },
-  { Icon: Heart, color: 'bg-teal-400' },
-  { Icon: Mail, color: 'bg-fuchsia-400' },
-  { Icon: MapPin, color: 'bg-lime-500' },
-  { Icon: Users, color: 'bg-cyan-400' },
-  { Icon: Bell, color: 'bg-indigo-400' },
-];
-
-const FloatingApps = () => {
+// Icônes des vraies apps trouvées installées, révélées une à une (via `count`)
+// à mesure que le scan les identifie, à des positions flottantes fixées une
+// fois pour toutes par app (useMemo) pour qu'elles ne sautent pas d'écran.
+const FloatingApps = ({ apps, count }) => {
   const layout = useMemo(() => (
-    FLOATING_ICONS.map(entry => {
+    apps.map(app => {
       const duration = rand(4.5, 8);
       return {
-        ...entry,
+        app,
         ...randomFloatPosition(),
-        size: Math.round(rand(34, 50)),
+        size: Math.round(rand(38, 54)),
         duration,
-        fadeDelay: rand(0, 1.2),
         driftDelay: -rand(0, duration),
-        opacity: rand(0.35, 0.7),
+        opacity: rand(0.65, 0.95),
         fx1: `${rand(-35, 35)}px`, fy1: `${rand(-35, 35)}px`, fr1: `${rand(-18, 18)}deg`,
         fx2: `${rand(-35, 35)}px`, fy2: `${rand(-35, 35)}px`, fr2: `${rand(-18, 18)}deg`,
         fx3: `${rand(-35, 35)}px`, fy3: `${rand(-35, 35)}px`, fr3: `${rand(-18, 18)}deg`,
       };
     })
-  ), []);
+  ), [apps]);
 
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
       <style>{FLOAT_CSS}</style>
-      {layout.map(({ Icon, color, top, left, size, duration, fadeDelay, driftDelay, opacity, fx1, fy1, fr1, fx2, fy2, fr2, fx3, fy3, fr3 }, i) => (
+      {layout.slice(0, count).map(({ app, top, left, size, duration, driftDelay, opacity, fx1, fy1, fr1, fx2, fy2, fr2, fx3, fy3, fr3 }) => (
         <div
-          key={i}
-          className={`absolute rounded-xl shadow-md flex items-center justify-center ${color}`}
+          key={app.id}
+          className="absolute rounded-xl shadow-md overflow-hidden"
           style={{
             top: `${top}%`,
             left: `${left}%`,
             width: size,
             height: size,
-            opacity: 0,
             '--fop': opacity,
             '--fx1': fx1, '--fy1': fy1, '--fr1': fr1,
             '--fx2': fx2, '--fy2': fy2, '--fr2': fr2,
             '--fx3': fx3, '--fy3': fy3, '--fr3': fr3,
-            animation: `onbFloatIn 0.5s ease-out ${fadeDelay}s forwards, onbFloatDrift ${duration}s ease-in-out ${driftDelay}s infinite`,
+            animation: `onbFloatIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards, onbFloatDrift ${duration}s ease-in-out ${driftDelay}s infinite`,
           }}
         >
-          <Icon size={Math.round(size * 0.5)} className="text-white" />
+          {app.icon && app.icon.startsWith('http') ? (
+            <img src={app.icon} alt="" className="w-full h-full object-cover" loading="lazy" />
+          ) : (
+            <div className={`w-full h-full ${app.color || 'bg-slate-400'} flex items-center justify-center text-lg`}>
+              {app.icon || app.name.charAt(0)}
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -114,6 +100,8 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
   const [phase, setPhase] = useState('intro');
   const [matches, setMatches] = useState([]); // apps du catalogue trouvées installées
   const [selected, setSelected] = useState(new Set());
+  const [foundApps, setFoundApps] = useState([]); // sous-ensemble de `matches` révélé pendant l'animation de scan
+  const [revealedCount, setRevealedCount] = useState(0);
 
   const toggleApp = (id) => {
     setSelected(prev => {
@@ -125,7 +113,8 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
 
   const runScan = async () => {
     setPhase('scanning');
-    const scanStartedAt = Date.now();
+    setFoundApps([]);
+    setRevealedCount(0);
     try {
       const installedPromise = InstalledApps.getInstalledPackages();
       const catalogRes = await fetch(`${API_URL}/apps?onboarding=true`).then(r => r.json());
@@ -138,12 +127,22 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
         return pkg && installedPackages.has(pkg);
       });
 
-      // Le scan natif est quasi instantané : sans ce délai, l'écran "scanning"
-      // (et donc l'animation) ne serait jamais peint avant de passer aux résultats.
-      const MIN_SCAN_MS = 1800;
-      const elapsed = Date.now() - scanStartedAt;
-      if (elapsed < MIN_SCAN_MS) {
-        await new Promise(resolve => setTimeout(resolve, MIN_SCAN_MS - elapsed));
+      // Révèle les apps trouvées une à une (plafonné pour rester lisible à
+      // l'écran) pour donner l'impression d'un scan qui les découvre en direct.
+      const REVEAL_CAP = 14;
+      const toReveal = found.slice(0, REVEAL_CAP);
+      setFoundApps(toReveal);
+
+      if (toReveal.length > 0) {
+        const REVEAL_TOTAL_MS = 1800;
+        const interval = Math.min(280, Math.max(90, REVEAL_TOTAL_MS / toReveal.length));
+        for (let i = 0; i < toReveal.length; i++) {
+          setRevealedCount(i + 1);
+          await new Promise(resolve => setTimeout(resolve, interval));
+        }
+        await new Promise(resolve => setTimeout(resolve, 500)); // laisse voir la dernière icône trouvée
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 900));
       }
 
       setMatches(found);
@@ -165,7 +164,7 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
     return (
       <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-white to-purple-50 flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
         <style>{ANIM_CSS}</style>
-        <FloatingApps />
+        <FloatingApps apps={foundApps} count={revealedCount} />
         <div className="relative z-10" style={{ animation: 'onbFadeUp 0.4s ease-out' }}>
           <div className="w-20 h-20 bg-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-200">
             <ScanSearch size={36} className="text-white" />
