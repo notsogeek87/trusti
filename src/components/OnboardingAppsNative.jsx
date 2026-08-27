@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { ScanSearch, ShieldCheck, ArrowRight, ListChecks } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { ScanSearch, ShieldCheck, ArrowRight, ListChecks, Globe, Lock, Eye } from 'lucide-react';
 import InstalledApps from '../native/InstalledApps';
 import { AppTile, ANIM_CSS } from './OnboardingApps';
 import { API_URL } from '../utils/apiConfig';
@@ -154,13 +154,65 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
     }
   };
 
-  useEffect(() => {
-    if (phase === 'intro') runScan();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // ── INTRO : explique l'app avant de pousser à lancer le scan ─────────
+  if (phase === 'intro') {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-white to-purple-50 flex flex-col items-center justify-center px-6 text-center">
+        <style>{ANIM_CSS}</style>
+        <div style={{ animation: 'onbFadeUp 0.4s ease-out' }} className="max-w-xs mx-auto">
+          <div className="w-20 h-20 bg-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-200">
+            <ShieldCheck size={36} className="text-white" />
+          </div>
+          <h1 className="text-2xl font-black text-slate-900 mb-3">Découvre ce que tes apps savent de toi</h1>
+          <p className="text-slate-500 text-sm leading-relaxed mb-6">
+            Trusti évalue plus de 100 apps populaires sur 12 critères objectifs, pour te donner
+            une note claire et te dire ce qu'elles font vraiment de tes données.
+          </p>
 
-  // ── INTRO / SCAN EN COURS ────────────────────────────────────────────
-  if (phase === 'intro' || phase === 'scanning') {
+          <div className="space-y-3 text-left mb-8">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
+                <Globe size={16} className="text-indigo-600" />
+              </div>
+              <p className="text-xs text-slate-600 leading-snug pt-1.5">Hébergement des données en Europe, conformité RGPD</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
+                <Lock size={16} className="text-indigo-600" />
+              </div>
+              <p className="text-xs text-slate-600 leading-snug pt-1.5">Protection contre le Cloud Act et la surveillance</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
+                <Eye size={16} className="text-indigo-600" />
+              </div>
+              <p className="text-xs text-slate-600 leading-snug pt-1.5">Scores transparents, basés sur des critères objectifs</p>
+            </div>
+          </div>
+
+          <button
+            onClick={runScan}
+            className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-indigo-200 transition-all active:scale-95"
+          >
+            <ScanSearch size={18} />
+            Scanner mon téléphone
+          </button>
+          <p className="text-xs text-slate-400 mt-3">On repère tes apps installées automatiquement, rien à saisir</p>
+          {onManualSelection && (
+            <button
+              onClick={onManualSelection}
+              className="mt-4 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              Sélection manuelle
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ── SCAN EN COURS ──────────────────────────────────────────────────
+  if (phase === 'scanning') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-white to-purple-50 flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
         <style>{ANIM_CSS}</style>
