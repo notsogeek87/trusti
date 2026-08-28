@@ -46,8 +46,8 @@ const SearchBar = ({ searchTerm, onSearchChange }) => {
         autoCorrect="off"
         autoCapitalize="none"
         spellCheck={false}
-        placeholder="Rechercher une app..."
-        className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-100 rounded-xl shadow-sm outline-none font-bold text-sm focus:ring-2 focus:ring-indigo-100 transition-all"
+        placeholder="Rechercher une application..."
+        className="w-full pl-10 pr-10 py-3 bg-white border border-slate-100 rounded-2xl shadow-sm outline-none font-semibold text-sm text-slate-700 placeholder:text-slate-300 focus:ring-2 focus:ring-indigo-100 transition-all"
         onChange={handleChange}
       />
       {hasValue && (

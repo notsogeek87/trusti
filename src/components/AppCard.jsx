@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { PlusCircle, CheckCircle, Trash2, Sparkles, ShieldCheck, Search, Star, ChevronRight, ArrowUpRight } from 'lucide-react';
+import { PlusCircle, CheckCircle, Trash2, ShieldCheck, ChevronRight, ArrowUpRight, CornerDownRight } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
 import { TABS } from '../constants/tabs';
 
@@ -82,12 +82,12 @@ const AppCard = React.memo(({
           transform: `translateX(${swipeX}px)`,
           transition: swiping ? 'none' : 'transform 0.3s cubic-bezier(0.25,1,0.5,1)',
         }}
-        className={`bg-white border border-slate-100 p-4 flex flex-col gap-2.5 rounded-2xl ${
+        className={`bg-white border border-slate-100 p-4 flex flex-col gap-2 rounded-2xl ${
           isLoadingSkeleton ? 'cursor-default' : 'cursor-pointer hover:shadow-md hover:border-indigo-100'
         } transition-shadow group`}
       >
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 ${isLoadingSkeleton ? 'bg-slate-200 animate-pulse' : 'bg-slate-100'}`}>
+          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center overflow-hidden shrink-0 ${isLoadingSkeleton ? 'bg-slate-200 animate-pulse' : 'bg-slate-100'}`}>
             {!isLoadingSkeleton && app.icon && app.icon.startsWith('http') ? (
               <img src={app.icon} alt={app.name} loading="lazy" className="w-full h-full object-cover" />
             ) : (
@@ -98,8 +98,8 @@ const AppCard = React.memo(({
           </div>
 
           <div className="flex-grow min-w-0">
-            <h3 className={`font-black text-sm truncate ${isLoadingSkeleton ? 'text-slate-400' : ''}`}>{app.name}</h3>
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+            <h3 className={`font-bold text-[15px] truncate ${isLoadingSkeleton ? 'text-slate-400' : 'text-slate-900'}`}>{app.name}</h3>
+            <p className="text-xs font-medium text-slate-400">
               {isLoadingSkeleton ? 'Chargement...' : app.category}
             </p>
           </div>
@@ -142,24 +142,24 @@ const AppCard = React.memo(({
 
         {/* Grade A — tout va bien */}
         {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade === 'A' && (
-          <div className="flex items-center gap-2 pl-0.5">
-            <ShieldCheck size={16} className="text-emerald-500 shrink-0" />
-            <p className="text-[11px] font-bold text-emerald-600">TrustiScore au max, tout va bien</p>
+          <div className="flex items-center gap-1.5 pl-0.5">
+            <ShieldCheck size={14} className="text-emerald-500 shrink-0" />
+            <p className="text-xs font-semibold text-emerald-600">TrustiScore au max, tout va bien</p>
           </div>
         )}
 
         {/* Pas d'alternative connue */}
         {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade !== 'A' && !app.alternative && !customMigration && (
-          <div className="flex items-center gap-2 pl-0.5">
+          <div className="flex items-center gap-1.5 pl-0.5">
             {app.isLoadingAlternative ? (
               <>
-                <div className="w-4 h-4 rounded-full border-2 border-slate-300 border-t-indigo-600 animate-spin shrink-0" />
-                <p className="text-[11px] font-semibold text-slate-500">Recherche d'alternatives...</p>
+                <div className="w-3.5 h-3.5 rounded-full border-2 border-slate-300 border-t-indigo-600 animate-spin shrink-0" />
+                <p className="text-xs font-semibold text-slate-500">Recherche d'alternatives...</p>
               </>
             ) : (
               <>
-                <Search size={14} className="text-slate-400 shrink-0" />
-                <p className="text-[11px] text-slate-400">Alternative inconnue pour le moment</p>
+                <CornerDownRight size={14} className="text-orange-400 shrink-0" />
+                <p className="text-xs font-semibold text-orange-500">Aucune alternative connue</p>
               </>
             )}
           </div>
@@ -167,61 +167,30 @@ const AppCard = React.memo(({
 
         {/* Alternative disponible */}
         {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade !== 'A' && (app.alternative || customMigration) && (
-          <div className="space-y-1.5">
-            <div className="bg-emerald-50/60 border border-emerald-100 rounded-xl p-2.5 flex items-center justify-between">
-              <div className="flex items-center gap-3 flex-grow min-w-0">
-                {app.altIcon && (
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-white border border-emerald-200">
-                    {app.altIcon.startsWith('http') ? (
-                      <img src={app.altIcon} alt="Alternative" className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-lg">{app.altIcon}</span>
-                    )}
-                  </div>
-                )}
-                {!app.altIcon && (app.alternativeAdopted ? <CheckCircle size={14} className="text-emerald-600 shrink-0" /> : <Sparkles size={14} className="text-emerald-600 shrink-0" />)}
-                <div className="flex-grow">
-                  <p className="text-[11px] font-black text-emerald-800 uppercase tracking-tight">
-                    {app.alternativeAdopted ? 'Déjà migré vers :' : 'Migrer vers :'}
-                  </p>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onSelectMigration(app.id); }}
-                    className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline mt-1"
-                  >
-                    {app.alternative ? (
-                      <span>
-                        {app.alternative}
-                        {app.alternativeAdopted ? (
-                          <span className="inline-flex items-center gap-0.5 text-[10px] ml-1 opacity-70">
-                            <CheckCircle size={8} /> Dans vos apps
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-0.5 text-[10px] ml-1 opacity-70">
-                            <Star size={8} className="fill-current" /> Recommandé
-                          </span>
-                        )}
-                      </span>
-                    ) : customMigration ? (
-                      <span>{customMigration} <span className="text-[10px] ml-1 opacity-70">(cliquez pour changer)</span></span>
-                    ) : (
-                      <span>Sélectionner une alternative ▼</span>
-                    )}
-                  </button>
-                </div>
-              </div>
-              <div className="shrink-0 ml-2">
-                <ScoreIndicator grade={app.altGrade || 'A'} />
-              </div>
-            </div>
+          <div className="space-y-1">
+            <button
+              onClick={(e) => { e.stopPropagation(); onSelectMigration(app.id); }}
+              className="w-full flex items-center gap-1.5 pl-0.5 text-left"
+            >
+              <CornerDownRight size={14} className="text-emerald-500 shrink-0" />
+              <span className="text-xs font-bold text-emerald-600 hover:underline truncate">
+                {app.alternative || customMigration}
+              </span>
+              {app.alternativeAdopted && (
+                <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-500 shrink-0">
+                  <CheckCircle size={11} /> Dans vos apps
+                </span>
+              )}
+            </button>
 
             {/* Une alternative encore mieux notée existe, mais n'est pas (encore) utilisée */}
             {app.betterAlternative && (
               <button
                 onClick={(e) => { e.stopPropagation(); onSelectMigration(app.id); }}
-                className="w-full flex items-center gap-1.5 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1.5 hover:bg-amber-100 transition-colors"
+                className="w-full flex items-center gap-1.5 pl-0.5 text-[11px] font-semibold text-amber-600 hover:text-amber-700 transition-colors"
               >
                 <ArrowUpRight size={12} className="shrink-0" />
-                <span className="flex-grow text-left">
+                <span className="flex-grow text-left truncate">
                   Encore mieux noté : <span className="font-black">{app.betterAlternative.name}</span> (grade {app.betterAlternative.grade})
                 </span>
               </button>

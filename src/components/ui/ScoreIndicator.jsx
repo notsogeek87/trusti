@@ -14,8 +14,9 @@ const GRADE_TEXT_COLORS = {
  * Indicateur de score (note A, B, C, D, E)
  * @param {string} grade - La note (A, B, C, D, ou E)
  * @param {string} size - Taille: "small" ou "large"
+ * @param {string} shape - Forme: "square" (défaut) ou "circle"
  */
-const ScoreIndicator = ({ grade, size = "small" }) => {
+const ScoreIndicator = ({ grade, size = "small", shape = "square" }) => {
   if (size === "large") {
     return (
       <div className="flex flex-col items-center">
@@ -26,10 +27,20 @@ const ScoreIndicator = ({ grade, size = "small" }) => {
     );
   }
 
+  if (shape === "circle") {
+    return (
+      <div
+        className={`${GRADE_COLORS[grade]} ${GRADE_TEXT_COLORS[grade] || 'text-white'} w-11 h-11 rounded-full flex items-center justify-center shrink-0`}
+      >
+        <span className="text-base font-black leading-none">{grade}</span>
+      </div>
+    );
+  }
+
   // Badge lettre unique, compact et lisible
   return (
     <div
-      className={`${GRADE_COLORS[grade]} ${GRADE_TEXT_COLORS[grade] || 'text-white'} w-7 h-7 rounded-lg flex items-center justify-center shrink-0`}
+      className={`${GRADE_COLORS[grade]} ${GRADE_TEXT_COLORS[grade] || 'text-white'} w-8 h-8 rounded-xl flex items-center justify-center shrink-0`}
     >
       <span className="text-sm font-black leading-none">{grade}</span>
     </div>

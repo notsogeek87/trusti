@@ -666,10 +666,10 @@ const App = () => {
           <div className="mb-4">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <h2 className="text-sm font-black text-slate-800 leading-tight">Mes applications</h2>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <h2 className="text-lg font-black text-slate-900 leading-tight">Mes applications</h2>
+                <p className="text-xs text-slate-400 mt-0.5">
                   {myApps.size > 0
-                    ? `${myApps.size} app${myApps.size > 1 ? 's' : ''} · à migrer en priorité en haut`
+                    ? `${myApps.size} application${myApps.size > 1 ? 's' : ''} · ${migratedApps.size} migrée${migratedApps.size > 1 ? 's' : ''}`
                     : 'Relance un scan pour repérer tes apps'}
                 </p>
               </div>
