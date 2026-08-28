@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
+import { App as CapacitorApp } from '@capacitor/app';
 import { useAppManagement } from './hooks/useAppManagement';
 import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
@@ -424,6 +425,49 @@ const App = () => {
       window.history.pushState({ page: 'trusti' }, '');
     }
   }, [selectedApp, showMigrationSelector, activeTab]);
+
+  // Gérer le bouton retour matériel Android (app native Capacitor).
+  // Dans le WebView natif, ce bouton ne déclenche PAS l'événement navigateur
+  // "popstate" : il émet l'événement natif Capacitor "backButton". Sans
+  // écouteur dessus, le comportement par défaut est de fermer l'app
+  // directement, même si un détail d'app ou une modale est ouvert.
+  useEffect(() => {
+    if (!isNativeAndroid) return;
+
+    let listenerHandle;
+    let cancelled = false;
+
+    CapacitorApp.addListener('backButton', () => {
+      if (selectedApp) {
+        shouldRestoreScroll.current = true;
+        setSelectedApp(null);
+        return;
+      }
+
+      if (showMigrationSelector) {
+        setShowMigrationSelector(null);
+        return;
+      }
+
+      if (activeTab === TABS.MY_APPS) {
+        setActiveTab(TABS.APPLICATIONS);
+        return;
+      }
+
+      CapacitorApp.exitApp();
+    }).then((handle) => {
+      if (cancelled) {
+        handle.remove();
+      } else {
+        listenerHandle = handle;
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      listenerHandle?.remove();
+    };
+  }, [selectedApp, showMigrationSelector, activeTab, setSelectedApp, setShowMigrationSelector, setActiveTab]);
 
   // Appelé par PinModal après validation serveur réussie
   const handleUnlockAdmin = async (token) => {
