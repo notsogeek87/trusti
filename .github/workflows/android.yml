@@ -29,22 +29,54 @@ jobs:
 
       - run: npm run cap:sync
 
+      # versionCode/versionName ne sont plus figés dans build.gradle : ce run
+      # de CI leur donne une valeur unique et strictement croissante (run_number),
+      # nécessaire pour que les vraies releases (voir plus bas) portent chacune
+      # une version distincte au lieu de rester bloquées en "1.0".
+      - name: Déterminer la version
+        id: version
+        run: |
+          echo "code=${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          echo "name=1.0.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
       - name: Build debug APK
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon -q
+        run: |
+          ./gradlew assembleDebug --no-daemon -q \
+            -PtrustiVersionCode=${{ steps.version.outputs.code }} \
+            -PtrustiVersionName=${{ steps.version.outputs.name }}
 
       - uses: actions/upload-artifact@v5
         with:
           name: trustiscore-debug-${{ github.run_number }}
           path: android/app/build/outputs/apk/debug/app-debug.apk
 
+      # Vraie release GitHub, versionnée et permanente : seulement pour main,
+      # jamais écrasée (chaque run a une version unique), pas marquée
+      # "Pre-release". Toujours signée avec la clé debug committée (pas de
+      # clé de production configurée) : à faire évoluer le jour où on distribue
+      # via le Play Store ou en dehors des testeurs internes.
+      - name: Publier la release GitHub (main)
+        if: github.event_name == 'push' && github.ref_name == 'main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v${{ steps.version.outputs.name }}"
+          gh release create "$TAG" \
+            android/app/build/outputs/apk/debug/app-debug.apk \
+            --title "TrustiScore $TAG" \
+            --notes "Run #${{ github.run_number }} (${{ github.sha }}). Signé avec la clé debug (pas de clé de production configurée)." \
+            --target "${{ github.sha }}"
+
       # Les artifacts d'Actions sont hébergés sur Azure Blob Storage, souvent
       # bloqué par des politiques réseau restrictives. Une release GitHub
       # (objects.githubusercontent.com) reste accessible dans ces cas et sert
       # de lien stable pour installer le dernier APK debug. Un tag par branche
       # évite qu'un build staging n'écrase le dernier build main (ou l'inverse).
-      - name: Déterminer le tag de release
+      # Réservé à staging/PR/dispatch : main a sa vraie release ci-dessus.
+      - name: Déterminer le tag de release debug
         id: reltag
+        if: "!(github.event_name == 'push' && github.ref_name == 'main')"
         run: |
           BRANCH="${{ github.head_ref || github.ref_name }}"
           SAFE_BRANCH=$(echo "$BRANCH" | tr '/' '-')
@@ -52,6 +84,7 @@ jobs:
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
       - name: Publier l'APK debug en release GitHub
+        if: "!(github.event_name == 'push' && github.ref_name == 'main')"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

@@ -7,8 +7,10 @@ android {
         applicationId "com.trusti.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        // Surchargeable en CI via -PtrustiVersionCode=N -PtrustiVersionName=X.Y.N
+        // pour que chaque release GitHub porte une version unique et croissante.
+        versionCode project.hasProperty('trustiVersionCode') ? (trustiVersionCode as int) : 1
+        versionName project.hasProperty('trustiVersionName') ? trustiVersionName : "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
