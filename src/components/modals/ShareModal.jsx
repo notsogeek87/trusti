@@ -2,7 +2,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import WhatsAppIcon from '../icons/WhatsAppIcon';
-import { shareText, shareToWhatsApp, copyToClipboard, buildShareUrl } from '../../utils/shareUtils';
+import { shareText, shareToWhatsApp, buildShareUrl } from '../../utils/shareUtils';
 
 /**
  * Modal de partage des migrations
@@ -44,10 +44,6 @@ const ShareModal = ({ migratedApps, customMigrations, allApps = [], onClose }) =
 
   const handleShareWhatsApp = () => {
     shareToWhatsApp(generateShareText(), shareUrl);
-  };
-
-  const handleCopy = () => {
-    copyToClipboard(`${generateShareText()}\n\n${shareUrl}`);
   };
 
   return (
@@ -136,12 +132,6 @@ const ShareModal = ({ migratedApps, customMigrations, allApps = [], onClose }) =
                   <WhatsAppIcon size={18} /> WhatsApp
                 </button>
                 <button
-                  onClick={handleCopy}
-                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 py-3 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
-                >
-                  <span>📋</span> Copier
-                </button>
-                <button 
                   onClick={onClose}
                   className="w-full bg-slate-50 hover:bg-slate-100 text-slate-900 py-3 rounded-xl font-bold text-sm transition-colors"
                 >

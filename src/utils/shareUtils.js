@@ -42,18 +42,6 @@ export const shareToWhatsApp = (text, url) => {
 };
 
 /**
- * Copie du texte dans le presse-papiers
- */
-export const copyToClipboard = async (text) => {
-  try {
-    await navigator.clipboard.writeText(text);
-    alert('Copié dans le presse-papiers ✓');
-  } catch (err) {
-    console.error('Erreur lors de la copie', err);
-  }
-};
-
-/**
  * Construit un lien profond (deep link) partageable à partir de l'origine
  * courante. Le destinataire qui l'ouvre pourra réimporter la sélection.
  *
