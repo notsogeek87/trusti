@@ -570,7 +570,7 @@ const App = () => {
             TrustiScore
           </p>
           <p className="text-sm text-slate-400 font-medium mb-10" style={{ animation: 'splashFadeIn 0.5s 0.2s ease-out both', opacity: 0 }}>
-            Votre guide de confidentialité
+            Votre guide pour maîtriser vos apps et vos données
           </p>
 
           <div className="flex items-center gap-2" style={{ animation: 'splashFadeIn 0.5s 0.35s ease-out both', opacity: 0 }}>
