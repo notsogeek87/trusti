@@ -768,6 +768,7 @@ const App = () => {
       {showTrustiShareModal && (
         <TrustiShareModal
           selectedApps={filteredApps.filter(a => myApps.has(a.id))}
+          customMigrations={customMigrations}
           allApps={apps}
           onClose={() => setShowTrustiShareModal(false)}
         />

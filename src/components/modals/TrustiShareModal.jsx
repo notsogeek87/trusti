@@ -6,9 +6,23 @@ import { shareText } from '../../utils/shareUtils';
 /**
  * Modal de partage des TrustiApp
  */
-const TrustiShareModal = ({ selectedApps, onClose }) => {
+const TrustiShareModal = ({ selectedApps, customMigrations = new Map(), allApps = [], onClose }) => {
+  // Alternative choisie pour une app à risque : personnalisée si l'utilisateur
+  // en a sélectionné une, sinon celle suggérée automatiquement.
+  const getChosenAlternative = (app) => {
+    const customAlt = customMigrations.get(app.id);
+    const altName = customAlt || app.alternative;
+    if (!altName) return null;
+    const altApp = allApps.find(a => a.name === altName);
+    return { name: altName, grade: altApp?.grade || app.altGrade };
+  };
+
   const generateShareText = () => {
-    const appsList = selectedApps.map(a => `${a.name} (Grade ${a.grade})`).join('\n• ');
+    const appsList = selectedApps.map(app => {
+      const alt = app.grade !== 'A' ? getChosenAlternative(app) : null;
+      return alt ? `${app.name} → ${alt.name}` : `${app.name} (Grade ${app.grade})`;
+    }).join('\n• ');
+
     return `⭐ Mes TrustiApp:\n\n• ${appsList}`;
   };
 
@@ -34,30 +48,38 @@ const TrustiShareModal = ({ selectedApps, onClose }) => {
               </h3>
               
               <div className="space-y-3">
-                {selectedApps.map(app => (
-                  <div key={app.id} className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
-                        {app.icon && app.icon.startsWith('http') ? (
-                          <img 
-                            src={app.icon} 
-                            alt={app.name} 
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className={`${app.color} w-full h-full flex items-center justify-center text-lg text-white`}>
-                            {app.icon}
-                          </div>
-                        )}
+                {selectedApps.map(app => {
+                  const alt = app.grade !== 'A' ? getChosenAlternative(app) : null;
+                  return (
+                    <div key={app.id} className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
+                          {app.icon && app.icon.startsWith('http') ? (
+                            <img
+                              src={app.icon}
+                              alt={app.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className={`${app.color} w-full h-full flex items-center justify-center text-lg text-white`}>
+                              {app.icon}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-grow">
+                          <p className="font-black text-sm text-slate-900">{app.name}</p>
+                          <p className="text-xs text-slate-500">{app.category}</p>
+                        </div>
+                        <ScoreIndicator grade={app.grade} />
                       </div>
-                      <div className="flex-grow">
-                        <p className="font-black text-sm text-slate-900">{app.name}</p>
-                        <p className="text-xs text-slate-500">{app.category}</p>
-                      </div>
-                      <ScoreIndicator grade={app.grade} />
+                      {alt && (
+                        <p className="text-xs text-emerald-700 font-semibold mt-2 pl-[52px]">
+                          → {alt.name}
+                        </p>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Boutons d'Action */}
