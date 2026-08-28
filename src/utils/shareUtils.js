@@ -2,15 +2,28 @@
  * Utilitaires pour le partage de contenu
  */
 
+import { Share } from '@capacitor/share';
+import { isNativeAndroid } from './platform';
+
 /**
- * Partage du texte (et éventuellement un lien) via l'API native
- * ou copie dans le presse-papiers en fallback.
+ * Partage du texte (et éventuellement un lien) via le vrai menu de partage
+ * du système : plugin natif Capacitor dans l'APK Android, sinon API Web
+ * Share du navigateur, avec copie dans le presse-papiers en dernier recours.
  *
  * @param {string} title - Titre du partage
  * @param {string} text - Texte lisible (fallback pour les canaux sans lien)
  * @param {string} [url] - Lien profond permettant de réimporter la sélection
  */
 export const shareText = async (title, text, url) => {
+  if (isNativeAndroid) {
+    try {
+      await Share.share(url ? { title, text, url } : { title, text });
+    } catch (err) {
+      // Partage annulé par l'utilisateur
+    }
+    return;
+  }
+
   if (navigator.share) {
     try {
       await navigator.share(url ? { title, text, url } : { title, text });
@@ -27,18 +40,6 @@ export const shareText = async (title, text, url) => {
       console.error('Erreur lors de la copie', err);
     }
   }
-};
-
-/**
- * Ouvre WhatsApp (app mobile si installée, sinon WhatsApp Web) avec le
- * texte pré-rempli, pour partager directement dans une conversation.
- *
- * @param {string} text - Texte lisible
- * @param {string} [url] - Lien profond à ajouter au message
- */
-export const shareToWhatsApp = (text, url) => {
-  const payload = url ? `${text}\n\n${url}` : text;
-  window.open(`https://wa.me/?text=${encodeURIComponent(payload)}`, '_blank', 'noopener,noreferrer');
 };
 
 /**
