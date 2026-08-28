@@ -4,7 +4,7 @@ import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
 import { TABS } from './constants/tabs';
 import { CATEGORIES } from './constants/categories';
-import { Sparkles, Smartphone, Monitor, Share2, ScanSearch } from 'lucide-react';
+import { Sparkles, Smartphone, Monitor, Share2, RefreshCw } from 'lucide-react';
 import { ViewModeContext } from './contexts/ViewModeContext';
 import { parseShareParams, clearShareParams, hasShareParams } from './utils/shareUtils';
 import { getAdminTokenEmail, clearAdminToken, setAdminToken } from './utils/adminAuth';
@@ -45,7 +45,6 @@ import Header from './components/layout/Header';
 
 // UI Components
 import LoadingSpinner from './components/ui/LoadingSpinner';
-import TrustiLogo from './components/ui/TrustiLogo';
 import Navigation from './components/layout/Navigation';
 
 // UI Components
@@ -520,7 +519,7 @@ const App = () => {
       {isInitialLoading && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-indigo-50 via-white to-purple-50">
           <div style={{ animation: 'splashFadeIn 0.5s ease-out both' }}>
-            <TrustiLogo className="w-20 h-20 mb-5" />
+            <img src="/assets/logo.png" alt="TrustiScore" className="w-28 h-28 mb-3 drop-shadow-lg" />
           </div>
 
           <p className="text-2xl font-black text-slate-800 tracking-tight mb-1" style={{ animation: 'splashFadeIn 0.5s 0.1s ease-out both', opacity: 0 }}>
@@ -634,10 +633,10 @@ const App = () => {
                 <button
                   onClick={() => setShowRescan(true)}
                   className="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-full transition-colors"
-                  title="Relancer un scan pour repérer de nouvelles apps"
+                  title="Relancer un scan pour actualiser ton TrustiScore avec tes apps récentes"
                 >
-                  <ScanSearch size={14} />
-                  Scanner
+                  <RefreshCw size={14} />
+                  Actualiser
                 </button>
                 {myApps.size > 0 && (
                   <button
