@@ -30,6 +30,18 @@ export const shareText = async (title, text, url) => {
 };
 
 /**
+ * Ouvre WhatsApp (app mobile si installée, sinon WhatsApp Web) avec le
+ * texte pré-rempli, pour partager directement dans une conversation.
+ *
+ * @param {string} text - Texte lisible
+ * @param {string} [url] - Lien profond à ajouter au message
+ */
+export const shareToWhatsApp = (text, url) => {
+  const payload = url ? `${text}\n\n${url}` : text;
+  window.open(`https://wa.me/?text=${encodeURIComponent(payload)}`, '_blank', 'noopener,noreferrer');
+};
+
+/**
  * Copie du texte dans le presse-papiers
  */
 export const copyToClipboard = async (text) => {

@@ -1,7 +1,8 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
-import { shareText, copyToClipboard, buildShareUrl } from '../../utils/shareUtils';
+import WhatsAppIcon from '../icons/WhatsAppIcon';
+import { shareText, shareToWhatsApp, copyToClipboard, buildShareUrl } from '../../utils/shareUtils';
 
 /**
  * Modal de partage des migrations
@@ -39,6 +40,10 @@ const ShareModal = ({ migratedApps, customMigrations, allApps = [], onClose }) =
 
   const handleShare = () => {
     shareText('Mes migrations TrustiScore', generateShareText(), shareUrl);
+  };
+
+  const handleShareWhatsApp = () => {
+    shareToWhatsApp(generateShareText(), shareUrl);
   };
 
   const handleCopy = () => {
@@ -118,13 +123,19 @@ const ShareModal = ({ migratedApps, customMigrations, allApps = [], onClose }) =
 
               {/* Boutons d'Action */}
               <div className="border-t border-slate-100 mt-6 pt-6 space-y-2">
-                <button 
+                <button
                   onClick={handleShare}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
                 >
                   <span>🔗</span> Partager
                 </button>
-                <button 
+                <button
+                  onClick={handleShareWhatsApp}
+                  className="w-full bg-[#25D366] hover:bg-[#1fbd5a] text-white py-3 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
+                >
+                  <WhatsAppIcon size={18} /> WhatsApp
+                </button>
+                <button
                   onClick={handleCopy}
                   className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 py-3 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
                 >
