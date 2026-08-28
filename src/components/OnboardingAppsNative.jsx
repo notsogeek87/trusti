@@ -59,6 +59,26 @@ const FLOAT_CSS = `
   }
 `;
 
+const PROGRESS_CSS = `
+  @keyframes onbProgressSlide {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+  }
+`;
+
+// Barre de chargement indéterminée : le scan (fetch catalogue + lecture des
+// packages installés) prend jusqu'à ~5s sans qu'aucune icône n'apparaisse
+// encore, cette barre rassure l'utilisateur pendant ce temps mort.
+const ScanProgressBar = () => (
+  <div className="w-56 h-1.5 bg-indigo-100 rounded-full overflow-hidden mx-auto">
+    <style>{PROGRESS_CSS}</style>
+    <div
+      className="h-full w-1/3 bg-indigo-500 rounded-full"
+      style={{ animation: 'onbProgressSlide 1.1s ease-in-out infinite' }}
+    />
+  </div>
+);
+
 // Icônes des vraies apps trouvées installées, révélées une à une (via `count`)
 // à mesure que le scan les identifie, à des positions flottantes fixées une
 // fois pour toutes par app (useMemo) pour qu'elles ne sautent pas d'écran.
@@ -264,11 +284,12 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
             <ScanSearch size={36} className="text-white" />
           </div>
           <h1 className="text-2xl font-black text-slate-900 mb-3">On scanne ton téléphone</h1>
-          <p className="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto mb-8">
+          <p className="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto mb-6">
             Trusti repère automatiquement les apps installées qu'on connaît, pour t'éviter
             de tout sélectionner à la main.
           </p>
-          <div className="w-8 h-8 rounded-full border-2 border-indigo-400 border-t-transparent animate-spin mx-auto" />
+          <ScanProgressBar />
+          <p className="text-xs text-slate-400 mt-3">Analyse en cours, ça ne prend que quelques secondes...</p>
         </div>
       </div>
     );
