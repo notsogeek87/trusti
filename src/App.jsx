@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from 'react';
 import { App as CapacitorApp } from '@capacitor/app';
 import { useAppManagement } from './hooks/useAppManagement';
 import { useModals } from './hooks/useModals';
@@ -219,6 +219,9 @@ const App = () => {
   // État pour le filtre de catégorie dans l'onglet Applications
   const [selectedCategory, setSelectedCategory] = useState('Toutes');
 
+  // État pour le filtre migrée / à migrer dans l'onglet Mes Apps
+  const [migrationFilter, setMigrationFilter] = useState('all');
+
   // Gestion de l'état des applications (avec sauvegarde utilisateur)
   const {
     activeTab,
@@ -245,6 +248,27 @@ const App = () => {
     setSelectedApp,
     loadMoreApps,
   } = useAppManagement(currentUser, saveUserData, getUserData, selectedCategory);
+
+  // Une app "Mes Apps" est considérée migrée si elle est déjà au top (grade A)
+  // ou si l'alternative recommandée est déjà utilisée.
+  const isAppMigrated = (app) => app.grade === 'A' || app.alternativeAdopted === true;
+
+  // Compteurs pour le filtre migrée / à migrer (sur la liste non filtrée par ce critère)
+  const migrationCounts = useMemo(() => {
+    if (activeTab !== TABS.MY_APPS) return { migrated: 0, todo: 0 };
+    const realApps = filteredApps.filter(app => !app.isLoadingSkeleton);
+    const migrated = realApps.filter(isAppMigrated).length;
+    return { migrated, todo: realApps.length - migrated };
+  }, [activeTab, filteredApps]);
+
+  // Liste effectivement affichée dans "Mes Apps", après application du filtre migrée / à migrer
+  const myAppsDisplayed = useMemo(() => {
+    if (activeTab !== TABS.MY_APPS || migrationFilter === 'all') return filteredApps;
+    return filteredApps.filter(app => {
+      if (app.isLoadingSkeleton) return false;
+      return migrationFilter === 'migrated' ? isAppMigrated(app) : !isAppMigrated(app);
+    });
+  }, [activeTab, filteredApps, migrationFilter]);
 
   // Import via lien de partage (?apps=... et/ou ?mig=...)
   const [pendingImport, setPendingImport] = useState(null);
@@ -617,7 +641,9 @@ const App = () => {
         ? 'max-w-md mx-auto px-4 py-3 pb-24'
         : 'flex-1 min-w-0 px-6 py-3 pb-6'
       }>
-        <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+        {activeTab !== TABS.MY_APPS && (
+          <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+        )}
 
         <div key={activeTab} style={{ animation: 'tabFadeIn 0.18s ease-out' }}>
 
@@ -711,6 +737,34 @@ const App = () => {
           <MyAppsSummary apps={filteredApps} />
         )}
 
+        {/* Recherche : positionnée sous le résumé, car elle porte sur les apps listées ci-dessous */}
+        {activeTab === TABS.MY_APPS && (
+          <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+        )}
+
+        {/* Filtre migrée / à migrer */}
+        {activeTab === TABS.MY_APPS && myApps.size > 0 && !searchTerm.trim() && (
+          <div className="flex gap-1.5 mb-4">
+            {[
+              { id: 'all', label: 'Toutes' },
+              { id: 'todo', label: `À migrer (${migrationCounts.todo})` },
+              { id: 'migrated', label: `Migrées (${migrationCounts.migrated})` },
+            ].map(({ id, label }) => (
+              <button
+                key={id}
+                onClick={() => setMigrationFilter(id)}
+                className={`flex-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
+                  migrationFilter === id
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300 hover:shadow-sm'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Titre pour l'onglet Nos recommandations */}
         {activeTab === TABS.TOP_ALTERNATIVES && (
           <div className="mb-3 text-center">
@@ -735,7 +789,7 @@ const App = () => {
 
         {/* Liste des applications */}
         <AppsList
-          apps={filteredApps}
+          apps={activeTab === TABS.MY_APPS ? myAppsDisplayed : filteredApps}
           activeTab={activeTab}
           myApps={myApps}
           migratedApps={migratedApps}

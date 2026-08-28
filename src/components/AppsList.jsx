@@ -116,6 +116,11 @@ const AppsList = ({
           <p className="text-slate-400 text-xs">Essayez une autre catégorie ou utilisez la recherche</p>
         </div>
       )}
+      {displayApps.length === 0 && activeTab === TABS.MY_APPS && !searchTerm.trim() && myApps.size > 0 && (
+        <div className="text-center py-8 px-4">
+          <p className="text-slate-500 text-sm">Aucune application ne correspond à ce filtre</p>
+        </div>
+      )}
       {displayApps.map((app) => (
         <AppCard
           key={app.id}
