@@ -27,7 +27,7 @@ const LandingPage = ({ onClose }) => {
                 className="w-full h-auto"
                 controls
                 preload="metadata"
-                poster="/assets/logo.png"
+                poster="/assets/poster.png"
               >
                 <source src="/assets/intro.mp4" type="video/mp4" />
                 Votre navigateur ne supporte pas la lecture de vidéos.
