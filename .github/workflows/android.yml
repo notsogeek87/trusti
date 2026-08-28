@@ -46,10 +46,24 @@ jobs:
             -PtrustiVersionCode=${{ steps.version.outputs.code }} \
             -PtrustiVersionName=${{ steps.version.outputs.name }}
 
+      # Gradle nomme toujours sa sortie "app-debug.apk" (nom fixe lié au
+      # buildType), quelle que soit la version : on la renomme pour que le
+      # fichier téléchargé (artifact ou asset de release) porte la version
+      # au lieu d'un nom générique identique à chaque run.
+      - name: Renommer l'APK avec sa version
+        id: apk
+        run: |
+          NAME="TrustiScore-${{ steps.version.outputs.name }}.apk"
+          SRC="android/app/build/outputs/apk/debug/app-debug.apk"
+          DEST="android/app/build/outputs/apk/debug/$NAME"
+          mv "$SRC" "$DEST"
+          echo "path=$DEST" >> "$GITHUB_OUTPUT"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+
       - uses: actions/upload-artifact@v5
         with:
           name: trustiscore-debug-${{ github.run_number }}
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: ${{ steps.apk.outputs.path }}
 
       # Vraie release GitHub, versionnée et permanente : seulement pour main,
       # jamais écrasée (chaque run a une version unique), pas marquée
@@ -63,7 +77,7 @@ jobs:
         run: |
           TAG="v${{ steps.version.outputs.name }}"
           gh release create "$TAG" \
-            android/app/build/outputs/apk/debug/app-debug.apk \
+            "${{ steps.apk.outputs.path }}" \
             --title "TrustiScore $TAG" \
             --notes "Run #${{ github.run_number }} (${{ github.sha }}). Signé avec la clé debug (pas de clé de production configurée)." \
             --target "${{ github.sha }}"
@@ -91,7 +105,7 @@ jobs:
           TAG="${{ steps.reltag.outputs.tag }}"
           gh release delete "$TAG" --yes --cleanup-tag || true
           gh release create "$TAG" \
-            android/app/build/outputs/apk/debug/app-debug.apk \
+            "${{ steps.apk.outputs.path }}" \
             --title "TrustiScore — APK debug (${{ steps.reltag.outputs.branch }})" \
             --notes "Build automatique non signé, run #${{ github.run_number }} (${{ github.sha }})." \
             --prerelease \
