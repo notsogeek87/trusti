@@ -835,8 +835,8 @@ const App = () => {
 
       </>
 
-      {/* Widget de chat Trusti (visible partout sauf pendant la vérification du token, la page de bienvenue, l'onboarding et la console admin) */}
-      {!showWelcomeModal && !showOnboarding && !showRescan && !showAdminModal && <TrustiChatWidget onOpenLandingPage={handleOpenLandingPage} />}
+      {/* Widget de chat Trusti (visible partout sauf pendant la vérification du token, la page de bienvenue, l'onboarding, le chargement initial et la console admin) */}
+      {!showWelcomeModal && !showOnboarding && !showRescan && !showAdminModal && !isLoadingApps && <TrustiChatWidget onOpenLandingPage={handleOpenLandingPage} />}
 
       <style>{`
         @keyframes pulse-subtle {

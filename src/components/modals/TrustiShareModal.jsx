@@ -1,21 +1,19 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
-import { shareText, buildShareUrl } from '../../utils/shareUtils';
+import { shareText } from '../../utils/shareUtils';
 
 /**
  * Modal de partage des TrustiApp
  */
 const TrustiShareModal = ({ selectedApps, onClose }) => {
-  const shareUrl = buildShareUrl({ apps: selectedApps.map(a => a.id) });
-
   const generateShareText = () => {
     const appsList = selectedApps.map(a => `${a.name} (Grade ${a.grade})`).join('\n• ');
     return `⭐ Mes TrustiApp:\n\n• ${appsList}`;
   };
 
   const handleShare = () => {
-    shareText('Mes TrustiApp', generateShareText(), shareUrl);
+    shareText('Mes TrustiApp', generateShareText());
   };
 
   return (
