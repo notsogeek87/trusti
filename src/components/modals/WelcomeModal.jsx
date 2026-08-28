@@ -1,5 +1,4 @@
 import React from 'react';
-import TrustiLogo from '../ui/TrustiLogo';
 
 /**
  * Modal de bienvenue affiché lors de la première visite
@@ -11,7 +10,11 @@ const WelcomeModal = ({ onFirstTimeYes, onFirstTimeNo }) => {
         {/* En-tête avec logo */}
         <div className="bg-gradient-to-r from-indigo-600/20 via-purple-600/20 to-pink-600/20 p-6 text-center border-b border-indigo-500/20">
           <div className="flex justify-center mb-3">
-            <TrustiLogo className="w-16 h-16 animate-in spin-in duration-700" />
+            <img
+              src="/assets/logo.png"
+              alt="TrustiScore"
+              className="w-16 h-16 animate-in spin-in duration-700"
+            />
           </div>
           <h2 className="text-xl font-bold text-white mb-1.5">
             Bienvenue sur TrustiScore !

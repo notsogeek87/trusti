@@ -52,7 +52,7 @@ npm run preview
 
 - **Layout** : Header, Navigation
 - **Modals** : AppDetailModal, ShareModal, TrustiShareModal, MigrationSelectorModal
-- **UI** : TrustiLogo, ScoreIndicator, SearchBar
+- **UI** : ScoreIndicator, SearchBar
 - **Features** : AppCard, AppsList, ExplainerPanel, ShareButton
 
 ### Hooks Personnalisés
