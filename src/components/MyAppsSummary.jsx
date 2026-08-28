@@ -1,13 +1,16 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
 import { GRADES, GRADE_COLORS, PHONE_GRADE_LABEL } from '../constants/grades';
 import { computeTrustiSummary } from '../utils/trustiScore';
 
-// Résumé persistant affiché en haut de l'onglet "Mes Apps" : le TrustiScore
-// global du téléphone (déduit des apps suivies), le nombre d'apps par note,
-// et une barre de progression des migrations (apps à risque déjà remplacées
-// par une alternative plus fiable).
+// Résumé compact affiché en haut de l'onglet "Mes Apps" : le TrustiScore
+// global du téléphone (déduit des apps suivies) et la progression des
+// migrations. Repliée par défaut pour laisser la place à la liste des apps,
+// elle se déplie au tap pour révéler la répartition par note (A-E).
 const MyAppsSummary = ({ apps }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   const { counts, total, overallGrade } = useMemo(() => computeTrustiSummary(apps), [apps]);
 
   const { migratedCount, riskyCount } = useMemo(() => {
@@ -20,46 +23,58 @@ const MyAppsSummary = ({ apps }) => {
 
   if (total === 0 || !overallGrade) return null;
 
-  const progressPct = riskyCount > 0 ? Math.round((migratedCount / riskyCount) * 100) : 100;
-
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-4">
-      <div className="flex items-center gap-3">
+    <button
+      type="button"
+      onClick={() => setIsOpen(prev => !prev)}
+      aria-expanded={isOpen}
+      className="w-full text-left bg-indigo-50/60 hover:bg-indigo-50 border border-indigo-100 rounded-2xl px-3.5 py-3 mb-4 transition-colors"
+    >
+      <div className="flex items-center gap-2.5">
         <ScoreIndicator grade={overallGrade} size="small" />
-        <div className="min-w-0">
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-            TrustiScore de ton téléphone
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-black text-slate-800 truncate">TrustiScore du téléphone</p>
+          <p className="text-[11px] text-slate-500 truncate">
+            {PHONE_GRADE_LABEL[overallGrade]} · {total} app{total !== 1 ? 's' : ''}
           </p>
-          <p className="text-xs font-bold text-slate-700 truncate">{PHONE_GRADE_LABEL[overallGrade]}</p>
+        </div>
+        <div className="shrink-0 flex items-center gap-2">
+          {riskyCount > 0 && (
+            <span className="text-[11px] font-bold text-indigo-600 whitespace-nowrap">
+              {migratedCount}/{riskyCount} migrées
+            </span>
+          )}
+          <ChevronDown
+            size={16}
+            className={`text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          />
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-1.5 mt-4">
-        {GRADES.map(grade => (
-          <div key={grade} className="flex flex-col items-center gap-1">
-            <div className={`${GRADE_COLORS[grade]} w-6 h-6 rounded-md flex items-center justify-center`}>
-              <span className="text-[11px] font-black text-white leading-none">{grade}</span>
-            </div>
-            <span className="text-[11px] font-black text-slate-700">{counts[grade]}</span>
+      {isOpen && (
+        <div className="mt-3 pt-3 border-t border-indigo-100">
+          <div className="flex w-full h-2 rounded-full overflow-hidden bg-slate-100">
+            {GRADES.map(grade => (
+              counts[grade] > 0 && (
+                <div
+                  key={grade}
+                  className={GRADE_COLORS[grade]}
+                  style={{ width: `${(counts[grade] / total) * 100}%` }}
+                />
+              )
+            ))}
           </div>
-        ))}
-      </div>
-
-      {riskyCount > 0 && (
-        <div className="mt-4">
-          <div className="flex items-center justify-between mb-1.5">
-            <p className="text-[11px] font-bold text-slate-600">Migrations vers des alternatives fiables</p>
-            <p className="text-[11px] font-black text-slate-700">{migratedCount}/{riskyCount}</p>
-          </div>
-          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full transition-all duration-500"
-              style={{ width: `${progressPct}%` }}
-            />
+          <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
+            {GRADES.map(grade => (
+              <span key={grade} className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500">
+                <span className={`${GRADE_COLORS[grade]} w-1.5 h-1.5 rounded-sm`} />
+                {grade}·{counts[grade]}
+              </span>
+            ))}
           </div>
         </div>
       )}
-    </div>
+    </button>
   );
 };
 
