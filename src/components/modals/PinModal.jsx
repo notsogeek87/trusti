@@ -50,13 +50,31 @@ const PinModal = ({ isOpen, onClose, onSuccess, userEmail }) => {
   };
 
   const handleChange = (index, value) => {
-    if (!/^\d*$/.test(value)) return;
+    const digits = value.replace(/\D/g, '');
+
+    if (!digits) {
+      const newOtp = [...otp];
+      newOtp[index] = '';
+      setOtp(newOtp);
+      setError('');
+      return;
+    }
+
+    // Plusieurs chiffres d'un coup (collage non intercepté par onPaste sur
+    // certains claviers mobiles, suggestion d'autofill…) : on les répartit
+    // à partir de la case courante au lieu de tronquer à 1 caractère.
     const newOtp = [...otp];
-    newOtp[index] = value.slice(-1);
+    let pos = index;
+    for (const d of digits) {
+      if (pos > 5) break;
+      newOtp[pos] = d;
+      pos++;
+    }
     setOtp(newOtp);
     setError('');
-    if (value && index < 5) inputRefs.current[index + 1]?.focus();
-    if (index === 5 && value) verifyCode(newOtp.join(''));
+    inputRefs.current[Math.min(pos, 5)]?.focus();
+    const code = newOtp.join('');
+    if (code.length === 6) verifyCode(code);
   };
 
   const handleKeyDown = (index, e) => {
@@ -145,7 +163,7 @@ const PinModal = ({ isOpen, onClose, onSuccess, userEmail }) => {
                   ref={el => inputRefs.current[i] = el}
                   type="text"
                   inputMode="numeric"
-                  maxLength="1"
+                  maxLength="6"
                   value={digit}
                   onChange={e => handleChange(i, e.target.value)}
                   onKeyDown={e => handleKeyDown(i, e)}

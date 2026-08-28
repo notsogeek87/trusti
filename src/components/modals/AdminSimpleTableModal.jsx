@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   ChevronLeft, ChevronRight, Search, X, Loader2,
-  Plus, Pencil, Trash2, Check,
+  Plus, Pencil, Trash2, Check, SlidersHorizontal,
 } from 'lucide-react';
 import { CATEGORIES, ADMIN_CATEGORIES } from '../../constants/categories';
 import { useToast } from '../../contexts/ToastContext';
 import { API_URL } from '../../utils/apiConfig';
 import { adminFetch } from '../../utils/adminAuth';
+import { useIsMobile } from '../../contexts/ViewModeContext';
 
 // ─── Grade display helpers ───────────────────────────────────────────────────
 
@@ -111,6 +112,7 @@ function AppIcon({ icon, name, color, size = 'md' }) {
 
 const AdminSimpleTableModal = ({ onClose }) => {
   const toast = useToast();
+  const isMobile = useIsMobile();
 
   // Table state
   const [apps, setApps] = useState([]);
@@ -122,6 +124,9 @@ const AdminSimpleTableModal = ({ onClose }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [filterGrade, setFilterGrade] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
+  // Sur mobile, la ligne de filtres (grade + catégorie) est repliée par défaut
+  // pour laisser un maximum de place à la liste — dépliable via l'icône filtre.
+  const [showFilters, setShowFilters] = useState(false);
   const itemsPerPage = 50;
 
   // Drawer state
@@ -305,6 +310,7 @@ const AdminSimpleTableModal = ({ onClose }) => {
   });
 
   const filtersActive = filterGrade || filterCategory;
+  const filtersVisible = !isMobile || showFilters;
 
   // ─── Render ───────────────────────────────────────────────────────────────
 
@@ -313,10 +319,10 @@ const AdminSimpleTableModal = ({ onClose }) => {
       <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full h-[92dvh] sm:h-[96vh] flex flex-col relative overflow-hidden">
 
         {/* ── Header ── */}
-        <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-3xl sm:rounded-t-2xl flex-shrink-0">
+        <div className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-3xl sm:rounded-t-2xl flex-shrink-0">
           <div className="flex items-center gap-2 min-w-0">
-            <h2 className="text-base font-bold truncate">Administration</h2>
-            <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full flex-shrink-0">
+            <h2 className="text-sm sm:text-base font-bold truncate">Administration</h2>
+            <span className="text-[10px] sm:text-xs bg-white/20 px-2 py-0.5 rounded-full flex-shrink-0">
               {isSearching
                 ? `${filteredApps.length} rés.`
                 : `${totalApps} apps`}
@@ -325,7 +331,7 @@ const AdminSimpleTableModal = ({ onClose }) => {
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <button
               onClick={openAdd}
-              className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 px-2.5 py-1.5 sm:px-3 rounded-lg text-xs font-semibold transition-all"
             >
               <Plus size={14} /> Ajouter
             </button>
@@ -336,8 +342,8 @@ const AdminSimpleTableModal = ({ onClose }) => {
         </div>
 
         {/* ── Toolbar ── */}
-        <div className="px-4 py-2 border-b bg-slate-50 flex flex-col gap-2 flex-shrink-0">
-          {/* Ligne 1 : recherche + pagination */}
+        <div className="px-3 py-1.5 sm:px-4 sm:py-2 border-b bg-slate-50 flex flex-col gap-1.5 sm:gap-2 flex-shrink-0">
+          {/* Ligne 1 : recherche + toggle filtres (mobile) + pagination */}
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
@@ -346,7 +352,7 @@ const AdminSimpleTableModal = ({ onClose }) => {
                 placeholder="Rechercher…"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="w-full pl-8 pr-7 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white"
+                className="w-full pl-8 pr-7 py-1.5 sm:py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white"
               />
               {searchTerm && (
                 <button onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -354,6 +360,16 @@ const AdminSimpleTableModal = ({ onClose }) => {
                 </button>
               )}
             </div>
+            <button
+              onClick={() => setShowFilters(v => !v)}
+              className={`relative sm:hidden flex-shrink-0 p-2 rounded-lg border transition-colors ${showFilters ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-500'}`}
+              title="Filtres"
+            >
+              <SlidersHorizontal size={15} />
+              {filtersActive && !showFilters && (
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-500 border border-white" />
+              )}
+            </button>
             {!isSearching && (
               <div className="flex items-center gap-1 bg-white border rounded-lg px-2 py-1 flex-shrink-0">
                 <button
@@ -377,42 +393,44 @@ const AdminSimpleTableModal = ({ onClose }) => {
             )}
           </div>
 
-          {/* Ligne 2 : filtres grade + catégorie + reset */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setFilterGrade('')}
-                className={`px-2 py-1 rounded-md text-xs font-semibold transition-all ${!filterGrade ? 'bg-slate-700 text-white' : 'bg-white border text-slate-500 hover:bg-slate-100'}`}
-              >
-                Tous
-              </button>
-              {['A', 'B', 'C', 'D', 'E'].map(g => (
+          {/* Ligne 2 : filtres grade + catégorie + reset (repliable sur mobile) */}
+          {filtersVisible && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1">
                 <button
-                  key={g}
-                  onClick={() => setFilterGrade(g === filterGrade ? '' : g)}
-                  className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${filterGrade === g ? GRADE_PILL_ACTIVE[g] : `${GRADE_BADGE[g]} hover:opacity-80`}`}
+                  onClick={() => setFilterGrade('')}
+                  className={`px-2 py-1 rounded-md text-xs font-semibold transition-all ${!filterGrade ? 'bg-slate-700 text-white' : 'bg-white border text-slate-500 hover:bg-slate-100'}`}
                 >
-                  {g}
+                  Tous
                 </button>
-              ))}
-            </div>
-            <select
-              value={filterCategory}
-              onChange={e => setFilterCategory(e.target.value)}
-              className="flex-1 py-1.5 pl-2 pr-6 text-xs border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 text-slate-600"
-            >
-              <option value="">Toutes catégories</option>
-              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-            {filtersActive && (
-              <button
-                onClick={() => { setFilterGrade(''); setFilterCategory(''); }}
-                className="text-xs text-slate-400 hover:text-rose-500 underline transition-colors flex-shrink-0"
+                {['A', 'B', 'C', 'D', 'E'].map(g => (
+                  <button
+                    key={g}
+                    onClick={() => setFilterGrade(g === filterGrade ? '' : g)}
+                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs font-bold transition-all ${filterGrade === g ? GRADE_PILL_ACTIVE[g] : `${GRADE_BADGE[g]} hover:opacity-80`}`}
+                  >
+                    {g}
+                  </button>
+                ))}
+              </div>
+              <select
+                value={filterCategory}
+                onChange={e => setFilterCategory(e.target.value)}
+                className="flex-1 py-1 sm:py-1.5 pl-2 pr-6 text-xs border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 text-slate-600"
               >
-                Réinitialiser
-              </button>
-            )}
-          </div>
+                <option value="">Toutes catégories</option>
+                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+              {filtersActive && (
+                <button
+                  onClick={() => { setFilterGrade(''); setFilterCategory(''); }}
+                  className="text-xs text-slate-400 hover:text-rose-500 underline transition-colors flex-shrink-0"
+                >
+                  Réinitialiser
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* ── Table ── */}
@@ -436,11 +454,11 @@ const AdminSimpleTableModal = ({ onClose }) => {
             <table className="w-full text-sm border-collapse">
               <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10">
                 <tr>
-                  <th className="px-4 py-2.5 text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Application</th>
-                  <th className="px-3 py-2.5 text-center text-[11px] font-semibold text-slate-400 uppercase tracking-wide w-20">Grade</th>
+                  <th className="px-4 py-1.5 sm:py-2.5 text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Application</th>
+                  <th className="px-3 py-1.5 sm:py-2.5 text-center text-[11px] font-semibold text-slate-400 uppercase tracking-wide w-20">Grade</th>
                   <th className="hidden sm:table-cell px-3 py-2.5 text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Catégorie</th>
                   <th className="hidden sm:table-cell px-3 py-2.5 text-center text-[11px] font-semibold text-slate-400 uppercase tracking-wide w-24">Liens</th>
-                  <th className="px-3 py-2.5 w-20" />
+                  <th className="px-3 py-1.5 sm:py-2.5 w-20" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -451,7 +469,7 @@ const AdminSimpleTableModal = ({ onClose }) => {
                     onClick={() => openEdit(app)}
                   >
                     {/* Icon + Name */}
-                    <td className="px-4 py-2.5">
+                    <td className="px-4 py-2 sm:py-2.5">
                       <div className="flex items-center gap-3">
                         <AppIcon icon={app.icon} name={app.name} color={app.color} size="sm" />
                         <div className="min-w-0">
@@ -463,8 +481,8 @@ const AdminSimpleTableModal = ({ onClose }) => {
                       </div>
                     </td>
                     {/* Grade badge */}
-                    <td className="px-3 py-2.5 text-center">
-                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg text-sm font-bold ${GRADE_BADGE[app.grade] || 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
+                    <td className="px-3 py-2 sm:py-2.5 text-center">
+                      <span className={`inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-sm font-bold ${GRADE_BADGE[app.grade] || 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
                         {app.grade || '—'}
                       </span>
                     </td>
@@ -511,7 +529,7 @@ const AdminSimpleTableModal = ({ onClose }) => {
         </div>
 
         {/* ── Footer ── */}
-        <div className="flex items-center justify-between px-5 py-2.5 border-t bg-slate-50 flex-shrink-0 text-xs text-slate-400">
+        <div className="flex items-center justify-between px-3 py-1.5 sm:px-5 sm:py-2.5 border-t bg-slate-50 flex-shrink-0 text-xs text-slate-400">
           <span>
             {filtersActive
               ? `${filteredApps.length} / ${apps.length} apps (filtres actifs)`
