@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ScanSearch, ShieldCheck, ArrowRight, ListChecks, Globe, Lock, Eye } from 'lucide-react';
 import InstalledApps from '../native/InstalledApps';
 import { AppTile, ANIM_CSS, computeReplacementMap } from './OnboardingApps';
@@ -142,6 +142,26 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
   const [selected, setSelected] = useState(new Set());
   const [foundApps, setFoundApps] = useState([]); // sous-ensemble de `matches` révélé pendant l'animation de scan
   const [revealedCount, setRevealedCount] = useState(0);
+  const [scanHint, setScanHint] = useState(null); // message de réassurance affiché pendant l'attente du scan
+
+  // Messages de réassurance pendant le temps mort du scan (avant que les
+  // premières icônes n'apparaissent), pour éviter que l'utilisateur ne
+  // pense que l'app est figée et quitte l'onboarding.
+  useEffect(() => {
+    if (phase !== 'scanning') {
+      setScanHint(null);
+      return;
+    }
+    const t1 = setTimeout(
+      () => setScanHint("Forcément, s'il y a beaucoup d'applications, c'est un peu plus long..."),
+      2000
+    );
+    const t2 = setTimeout(() => setScanHint('Promis, c\'est bientôt fini !'), 7000);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [phase]);
 
   const toggleApp = (id) => {
     setSelected(prev => {
@@ -289,7 +309,9 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
             de tout sélectionner à la main.
           </p>
           <ScanProgressBar />
-          <p className="text-xs text-slate-400 mt-3">Analyse en cours, ça ne prend que quelques secondes...</p>
+          <p key={scanHint || 'default'} className="text-xs text-slate-400 mt-3" style={{ animation: 'onbFadeUp 0.3s ease-out' }}>
+            {scanHint || 'Analyse en cours, ça ne prend que quelques secondes...'}
+          </p>
         </div>
       </div>
     );
