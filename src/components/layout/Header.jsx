@@ -21,7 +21,7 @@ const Header = ({
           <img
             src="/assets/logo.png"
             alt="TrustiScore"
-            className="w-8"
+            className="w-11 h-11 object-contain"
           />
           <h1 className="text-sm font-black tracking-tight text-slate-900 leading-none">
             TrustiScore
