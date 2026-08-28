@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  ChevronLeft, ChevronRight, Search, X, Loader2,
+  Search, X, Loader2,
   Plus, Pencil, Trash2, Check, SlidersHorizontal, Download,
 } from 'lucide-react';
 import { CATEGORIES, ADMIN_CATEGORIES } from '../../constants/categories';
@@ -117,8 +117,6 @@ const AdminSimpleTableModal = ({ onClose }) => {
   // Table state
   const [apps, setApps] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [totalApps, setTotalApps] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -127,7 +125,6 @@ const AdminSimpleTableModal = ({ onClose }) => {
   // Sur mobile, la ligne de filtres (grade + catégorie) est repliée par défaut
   // pour laisser un maximum de place à la liste — dépliable via l'icône filtre.
   const [showFilters, setShowFilters] = useState(false);
-  const itemsPerPage = 50;
 
   // Drawer state
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -142,20 +139,22 @@ const AdminSimpleTableModal = ({ onClose }) => {
 
   // ─── Load apps ────────────────────────────────────────────────────────────
 
-  const loadApps = async (page = 1, search = '') => {
+  // Pas de pagination : à ce volume (quelques centaines d'apps), tout charger
+  // d'un coup et laisser le scroll faire le travail est plus simple et évite
+  // la double navigation scroll+pages. C'est déjà comme ça que la recherche
+  // fonctionnait (elle ignorait la pagination).
+  const loadApps = async (search = '') => {
     setIsLoading(true);
     try {
       const url = search.trim()
         ? `${API_URL}/apps?search=${encodeURIComponent(search)}`
-        : `${API_URL}/apps?limit=${itemsPerPage}&page=${page}`;
+        : `${API_URL}/apps`;
       setIsSearching(!!search.trim());
       const res = await fetch(url);
       const data = await res.json();
       if (data.success) {
         setApps(data.apps);
         setTotalApps(data.pagination?.total ?? data.apps.length);
-        setTotalPages(data.pagination?.totalPages ?? 1);
-        setCurrentPage(page);
       }
     } catch {
       toast.error('Erreur de chargement des applications');
@@ -164,10 +163,10 @@ const AdminSimpleTableModal = ({ onClose }) => {
     }
   };
 
-  useEffect(() => { loadApps(1); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { loadApps(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const t = setTimeout(() => loadApps(1, searchTerm), 300);
+    const t = setTimeout(() => loadApps(searchTerm), 300);
     return () => clearTimeout(t);
   }, [searchTerm]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -180,20 +179,10 @@ const AdminSimpleTableModal = ({ onClose }) => {
         if (drawerOpen) { closeDrawer(); return; }
         onClose();
       }
-      if (!drawerOpen) {
-        const active = document.activeElement?.tagName;
-        if (['INPUT', 'TEXTAREA', 'SELECT'].includes(active)) return;
-        if (e.key === 'ArrowLeft' && !isSearching && currentPage > 1 && !isLoading) {
-          e.preventDefault(); loadApps(currentPage - 1, searchTerm);
-        }
-        if (e.key === 'ArrowRight' && !isSearching && currentPage < totalPages && !isLoading) {
-          e.preventDefault(); loadApps(currentPage + 1, searchTerm);
-        }
-      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [drawerOpen, showDeleteConfirm, isSearching, currentPage, totalPages, isLoading, onClose, searchTerm]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [drawerOpen, showDeleteConfirm, onClose]);
 
   // ─── Drawer helpers ───────────────────────────────────────────────────────
 
@@ -294,7 +283,7 @@ const AdminSimpleTableModal = ({ onClose }) => {
       if (res.ok) {
         if (drawerMode === 'add') {
           toast.success(`« ${selectedApp.name} » ajoutée avec succès`);
-          await loadApps(currentPage, searchTerm);
+          await loadApps(searchTerm);
         } else {
           setApps(prev => prev.map(a => a.id === selectedApp.id ? { ...a, ...selectedApp } : a));
           toast.success(`« ${selectedApp.name} » mise à jour`);
@@ -403,27 +392,6 @@ const AdminSimpleTableModal = ({ onClose }) => {
                 <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-500 border border-white" />
               )}
             </button>
-            {!isSearching && (
-              <div className="flex items-center gap-1 bg-white border rounded-lg px-2 py-1 flex-shrink-0">
-                <button
-                  onClick={() => loadApps(currentPage - 1, searchTerm)}
-                  disabled={currentPage <= 1 || isLoading}
-                  className="p-1.5 rounded hover:bg-slate-100 disabled:opacity-30 transition-colors"
-                >
-                  <ChevronLeft size={15} />
-                </button>
-                <span className="text-xs font-medium text-slate-600 tabular-nums whitespace-nowrap px-1">
-                  {currentPage} / {totalPages}
-                </span>
-                <button
-                  onClick={() => loadApps(currentPage + 1, searchTerm)}
-                  disabled={currentPage >= totalPages || isLoading}
-                  className="p-1.5 rounded hover:bg-slate-100 disabled:opacity-30 transition-colors"
-                >
-                  <ChevronRight size={15} />
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Ligne 2 : filtres grade + catégorie + reset (repliable sur mobile) */}
@@ -565,13 +533,11 @@ const AdminSimpleTableModal = ({ onClose }) => {
         <div className="flex items-center justify-between px-3 py-1.5 sm:px-5 sm:py-2.5 border-t bg-slate-50 flex-shrink-0 text-xs text-slate-400">
           <span>
             {filtersActive
-              ? `${filteredApps.length} / ${apps.length} apps (filtres actifs)`
-              : `${apps.length} apps affichées · ${totalApps} total`}
+              ? `${filteredApps.length} / ${totalApps} apps (filtres actifs)`
+              : `${totalApps} apps`}
           </span>
           <span className="hidden sm:block">
             <kbd className="px-1.5 py-0.5 bg-white border rounded text-[10px]">Échap</kbd> Fermer
-            {' · '}
-            <kbd className="px-1.5 py-0.5 bg-white border rounded text-[10px]">← →</kbd> Pages
           </span>
         </div>
 
