@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   ChevronLeft, ChevronRight, Search, X, Loader2,
-  Plus, Pencil, Trash2, Check, SlidersHorizontal,
+  Plus, Pencil, Trash2, Check, SlidersHorizontal, Download,
 } from 'lucide-react';
 import { CATEGORIES, ADMIN_CATEGORIES } from '../../constants/categories';
 import { useToast } from '../../contexts/ToastContext';
@@ -136,6 +136,7 @@ const AdminSimpleTableModal = ({ onClose }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isLookingUp, setIsLookingUp] = useState(false);
 
   const drawerScrollRef = useRef(null);
 
@@ -230,6 +231,38 @@ const AdminSimpleTableModal = ({ onClose }) => {
   const updateField = (field, value) =>
     setSelectedApp(prev => ({ ...prev, [field]: value }));
 
+  // ─── Aperçu Play Store ────────────────────────────────────────────────────
+  // Récupère nom/icône/développeur tout de suite (avant l'enregistrement),
+  // pratique pour ne pas avoir à taper un nom provisoire juste pour débloquer
+  // le bouton "Créer" : coller le lien Play Store et cliquer suffit.
+
+  const lookupPlayStore = async () => {
+    const url = selectedApp?.playStoreUrl?.trim();
+    if (!url) { toast.error('Renseigne d\'abord le lien (ou le package) Play Store'); return; }
+
+    setIsLookingUp(true);
+    try {
+      const res = await adminFetch(`${API_URL}/lookup-playstore?url=${encodeURIComponent(url)}`);
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSelectedApp(prev => ({
+          ...prev,
+          name: data.name || prev.name,
+          icon: data.icon || prev.icon,
+          developer: data.developer || prev.developer,
+          playStoreUrl: data.playStoreUrl || prev.playStoreUrl,
+        }));
+        toast.success(`« ${data.name} » récupérée depuis le Play Store`);
+      } else {
+        toast.error(data.error || 'Application introuvable sur le Play Store');
+      }
+    } catch {
+      toast.error('Erreur réseau');
+    } finally {
+      setIsLookingUp(false);
+    }
+  };
+
   // ─── Save ─────────────────────────────────────────────────────────────────
 
   const handleSave = async () => {
@@ -316,10 +349,10 @@ const AdminSimpleTableModal = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 sm:p-4">
-      <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full h-[92dvh] sm:h-[96vh] flex flex-col relative overflow-hidden">
+      <div className="bg-white rounded-none sm:rounded-2xl shadow-2xl w-full h-[100dvh] sm:h-[96vh] flex flex-col relative overflow-hidden">
 
         {/* ── Header ── */}
-        <div className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-3xl sm:rounded-t-2xl flex-shrink-0">
+        <div className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-none sm:rounded-t-2xl flex-shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <h2 className="text-sm sm:text-base font-bold truncate">Administration</h2>
             <span className="text-[10px] sm:text-xs bg-white/20 px-2 py-0.5 rounded-full flex-shrink-0">
@@ -451,14 +484,14 @@ const AdminSimpleTableModal = ({ onClose }) => {
               )}
             </div>
           ) : (
-            <table className="w-full text-sm border-collapse">
+            <table className="w-full table-fixed text-sm border-collapse">
               <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10">
                 <tr>
                   <th className="px-4 py-1.5 sm:py-2.5 text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Application</th>
-                  <th className="px-3 py-1.5 sm:py-2.5 text-center text-[11px] font-semibold text-slate-400 uppercase tracking-wide w-20">Grade</th>
+                  <th className="px-2 sm:px-3 py-1.5 sm:py-2.5 text-center text-[11px] font-semibold text-slate-400 uppercase tracking-wide w-14 sm:w-20">Grade</th>
                   <th className="hidden sm:table-cell px-3 py-2.5 text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Catégorie</th>
                   <th className="hidden sm:table-cell px-3 py-2.5 text-center text-[11px] font-semibold text-slate-400 uppercase tracking-wide w-24">Liens</th>
-                  <th className="px-3 py-1.5 sm:py-2.5 w-20" />
+                  <th className="px-1 sm:px-3 py-1.5 sm:py-2.5 w-16 sm:w-20" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -469,8 +502,8 @@ const AdminSimpleTableModal = ({ onClose }) => {
                     onClick={() => openEdit(app)}
                   >
                     {/* Icon + Name */}
-                    <td className="px-4 py-2 sm:py-2.5">
-                      <div className="flex items-center gap-3">
+                    <td className="px-4 py-2 sm:py-2.5 min-w-0">
+                      <div className="flex items-center gap-3 min-w-0">
                         <AppIcon icon={app.icon} name={app.name} color={app.color} size="sm" />
                         <div className="min-w-0">
                           <p className="font-semibold text-slate-800 text-sm leading-tight truncate">{app.name}</p>
@@ -481,7 +514,7 @@ const AdminSimpleTableModal = ({ onClose }) => {
                       </div>
                     </td>
                     {/* Grade badge */}
-                    <td className="px-3 py-2 sm:py-2.5 text-center">
+                    <td className="px-2 sm:px-3 py-2 sm:py-2.5 text-center">
                       <span className={`inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-sm font-bold ${GRADE_BADGE[app.grade] || 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
                         {app.grade || '—'}
                       </span>
@@ -503,18 +536,18 @@ const AdminSimpleTableModal = ({ onClose }) => {
                       </div>
                     </td>
                     {/* Actions — toujours visibles sur mobile, hover sur desktop */}
-                    <td className="px-3 py-2.5" onClick={e => e.stopPropagation()}>
-                      <div className="flex items-center justify-end gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                    <td className="px-1 sm:px-3 py-2.5" onClick={e => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-0.5 sm:gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => openEdit(app)}
-                          className="p-2 sm:p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
                           title="Modifier"
                         >
                           <Pencil size={15} />
                         </button>
                         <button
                           onClick={() => openEdit(app, true)}
-                          className="p-2 sm:p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
                           title="Supprimer"
                         >
                           <Trash2 size={15} />
@@ -706,22 +739,44 @@ const AdminSimpleTableModal = ({ onClose }) => {
 
                 {/* ─ Liens ─ */}
                 <Section title="Liens">
+                  <Field label="Play Store">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={selectedApp.playStoreUrl || ''}
+                        onChange={e => updateField('playStoreUrl', e.target.value)}
+                        className={`${monoInputCls} flex-1`}
+                        placeholder="https://play.google.com/store/apps/details?id=… ou juste com.exemple.app"
+                      />
+                      <button
+                        type="button"
+                        onClick={lookupPlayStore}
+                        disabled={isLookingUp || !selectedApp.playStoreUrl?.trim()}
+                        className="flex-shrink-0 flex items-center gap-1.5 px-3 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                        title="Récupérer nom, icône et développeur depuis le Play Store"
+                      >
+                        {isLookingUp ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                        Récupérer
+                      </button>
+                    </div>
+                    <p className="mt-1 text-xs text-slate-400">
+                      Le nom et l'icône seront de toute façon resynchronisés depuis le Play Store à l'enregistrement — le bouton sert juste à les voir tout de suite.
+                    </p>
+                  </Field>
                   {[
-                    { key: 'playStoreUrl',  label: 'Play Store',  placeholder: 'https://play.google.com/store/apps/details?id=… ou juste com.exemple.app', hint: "Le nom et l'icône seront synchronisés automatiquement depuis le Play Store à l'enregistrement." },
                     { key: 'appleStoreUrl', label: 'App Store',   placeholder: 'https://apps.apple.com/…' },
                     { key: 'fDroidUrl',     label: 'F-Droid',     placeholder: 'https://f-droid.org/packages/…' },
                     { key: 'githubUrl',     label: 'GitHub',      placeholder: 'https://github.com/…' },
                     { key: 'website',       label: 'Site Web',    placeholder: 'https://…' },
-                  ].map(({ key, label, placeholder, hint }) => (
+                  ].map(({ key, label, placeholder }) => (
                     <Field key={key} label={label}>
                       <input
-                        type={key === 'playStoreUrl' ? 'text' : 'url'}
+                        type="url"
                         value={selectedApp[key] || ''}
                         onChange={e => updateField(key, e.target.value)}
                         className={monoInputCls}
                         placeholder={placeholder}
                       />
-                      {hint && <p className="mt-1 text-xs text-slate-400">{hint}</p>}
                     </Field>
                   ))}
                 </Section>

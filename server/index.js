@@ -19,6 +19,7 @@ import adminAuthHandler from '../api/admin-auth.js';
 import sendOtpHandler from '../api/send-otp.js';
 import verifyOtpHandler from '../api/verify-otp.js';
 import verifyAdminOtpHandler from '../api/verify-admin-otp.js';
+import lookupPlayStoreHandler from '../api/lookup-playstore.js';
 
 const app = express();
 const PORT = 3001;
@@ -36,6 +37,7 @@ app.all('/api/admin-auth', adminAuthHandler);
 app.all('/api/send-otp', sendOtpHandler);
 app.all('/api/verify-otp', verifyOtpHandler);
 app.all('/api/verify-admin-otp', verifyAdminOtpHandler);
+app.all('/api/lookup-playstore', lookupPlayStoreHandler);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
