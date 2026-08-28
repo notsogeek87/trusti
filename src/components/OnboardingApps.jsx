@@ -232,29 +232,34 @@ const OnboardingApps = ({ onComplete, onSignUp }) => {
 
   const progress = step < 0 ? 0 : Math.round(((step + 1) / STEPS.length) * 100);
 
-  // Repère, parmi les apps de l'étape courante, celles déjà remplacées par
-  // une alternative également proposée ici (ex: Facebook + Mastodon).
-  // Calculé avant les `return` conditionnels ci-dessous pour respecter les
-  // règles des Hooks (toujours appelés dans le même ordre).
-  const replacementMap = useMemo(() => computeReplacementMap(stepApps), [stepApps]);
-  const alternativeIds = useMemo(
-    () => new Set([...replacementMap.values()].map(a => String(a.id))),
-    [replacementMap]
-  );
-
-  // Données complètes (avec grade) des apps sélectionnées, pour le
-  // récapitulatif final — reconstituées à partir de tout ce qui a été
-  // chargé en cache pendant les étapes (une app peut avoir été sélectionnée
-  // à une étape puis affichée dans une autre si elle appartient à plusieurs
-  // catégories).
+  // Données complètes (avec grade) des apps déjà sélectionnées par
+  // l'utilisateur — reconstituées à partir de tout ce qui a été chargé en
+  // cache pendant les étapes (une app peut avoir été sélectionnée à une
+  // étape puis affichée dans une autre si elle appartient à plusieurs
+  // catégories). Contrairement à la version native (qui a un vrai scan des
+  // apps installées), ici il n'y a pas de scan : seule une app que
+  // l'utilisateur a lui-même cochée peut être considérée comme "déjà
+  // utilisée".
   const selectedAppsData = useMemo(() => {
-    if (step !== SUMMARY_STEP) return [];
     const loaded = new Map();
     Object.values(cache.current).forEach(list => {
       list.forEach(app => { if (!loaded.has(app.id)) loaded.set(app.id, app); });
     });
     return [...selected].map(id => loaded.get(id)).filter(Boolean);
-  }, [step, selected]);
+  }, [selected, stepApps]);
+
+  // Repère, parmi les apps déjà sélectionnées par l'utilisateur, celles qui
+  // remplacent une autre app également sélectionnée (ex: Facebook + Mastodon
+  // cochées toutes les deux) — pour ne signaler "Déjà migré" que sur des
+  // apps réellement confirmées par l'utilisateur, jamais sur le simple
+  // catalogue de la catégorie. Calculé avant les `return` conditionnels
+  // ci-dessous pour respecter les règles des Hooks (toujours appelés dans
+  // le même ordre).
+  const replacementMap = useMemo(() => computeReplacementMap(selectedAppsData), [selectedAppsData]);
+  const alternativeIds = useMemo(
+    () => new Set([...replacementMap.values()].map(a => String(a.id))),
+    [replacementMap]
+  );
 
   // ── INTRO ─────────────────────────────────────────────────────────────
   if (step === -1) {
