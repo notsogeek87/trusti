@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, CheckCircle, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink } from 'lucide-react';
+import { ChevronLeft, CheckCircle, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink, Trash2 } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { GRADE_INFO } from '../../constants/grades';
 import { useIsMobile } from '../../contexts/ViewModeContext';
 import { API_URL } from '../../utils/apiConfig';
+import { isNativeAndroid } from '../../utils/platform';
+import { extractPackageId } from '../../utils/androidPackage';
+import InstalledApps from '../../native/InstalledApps';
 
 const ANIM_STYLES = `
   @keyframes detailSlideUp {
@@ -40,6 +43,36 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
   // State pour stocker les apps chargées dynamiquement
   const [loadedApps, setLoadedApps] = useState([]);
   const [isLoadingRelations, setIsLoadingRelations] = useState(false);
+  // Détection app installée sur l'appareil (Android natif uniquement)
+  const [isInstalledOnDevice, setIsInstalledOnDevice] = useState(false);
+  const packageName = extractPackageId(app.playStoreUrl);
+
+  // Vérifie si cette app précise fait partie des apps détectées sur le téléphone,
+  // pour proposer sa désinstallation directement depuis le détail.
+  useEffect(() => {
+    if (!isNativeAndroid || !packageName) {
+      setIsInstalledOnDevice(false);
+      return;
+    }
+    let cancelled = false;
+    InstalledApps.getInstalledPackages()
+      .then(({ packages }) => {
+        if (!cancelled) setIsInstalledOnDevice((packages || []).includes(packageName));
+      })
+      .catch(() => {
+        if (!cancelled) setIsInstalledOnDevice(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [packageName]);
+
+  const handleUninstall = () => {
+    if (!packageName) return;
+    InstalledApps.uninstallPackage({ packageName }).catch((error) => {
+      console.error('Désinstallation impossible:', error);
+    });
+  };
 
   // Fusionner allApps avec les apps chargées dynamiquement
   const availableApps = [...allApps, ...loadedApps];
@@ -246,6 +279,24 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
             )}
             <ScoreIndicator grade={app.grade} size="large" />
           </div>
+
+          {/* Installée sur cet appareil */}
+          {isInstalledOnDevice && (
+            <div className="bg-red-50 rounded-2xl p-4 border border-red-200 mb-4">
+              <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 mb-2 flex items-center gap-2">
+                <Trash2 size={16} className="text-red-600" /> Installée sur cet appareil
+              </h3>
+              <p className="text-xs text-slate-500 mb-3 leading-relaxed">
+                Trusti a détecté cette application sur votre téléphone. Vous pouvez la désinstaller directement.
+              </p>
+              <button
+                onClick={handleUninstall}
+                className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition-all active:scale-[0.98]"
+              >
+                <Trash2 size={14} /> Désinstaller
+              </button>
+            </div>
+          )}
 
           {/* Télécharger */}
           {(app.playStoreUrl || app.appleStoreUrl || app.fDroidUrl || app.website) && (

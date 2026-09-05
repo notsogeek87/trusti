@@ -1,6 +1,8 @@
 package com.trusti.app;
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
@@ -37,5 +39,25 @@ public class InstalledAppsPlugin extends Plugin {
         JSObject result = new JSObject();
         result.put("packages", installed);
         call.resolve(result);
+    }
+
+    /**
+     * Ouvre la boîte de dialogue système de désinstallation pour le paquet donné
+     * (Intent.ACTION_DELETE). Ne désinstalle rien silencieusement : l'utilisateur
+     * doit confirmer dans l'UI native Android, comme pour une désinstallation
+     * classique depuis le launcher.
+     */
+    @PluginMethod
+    public void uninstallPackage(PluginCall call) {
+        String packageName = call.getString("packageName");
+        if (packageName == null || packageName.isEmpty()) {
+            call.reject("packageName manquant");
+            return;
+        }
+
+        Intent intent = new Intent(Intent.ACTION_DELETE, Uri.parse("package:" + packageName));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getContext().startActivity(intent);
+        call.resolve();
     }
 }

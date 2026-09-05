@@ -4,12 +4,7 @@ import InstalledApps from '../native/InstalledApps';
 import { AppTile, ANIM_CSS, computeReplacementMap } from './OnboardingApps';
 import OnboardingSummary from './OnboardingSummary';
 import { API_URL } from '../utils/apiConfig';
-
-function extractPackageId(playStoreUrl) {
-  if (!playStoreUrl) return null;
-  const match = playStoreUrl.match(/id=([a-zA-Z0-9._]+)/);
-  return match ? match[1] : null;
-}
+import { extractPackageId } from '../utils/androidPackage';
 
 const rand = (min, max) => Math.random() * (max - min) + min;
 
