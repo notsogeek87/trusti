@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,6 +7,86 @@
 html, body {
   margin: 0;
   padding: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * Style graphique "moins de 15 ans"
+ * Activé via la classe `theme-kids` posée sur <html> (voir App.jsx) quand
+ * l'utilisateur a répondu "moins de 15 ans" à la demande d'âge du premier
+ * démarrage. Recolore la palette indigo/violet/bleu/rose utilisée dans toute
+ * l'app (voir usages de bg-/text-/border-/from-/to-/via-indigo|purple|blue|pink)
+ * vers une palette orange plus ludique, et applique une typo arrondie.
+ * ────────────────────────────────────────────────────────────────────── */
+.theme-kids {
+  --kid-50: #fff7e6;
+  --kid-100: #ffebc2;
+  --kid-200: #ffd98a;
+  --kid-300: #ffc158;
+  --kid-400: #ffa726;
+  --kid-500: #ff8a00;
+  --kid-600: #f97316;
+  --kid-700: #e35d00;
+  --kid-800: #b84a00;
+  --kid-900: #8a3800;
+
+  font-family: 'Baloo 2', ui-rounded, 'Nunito', sans-serif;
+}
+
+.theme-kids h1,
+.theme-kids h2,
+.theme-kids h3,
+.theme-kids .font-black,
+.theme-kids .font-bold,
+.theme-kids .font-semibold {
+  font-family: 'Baloo 2', ui-rounded, 'Nunito', sans-serif;
+}
+
+.theme-kids .rounded-full,
+.theme-kids .rounded-xl,
+.theme-kids .rounded-2xl {
+  border-radius: 1.4rem;
+}
+
+/* Recoloration de la palette indigo/violet/bleu/rose -> orange ludique */
+.theme-kids .bg-indigo-50, .theme-kids .bg-purple-50, .theme-kids .bg-blue-50, .theme-kids .bg-pink-50 { background-color: var(--kid-50) !important; }
+.theme-kids .bg-indigo-100, .theme-kids .bg-purple-100, .theme-kids .bg-blue-100, .theme-kids .bg-pink-100 { background-color: var(--kid-100) !important; }
+.theme-kids .bg-indigo-200, .theme-kids .bg-purple-200, .theme-kids .bg-blue-200, .theme-kids .bg-pink-200 { background-color: var(--kid-200) !important; }
+.theme-kids .bg-indigo-300, .theme-kids .bg-purple-300, .theme-kids .bg-blue-300, .theme-kids .bg-pink-300 { background-color: var(--kid-300) !important; }
+.theme-kids .bg-indigo-400, .theme-kids .bg-purple-400, .theme-kids .bg-blue-400, .theme-kids .bg-pink-400 { background-color: var(--kid-400) !important; }
+.theme-kids .bg-indigo-500, .theme-kids .bg-purple-500, .theme-kids .bg-blue-500, .theme-kids .bg-pink-500 { background-color: var(--kid-500) !important; }
+.theme-kids .bg-indigo-600, .theme-kids .bg-purple-600, .theme-kids .bg-blue-600, .theme-kids .bg-pink-600 { background-color: var(--kid-600) !important; }
+.theme-kids .bg-indigo-700, .theme-kids .bg-purple-700, .theme-kids .bg-blue-700, .theme-kids .bg-pink-700 { background-color: var(--kid-700) !important; }
+.theme-kids .bg-indigo-800, .theme-kids .bg-purple-800, .theme-kids .bg-blue-800, .theme-kids .bg-pink-800 { background-color: var(--kid-800) !important; }
+.theme-kids .bg-indigo-900, .theme-kids .bg-purple-900, .theme-kids .bg-blue-900, .theme-kids .bg-pink-900 { background-color: var(--kid-900) !important; }
+
+.theme-kids .text-indigo-300, .theme-kids .text-purple-300, .theme-kids .text-blue-300, .theme-kids .text-pink-300 { color: var(--kid-300) !important; }
+.theme-kids .text-indigo-400, .theme-kids .text-purple-400, .theme-kids .text-blue-400, .theme-kids .text-pink-400 { color: var(--kid-400) !important; }
+.theme-kids .text-indigo-500, .theme-kids .text-purple-500, .theme-kids .text-blue-500, .theme-kids .text-pink-500 { color: var(--kid-500) !important; }
+.theme-kids .text-indigo-600, .theme-kids .text-purple-600, .theme-kids .text-blue-600, .theme-kids .text-pink-600 { color: var(--kid-600) !important; }
+.theme-kids .text-indigo-700, .theme-kids .text-purple-700, .theme-kids .text-blue-700, .theme-kids .text-pink-700 { color: var(--kid-700) !important; }
+.theme-kids .text-indigo-800, .theme-kids .text-purple-800, .theme-kids .text-blue-800, .theme-kids .text-pink-800 { color: var(--kid-800) !important; }
+.theme-kids .text-indigo-900, .theme-kids .text-purple-900, .theme-kids .text-blue-900, .theme-kids .text-pink-900 { color: var(--kid-900) !important; }
+
+.theme-kids .border-indigo-100, .theme-kids .border-purple-100, .theme-kids .border-blue-100, .theme-kids .border-pink-100 { border-color: var(--kid-100) !important; }
+.theme-kids .border-indigo-200, .theme-kids .border-purple-200, .theme-kids .border-blue-200, .theme-kids .border-pink-200 { border-color: var(--kid-200) !important; }
+.theme-kids .border-indigo-300, .theme-kids .border-purple-300, .theme-kids .border-blue-300, .theme-kids .border-pink-300 { border-color: var(--kid-300) !important; }
+.theme-kids .border-indigo-400, .theme-kids .border-purple-400, .theme-kids .border-blue-400, .theme-kids .border-pink-400 { border-color: var(--kid-400) !important; }
+.theme-kids .border-indigo-500, .theme-kids .border-purple-500, .theme-kids .border-blue-500, .theme-kids .border-pink-500 { border-color: var(--kid-500) !important; }
+
+.theme-kids .from-indigo-50, .theme-kids .from-purple-50, .theme-kids .from-blue-50, .theme-kids .from-pink-50 { --tw-gradient-from: var(--kid-50) var(--tw-gradient-from-position) !important; }
+.theme-kids .from-indigo-500, .theme-kids .from-purple-500, .theme-kids .from-blue-500, .theme-kids .from-pink-500 { --tw-gradient-from: var(--kid-500) var(--tw-gradient-from-position) !important; }
+.theme-kids .from-indigo-600, .theme-kids .from-purple-600, .theme-kids .from-blue-600, .theme-kids .from-pink-600 { --tw-gradient-from: var(--kid-600) var(--tw-gradient-from-position) !important; }
+.theme-kids .from-indigo-700, .theme-kids .from-purple-700, .theme-kids .from-blue-700, .theme-kids .from-pink-700 { --tw-gradient-from: var(--kid-700) var(--tw-gradient-from-position) !important; }
+
+.theme-kids .via-indigo-600, .theme-kids .via-purple-600, .theme-kids .via-blue-600, .theme-kids .via-pink-600 { --tw-gradient-via: var(--kid-600) var(--tw-gradient-via-position) !important; }
+
+.theme-kids .to-indigo-500, .theme-kids .to-purple-500, .theme-kids .to-blue-500, .theme-kids .to-pink-500 { --tw-gradient-to: var(--kid-500) var(--tw-gradient-to-position) !important; }
+.theme-kids .to-indigo-600, .theme-kids .to-purple-600, .theme-kids .to-blue-600, .theme-kids .to-pink-600 { --tw-gradient-to: var(--kid-600) var(--tw-gradient-to-position) !important; }
+.theme-kids .to-indigo-700, .theme-kids .to-purple-700, .theme-kids .to-blue-700, .theme-kids .to-pink-700 { --tw-gradient-to: var(--kid-700) var(--tw-gradient-to-position) !important; }
+.theme-kids .to-indigo-50, .theme-kids .to-purple-50, .theme-kids .to-blue-50, .theme-kids .to-pink-50 { --tw-gradient-to: var(--kid-50) var(--tw-gradient-to-position) !important; }
+
+.theme-kids .bg-slate-50 {
+  background: linear-gradient(180deg, var(--kid-50), #fffdf7) !important;
 }
 
 /* Styles personnalisés pour l'application */

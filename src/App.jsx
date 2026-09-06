@@ -7,9 +7,11 @@ import { TABS } from './constants/tabs';
 import { CATEGORIES } from './constants/categories';
 import { Sparkles, Smartphone, Monitor, Share2, RefreshCw } from 'lucide-react';
 import { ViewModeContext } from './contexts/ViewModeContext';
+import { AgeModeContext } from './contexts/AgeModeContext';
 import { parseShareParams, clearShareParams, hasShareParams } from './utils/shareUtils';
 import { getAdminTokenEmail, clearAdminToken, setAdminToken } from './utils/adminAuth';
 import { hasCompletedOnboarding, markOnboardingComplete } from './utils/onboardingStorage';
+import { AGE_MODE, getAgeMode, hasSetAgeMode, setAgeMode } from './utils/ageMode';
 
 // Composants définis hors du render pour éviter le remontage à chaque re-render
 const FloatingToggle = ({ isSmallViewport, forceMobile, onToggle }) => {
@@ -69,6 +71,7 @@ import LoginModal from './components/modals/LoginModal';
 import AdminAppsModal from './components/modals/AdminAppsModal';
 import PinModal from './components/modals/PinModal';
 import WelcomeModal from './components/modals/WelcomeModal';
+import AgePromptModal from './components/modals/AgePromptModal';
 
 const useIsSmallViewport = () => {
   const [isSmall, setIsSmall] = useState(() => window.innerWidth < 768);
@@ -138,6 +141,24 @@ const App = () => {
   const handleOpenLandingPage = () => {
     setShowLandingPage(true);
   };
+
+  // Demande d'âge (+ ou - 15 ans) : posée une seule fois, avant tout le
+  // reste (même la landing page/l'onboarding), pour déterminer le style
+  // graphique à appliquer. Sauvegardée par appareil, comme l'onboarding.
+  const [ageMode, setAgeModeState] = useState(() => getAgeMode() || AGE_MODE.ADULT);
+  const [showAgePrompt, setShowAgePrompt] = useState(() => !hasSetAgeMode());
+
+  const handleAgeSelect = (mode) => {
+    setAgeMode(mode);
+    setAgeModeState(mode);
+    setShowAgePrompt(false);
+  };
+
+  // Applique le style graphique "moins de 15 ans" globalement (y compris aux
+  // modales/écrans qui ne sont pas dans l'arbre React sous ce composant).
+  useEffect(() => {
+    document.documentElement.classList.toggle('theme-kids', ageMode === AGE_MODE.KID);
+  }, [ageMode]);
 
   // Est-on arrivé via un lien de partage ? (évalué une seule fois au montage,
   // avant que l'URL ne soit nettoyée). Dans ce cas on court-circuite le
@@ -522,6 +543,11 @@ const App = () => {
 
   // Bouton flottant uniquement sur vrai écran large (pas sur mobile réel)
 
+  // Demande d'âge : priorité sur tout le reste, y compris la landing page.
+  if (showAgePrompt) {
+    return <AgePromptModal onSelect={handleAgeSelect} />;
+  }
+
   // Afficher la landing page en premier si c'est la première visite
   if (showLandingPage) {
     return <LandingPage onClose={handleCloseLandingPage} />;
@@ -559,6 +585,7 @@ const App = () => {
   // Affichage du détail d'une application
   if (selectedApp) {
     return (
+      <AgeModeContext.Provider value={ageMode}>
       <ViewModeContext.Provider value={isMobile}>
         <FloatingToggle isSmallViewport={isSmallViewport} forceMobile={forceMobile} onToggle={toggleForceMobile} />
         <MobileFrame forceMobile={forceMobile}>
@@ -573,11 +600,13 @@ const App = () => {
           />
         </MobileFrame>
       </ViewModeContext.Provider>
+      </AgeModeContext.Provider>
     );
   }
 
   // Vue principale
   return (
+    <AgeModeContext.Provider value={ageMode}>
     <ViewModeContext.Provider value={isMobile}>
     <FloatingToggle isSmallViewport={isSmallViewport} forceMobile={forceMobile} onToggle={toggleForceMobile} />
     <MobileFrame forceMobile={forceMobile}>
@@ -594,7 +623,9 @@ const App = () => {
             TrustiScore
           </p>
           <p className="text-sm text-slate-400 font-medium mb-10" style={{ animation: 'splashFadeIn 0.5s 0.2s ease-out both', opacity: 0 }}>
-            Votre guide pour maîtriser vos apps et vos données
+            {ageMode === AGE_MODE.KID
+              ? 'Ton copain pour bien choisir tes applis ! 🚀'
+              : 'Votre guide pour maîtriser vos apps et vos données'}
           </p>
 
           <div className="flex items-center gap-2" style={{ animation: 'splashFadeIn 0.5s 0.35s ease-out both', opacity: 0 }}>
@@ -910,6 +941,7 @@ const App = () => {
     </div>
     </MobileFrame>
     </ViewModeContext.Provider>
+    </AgeModeContext.Provider>
   );
 };
 
