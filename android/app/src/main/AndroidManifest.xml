@@ -34,6 +34,14 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <!--
+      Requise depuis Android 11 (API 30) pour lancer la boîte de dialogue système
+      de désinstallation d'un paquet qui n'appartient pas à Trusti (ACTION_DELETE /
+      ACTION_UNINSTALL_PACKAGE ciblant un autre package). Permission "normale",
+      accordée automatiquement à l'installation, aucune demande à l'utilisateur.
+    -->
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+
+    <!--
       Visibilité des paquets pour le scan d'apps installées (onboarding natif Android).
       On liste explicitement chaque app connue du catalogue Trusti plutôt que de demander
       la permission QUERY_ALL_PACKAGES (très restreinte par Google Play depuis 2021 et
