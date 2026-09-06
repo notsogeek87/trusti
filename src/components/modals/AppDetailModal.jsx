@@ -71,6 +71,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
     if (!packageName) return;
     InstalledApps.uninstallPackage({ packageName }).catch((error) => {
       console.error('Désinstallation impossible:', error);
+      window.alert("Impossible d'ouvrir la désinstallation. Réessayez depuis les paramètres du téléphone.");
     });
   };
 

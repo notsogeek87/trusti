@@ -55,9 +55,13 @@ public class InstalledAppsPlugin extends Plugin {
             return;
         }
 
-        Intent intent = new Intent(Intent.ACTION_DELETE, Uri.parse("package:" + packageName));
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        getContext().startActivity(intent);
-        call.resolve();
+        try {
+            Intent intent = new Intent(Intent.ACTION_DELETE, Uri.parse("package:" + packageName));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(intent);
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("Désinstallation impossible : " + e.getMessage(), e);
+        }
     }
 }
