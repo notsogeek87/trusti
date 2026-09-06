@@ -1,11 +1,16 @@
 import React from 'react';
 import { X, ShieldCheck, BookOpen } from 'lucide-react';
-import { GRADE_INFO } from '../constants/grades';
+import { GRADE_INFO, GRADE_INFO_KID } from '../constants/grades';
+import { useAgeMode } from '../contexts/AgeModeContext';
+import { AGE_MODE } from '../utils/ageMode';
 
 /**
  * Panneau explicatif du TrustiScore
  */
 const ExplainerPanel = ({ onClose }) => {
+  const isKid = useAgeMode() === AGE_MODE.KID;
+  const gradeInfo = isKid ? GRADE_INFO_KID : GRADE_INFO;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-in fade-in duration-200 p-4">
       <div className="bg-slate-900 text-white rounded-[2.5rem] relative shadow-2xl animate-in slide-in-from-bottom duration-300 border border-slate-800 max-w-md w-full max-h-[90vh] overflow-hidden">
@@ -23,13 +28,22 @@ const ExplainerPanel = ({ onClose }) => {
             <h4 className="font-black text-xs uppercase tracking-widest">Le TrustiScore</h4>
           </div>
           <h3 className="text-xl font-black mb-3 text-white leading-tight">
-            Comprendre votre santé numérique
+            {isKid ? 'Une note pour protéger tes secrets' : 'Comprendre votre santé numérique'}
           </h3>
-          <p className="text-[13px] leading-relaxed text-slate-400 font-medium">
-            Le TrustiScore est un indice qui évalue la confiance que vous pouvez accorder à vos outils numériques. 
-            Il mesure la protection de votre <span className="text-white font-bold text-[12px]">vie privée</span> et 
-            le respect de la <span className="text-white font-bold text-[12px]">souveraineté</span> de vos données.
-          </p>
+          {isKid ? (
+            <p className="text-[13px] leading-relaxed text-slate-400 font-medium">
+              Le TrustiScore, c'est une note de <span className="text-white font-bold text-[12px]">A à E</span>,
+              un peu comme à l'école, qui te dit si une appli respecte tes
+              <span className="text-white font-bold text-[12px]"> informations personnelles</span> (photos,
+              messages, position...) ou si elle les partage sans te le dire.
+            </p>
+          ) : (
+            <p className="text-[13px] leading-relaxed text-slate-400 font-medium">
+              Le TrustiScore est un indice qui évalue la confiance que vous pouvez accorder à vos outils numériques.
+              Il mesure la protection de votre <span className="text-white font-bold text-[12px]">vie privée</span> et
+              le respect de la <span className="text-white font-bold text-[12px]">souveraineté</span> de vos données.
+            </p>
+          )}
         </div>
 
         <h4 className="font-black text-[11px] uppercase tracking-widest mb-5 text-slate-500 flex items-center gap-2">
@@ -37,9 +51,9 @@ const ExplainerPanel = ({ onClose }) => {
           Échelle des notes
           <div className="h-px bg-slate-800 flex-grow"></div>
         </h4>
-        
+
         <div className="space-y-5">
-          {GRADE_INFO.map(({ grade, title, description, bgColor, shadowColor, textColor }) => (
+          {gradeInfo.map(({ grade, title, description, bgColor, shadowColor, textColor }) => (
             <div key={grade} className="flex gap-4 items-start">
               <div className={`${bgColor} w-9 h-9 rounded-xl shrink-0 flex items-center justify-center font-black text-sm shadow-lg ${shadowColor} ${textColor || ''}`}>
                 {grade}
@@ -60,12 +74,14 @@ const ExplainerPanel = ({ onClose }) => {
         >
           <div className="flex items-center justify-center gap-2">
             <BookOpen size={18} className="group-hover:rotate-6 transition-transform" />
-            <span className="text-sm">Documentation complète</span>
+            <span className="text-sm">{isKid ? 'Pour les curieux : tout expliquer en détail' : 'Documentation complète'}</span>
           </div>
         </a>
 
         <div className="mt-8 pt-5 border-t border-slate-800 text-[11px] italic text-slate-500 text-center">
-          Basé sur 12 critères (RGPD, Cloud Act, Open Source, Localisation).
+          {isKid
+            ? 'On a vérifié plein de choses pour toi : où sont rangées tes données, si l\'appli les vend, et si elle est fabriquée dans le respect de ta vie privée. 🕵️'
+            : 'Basé sur 12 critères (RGPD, Cloud Act, Open Source, Localisation).'}
         </div>
         </div>
       </div>
