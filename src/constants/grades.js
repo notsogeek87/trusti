@@ -20,6 +20,15 @@ export const PHONE_GRADE_LABEL = {
   E: 'Ton téléphone présente un risque critique',
 };
 
+// Version -15 ans du libellé ci-dessus : même info, mots simples + émoji.
+export const PHONE_GRADE_LABEL_KID = {
+  A: 'Bravo, ton téléphone garde bien tes secrets ! 🛡️',
+  B: 'Ton téléphone est plutôt bien protégé 👍',
+  C: 'Certaines de tes applis sont un peu bavardes 🗣️',
+  D: 'Attention, plusieurs applis en savent trop sur toi 👀',
+  E: 'Danger : ton téléphone a besoin d\'un grand ménage 🚨',
+};
+
 export const GRADE_INFO = [
   {
     grade: 'A',
@@ -55,6 +64,49 @@ export const GRADE_INFO = [
     grade: 'E',
     title: 'Critique',
     description: 'Opacité totale, transfert hors RGPD ou failles majeures.',
+    bgColor: 'bg-[#c1272d]',
+    shadowColor: 'shadow-rose-900/20'
+  }
+];
+
+// Version -15 ans de GRADE_INFO : mêmes couleurs et la même échelle A à E,
+// mais des explications en mots simples et des images concrètes plutôt que
+// du vocabulaire juridique (RGPD, Cloud Act, profilage...).
+export const GRADE_INFO_KID = [
+  {
+    grade: 'A',
+    title: 'Un journal secret bien fermé 🔒',
+    description: 'Elle garde tes infos pour elle, ne les vend à personne et est fabriquée près de chez toi.',
+    bgColor: 'bg-[#006837]',
+    shadowColor: 'shadow-emerald-900/20'
+  },
+  {
+    grade: 'B',
+    title: 'Protégée, mais loin de chez toi 🌍',
+    description: 'Tes données sont bien verrouillées, mais elles voyagent jusqu\'aux États-Unis où d\'autres lois s\'appliquent.',
+    bgColor: 'bg-[#8dc63f]',
+    shadowColor: 'shadow-lime-900/20'
+  },
+  {
+    grade: 'C',
+    title: 'Un peu bavarde 🗣️',
+    description: 'Elle est utile, mais elle regarde ce que tu fais pour te proposer des publicités.',
+    bgColor: 'bg-[#fbb03b]',
+    shadowColor: 'shadow-amber-900/20',
+    textColor: 'text-slate-900'
+  },
+  {
+    grade: 'D',
+    title: 'Un peu trop curieuse 👀',
+    description: 'Elle collecte beaucoup d\'informations sur toi pour deviner tes habitudes et te suivre partout.',
+    bgColor: 'bg-[#f7931e]',
+    shadowColor: 'shadow-orange-900/20',
+    textColor: 'text-slate-900'
+  },
+  {
+    grade: 'E',
+    title: 'Attention, danger ! 🚨',
+    description: 'Personne ne sait vraiment ce qu\'elle fait de tes données, ou elle a de grosses failles de sécurité.',
     bgColor: 'bg-[#c1272d]',
     shadowColor: 'shadow-rose-900/20'
   }

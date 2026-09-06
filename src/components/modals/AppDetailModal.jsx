@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, CheckCircle, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink, Trash2 } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
-import { GRADE_INFO } from '../../constants/grades';
+import { GRADE_INFO, GRADE_INFO_KID } from '../../constants/grades';
 import { useIsMobile } from '../../contexts/ViewModeContext';
+import { useAgeMode } from '../../contexts/AgeModeContext';
+import { AGE_MODE } from '../../utils/ageMode';
 import { API_URL } from '../../utils/apiConfig';
 import { isNativeAndroid } from '../../utils/platform';
 import { extractPackageId } from '../../utils/androidPackage';
@@ -188,6 +190,8 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
   };
 
   const isMobile = useIsMobile();
+  const isKid = useAgeMode() === AGE_MODE.KID;
+  const gradeInfo = isKid ? GRADE_INFO_KID : GRADE_INFO;
 
   const handleClose = () => {
     setIsExiting(true);
@@ -352,7 +356,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
 
           {/* Pourquoi cette note ? */}
           {(() => {
-            const info = GRADE_INFO.find(g => g.grade === app.grade);
+            const info = gradeInfo.find(g => g.grade === app.grade);
             return (
               <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm mb-4">
                 <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 mb-3 flex items-center gap-2">
@@ -374,7 +378,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                   className="inline-flex items-center gap-1.5 mt-2 text-xs text-indigo-600 hover:text-indigo-800 font-semibold transition-colors"
                 >
                   <ExternalLink size={12} />
-                  En savoir plus sur notre méthodologie
+                  {isKid ? 'Pour les curieux : la méthode complète' : 'En savoir plus sur notre méthodologie'}
                 </a>
                 {app.updatedAt && (
                   <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-400">

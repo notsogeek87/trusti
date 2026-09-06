@@ -550,7 +550,11 @@ const App = () => {
 
   // Afficher la landing page en premier si c'est la première visite
   if (showLandingPage) {
-    return <LandingPage onClose={handleCloseLandingPage} />;
+    return (
+      <AgeModeContext.Provider value={ageMode}>
+        <LandingPage onClose={handleCloseLandingPage} />
+      </AgeModeContext.Provider>
+    );
   }
 
   // Afficher la page d'onboarding de sélection des apps
@@ -558,14 +562,20 @@ const App = () => {
     const onSignUp = currentUser ? undefined : () => setShowLoginModal(true);
     if (isNativeAndroid && !forceManualOnboarding) {
       return (
-        <OnboardingAppsNative
-          onComplete={handleOnboardingComplete}
-          onSignUp={onSignUp}
-          onManualSelection={() => setForceManualOnboarding(true)}
-        />
+        <AgeModeContext.Provider value={ageMode}>
+          <OnboardingAppsNative
+            onComplete={handleOnboardingComplete}
+            onSignUp={onSignUp}
+            onManualSelection={() => setForceManualOnboarding(true)}
+          />
+        </AgeModeContext.Provider>
       );
     }
-    return <OnboardingApps onComplete={handleOnboardingComplete} onSignUp={onSignUp} />;
+    return (
+      <AgeModeContext.Provider value={ageMode}>
+        <OnboardingApps onComplete={handleOnboardingComplete} onSignUp={onSignUp} />
+      </AgeModeContext.Provider>
+    );
   }
 
   // Re-scan manuel (déclenché depuis "Mes Apps") : même écran que l'onboarding
@@ -573,13 +583,19 @@ const App = () => {
   if (showRescan) {
     if (isNativeAndroid && !forceManualRescan) {
       return (
-        <OnboardingAppsNative
-          onComplete={handleRescanComplete}
-          onManualSelection={() => setForceManualRescan(true)}
-        />
+        <AgeModeContext.Provider value={ageMode}>
+          <OnboardingAppsNative
+            onComplete={handleRescanComplete}
+            onManualSelection={() => setForceManualRescan(true)}
+          />
+        </AgeModeContext.Provider>
       );
     }
-    return <OnboardingApps onComplete={handleRescanComplete} />;
+    return (
+      <AgeModeContext.Provider value={ageMode}>
+        <OnboardingApps onComplete={handleRescanComplete} />
+      </AgeModeContext.Provider>
+    );
   }
 
   // Affichage du détail d'une application
