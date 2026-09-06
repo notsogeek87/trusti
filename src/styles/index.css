@@ -13,21 +13,53 @@ html, body {
  * Style graphique "moins de 15 ans"
  * Activé via la classe `theme-kids` posée sur <html> (voir App.jsx) quand
  * l'utilisateur a répondu "moins de 15 ans" à la demande d'âge du premier
- * démarrage. Recolore la palette indigo/violet/bleu/rose utilisée dans toute
- * l'app (voir usages de bg-/text-/border-/from-/to-/via-indigo|purple|blue|pink)
- * vers une palette orange plus ludique, et applique une typo arrondie.
+ * démarrage. Recolore, famille par famille, la palette indigo/violet/bleu/
+ * rose utilisée dans toute l'app (bg-/text-/border-/from-/to-/via-) vers un
+ * camaïeu corail/turquoise/ciel/candy plus doux — les dégradés à deux tons
+ * (ex. from-indigo to-purple) restent des dégradés à deux tons, juste dans
+ * une palette plus enfantine — et applique une typo arrondie.
  * ────────────────────────────────────────────────────────────────────── */
 .theme-kids {
-  --kid-50: #fff7e6;
-  --kid-100: #ffebc2;
-  --kid-200: #ffd98a;
-  --kid-300: #ffc158;
-  --kid-400: #ffa726;
-  --kid-500: #ff8a00;
-  --kid-600: #f97316;
-  --kid-700: #e35d00;
-  --kid-800: #b84a00;
-  --kid-900: #8a3800;
+  --kid-coral-50: #fff1ea;
+  --kid-coral-100: #ffdcc7;
+  --kid-coral-200: #ffbf95;
+  --kid-coral-300: #ff9d63;
+  --kid-coral-400: #ff7f3f;
+  --kid-coral-500: #ff6b35;
+  --kid-coral-600: #f2531c;
+  --kid-coral-700: #d43f0f;
+  --kid-coral-800: #a8330d;
+  --kid-coral-900: #7a260a;
+  --kid-teal-50: #e6fbf8;
+  --kid-teal-100: #c1f3ec;
+  --kid-teal-200: #8ee6da;
+  --kid-teal-300: #5bd6c5;
+  --kid-teal-400: #2ec4ae;
+  --kid-teal-500: #14b8a0;
+  --kid-teal-600: #0e9c88;
+  --kid-teal-700: #0b7c6c;
+  --kid-teal-800: #096255;
+  --kid-teal-900: #074940;
+  --kid-sky-50: #eaf6ff;
+  --kid-sky-100: #cdeaff;
+  --kid-sky-200: #9dd6ff;
+  --kid-sky-300: #6cc0ff;
+  --kid-sky-400: #45aaff;
+  --kid-sky-500: #29b6f6;
+  --kid-sky-600: #1aa3e0;
+  --kid-sky-700: #1288bd;
+  --kid-sky-800: #0e6d95;
+  --kid-sky-900: #0a5170;
+  --kid-candy-50: #fff0f6;
+  --kid-candy-100: #ffd6e8;
+  --kid-candy-200: #ffadd1;
+  --kid-candy-300: #ff85ba;
+  --kid-candy-400: #ff5fa4;
+  --kid-candy-500: #ff3d8f;
+  --kid-candy-600: #e62679;
+  --kid-candy-700: #c01862;
+  --kid-candy-800: #97124d;
+  --kid-candy-900: #6e0d38;
 
   font-family: 'Baloo 2', ui-rounded, 'Nunito', sans-serif;
 }
@@ -47,46 +79,171 @@ html, body {
   border-radius: 1.4rem;
 }
 
-/* Recoloration de la palette indigo/violet/bleu/rose -> orange ludique */
-.theme-kids .bg-indigo-50, .theme-kids .bg-purple-50, .theme-kids .bg-blue-50, .theme-kids .bg-pink-50 { background-color: var(--kid-50) !important; }
-.theme-kids .bg-indigo-100, .theme-kids .bg-purple-100, .theme-kids .bg-blue-100, .theme-kids .bg-pink-100 { background-color: var(--kid-100) !important; }
-.theme-kids .bg-indigo-200, .theme-kids .bg-purple-200, .theme-kids .bg-blue-200, .theme-kids .bg-pink-200 { background-color: var(--kid-200) !important; }
-.theme-kids .bg-indigo-300, .theme-kids .bg-purple-300, .theme-kids .bg-blue-300, .theme-kids .bg-pink-300 { background-color: var(--kid-300) !important; }
-.theme-kids .bg-indigo-400, .theme-kids .bg-purple-400, .theme-kids .bg-blue-400, .theme-kids .bg-pink-400 { background-color: var(--kid-400) !important; }
-.theme-kids .bg-indigo-500, .theme-kids .bg-purple-500, .theme-kids .bg-blue-500, .theme-kids .bg-pink-500 { background-color: var(--kid-500) !important; }
-.theme-kids .bg-indigo-600, .theme-kids .bg-purple-600, .theme-kids .bg-blue-600, .theme-kids .bg-pink-600 { background-color: var(--kid-600) !important; }
-.theme-kids .bg-indigo-700, .theme-kids .bg-purple-700, .theme-kids .bg-blue-700, .theme-kids .bg-pink-700 { background-color: var(--kid-700) !important; }
-.theme-kids .bg-indigo-800, .theme-kids .bg-purple-800, .theme-kids .bg-blue-800, .theme-kids .bg-pink-800 { background-color: var(--kid-800) !important; }
-.theme-kids .bg-indigo-900, .theme-kids .bg-purple-900, .theme-kids .bg-blue-900, .theme-kids .bg-pink-900 { background-color: var(--kid-900) !important; }
+/* Ombres plus douces et teintées, moins "corporate" que le indigo/slate par défaut */
+.theme-kids .shadow-lg,
+.theme-kids .shadow-xl,
+.theme-kids .shadow-2xl {
+  box-shadow: 0 10px 24px -8px rgba(242, 83, 28, 0.28);
+}
 
-.theme-kids .text-indigo-300, .theme-kids .text-purple-300, .theme-kids .text-blue-300, .theme-kids .text-pink-300 { color: var(--kid-300) !important; }
-.theme-kids .text-indigo-400, .theme-kids .text-purple-400, .theme-kids .text-blue-400, .theme-kids .text-pink-400 { color: var(--kid-400) !important; }
-.theme-kids .text-indigo-500, .theme-kids .text-purple-500, .theme-kids .text-blue-500, .theme-kids .text-pink-500 { color: var(--kid-500) !important; }
-.theme-kids .text-indigo-600, .theme-kids .text-purple-600, .theme-kids .text-blue-600, .theme-kids .text-pink-600 { color: var(--kid-600) !important; }
-.theme-kids .text-indigo-700, .theme-kids .text-purple-700, .theme-kids .text-blue-700, .theme-kids .text-pink-700 { color: var(--kid-700) !important; }
-.theme-kids .text-indigo-800, .theme-kids .text-purple-800, .theme-kids .text-blue-800, .theme-kids .text-pink-800 { color: var(--kid-800) !important; }
-.theme-kids .text-indigo-900, .theme-kids .text-purple-900, .theme-kids .text-blue-900, .theme-kids .text-pink-900 { color: var(--kid-900) !important; }
+/* Recoloration de la palette indigo/violet/bleu/rose vers un camaïeu corail/turquoise/ciel/candy, par famille (préserve les dégradés) */
+.theme-kids .bg-indigo-50 { background-color: var(--kid-coral-50) !important; }
+.theme-kids .bg-purple-50 { background-color: var(--kid-teal-50) !important; }
+.theme-kids .bg-blue-50 { background-color: var(--kid-sky-50) !important; }
+.theme-kids .bg-pink-50 { background-color: var(--kid-candy-50) !important; }
 
-.theme-kids .border-indigo-100, .theme-kids .border-purple-100, .theme-kids .border-blue-100, .theme-kids .border-pink-100 { border-color: var(--kid-100) !important; }
-.theme-kids .border-indigo-200, .theme-kids .border-purple-200, .theme-kids .border-blue-200, .theme-kids .border-pink-200 { border-color: var(--kid-200) !important; }
-.theme-kids .border-indigo-300, .theme-kids .border-purple-300, .theme-kids .border-blue-300, .theme-kids .border-pink-300 { border-color: var(--kid-300) !important; }
-.theme-kids .border-indigo-400, .theme-kids .border-purple-400, .theme-kids .border-blue-400, .theme-kids .border-pink-400 { border-color: var(--kid-400) !important; }
-.theme-kids .border-indigo-500, .theme-kids .border-purple-500, .theme-kids .border-blue-500, .theme-kids .border-pink-500 { border-color: var(--kid-500) !important; }
+.theme-kids .bg-indigo-100 { background-color: var(--kid-coral-100) !important; }
+.theme-kids .bg-purple-100 { background-color: var(--kid-teal-100) !important; }
+.theme-kids .bg-blue-100 { background-color: var(--kid-sky-100) !important; }
+.theme-kids .bg-pink-100 { background-color: var(--kid-candy-100) !important; }
 
-.theme-kids .from-indigo-50, .theme-kids .from-purple-50, .theme-kids .from-blue-50, .theme-kids .from-pink-50 { --tw-gradient-from: var(--kid-50) var(--tw-gradient-from-position) !important; }
-.theme-kids .from-indigo-500, .theme-kids .from-purple-500, .theme-kids .from-blue-500, .theme-kids .from-pink-500 { --tw-gradient-from: var(--kid-500) var(--tw-gradient-from-position) !important; }
-.theme-kids .from-indigo-600, .theme-kids .from-purple-600, .theme-kids .from-blue-600, .theme-kids .from-pink-600 { --tw-gradient-from: var(--kid-600) var(--tw-gradient-from-position) !important; }
-.theme-kids .from-indigo-700, .theme-kids .from-purple-700, .theme-kids .from-blue-700, .theme-kids .from-pink-700 { --tw-gradient-from: var(--kid-700) var(--tw-gradient-from-position) !important; }
+.theme-kids .bg-indigo-200 { background-color: var(--kid-coral-200) !important; }
+.theme-kids .bg-purple-200 { background-color: var(--kid-teal-200) !important; }
+.theme-kids .bg-blue-200 { background-color: var(--kid-sky-200) !important; }
+.theme-kids .bg-pink-200 { background-color: var(--kid-candy-200) !important; }
 
-.theme-kids .via-indigo-600, .theme-kids .via-purple-600, .theme-kids .via-blue-600, .theme-kids .via-pink-600 { --tw-gradient-via: var(--kid-600) var(--tw-gradient-via-position) !important; }
+.theme-kids .bg-indigo-300 { background-color: var(--kid-coral-300) !important; }
+.theme-kids .bg-purple-300 { background-color: var(--kid-teal-300) !important; }
+.theme-kids .bg-blue-300 { background-color: var(--kid-sky-300) !important; }
+.theme-kids .bg-pink-300 { background-color: var(--kid-candy-300) !important; }
 
-.theme-kids .to-indigo-500, .theme-kids .to-purple-500, .theme-kids .to-blue-500, .theme-kids .to-pink-500 { --tw-gradient-to: var(--kid-500) var(--tw-gradient-to-position) !important; }
-.theme-kids .to-indigo-600, .theme-kids .to-purple-600, .theme-kids .to-blue-600, .theme-kids .to-pink-600 { --tw-gradient-to: var(--kid-600) var(--tw-gradient-to-position) !important; }
-.theme-kids .to-indigo-700, .theme-kids .to-purple-700, .theme-kids .to-blue-700, .theme-kids .to-pink-700 { --tw-gradient-to: var(--kid-700) var(--tw-gradient-to-position) !important; }
-.theme-kids .to-indigo-50, .theme-kids .to-purple-50, .theme-kids .to-blue-50, .theme-kids .to-pink-50 { --tw-gradient-to: var(--kid-50) var(--tw-gradient-to-position) !important; }
+.theme-kids .bg-indigo-400 { background-color: var(--kid-coral-400) !important; }
+.theme-kids .bg-purple-400 { background-color: var(--kid-teal-400) !important; }
+.theme-kids .bg-blue-400 { background-color: var(--kid-sky-400) !important; }
+.theme-kids .bg-pink-400 { background-color: var(--kid-candy-400) !important; }
+
+.theme-kids .bg-indigo-500 { background-color: var(--kid-coral-500) !important; }
+.theme-kids .bg-purple-500 { background-color: var(--kid-teal-500) !important; }
+.theme-kids .bg-blue-500 { background-color: var(--kid-sky-500) !important; }
+.theme-kids .bg-pink-500 { background-color: var(--kid-candy-500) !important; }
+
+.theme-kids .bg-indigo-600 { background-color: var(--kid-coral-600) !important; }
+.theme-kids .bg-purple-600 { background-color: var(--kid-teal-600) !important; }
+.theme-kids .bg-blue-600 { background-color: var(--kid-sky-600) !important; }
+.theme-kids .bg-pink-600 { background-color: var(--kid-candy-600) !important; }
+
+.theme-kids .bg-indigo-700 { background-color: var(--kid-coral-700) !important; }
+.theme-kids .bg-purple-700 { background-color: var(--kid-teal-700) !important; }
+.theme-kids .bg-blue-700 { background-color: var(--kid-sky-700) !important; }
+.theme-kids .bg-pink-700 { background-color: var(--kid-candy-700) !important; }
+
+.theme-kids .bg-indigo-800 { background-color: var(--kid-coral-800) !important; }
+.theme-kids .bg-purple-800 { background-color: var(--kid-teal-800) !important; }
+.theme-kids .bg-blue-800 { background-color: var(--kid-sky-800) !important; }
+.theme-kids .bg-pink-800 { background-color: var(--kid-candy-800) !important; }
+
+.theme-kids .bg-indigo-900 { background-color: var(--kid-coral-900) !important; }
+.theme-kids .bg-purple-900 { background-color: var(--kid-teal-900) !important; }
+.theme-kids .bg-blue-900 { background-color: var(--kid-sky-900) !important; }
+.theme-kids .bg-pink-900 { background-color: var(--kid-candy-900) !important; }
+
+.theme-kids .text-indigo-300 { color: var(--kid-coral-300) !important; }
+.theme-kids .text-purple-300 { color: var(--kid-teal-300) !important; }
+.theme-kids .text-blue-300 { color: var(--kid-sky-300) !important; }
+.theme-kids .text-pink-300 { color: var(--kid-candy-300) !important; }
+
+.theme-kids .text-indigo-400 { color: var(--kid-coral-400) !important; }
+.theme-kids .text-purple-400 { color: var(--kid-teal-400) !important; }
+.theme-kids .text-blue-400 { color: var(--kid-sky-400) !important; }
+.theme-kids .text-pink-400 { color: var(--kid-candy-400) !important; }
+
+.theme-kids .text-indigo-500 { color: var(--kid-coral-500) !important; }
+.theme-kids .text-purple-500 { color: var(--kid-teal-500) !important; }
+.theme-kids .text-blue-500 { color: var(--kid-sky-500) !important; }
+.theme-kids .text-pink-500 { color: var(--kid-candy-500) !important; }
+
+.theme-kids .text-indigo-600 { color: var(--kid-coral-600) !important; }
+.theme-kids .text-purple-600 { color: var(--kid-teal-600) !important; }
+.theme-kids .text-blue-600 { color: var(--kid-sky-600) !important; }
+.theme-kids .text-pink-600 { color: var(--kid-candy-600) !important; }
+
+.theme-kids .text-indigo-700 { color: var(--kid-coral-700) !important; }
+.theme-kids .text-purple-700 { color: var(--kid-teal-700) !important; }
+.theme-kids .text-blue-700 { color: var(--kid-sky-700) !important; }
+.theme-kids .text-pink-700 { color: var(--kid-candy-700) !important; }
+
+.theme-kids .text-indigo-800 { color: var(--kid-coral-800) !important; }
+.theme-kids .text-purple-800 { color: var(--kid-teal-800) !important; }
+.theme-kids .text-blue-800 { color: var(--kid-sky-800) !important; }
+.theme-kids .text-pink-800 { color: var(--kid-candy-800) !important; }
+
+.theme-kids .text-indigo-900 { color: var(--kid-coral-900) !important; }
+.theme-kids .text-purple-900 { color: var(--kid-teal-900) !important; }
+.theme-kids .text-blue-900 { color: var(--kid-sky-900) !important; }
+.theme-kids .text-pink-900 { color: var(--kid-candy-900) !important; }
+
+.theme-kids .border-indigo-100 { border-color: var(--kid-coral-100) !important; }
+.theme-kids .border-purple-100 { border-color: var(--kid-teal-100) !important; }
+.theme-kids .border-blue-100 { border-color: var(--kid-sky-100) !important; }
+.theme-kids .border-pink-100 { border-color: var(--kid-candy-100) !important; }
+
+.theme-kids .border-indigo-200 { border-color: var(--kid-coral-200) !important; }
+.theme-kids .border-purple-200 { border-color: var(--kid-teal-200) !important; }
+.theme-kids .border-blue-200 { border-color: var(--kid-sky-200) !important; }
+.theme-kids .border-pink-200 { border-color: var(--kid-candy-200) !important; }
+
+.theme-kids .border-indigo-300 { border-color: var(--kid-coral-300) !important; }
+.theme-kids .border-purple-300 { border-color: var(--kid-teal-300) !important; }
+.theme-kids .border-blue-300 { border-color: var(--kid-sky-300) !important; }
+.theme-kids .border-pink-300 { border-color: var(--kid-candy-300) !important; }
+
+.theme-kids .border-indigo-400 { border-color: var(--kid-coral-400) !important; }
+.theme-kids .border-purple-400 { border-color: var(--kid-teal-400) !important; }
+.theme-kids .border-blue-400 { border-color: var(--kid-sky-400) !important; }
+.theme-kids .border-pink-400 { border-color: var(--kid-candy-400) !important; }
+
+.theme-kids .border-indigo-500 { border-color: var(--kid-coral-500) !important; }
+.theme-kids .border-purple-500 { border-color: var(--kid-teal-500) !important; }
+.theme-kids .border-blue-500 { border-color: var(--kid-sky-500) !important; }
+.theme-kids .border-pink-500 { border-color: var(--kid-candy-500) !important; }
+
+.theme-kids .from-indigo-50 { --tw-gradient-from: var(--kid-coral-50) var(--tw-gradient-from-position) !important; }
+.theme-kids .from-purple-50 { --tw-gradient-from: var(--kid-teal-50) var(--tw-gradient-from-position) !important; }
+.theme-kids .from-blue-50 { --tw-gradient-from: var(--kid-sky-50) var(--tw-gradient-from-position) !important; }
+.theme-kids .from-pink-50 { --tw-gradient-from: var(--kid-candy-50) var(--tw-gradient-from-position) !important; }
+
+.theme-kids .from-indigo-500 { --tw-gradient-from: var(--kid-coral-500) var(--tw-gradient-from-position) !important; }
+.theme-kids .from-purple-500 { --tw-gradient-from: var(--kid-teal-500) var(--tw-gradient-from-position) !important; }
+.theme-kids .from-blue-500 { --tw-gradient-from: var(--kid-sky-500) var(--tw-gradient-from-position) !important; }
+.theme-kids .from-pink-500 { --tw-gradient-from: var(--kid-candy-500) var(--tw-gradient-from-position) !important; }
+
+.theme-kids .from-indigo-600 { --tw-gradient-from: var(--kid-coral-600) var(--tw-gradient-from-position) !important; }
+.theme-kids .from-purple-600 { --tw-gradient-from: var(--kid-teal-600) var(--tw-gradient-from-position) !important; }
+.theme-kids .from-blue-600 { --tw-gradient-from: var(--kid-sky-600) var(--tw-gradient-from-position) !important; }
+.theme-kids .from-pink-600 { --tw-gradient-from: var(--kid-candy-600) var(--tw-gradient-from-position) !important; }
+
+.theme-kids .from-indigo-700 { --tw-gradient-from: var(--kid-coral-700) var(--tw-gradient-from-position) !important; }
+.theme-kids .from-purple-700 { --tw-gradient-from: var(--kid-teal-700) var(--tw-gradient-from-position) !important; }
+.theme-kids .from-blue-700 { --tw-gradient-from: var(--kid-sky-700) var(--tw-gradient-from-position) !important; }
+.theme-kids .from-pink-700 { --tw-gradient-from: var(--kid-candy-700) var(--tw-gradient-from-position) !important; }
+
+.theme-kids .via-indigo-600 { --tw-gradient-via: var(--kid-coral-600) var(--tw-gradient-via-position) !important; }
+.theme-kids .via-purple-600 { --tw-gradient-via: var(--kid-teal-600) var(--tw-gradient-via-position) !important; }
+.theme-kids .via-blue-600 { --tw-gradient-via: var(--kid-sky-600) var(--tw-gradient-via-position) !important; }
+.theme-kids .via-pink-600 { --tw-gradient-via: var(--kid-candy-600) var(--tw-gradient-via-position) !important; }
+
+.theme-kids .to-indigo-50 { --tw-gradient-to: var(--kid-coral-50) var(--tw-gradient-to-position) !important; }
+.theme-kids .to-purple-50 { --tw-gradient-to: var(--kid-teal-50) var(--tw-gradient-to-position) !important; }
+.theme-kids .to-blue-50 { --tw-gradient-to: var(--kid-sky-50) var(--tw-gradient-to-position) !important; }
+.theme-kids .to-pink-50 { --tw-gradient-to: var(--kid-candy-50) var(--tw-gradient-to-position) !important; }
+
+.theme-kids .to-indigo-500 { --tw-gradient-to: var(--kid-coral-500) var(--tw-gradient-to-position) !important; }
+.theme-kids .to-purple-500 { --tw-gradient-to: var(--kid-teal-500) var(--tw-gradient-to-position) !important; }
+.theme-kids .to-blue-500 { --tw-gradient-to: var(--kid-sky-500) var(--tw-gradient-to-position) !important; }
+.theme-kids .to-pink-500 { --tw-gradient-to: var(--kid-candy-500) var(--tw-gradient-to-position) !important; }
+
+.theme-kids .to-indigo-600 { --tw-gradient-to: var(--kid-coral-600) var(--tw-gradient-to-position) !important; }
+.theme-kids .to-purple-600 { --tw-gradient-to: var(--kid-teal-600) var(--tw-gradient-to-position) !important; }
+.theme-kids .to-blue-600 { --tw-gradient-to: var(--kid-sky-600) var(--tw-gradient-to-position) !important; }
+.theme-kids .to-pink-600 { --tw-gradient-to: var(--kid-candy-600) var(--tw-gradient-to-position) !important; }
+
+.theme-kids .to-indigo-700 { --tw-gradient-to: var(--kid-coral-700) var(--tw-gradient-to-position) !important; }
+.theme-kids .to-purple-700 { --tw-gradient-to: var(--kid-teal-700) var(--tw-gradient-to-position) !important; }
+.theme-kids .to-blue-700 { --tw-gradient-to: var(--kid-sky-700) var(--tw-gradient-to-position) !important; }
+.theme-kids .to-pink-700 { --tw-gradient-to: var(--kid-candy-700) var(--tw-gradient-to-position) !important; }
 
 .theme-kids .bg-slate-50 {
-  background: linear-gradient(180deg, var(--kid-50), #fffdf7) !important;
+  background: linear-gradient(160deg, var(--kid-coral-50) 0%, #fffdf7 45%, var(--kid-teal-50) 100%) !important;
 }
 
 /* Styles personnalisés pour l'application */

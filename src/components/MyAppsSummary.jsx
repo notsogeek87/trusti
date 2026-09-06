@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { ChevronRight } from 'lucide-react';
-import { GRADES, GRADE_COLORS, PHONE_GRADE_LABEL } from '../constants/grades';
+import { GRADES, GRADE_COLORS, PHONE_GRADE_LABEL, PHONE_GRADE_LABEL_KID } from '../constants/grades';
 import { computeTrustiSummary } from '../utils/trustiScore';
+import { useAgeMode } from '../contexts/AgeModeContext';
+import { AGE_MODE } from '../utils/ageMode';
 
 // Résumé compact affiché en haut de l'onglet "Mes Apps" : le TrustiScore
 // global du téléphone (déduit des apps suivies) et la progression des
@@ -9,6 +11,8 @@ import { computeTrustiSummary } from '../utils/trustiScore';
 // révèle la répartition détaillée par note (A-E).
 const MyAppsSummary = ({ apps }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const isKid = useAgeMode() === AGE_MODE.KID;
+  const phoneGradeLabel = isKid ? PHONE_GRADE_LABEL_KID : PHONE_GRADE_LABEL;
 
   const { counts, total, overallGrade } = useMemo(() => computeTrustiSummary(apps), [apps]);
 
@@ -37,7 +41,7 @@ const MyAppsSummary = ({ apps }) => {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[15px] font-bold text-slate-900 truncate">TrustiScore du téléphone</p>
-          <p className="text-xs text-slate-500 truncate">{PHONE_GRADE_LABEL[overallGrade]}</p>
+          <p className="text-xs text-slate-500 truncate">{phoneGradeLabel[overallGrade]}</p>
         </div>
         <div className="shrink-0 flex items-center gap-1.5">
           {riskyCount > 0 && (

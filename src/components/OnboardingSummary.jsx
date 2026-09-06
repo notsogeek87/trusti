@@ -1,14 +1,19 @@
 import React, { useMemo } from 'react';
 import { ArrowRight } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
-import { GRADE_INFO, PHONE_GRADE_LABEL } from '../constants/grades';
+import { GRADE_INFO, GRADE_INFO_KID, PHONE_GRADE_LABEL, PHONE_GRADE_LABEL_KID } from '../constants/grades';
 import { computeTrustiSummary } from '../utils/trustiScore';
+import { useAgeMode } from '../contexts/AgeModeContext';
+import { AGE_MODE } from '../utils/ageMode';
 
 // Écran de récapitulatif affiché après un scan (natif) ou une sélection
 // (manuelle/web), avant d'arriver sur "Mes Apps" : combien d'apps par
 // TrustiScore, une note globale déduite du téléphone, et un bouton pour
 // accéder au détail (la liste "Mes Apps").
 const OnboardingSummary = ({ apps, onDetails }) => {
+  const isKid = useAgeMode() === AGE_MODE.KID;
+  const gradeInfo = isKid ? GRADE_INFO_KID : GRADE_INFO;
+  const phoneGradeLabel = isKid ? PHONE_GRADE_LABEL_KID : PHONE_GRADE_LABEL;
   const { counts, total, overallGrade } = useMemo(() => computeTrustiSummary(apps), [apps]);
 
   return (
@@ -29,13 +34,13 @@ const OnboardingSummary = ({ apps, onDetails }) => {
               <ScoreIndicator grade={overallGrade} size="large" />
             </div>
             <p className="text-sm font-bold text-slate-700 mb-6 leading-snug">
-              {PHONE_GRADE_LABEL[overallGrade]}
+              {phoneGradeLabel[overallGrade]}
             </p>
           </>
         )}
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 divide-y divide-slate-100 mb-8 overflow-hidden">
-          {GRADE_INFO.map(({ grade, title }) => (
+          {gradeInfo.map(({ grade, title }) => (
             <div key={grade} className="flex items-center gap-3 px-4 py-3">
               <ScoreIndicator grade={grade} size="small" />
               <span className="flex-1 min-w-0 text-left text-xs font-bold text-slate-700 truncate">

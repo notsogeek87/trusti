@@ -1,11 +1,16 @@
 import React from 'react';
 import { ShieldCheck, ArrowRight, Lock, Globe, Eye, CheckCircle, BookOpen, X } from 'lucide-react';
-import { GRADE_INFO } from '../constants/grades';
+import { GRADE_INFO, GRADE_INFO_KID } from '../constants/grades';
+import { useAgeMode } from '../contexts/AgeModeContext';
+import { AGE_MODE } from '../utils/ageMode';
 
 /**
  * Landing Page affichée uniquement lors de la première visite
  */
 const LandingPage = ({ onClose }) => {
+  const isKid = useAgeMode() === AGE_MODE.KID;
+  const gradeInfo = isKid ? GRADE_INFO_KID : GRADE_INFO;
+
   return (
     <div className="fixed inset-0 z-50 bg-slate-900 overflow-y-auto">
       {/* Bouton fermer */}
@@ -44,14 +49,22 @@ const LandingPage = ({ onClose }) => {
             </div>
 
             <h1 className="text-4xl font-black mb-4 text-white leading-tight">
-              Reprenez votre souveraineté numérique européenne
+              {isKid ? 'Deviens un champion de tes données ! 🦸' : 'Reprenez votre souveraineté numérique européenne'}
             </h1>
-            
-            <p className="text-base leading-relaxed text-slate-400 font-medium mb-8">
-              TrustiScore évalue la confiance que vous pouvez accorder à vos applications. 
-              Découvrez quelles apps respectent vraiment votre <span className="text-white font-bold">souveraineté numérique</span> et 
-              protègent votre <span className="text-white font-bold">vie privée</span>.
-            </p>
+
+            {isKid ? (
+              <p className="text-base leading-relaxed text-slate-400 font-medium mb-8">
+                TrustiScore t'aide à savoir si une appli est sympa avec tes
+                <span className="text-white font-bold"> informations personnelles</span> (photos, messages,
+                position...) ou si elle les partage <span className="text-white font-bold">en douce</span>.
+              </p>
+            ) : (
+              <p className="text-base leading-relaxed text-slate-400 font-medium mb-8">
+                TrustiScore évalue la confiance que vous pouvez accorder à vos applications.
+                Découvrez quelles apps respectent vraiment votre <span className="text-white font-bold">souveraineté numérique</span> et
+                protègent votre <span className="text-white font-bold">vie privée</span>.
+              </p>
+            )}
 
             {/* Fonctionnalités clés */}
             <div className="grid gap-4 mb-10 text-left">
@@ -60,8 +73,12 @@ const LandingPage = ({ onClose }) => {
                   <Globe size={20} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="text-white font-bold text-sm mb-1">Souveraineté européenne</h3>
-                  <p className="text-slate-400 text-xs">Données hébergées en Europe, conformité RGPD</p>
+                  <h3 className="text-white font-bold text-sm mb-1">
+                    {isKid ? 'Fabriquée près de chez toi 🌍' : 'Souveraineté européenne'}
+                  </h3>
+                  <p className="text-slate-400 text-xs">
+                    {isKid ? 'Tes données restent en Europe, là où les lois te protègent le mieux.' : 'Données hébergées en Europe, conformité RGPD'}
+                  </p>
                 </div>
               </div>
 
@@ -70,8 +87,12 @@ const LandingPage = ({ onClose }) => {
                   <Lock size={20} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="text-white font-bold text-sm mb-1">Vie privée protégée</h3>
-                  <p className="text-slate-400 text-xs">Protection contre le Cloud Act et surveillance</p>
+                  <h3 className="text-white font-bold text-sm mb-1">
+                    {isKid ? 'Tes secrets bien gardés 🔒' : 'Vie privée protégée'}
+                  </h3>
+                  <p className="text-slate-400 text-xs">
+                    {isKid ? "On vérifie qu'aucune appli n'espionne ce que tu fais en cachette." : 'Protection contre le Cloud Act et surveillance'}
+                  </p>
                 </div>
               </div>
 
@@ -80,8 +101,12 @@ const LandingPage = ({ onClose }) => {
                   <Eye size={20} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="text-white font-bold text-sm mb-1">Évaluations transparentes</h3>
-                  <p className="text-slate-400 text-xs">Scores basés sur 12 critères objectifs</p>
+                  <h3 className="text-white font-bold text-sm mb-1">
+                    {isKid ? 'Des notes claires, sans blabla 🔍' : 'Évaluations transparentes'}
+                  </h3>
+                  <p className="text-slate-400 text-xs">
+                    {isKid ? 'Chaque note est expliquée simplement, sans mots compliqués.' : 'Scores basés sur 12 critères objectifs'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -91,9 +116,9 @@ const LandingPage = ({ onClose }) => {
               <h3 className="font-black text-xs uppercase tracking-widest mb-4 text-slate-400 text-center">
                 Échelle des notes
               </h3>
-              
+
               <div className="space-y-3">
-                {GRADE_INFO.map(({ grade, title, description, bgColor, shadowColor, textColor }) => (
+                {gradeInfo.map(({ grade, title, description, bgColor, shadowColor, textColor }) => (
                   <div key={grade} className="flex gap-3 items-start">
                     <div className={`${bgColor} w-8 h-8 rounded-lg shrink-0 flex items-center justify-center font-black text-sm shadow-md ${shadowColor} ${textColor || ''}`}>
                       {grade}
@@ -111,7 +136,7 @@ const LandingPage = ({ onClose }) => {
               onClick={onClose}
               className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl hover:scale-105"
             >
-              Commencer l'exploration
+              {isKid ? "C'est parti pour l'aventure !" : "Commencer l'exploration"}
               <ArrowRight size={20} />
             </button>
 
@@ -122,12 +147,14 @@ const LandingPage = ({ onClose }) => {
               className="w-full mt-4 bg-slate-800 hover:bg-slate-700 border-2 border-indigo-500/30 hover:border-indigo-500 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 group"
             >
               <BookOpen size={20} className="text-indigo-400 group-hover:text-indigo-300" />
-              En savoir plus sur le TrustiScore
+              {isKid ? 'Pour les curieux : tout savoir' : 'En savoir plus sur le TrustiScore'}
               <ArrowRight size={18} className="text-indigo-400 group-hover:text-indigo-300 group-hover:translate-x-1 transition-transform" />
             </a>
 
             <p className="text-[11px] text-slate-500 mt-6 italic">
-              Basé sur 12 critères : RGPD, Cloud Act, Open Source, Localisation des données, et plus encore.
+              {isKid
+                ? 'On vérifie plein de choses pour toi : où sont rangées tes données, si l\'appli les vend, et bien plus encore. 🕵️'
+                : 'Basé sur 12 critères : RGPD, Cloud Act, Open Source, Localisation des données, et plus encore.'}
             </p>
           </div>
         </div>
