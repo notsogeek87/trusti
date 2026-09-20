@@ -559,7 +559,9 @@ const App = () => {
 
   // Afficher la page d'onboarding de sélection des apps
   if (showOnboarding) {
-    const onSignUp = currentUser ? undefined : () => setShowLoginModal(true);
+    // Pas de proposition de connexion sur l'app mobile (fonctionnalité retirée) :
+    // l'onboarding natif reste toujours en mode invité (voir useAuth).
+    const onSignUp = (isNativeAndroid || currentUser) ? undefined : () => setShowLoginModal(true);
     if (isNativeAndroid && !forceManualOnboarding) {
       return (
         <AgeModeContext.Provider value={ageMode}>
@@ -902,12 +904,14 @@ const App = () => {
         />
       )}
 
-      {/* Modal de connexion */}
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onLogin={(email) => { login(email); setShowLoginModal(false); }}
-      />
+      {/* Modal de connexion (fonctionnalité retirée sur l'app mobile) */}
+      {!isNativeAndroid && (
+        <LoginModal
+          isOpen={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+          onLogin={(email) => { login(email); setShowLoginModal(false); }}
+        />
+      )}
 
       {/* Modal de code PIN admin */}
       <PinModal

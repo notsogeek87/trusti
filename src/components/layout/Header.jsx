@@ -1,6 +1,7 @@
 import React from 'react';
 import { HelpCircle, LogOut, User, RotateCcw, Settings, Lock } from 'lucide-react';
 import { useIsMobile } from '../../contexts/ViewModeContext';
+import { isNativeAndroid } from '../../utils/platform';
 
 const Header = ({
   currentUser,
@@ -73,15 +74,19 @@ const Header = ({
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={onLogin}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2"
-              >
-                <User size={16} />
-                Se connecter
-              </button>
-            </div>
+            // Fonctionnalité de connexion retirée sur l'app mobile (Android) : pas
+            // de bouton dans ce cas, l'app reste en mode invité (voir useAuth).
+            !isNativeAndroid && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={onLogin}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2"
+                >
+                  <User size={16} />
+                  Se connecter
+                </button>
+              </div>
+            )
           )}
 
           <button
