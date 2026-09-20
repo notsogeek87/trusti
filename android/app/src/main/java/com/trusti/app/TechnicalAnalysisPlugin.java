@@ -361,6 +361,14 @@ public class TechnicalAnalysisPlugin extends Plugin {
      * ("application sécurisée"). `usesCleartextTraffic` reflète le drapeau
      * déclaré dans le manifeste (peut être affiné par un Network Security
      * Config par domaine, non analysé ici — voir SecurityInfo côté JS).
+     *
+     * La présence d'un Network Security Config personnalisé n'est pas exposée
+     * par un champ public de l'API Android (aucun équivalent public à
+     * PackageParser$Package#networkSecurityConfigRes, qui est un détail
+     * d'implémentation interne) : on ne le met volontairement pas dans le
+     * JSON plutôt que de deviner via une API non documentée — reste donc
+     * "Non déterminé" côté JS (voir SecurityInfo.customPinnedCertificates,
+     * même limite).
      */
     private JSObject buildSecurity(ApplicationInfo appInfo, PackageInfo packageInfo) {
         JSObject securityJs = new JSObject();
@@ -372,9 +380,6 @@ public class TechnicalAnalysisPlugin extends Plugin {
         securityJs.put("debuggable", debuggable);
         securityJs.put("allowBackup", allowBackup);
         securityJs.put("usesCleartextTraffic", cleartext);
-
-        boolean hasNetworkSecurityConfig = appInfo != null && appInfo.networkSecurityConfigRes != 0;
-        securityJs.put("networkSecurityConfigPresent", hasNetworkSecurityConfig);
 
         JSArray certSha256 = new JSArray();
         Boolean multipleSigners = null;
