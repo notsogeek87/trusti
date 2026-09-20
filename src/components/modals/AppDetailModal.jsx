@@ -361,14 +361,6 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
         {/* ── Colonne droite : analyse & relations ── */}
         <div className={isMobile ? '' : 'flex-1 min-w-0'} style={sectionAnim(isMobile ? 100 : 120)}>
 
-          {/* 🔎 Analyse technique — indépendante du Trusti-Score, visible uniquement
-              si l'app est détectée installée sur l'appareil (app Android native) */}
-          <TechnicalAnalysisSection
-            status={technicalAnalysis.status}
-            analysis={technicalAnalysis.analysis}
-            error={technicalAnalysis.error}
-          />
-
           {/* Pourquoi cette note ? */}
           {(() => {
             const info = gradeInfo.find(g => g.grade === app.grade);
@@ -479,6 +471,16 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
               </div>
             </div>
           )}
+
+          {/* 🔎 Analyse technique — tout en bas de la fiche, repliée par défaut
+              (accordéon) : bloc secondaire et volumineux, indépendant du
+              Trusti-Score. Visible uniquement si l'app est détectée installée
+              sur l'appareil (app Android native). */}
+          <TechnicalAnalysisSection
+            status={technicalAnalysis.status}
+            analysis={technicalAnalysis.analysis}
+            error={technicalAnalysis.error}
+          />
 
           {/* Bouton retour (mobile uniquement) */}
           {isMobile && (
