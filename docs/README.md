@@ -7,6 +7,7 @@ démarrage rapide.
 ## 🏗️ Architecture
 
 - [App Android native — scan automatique des apps installées](architecture/android-native-app-scan.md)
+- [Analyse technique — architecture](architecture/technical-analysis.md)
 
 ## 📡 API
 
