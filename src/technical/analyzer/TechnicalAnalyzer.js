@@ -5,6 +5,8 @@ import { analyzeGoogleDependencies } from './GoogleDependencyAnalyzer.js';
 import { analyzeSdks } from './SdkAnalyzer.js';
 import { analyzeTrackers } from './TrackerAnalyzer.js';
 import { calculateDependencyLevel } from './DependencyLevelCalculator.js';
+import { analyzeComposition } from './CompositionAnalyzer.js';
+import { analyzeSecurity } from './SecurityAnalyzer.js';
 
 /**
  * Orchestrateur de l'analyse technique. Ne dépend que d'une ApplicationSource
@@ -37,6 +39,8 @@ export class TechnicalAnalyzer {
     const googleDependencies = analyzeGoogleDependencies(rawData);
     const trackers = analyzeTrackers(rawData);
     const sdks = analyzeSdks(rawData);
+    const composition = analyzeComposition(rawData);
+    const security = analyzeSecurity(rawData);
     const { level: dependencyLevel } = calculateDependencyLevel({
       googleDependencies,
       trackers,
@@ -62,6 +66,8 @@ export class TechnicalAnalyzer {
       googleDependencies,
       sdks,
       trackers,
+      composition,
+      security,
       dependencyLevel,
       componentsAvailable: rawData.componentsAvailable,
       limitations,

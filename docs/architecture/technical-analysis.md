@@ -55,6 +55,26 @@ uniquement dans l'app Android native (`isNativeAndroid`) et quand
 l'application consultée est détectée installée sur l'appareil
 (`useTechnicalAnalysis`).
 
+## Catégories implémentées (P1)
+
+Composition, Permissions, Sécurité, Google, SDK, Trackers. Chaque
+dépendance/SDK/tracker détecté porte une `DetectionMetadata`
+(`src/technical/model/DetectionMetadata.js` : `method` un `DetectionMethod`,
+`confidence`, `source`) qui explique sa provenance — exportée dans le JSON
+(`metadata` sur chaque entrée).
+
+Composition (`CompositionAnalyzer`) et Sécurité (`SecurityAnalyzer`) lisent
+des blocs `rawData.composition` / `rawData.security` / `rawData.componentCounts`
+optionnels : absents → `dataAvailable: false` / statuts `UNKNOWN`, jamais une
+valeur inventée. Le schéma de signature APK (v1/v2/v3) et les certificats
+réseau épinglés restent volontairement `UNKNOWN` : non exposés de façon
+fiable par l'API publique `PackageManager`.
+
+Non implémenté pour l'instant (P2/P3, voir la spec) : Réseau, Authentification,
+Monétisation, Capacités matérielles, IA, Open Source, Écosystème. Ces clés
+n'apparaissent pas dans l'export JSON tant qu'elles ne sont pas analysées —
+mieux vaut une absence de clé qu'une catégorie vide présentée comme analysée.
+
 ## Ajouter un nouveau SDK/tracker/dépendance Google
 
 Ajouter une entrée dans le fichier de signatures concerné

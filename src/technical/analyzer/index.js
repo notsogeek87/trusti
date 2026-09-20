@@ -4,4 +4,6 @@ export * from './GoogleDependencyAnalyzer.js';
 export * from './SdkAnalyzer.js';
 export * from './TrackerAnalyzer.js';
 export * from './DependencyLevelCalculator.js';
+export * from './CompositionAnalyzer.js';
+export * from './SecurityAnalyzer.js';
 export * from './TechnicalAnalyzer.js';

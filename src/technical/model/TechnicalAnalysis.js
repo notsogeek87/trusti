@@ -14,6 +14,8 @@ import { DependencyLevel } from './DependencyLevel.js';
  * @property {import('./DetectionEntry').DetectionEntry[]} googleDependencies
  * @property {import('./DetectionEntry').DetectionEntry[]} sdks
  * @property {import('./DetectionEntry').DetectionEntry[]} trackers
+ * @property {import('./CompositionInfo').CompositionInfo} composition
+ * @property {import('./SecurityInfo').SecurityInfo} security
  * @property {string} dependencyLevel - Un des DependencyLevel
  * @property {boolean} componentsAvailable - false si le système n'a pas pu fournir
  *   la liste des composants du manifeste (alors googleDependencies/sdks/trackers
@@ -29,6 +31,8 @@ export function createTechnicalAnalysis({
   googleDependencies = [],
   sdks = [],
   trackers = [],
+  composition = null,
+  security = null,
   dependencyLevel = DependencyLevel.UNKNOWN,
   componentsAvailable = true,
   limitations = [],
@@ -42,6 +46,8 @@ export function createTechnicalAnalysis({
     googleDependencies,
     sdks,
     trackers,
+    composition,
+    security,
     dependencyLevel,
     componentsAvailable,
     limitations,
@@ -70,6 +76,8 @@ export function toExportJSON(analysis) {
     googleDependencies: analysis.googleDependencies.map(toExportEntry),
     sdk: analysis.sdks.map(toExportEntry),
     trackers: analysis.trackers.map(toExportEntry),
+    composition: analysis.composition,
+    security: analysis.security,
     dependencyLevel: analysis.dependencyLevel,
     componentsAvailable: analysis.componentsAvailable,
     limitations: analysis.limitations,
@@ -84,6 +92,7 @@ function toExportEntry(entry) {
     category: entry.category,
     confidence: entry.confidence,
     detectionMethod: entry.detectionMethod,
+    metadata: entry.metadata,
   };
 }
 

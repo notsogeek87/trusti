@@ -20,6 +20,15 @@
  *   "com.google.firebase.messaging.FirebaseMessagingService").
  * @property {string[]} metaDataKeys - Clés <meta-data> déclarées (app-level + par composant).
  *   On ne conserve que les clés, jamais les valeurs (peuvent contenir des identifiants/API keys).
+ * @property {{activities: number, services: number, receivers: number, providers: number,
+ *   exportedActivities: number, exportedServices: number, exportedReceivers: number,
+ *   exportedProviders: number}|null} componentCounts - null si non déterminable.
+ * @property {{totalSizeBytes: number, apkSizeBytes: number, dexCount: number,
+ *   nativeLibraryCount: number, architectures: string[], isSplitApk: boolean,
+ *   splitCount: number}|null} composition - null si non déterminable (ex. APK illisible).
+ * @property {{debuggable: boolean, allowBackup: boolean, usesCleartextTraffic: boolean,
+ *   networkSecurityConfigPresent: boolean, signingCertificatesSha256: string[],
+ *   hasMultipleSigners: boolean|null}|null} security - null si non déterminable.
  */
 
 const EMPTY_COMPONENTS = { services: [], receivers: [], providers: [], activities: [] };
@@ -43,6 +52,9 @@ export function normalizeRawPackageData(raw = {}) {
       activities: raw.components?.activities || EMPTY_COMPONENTS.activities,
     },
     metaDataKeys: Array.isArray(raw.metaDataKeys) ? raw.metaDataKeys : [],
+    componentCounts: raw.componentCounts || null,
+    composition: raw.composition || null,
+    security: raw.security || null,
   };
 }
 

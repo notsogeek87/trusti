@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Search, Boxes, Eye, Package, Download, Info, AlertTriangle, HelpCircle } from 'lucide-react';
 import Accordion from '../ui/Accordion';
+import TechnicalSummary from './TechnicalSummary';
 import DependencyLevelBadge from './DependencyLevelBadge';
+import CompositionCard from './CompositionCard';
+import SecurityCard from './SecurityCard';
 import DetectionEntryList from './DetectionEntryList';
 import TechnicalPermissionsCard from './TechnicalPermissionsCard';
 import AppInfoCard from './AppInfoCard';
@@ -16,6 +19,11 @@ import { downloadJSON } from '../../utils/downloadJSON';
  * au Trusti-Score) et accompagnée d'un texte d'explication pour un public non
  * technique. N'apparaît que dans l'app Android native, quand l'application
  * analysée est installée sur l'appareil (voir useTechnicalAnalysis).
+ *
+ * Ordre des sous-sections (voir spec §21) : vue synthétique → composition →
+ * permissions → sécurité → trackers → SDK → Google → informations générales.
+ * Réseau / authentification / monétisation / capacités / IA / open source /
+ * écosystème arrivent en P2/P3 (voir docs/architecture/technical-analysis.md).
  */
 const TechnicalAnalysisSection = ({ status, analysis, error }) => {
   const [showAbout, setShowAbout] = useState(false);
@@ -51,9 +59,9 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
         <div className="text-[11px] text-indigo-900 leading-relaxed space-y-1.5">
           <p>
             Cette section liste des <strong>faits techniques</strong> détectés automatiquement
-            sur votre téléphone (permissions, services Google, SDK publicitaires...).
-            C'est différent du Trusti-Score ci-dessus, qui reflète l'avis de la communauté :
-            ici, aucun jugement, seulement ce qui a été trouvé.
+            sur votre téléphone (permissions, services Google, SDK publicitaires, paramètres de
+            sécurité...). C'est différent du Trusti-Score ci-dessus, qui reflète l'avis de la
+            communauté : ici, aucun jugement, seulement ce qui a été trouvé.
           </p>
           <p>
             Une bibliothèque détectée n'est pas forcément utilisée activement par l'application.
@@ -75,17 +83,20 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
         </div>
       )}
 
+      {/* 📊 Vue synthétique */}
+      <TechnicalSummary analysis={analysis} />
       <DependencyLevelBadge level={analysis.dependencyLevel} />
 
-      <DetectionEntryList
-        icon={Boxes}
-        title="Google"
-        countLabel={(n) => (n === 0 ? 'Aucune détectée' : `${n} dépendance${n > 1 ? 's' : ''} détectée${n > 1 ? 's' : ''}`)}
-        entries={analysis.googleDependencies}
-        emptyLabel="Aucune dépendance Google connue détectée."
-        accentClassName="text-blue-600"
-      />
+      {/* 📦 Composition */}
+      <CompositionCard composition={analysis.composition} />
 
+      {/* 🔐 Permissions */}
+      <TechnicalPermissionsCard permissions={analysis.permissions} />
+
+      {/* 🛡️ Sécurité */}
+      <SecurityCard security={analysis.security} />
+
+      {/* 🕵️ Trackers */}
       <DetectionEntryList
         icon={Eye}
         title="Trackers"
@@ -95,6 +106,7 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
         accentClassName="text-rose-600"
       />
 
+      {/* 📦 SDK */}
       <DetectionEntryList
         icon={Package}
         title="SDK"
@@ -104,8 +116,17 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
         accentClassName="text-violet-600"
       />
 
-      <TechnicalPermissionsCard permissions={analysis.permissions} />
+      {/* 🇬 Google */}
+      <DetectionEntryList
+        icon={Boxes}
+        title="Google"
+        countLabel={(n) => (n === 0 ? 'Aucune détectée' : `${n} dépendance${n > 1 ? 's' : ''} détectée${n > 1 ? 's' : ''}`)}
+        entries={analysis.googleDependencies}
+        emptyLabel="Aucune dépendance Google connue détectée."
+        accentClassName="text-blue-600"
+      />
 
+      {/* 📱 Informations générales */}
       <AppInfoCard appInfo={analysis.appInfo} />
 
       {analysis.limitations?.length > 0 && (
