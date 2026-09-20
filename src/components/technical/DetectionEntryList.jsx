@@ -7,7 +7,7 @@ import ConfidenceBadge from './ConfidenceBadge';
  * de dupliquer le rendu — cohérent avec l'idée d'un moteur générique côté
  * données (SignatureDatabase).
  */
-const DetectionEntryList = ({ icon: Icon, title, countLabel, entries, emptyLabel, accentClassName }) => (
+const DetectionEntryList = ({ icon: Icon, title, intro, countLabel, entries, emptyLabel, accentClassName }) => (
   <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm mb-4">
     <div className="flex items-center justify-between mb-3">
       <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 flex items-center gap-2">
@@ -18,6 +18,10 @@ const DetectionEntryList = ({ icon: Icon, title, countLabel, entries, emptyLabel
       </span>
     </div>
 
+    {/* Une phrase en langage clair sur ce que représente cette catégorie,
+        pour un utilisateur non technique — avant même la liste détaillée. */}
+    {intro && <p className="text-[11px] text-slate-400 leading-relaxed mb-3">{intro}</p>}
+
     {entries.length === 0 ? (
       <p className="text-xs text-slate-400">{emptyLabel}</p>
     ) : (
@@ -26,7 +30,11 @@ const DetectionEntryList = ({ icon: Icon, title, countLabel, entries, emptyLabel
           <div key={entry.id} className="flex items-center justify-between gap-2 bg-slate-50 rounded-lg px-2.5 py-2 border border-slate-200">
             <div className="min-w-0">
               <p className="text-xs font-bold text-slate-800 truncate">{entry.name}</p>
-              <p className="text-[11px] text-slate-500 truncate">{entry.detectionMethod}</p>
+              {entry.description ? (
+                <p className="text-[11px] text-slate-500 leading-relaxed">{entry.description}</p>
+              ) : (
+                <p className="text-[11px] text-slate-500 truncate">{entry.detectionMethod}</p>
+              )}
             </div>
             <ConfidenceBadge confidence={entry.confidence} />
           </div>

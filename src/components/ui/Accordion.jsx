@@ -6,7 +6,7 @@ import { ChevronDown } from 'lucide-react';
  * pour les blocs volumineux qui ne doivent pas prendre toute la place au
  * premier coup d'œil (ex. l'analyse technique dans AppDetailModal).
  */
-const Accordion = ({ icon: Icon, title, subtitle, defaultOpen = false, children }) => {
+const Accordion = ({ icon: Icon, title, subtitle, badge, defaultOpen = false, children }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
@@ -22,10 +22,15 @@ const Accordion = ({ icon: Icon, title, subtitle, defaultOpen = false, children 
             {subtitle && <span className="block text-[11px] text-slate-400 font-normal normal-case mt-0.5">{subtitle}</span>}
           </span>
         </span>
-        <ChevronDown
-          size={18}
-          className={`text-slate-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-        />
+        <span className="flex items-center gap-2 shrink-0">
+          {/* Visible même repliée : on montre "de suite" s'il y a des points
+              à surveiller, sans obliger à ouvrir la section pour le savoir. */}
+          {badge}
+          <ChevronDown
+            size={18}
+            className={`text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          />
+        </span>
       </button>
       {isOpen && <div className="px-4 pb-4">{children}</div>}
     </div>
