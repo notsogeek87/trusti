@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, Boxes, Eye, Package, Download, Info, AlertTriangle, HelpCircle } from 'lucide-react';
 import Accordion from '../ui/Accordion';
 import TechnicalSummary from './TechnicalSummary';
+import KeyTakeaways from './KeyTakeaways';
 import DependencyLevelBadge from './DependencyLevelBadge';
 import CompositionCard from './CompositionCard';
 import SecurityCard from './SecurityCard';
@@ -11,6 +12,7 @@ import AppInfoCard from './AppInfoCard';
 import AboutTechnicalAnalysisModal from '../modals/AboutTechnicalAnalysisModal';
 import { exportTechnicalAnalysisJSON } from '../../technical';
 import { downloadJSON } from '../../utils/downloadJSON';
+import { countSignalsByLevel } from './technicalSignals';
 
 /**
  * Section "🔎 Analyse technique" — totalement découplée du Trusti-Score
@@ -46,12 +48,35 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
     downloadJSON(exportTechnicalAnalysisJSON(analysis), `${analysis.packageName}-analyse-technique.json`);
   };
 
+  // Badge visible même quand l'accordéon est replié : "montrer de suite" s'il
+  // y a des points à surveiller, sans obliger l'utilisateur à ouvrir la
+  // section pour le savoir.
+  const { alert, watch } = countSignalsByLevel(analysis);
+  const attentionCount = alert + watch;
+  const headerBadge = attentionCount > 0 ? (
+    <span
+      className={`inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full ${
+        alert > 0 ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'
+      }`}
+    >
+      {alert > 0 ? '🚨' : '⚠️'} {attentionCount} point{attentionCount > 1 ? 's' : ''} à vérifier
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+      ✅ Rien à signaler
+    </span>
+  );
+
   return (
     <Accordion
       icon={Search}
       title="Analyse technique"
       subtitle="Ce que l'application contient réellement — détecté sur votre téléphone"
+      badge={headerBadge}
     >
+      {/* Ce qu'il faut retenir, en langage clair, avant même le détail. */}
+      <KeyTakeaways analysis={analysis} />
+
       {/* Explicatif pour un public non technique : à quoi sert cette section,
           en quoi elle diffère du Trusti-Score, et ses limites. */}
       <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3 mb-4 flex items-start gap-2">
@@ -100,6 +125,7 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
       <DetectionEntryList
         icon={Eye}
         title="Trackers"
+        intro="Des bibliothèques qui peuvent transmettre des informations sur votre utilisation à des sociétés tierces : publicité ciblée, mesure d'audience ou attribution (savoir quelle pub vous a fait installer l'app). Plus il y en a, plus l'app partage potentiellement de données avec des tiers."
         countLabel={(n) => (n === 0 ? 'Aucun détecté' : `${n} détecté${n > 1 ? 's' : ''}`)}
         entries={analysis.trackers}
         emptyLabel="Aucun SDK de tracking connu détecté."
@@ -110,6 +136,7 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
       <DetectionEntryList
         icon={Package}
         title="SDK"
+        intro="Les briques logicielles tierces (kits de développement) intégrées à l'application : paiement, cartes, notifications, statistiques... Ce ne sont pas forcément des trackers — beaucoup servent des fonctionnalités que vous utilisez directement."
         countLabel={(n) => (n === 0 ? 'Aucun détecté' : `${n} détecté${n > 1 ? 's' : ''}`)}
         entries={analysis.sdks}
         emptyLabel="Aucun SDK connu détecté."
@@ -120,6 +147,7 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
       <DetectionEntryList
         icon={Boxes}
         title="Google"
+        intro="Les services Google intégrés à l'application (notifications, cartes, connexion, publicité...). Très courants sur Android : leur présence ne veut pas dire que l'app est problématique, mais que vos données peuvent transiter par des serveurs Google pour ces fonctions."
         countLabel={(n) => (n === 0 ? 'Aucune détectée' : `${n} dépendance${n > 1 ? 's' : ''} détectée${n > 1 ? 's' : ''}`)}
         entries={analysis.googleDependencies}
         emptyLabel="Aucune dépendance Google connue détectée."
