@@ -1,6 +1,6 @@
 /**
  * Fixture : app debuggable, cleartext HTTP autorisé, plusieurs composants
- * exportés, sans Network Security Config déclaré.
+ * exportés.
  */
 export const cleartextExportedFixture = {
   packageName: 'org.example.cleartext',
@@ -38,7 +38,6 @@ export const cleartextExportedFixture = {
     debuggable: true,
     allowBackup: true,
     usesCleartextTraffic: true,
-    networkSecurityConfigPresent: false,
     signingCertificatesSha256: ['AB12CD34EF56'],
     hasMultipleSigners: false,
   },

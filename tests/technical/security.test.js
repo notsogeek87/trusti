@@ -5,12 +5,11 @@ import { DetectionStatus } from '../../src/technical/model/DetectionStatus.js';
 import { cleartextExportedFixture } from './fixtures/cleartextExported.js';
 import { componentsUnavailableFixture } from './fixtures/componentsUnavailable.js';
 
-test('détecte debuggable, cleartext HTTP et absence de Network Security Config', () => {
+test('détecte debuggable, backup et cleartext HTTP', () => {
   const security = analyzeSecurity(cleartextExportedFixture);
   assert.equal(security.debuggable, DetectionStatus.DETECTED);
   assert.equal(security.allowBackup, DetectionStatus.DETECTED);
   assert.equal(security.usesCleartextTraffic, DetectionStatus.DETECTED);
-  assert.equal(security.networkSecurityConfigPresent, DetectionStatus.NOT_DETECTED);
 });
 
 test('calcule le nombre de composants exportés et récupère le certificat de signature', () => {
@@ -20,9 +19,10 @@ test('calcule le nombre de composants exportés et récupère le certificat de s
   assert.equal(security.hasMultipleSigners, DetectionStatus.NOT_DETECTED);
 });
 
-test('le schéma de signature APK et les certificats épinglés restent toujours UNKNOWN (limite documentée)', () => {
+test('le schéma de signature APK, le Network Security Config et les certificats épinglés restent toujours UNKNOWN (limite documentée)', () => {
   const security = analyzeSecurity(cleartextExportedFixture);
   assert.equal(security.signatureScheme, DetectionStatus.UNKNOWN);
+  assert.equal(security.networkSecurityConfigPresent, DetectionStatus.UNKNOWN);
   assert.equal(security.customPinnedCertificates, DetectionStatus.UNKNOWN);
 });
 

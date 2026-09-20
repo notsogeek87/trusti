@@ -37,7 +37,7 @@ const SecurityCard = ({ security }) => (
       <DetectionStatusBadge status={security.usesCleartextTraffic} detectedLabel="Oui" notDetectedLabel="Non détecté" />
     </Row>
     <Row label="Network Security Config">
-      <DetectionStatusBadge status={security.networkSecurityConfigPresent} detectedLabel="Présent" notDetectedLabel="Non détecté" />
+      <DetectionStatusBadge status={security.networkSecurityConfigPresent} />
     </Row>
     <Row label="Certificats réseau personnalisés">
       <DetectionStatusBadge status={security.customPinnedCertificates} />
@@ -65,8 +65,8 @@ const SecurityCard = ({ security }) => (
 
     <p className="text-[10px] text-slate-400 leading-relaxed mt-2">
       Le cleartext HTTP reflète le paramètre déclaré dans le manifeste ; un Network Security Config
-      peut affiner ce comportement par domaine, ce qui n'est pas analysé ici. Le schéma de signature
-      APK (v1/v2/v3) n'est pas exposé de façon fiable par l'API Android publique.
+      peut affiner ce comportement par domaine, mais sa présence n'est pas exposée par l'API Android
+      publique. Le schéma de signature APK (v1/v2/v3) n'est pas non plus exposé de façon fiable.
     </p>
   </div>
 );

@@ -13,7 +13,8 @@ import { DetectionStatus } from './DetectionStatus.js';
  * @property {string} allowBackup - DetectionStatus
  * @property {string} usesCleartextTraffic - DetectionStatus (déclaratif : reflète le drapeau du
  *   manifeste, qui peut être affiné par un Network Security Config par domaine non analysé ici)
- * @property {string} networkSecurityConfigPresent - DetectionStatus
+ * @property {string} networkSecurityConfigPresent - DetectionStatus (toujours UNKNOWN : aucun champ
+ *   public de l'API Android n'expose la présence d'un Network Security Config personnalisé)
  * @property {string} customPinnedCertificates - DetectionStatus (toujours UNKNOWN pour l'instant :
  *   nécessiterait de parser le XML du Network Security Config, non fait dans cette version)
  * @property {number|null} exportedComponentCount
@@ -50,7 +51,7 @@ export function createSecurityInfo(rawSecurity, rawAppInfo, rawComponentCounts) 
     debuggable: dataAvailable ? boolToStatus(rawSecurity.debuggable) : DetectionStatus.UNKNOWN,
     allowBackup: dataAvailable ? boolToStatus(rawSecurity.allowBackup) : DetectionStatus.UNKNOWN,
     usesCleartextTraffic: dataAvailable ? boolToStatus(rawSecurity.usesCleartextTraffic) : DetectionStatus.UNKNOWN,
-    networkSecurityConfigPresent: dataAvailable ? boolToStatus(rawSecurity.networkSecurityConfigPresent) : DetectionStatus.UNKNOWN,
+    networkSecurityConfigPresent: DetectionStatus.UNKNOWN,
     customPinnedCertificates: DetectionStatus.UNKNOWN,
     exportedComponentCount,
     signingCertificatesSha256: rawSecurity?.signingCertificatesSha256 || [],
