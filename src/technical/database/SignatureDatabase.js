@@ -1,4 +1,5 @@
 import { Confidence } from '../model/Confidence.js';
+import { DetectionMethod } from '../model/DetectionMethod.js';
 import { createDetectionEntry } from '../model/DetectionEntry.js';
 
 /**
@@ -49,6 +50,8 @@ export class SignatureDatabase {
           createDetectionEntry(signature, {
             confidence: Confidence.HIGH,
             detectionMethod: `Composant déclaré dans le manifeste de l'application (${matchedComponent})`,
+            method: DetectionMethod.MANIFEST,
+            source: matchedComponent,
           })
         );
       } else if (matchedMetaData) {
@@ -56,6 +59,8 @@ export class SignatureDatabase {
           createDetectionEntry(signature, {
             confidence: Confidence.HIGH,
             detectionMethod: `Clé de configuration détectée dans le manifeste (${matchedMetaData})`,
+            method: DetectionMethod.APK_METADATA,
+            source: matchedMetaData,
           })
         );
       }

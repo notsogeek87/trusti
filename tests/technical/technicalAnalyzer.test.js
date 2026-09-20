@@ -37,11 +37,21 @@ test('toExportJSON() ne contient que les données réellement détectées', () =
   assert.ok(exported.sdk.length >= 3);
   assert.ok(['LOW', 'MODERATE', 'HIGH', 'VERY_HIGH', 'UNKNOWN'].includes(exported.dependencyLevel));
 
-  // Forme conforme à l'exemple de la spec : packageName, version, permissions,
-  // googleDependencies, sdk, trackers, dependencyLevel.
-  for (const key of ['packageName', 'version', 'permissions', 'googleDependencies', 'sdk', 'trackers', 'dependencyLevel']) {
+  // Forme conforme à l'exemple de la spec : packageName, version, composition,
+  // permissions, googleDependencies, sdk, trackers, security, dependencyLevel.
+  for (const key of ['packageName', 'version', 'composition', 'permissions', 'googleDependencies', 'sdk', 'trackers', 'security', 'dependencyLevel']) {
     assert.ok(key in exported, `clé manquante dans l'export: ${key}`);
   }
+});
+
+test('chaque SDK exporté conserve sa provenance (metadata.method / source)', () => {
+  const analysis = TechnicalAnalyzer.analyzeRaw(multipleSdksFixture);
+  const exported = toExportJSON(analysis);
+  const sentry = exported.sdk.find((s) => s.id === 'sentry');
+
+  assert.ok(sentry, 'Sentry doit être présent dans l\'export');
+  assert.equal(sentry.metadata.method, 'MANIFEST');
+  assert.ok(sentry.metadata.source.includes('io.sentry'));
 });
 
 test('l\'analyse technique ne modifie/ne lit jamais le module Trusti-Score éditorial', async () => {

@@ -1,11 +1,6 @@
 import React from 'react';
 import { Smartphone } from 'lucide-react';
-
-const formatBytes = (bytes) => {
-  if (bytes === null || bytes === undefined) return 'Non disponible';
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} Ko`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
-};
+import { formatBytes } from '../../utils/formatBytes';
 
 const formatDate = (timestampMs) => {
   if (!timestampMs) return 'Non disponible';
