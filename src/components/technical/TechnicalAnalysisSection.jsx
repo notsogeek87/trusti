@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Search, Boxes, Eye, Package, Download, Info, AlertTriangle } from 'lucide-react';
+import { Search, Boxes, Eye, Package, Download, Info, AlertTriangle, HelpCircle } from 'lucide-react';
+import Accordion from '../ui/Accordion';
 import DependencyLevelBadge from './DependencyLevelBadge';
 import DetectionEntryList from './DetectionEntryList';
 import TechnicalPermissionsCard from './TechnicalPermissionsCard';
@@ -10,9 +11,11 @@ import { downloadJSON } from '../../utils/downloadJSON';
 
 /**
  * Section "🔎 Analyse technique" — totalement découplée du Trusti-Score
- * communautaire/éditorial affiché plus haut dans AppDetailModal. N'apparaît
- * que dans l'app Android native, quand l'application analysée est installée
- * sur l'appareil (voir useTechnicalAnalysis).
+ * communautaire/éditorial affiché plus haut dans AppDetailModal. Repliée par
+ * défaut dans un accordéon (c'est un bloc volumineux, secondaire par rapport
+ * au Trusti-Score) et accompagnée d'un texte d'explication pour un public non
+ * technique. N'apparaît que dans l'app Android native, quand l'application
+ * analysée est installée sur l'appareil (voir useTechnicalAnalysis).
  */
 const TechnicalAnalysisSection = ({ status, analysis, error }) => {
   const [showAbout, setShowAbout] = useState(false);
@@ -36,18 +39,30 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
   };
 
   return (
-    <div className="mb-4">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="font-black text-sm uppercase tracking-tight text-slate-800 flex items-center gap-2">
-          <Search size={18} className="text-indigo-600" /> Analyse technique
-        </h2>
-        <button
-          onClick={() => setShowAbout(true)}
-          className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors"
-          title="À propos de l'analyse"
-        >
-          <Info size={16} />
-        </button>
+    <Accordion
+      icon={Search}
+      title="Analyse technique"
+      subtitle="Ce que l'application contient réellement — détecté sur votre téléphone"
+    >
+      {/* Explicatif pour un public non technique : à quoi sert cette section,
+          en quoi elle diffère du Trusti-Score, et ses limites. */}
+      <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3 mb-4 flex items-start gap-2">
+        <HelpCircle size={16} className="text-indigo-500 shrink-0 mt-0.5" />
+        <div className="text-[11px] text-indigo-900 leading-relaxed space-y-1.5">
+          <p>
+            Cette section liste des <strong>faits techniques</strong> détectés automatiquement
+            sur votre téléphone (permissions, services Google, SDK publicitaires...).
+            C'est différent du Trusti-Score ci-dessus, qui reflète l'avis de la communauté :
+            ici, aucun jugement, seulement ce qui a été trouvé.
+          </p>
+          <p>
+            Une bibliothèque détectée n'est pas forcément utilisée activement par l'application.
+            Et « non détecté » ne veut pas dire « absent » — voir{' '}
+            <button onClick={() => setShowAbout(true)} className="underline font-semibold">
+              à propos de l'analyse
+            </button>.
+          </p>
+        </div>
       </div>
 
       {!analysis.componentsAvailable && (
@@ -103,14 +118,21 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
 
       <button
         onClick={handleExport}
-        className="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 px-3 rounded-xl transition-all active:scale-[0.98] mb-4"
+        className="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 px-3 rounded-xl transition-all active:scale-[0.98] mb-2"
       >
         <Download size={14} /> Exporter l'analyse (JSON)
       </button>
 
+      <button
+        onClick={() => setShowAbout(true)}
+        className="w-full flex items-center justify-center gap-1.5 text-slate-400 hover:text-indigo-600 text-[11px] font-semibold py-1.5 transition-colors"
+      >
+        <Info size={12} /> À propos de l'analyse
+      </button>
+
       {showAbout && <AboutTechnicalAnalysisModal onClose={() => setShowAbout(false)} />}
       {error && null /* erreur déjà traduite en `unavailable` par le hook : rien à afficher ici */}
-    </div>
+    </Accordion>
   );
 };
 
