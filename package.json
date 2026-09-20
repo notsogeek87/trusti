@@ -18,6 +18,7 @@
     "check:resend": "node check-resend-config.js",
     "check:brevo": "node check-brevo-config.js",
     "test:email": "node check-brevo-config.js",
+    "test": "node --test 'tests/technical/**/*.test.js'",
     "build": "vite build",
     "preview": "vite preview",
     "vercel-build": "vite build"

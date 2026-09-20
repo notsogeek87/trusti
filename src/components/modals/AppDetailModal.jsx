@@ -9,6 +9,8 @@ import { API_URL } from '../../utils/apiConfig';
 import { isNativeAndroid } from '../../utils/platform';
 import { extractPackageId } from '../../utils/androidPackage';
 import InstalledApps from '../../native/InstalledApps';
+import TechnicalAnalysisSection from '../technical/TechnicalAnalysisSection';
+import useTechnicalAnalysis from '../../hooks/useTechnicalAnalysis';
 
 const ANIM_STYLES = `
   @keyframes detailSlideUp {
@@ -68,6 +70,11 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
       cancelled = true;
     };
   }, [packageName]);
+
+  // Analyse technique locale (permissions, Google, SDK, trackers...) — voir
+  // src/technical/. Uniquement pour une app réellement installée sur
+  // l'appareil ; totalement indépendante du Trusti-Score éditorial ci-dessus.
+  const technicalAnalysis = useTechnicalAnalysis(isInstalledOnDevice ? packageName : null);
 
   const handleUninstall = () => {
     if (!packageName) return;
@@ -353,6 +360,14 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
 
         {/* ── Colonne droite : analyse & relations ── */}
         <div className={isMobile ? '' : 'flex-1 min-w-0'} style={sectionAnim(isMobile ? 100 : 120)}>
+
+          {/* 🔎 Analyse technique — indépendante du Trusti-Score, visible uniquement
+              si l'app est détectée installée sur l'appareil (app Android native) */}
+          <TechnicalAnalysisSection
+            status={technicalAnalysis.status}
+            analysis={technicalAnalysis.analysis}
+            error={technicalAnalysis.error}
+          />
 
           {/* Pourquoi cette note ? */}
           {(() => {
