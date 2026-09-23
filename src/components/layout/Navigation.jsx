@@ -62,8 +62,12 @@ const Navigation = ({ activeTab, onTabChange, myAppsCount }) => {
   }
 
   return (
-    <aside className="flex flex-col w-52 shrink-0 border-r border-slate-100 bg-white">
-      <nav className="sticky top-0 flex flex-col gap-1 py-6 px-3 h-screen">
+    // `aside` ne fait que réserver la largeur dans le flux (le menu réel est
+    // en `fixed`, donc hors flux) pour que le contenu principal ne passe pas
+    // dessous. `fixed` plutôt que `sticky` : le menu ne doit jamais bouger,
+    // même d'un pixel, pendant le scroll.
+    <aside className="w-52 shrink-0">
+      <nav className="fixed top-14 left-0 bottom-0 w-52 flex flex-col gap-1 py-6 px-3 border-r border-slate-100 bg-white overflow-y-auto z-20">
         <p className="text-[10px] font-black uppercase tracking-widest text-slate-300 px-3 mb-2">Navigation</p>
         {TABS_CONFIG.map(({ id, label, icon: Icon, activeColor, activeBg, inactiveColor, badge }) => {
           const active = activeTab === id;
