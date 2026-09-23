@@ -12,6 +12,7 @@ import { parseShareParams, clearShareParams, hasShareParams } from './utils/shar
 import { getAdminTokenEmail, clearAdminToken, setAdminToken } from './utils/adminAuth';
 import { hasCompletedOnboarding, markOnboardingComplete } from './utils/onboardingStorage';
 import { AGE_MODE, getAgeMode, hasSetAgeMode, setAgeMode } from './utils/ageMode';
+import { getMyAppsSortPref, setMyAppsSortPref, sortMyApps } from './utils/myAppsSort';
 
 // Composants définis hors du render pour éviter le remontage à chaque re-render
 const FloatingToggle = ({ isSmallViewport, forceMobile, onToggle }) => {
@@ -55,6 +56,7 @@ import SearchBar from './components/ui/SearchBar';
 import ExplainerPanel from './components/ExplainerPanel';
 import AppsList from './components/AppsList';
 import MyAppsSummary from './components/MyAppsSummary';
+import MyAppsSortMenu from './components/MyAppsSortMenu';
 import LandingPage from './components/LandingPage';
 import TrustiChatWidget from './components/TrustiChatWidget';
 import OnboardingApps from './components/OnboardingApps';
@@ -243,6 +245,13 @@ const App = () => {
   // État pour le filtre migrée / à migrer dans l'onglet Mes Apps
   const [migrationFilter, setMigrationFilter] = useState('all');
 
+  // Réglage de tri de l'onglet "Mes Apps" (discret, persisté en local) :
+  // TrustiScore décroissant par défaut, comme historiquement.
+  const [mySort, setMySort] = useState(() => getMyAppsSortPref());
+  useEffect(() => {
+    setMyAppsSortPref(mySort);
+  }, [mySort]);
+
   // Gestion de l'état des applications (avec sauvegarde utilisateur)
   const {
     activeTab,
@@ -282,14 +291,25 @@ const App = () => {
     return { migrated, todo: realApps.length - migrated };
   }, [activeTab, filteredApps]);
 
-  // Liste effectivement affichée dans "Mes Apps", après application du filtre migrée / à migrer
+  // Ordre d'ajout à "Mes Apps" (le Set préserve l'ordre d'insertion), utilisé
+  // par le tri "Date d'ajout".
+  const myAppsOrder = useMemo(
+    () => new Map(Array.from(myApps).map((id, index) => [String(id), index])),
+    [myApps]
+  );
+
+  // Liste effectivement affichée dans "Mes Apps" : filtre migrée / à migrer
+  // puis tri selon le réglage choisi (TrustiScore décroissant par défaut).
   const myAppsDisplayed = useMemo(() => {
-    if (activeTab !== TABS.MY_APPS || migrationFilter === 'all') return filteredApps;
-    return filteredApps.filter(app => {
-      if (app.isLoadingSkeleton) return false;
-      return migrationFilter === 'migrated' ? isAppMigrated(app) : !isAppMigrated(app);
-    });
-  }, [activeTab, filteredApps, migrationFilter]);
+    if (activeTab !== TABS.MY_APPS) return filteredApps;
+    const filtered = migrationFilter === 'all'
+      ? filteredApps
+      : filteredApps.filter(app => {
+          if (app.isLoadingSkeleton) return false;
+          return migrationFilter === 'migrated' ? isAppMigrated(app) : !isAppMigrated(app);
+        });
+    return sortMyApps(filtered, mySort, myAppsOrder);
+  }, [activeTab, filteredApps, migrationFilter, mySort, myAppsOrder]);
 
   // Import via lien de partage (?apps=... et/ou ?mig=...)
   const [pendingImport, setPendingImport] = useState(null);
@@ -749,6 +769,13 @@ const App = () => {
                 </p>
               </div>
               <div className="shrink-0 flex items-center gap-2">
+                {myApps.size > 1 && (
+                  <MyAppsSortMenu
+                    sortBy={mySort.sortBy}
+                    direction={mySort.direction}
+                    onChange={setMySort}
+                  />
+                )}
                 <button
                   onClick={() => setShowRescan(true)}
                   className="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
