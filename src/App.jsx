@@ -298,18 +298,25 @@ const App = () => {
     [myApps]
   );
 
-  // Liste effectivement affichée dans "Mes Apps" : filtre migrée / à migrer
-  // puis tri selon le réglage choisi (TrustiScore décroissant par défaut).
+  // Toutes les apps de "Mes Apps", triées selon le réglage choisi (utilisé
+  // par la liste affichée ci-dessous, mais aussi par le partage : le lien
+  // "Partager mon TrustiScore" doit refléter le même ordre que ce que
+  // l'utilisateur voit).
+  const myAppsSorted = useMemo(() => {
+    const relevant = filteredApps.filter(app => myApps.has(app.id));
+    return sortMyApps(relevant, mySort, myAppsOrder);
+  }, [filteredApps, myApps, mySort, myAppsOrder]);
+
+  // Liste effectivement affichée dans "Mes Apps" : version triée ci-dessus,
+  // avec en plus le filtre migrée / à migrer.
   const myAppsDisplayed = useMemo(() => {
     if (activeTab !== TABS.MY_APPS) return filteredApps;
-    const filtered = migrationFilter === 'all'
-      ? filteredApps
-      : filteredApps.filter(app => {
-          if (app.isLoadingSkeleton) return false;
-          return migrationFilter === 'migrated' ? isAppMigrated(app) : !isAppMigrated(app);
-        });
-    return sortMyApps(filtered, mySort, myAppsOrder);
-  }, [activeTab, filteredApps, migrationFilter, mySort, myAppsOrder]);
+    if (migrationFilter === 'all') return myAppsSorted;
+    return myAppsSorted.filter(app => {
+      if (app.isLoadingSkeleton) return false;
+      return migrationFilter === 'migrated' ? isAppMigrated(app) : !isAppMigrated(app);
+    });
+  }, [activeTab, filteredApps, myAppsSorted, migrationFilter]);
 
   // Import via lien de partage (?apps=... et/ou ?mig=...)
   const [pendingImport, setPendingImport] = useState(null);
@@ -891,6 +898,7 @@ const App = () => {
           migratedApps={migratedApps}
           customMigrations={customMigrations}
           allApps={apps}
+          sortedAppIds={myAppsSorted.map(app => app.id)}
           onClose={() => setShowShareModal(false)}
         />
       )}
@@ -898,7 +906,7 @@ const App = () => {
       {/* Modal de partage des TrustiApp */}
       {showTrustiShareModal && (
         <TrustiShareModal
-          selectedApps={filteredApps.filter(a => myApps.has(a.id))}
+          selectedApps={myAppsSorted}
           customMigrations={customMigrations}
           allApps={apps}
           onClose={() => setShowTrustiShareModal(false)}

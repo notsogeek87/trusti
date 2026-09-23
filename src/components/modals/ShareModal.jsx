@@ -6,19 +6,24 @@ import { shareText } from '../../utils/shareUtils';
 /**
  * Modal de partage des migrations
  */
-const ShareModal = ({ migratedApps, customMigrations, allApps = [], onClose }) => {
+const ShareModal = ({ migratedApps, customMigrations, allApps = [], sortedAppIds = [], onClose }) => {
   // Utiliser uniquement les apps de la BDD
   const apps = allApps;
-  
+
+  // Reprend l'ordre choisi par l'utilisateur pour "Mes Apps" (voir le réglage
+  // de tri) plutôt que l'ordre d'insertion brut du Set des migrations.
+  const orderIndex = new Map(sortedAppIds.map((id, index) => [id, index]));
+
   const migratedList = Array.from(migratedApps).map(id => {
     const app = apps.find(a => a.id === id);
     const customAlt = customMigrations.get(id);
-    const altApp = customAlt 
-      ? apps.find(a => a.name === customAlt) 
+    const altApp = customAlt
+      ? apps.find(a => a.name === customAlt)
       : (app?.alternative ? apps.find(a => a.name === app.alternative) : null);
-    
+
     return { app, customAlt, altApp };
-  }).filter(({ app }) => app);
+  }).filter(({ app }) => app)
+    .sort((a, b) => (orderIndex.get(a.app.id) ?? 0) - (orderIndex.get(b.app.id) ?? 0));
 
   const generateShareText = () => {
     const migrations = migratedList.map(({ app, customAlt }) =>
