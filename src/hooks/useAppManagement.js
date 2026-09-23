@@ -577,6 +577,17 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     });
   };
 
+  // Retirer plusieurs apps de "Mes Apps" (ex: apps confirmées désinstallées
+  // lors d'un nouveau scan du téléphone)
+  const removeMyApps = (ids) => {
+    if (!ids || ids.length === 0) return;
+    setMyApps(prev => {
+      const next = new Set(prev);
+      ids.forEach(id => next.delete(String(id)));
+      return next;
+    });
+  };
+
   // Marquer/démarquer comme migré
   const toggleMigrate = (e, id) => {
     e.stopPropagation();
@@ -689,6 +700,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     setSearchTerm,
     toggleMyApp,
     addMyApps,
+    removeMyApps,
     toggleMigrate,
     setCustomMigration,
     importMigrations,
