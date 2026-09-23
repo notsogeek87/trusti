@@ -3,6 +3,11 @@
  * Catégories principales simplifiées pour le mobile
  * Ordonnées par pertinence/popularité
  */
+// Pseudo-catégorie du catalogue : ne filtre pas par catégorie réelle mais
+// par apps marquées en favori ("+" dans le catalogue), pour les retrouver
+// avant de décider de les ajouter à "Mes Apps".
+export const FAVORITES_FILTER = 'À tester';
+
 export const CATEGORIES = [
   'Messagerie',
   'Réseaux sociaux',
