@@ -226,12 +226,18 @@ const App = () => {
 
   // Re-scan manuel depuis "Mes Apps" : relance le scan (Android natif) ou la
   // sélection manuelle (PWA/web) pour repérer de nouvelles apps installées
-  // sans repasser par tout l'onboarding. Purement additif : n'enlève jamais
-  // une app déjà suivie, même si elle n'est plus cochée dans le résultat.
+  // sans repasser par tout l'onboarding. Le scan natif remonte aussi les apps
+  // du catalogue confirmées désinstallées (package non retrouvé) pour qu'on
+  // les retire de "Mes Apps" — sinon la liste n'est jamais vraiment "à jour".
+  // La sélection manuelle (PWA/web, sans lecture réelle du téléphone) reste
+  // purement additive, faute de moyen de vérifier ce qui est désinstallé.
   const [showRescan, setShowRescan] = useState(false);
   const [forceManualRescan, setForceManualRescan] = useState(false);
 
-  const handleRescanComplete = (selectedAppIds) => {
+  const handleRescanComplete = (selectedAppIds, notInstalledIds) => {
+    if (notInstalledIds && notInstalledIds.length > 0) {
+      removeMyApps(notInstalledIds);
+    }
     if (selectedAppIds && selectedAppIds.size > 0) {
       addMyApps([...selectedAppIds].map(String));
     }
@@ -272,6 +278,7 @@ const App = () => {
     setSearchTerm,
     toggleMyApp,
     addMyApps,
+    removeMyApps,
     toggleMigrate,
     setCustomMigration,
     importMigrations,

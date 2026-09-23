@@ -138,6 +138,9 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
   const [foundApps, setFoundApps] = useState([]); // sous-ensemble de `matches` révélé pendant l'animation de scan
   const [revealedCount, setRevealedCount] = useState(0);
   const [scanHint, setScanHint] = useState(null); // message de réassurance affiché pendant l'attente du scan
+  // Apps du catalogue qu'on sait détecter (playStoreUrl exploitable) mais qui
+  // ne sont PAS ressorties de ce scan : confirmées désinstallées du téléphone.
+  const [notInstalledIds, setNotInstalledIds] = useState([]);
 
   // Messages de réassurance pendant le temps mort du scan (avant que les
   // premières icônes n'apparaissent), pour éviter que l'utilisateur ne
@@ -180,7 +183,7 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
   // validation et le récapitulatif, plutôt qu'un cut brutal vers la liste d'apps.
   const handleFinish = async () => {
     if (selected.size === 0) {
-      onComplete(selected);
+      onComplete(selected, notInstalledIds);
       return;
     }
     setPhase('finalizing');
@@ -203,6 +206,16 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
         const pkg = extractPackageId(app.playStoreUrl);
         return pkg && installedPackages.has(pkg);
       });
+
+      // Apps qu'on est capable de vérifier (package identifiable) mais qui ne
+      // sont pas ressorties de ce scan : elles ont été désinstallées depuis un
+      // scan précédent, il faut les retirer de "Mes Apps" au lieu de les
+      // laisser traîner indéfiniment.
+      const foundIds = new Set(found.map(a => String(a.id)));
+      const notFound = catalogRes.apps
+        .filter(app => extractPackageId(app.playStoreUrl) && !foundIds.has(String(app.id)))
+        .map(app => String(app.id));
+      setNotInstalledIds(notFound);
 
       // Révèle les apps trouvées une à une (plafonné pour rester lisible à
       // l'écran) pour donner l'impression d'un scan qui les découvre en direct.
@@ -432,7 +445,7 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
     return (
       <OnboardingSummary
         apps={matches.filter(app => selected.has(app.id))}
-        onDetails={() => onComplete(selected)}
+        onDetails={() => onComplete(selected, notInstalledIds)}
       />
     );
   }
