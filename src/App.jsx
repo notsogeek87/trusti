@@ -4,8 +4,8 @@ import { useAppManagement } from './hooks/useAppManagement';
 import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
 import { TABS } from './constants/tabs';
-import { CATEGORIES } from './constants/categories';
-import { Sparkles, Smartphone, Monitor, Share2, RefreshCw } from 'lucide-react';
+import { CATEGORIES, FAVORITES_FILTER } from './constants/categories';
+import { Sparkles, Smartphone, Monitor, Share2, RefreshCw, Star } from 'lucide-react';
 import { ViewModeContext } from './contexts/ViewModeContext';
 import { AgeModeContext } from './contexts/AgeModeContext';
 import { parseShareParams, clearShareParams, hasShareParams } from './utils/shareUtils';
@@ -257,6 +257,7 @@ const App = () => {
     activeTab,
     searchTerm,
     myApps,
+    favoriteApps,
     migratedApps,
     customMigrations,
     selectedApp,
@@ -271,6 +272,7 @@ const App = () => {
     setActiveTab,
     setSearchTerm,
     toggleMyApp,
+    toggleFavorite,
     addMyApps,
     toggleMigrate,
     setCustomMigration,
@@ -739,12 +741,12 @@ const App = () => {
               <div className="relative">
               <div className="overflow-x-auto scrollbar-hide">
                 <div className="flex gap-1.5 pb-1.5 px-0.5">
-                  {['Toutes', ...CATEGORIES].map((category) => (
+                  {['Toutes', FAVORITES_FILTER, ...CATEGORIES].map((category) => (
                     <button
                       key={category}
                       onClick={() => setSelectedCategory(category)}
                       className={`
-                        flex-shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition-all
+                        flex-shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition-all inline-flex items-center gap-1
                         ${
                           selectedCategory === category
                             ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md scale-105'
@@ -752,7 +754,13 @@ const App = () => {
                         }
                       `}
                     >
+                      {category === FAVORITES_FILTER && (
+                        <Star size={11} className={selectedCategory === category ? 'fill-current' : ''} />
+                      )}
                       {category}
+                      {category === FAVORITES_FILTER && favoriteApps.size > 0 && (
+                        <span>({favoriteApps.size})</span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -875,9 +883,11 @@ const App = () => {
           apps={activeTab === TABS.MY_APPS ? myAppsDisplayed : filteredApps}
           activeTab={activeTab}
           myApps={myApps}
+          favoriteApps={favoriteApps}
           migratedApps={migratedApps}
           customMigrations={customMigrations}
           onToggleMyApp={toggleMyApp}
+          onToggleFavorite={toggleFavorite}
           onToggleMigrate={toggleMigrate}
           onSelectApp={openAppDetail}
           onSelectMigration={setShowMigrationSelector}

@@ -63,6 +63,9 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
   );
   const [searchTerm, setSearchTerm] = useState("");
   const [myApps, setMyApps] = useState(new Set());
+  // Favoris du catalogue ("+" sur une app hors Mes Apps) : filtrées ensuite
+  // via le filtre "À tester" dans le catalogue, indépendant de "Mes Apps".
+  const [favoriteApps, setFavoriteApps] = useState(new Set());
   const [migratedApps, setMigratedApps] = useState(new Set());
   const [customMigrations, setCustomMigrations] = useState(new Map());
   const [selectedApp, setSelectedApp] = useState(null);
@@ -107,11 +110,13 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     const userData = getUserData ? getUserData('apps') : null;
     if (userData) {
       setMyApps(new Set(userData.myApps || []));
+      setFavoriteApps(new Set(userData.favoriteApps || []));
       setMigratedApps(new Set(userData.migratedApps || []));
       setCustomMigrations(new Map(userData.customMigrations || []));
     } else {
       // Rien de sauvegardé encore : état vide
       setMyApps(new Set());
+      setFavoriteApps(new Set());
       setMigratedApps(new Set());
       setCustomMigrations(new Map());
     }
@@ -125,11 +130,12 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     if (isInitialized && saveUserData) {
       saveUserData('apps', {
         myApps: Array.from(myApps),
+        favoriteApps: Array.from(favoriteApps),
         migratedApps: Array.from(migratedApps),
         customMigrations: Array.from(customMigrations.entries())
       });
     }
-  }, [myApps, migratedApps, customMigrations]);
+  }, [myApps, favoriteApps, migratedApps, customMigrations]);
   // Note: On ne met pas saveUserData et currentUser dans les dépendances pour éviter la boucle
 
   // Charger toutes les applications au montage
@@ -568,6 +574,21 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     });
   };
 
+  // Ajouter/retirer une app des favoris du catalogue ("+" sur une app qui
+  // n'est pas dans "Mes Apps") — n'affecte jamais "Mes Apps".
+  const toggleFavorite = (e, id) => {
+    e.stopPropagation();
+    setFavoriteApps(prev => {
+      const newList = new Set(prev);
+      if (newList.has(id)) {
+        newList.delete(id);
+      } else {
+        newList.add(id);
+      }
+      return newList;
+    });
+  };
+
   // Ajouter plusieurs apps sans risque de toggle (toujours additive)
   const addMyApps = (ids) => {
     setMyApps(prev => {
@@ -672,6 +693,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     activeTab,
     searchTerm,
     myApps,
+    favoriteApps,
     migratedApps,
     customMigrations,
     selectedApp,
@@ -688,6 +710,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     setActiveTab,
     setSearchTerm,
     toggleMyApp,
+    toggleFavorite,
     addMyApps,
     toggleMigrate,
     setCustomMigration,
