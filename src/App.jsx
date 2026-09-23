@@ -714,7 +714,12 @@ const App = () => {
         onRequestAdminUnlock={() => setShowPinModal(true)}
       />
 
-      <div className={isMobile ? '' : 'flex items-start'}>
+      {/* items-start casserait le sticky du menu : sans stretch, la colonne du
+          menu ne fait que la hauteur d'un écran (h-screen) et n'a donc aucune
+          marge pour rester "collée" au scroll — elle disparaît avec le reste
+          dès qu'on dépasse un écran de contenu (visible en tablette/paysage,
+          où le menu latéral remplace la barre du bas). */}
+      <div className={isMobile ? '' : 'flex'}>
       <Navigation
         activeTab={activeTab}
         onTabChange={setActiveTab}
