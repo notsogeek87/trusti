@@ -221,6 +221,11 @@ const App = () => {
     setMyAppsSortPref(mySort);
   }, [mySort]);
 
+  // Gestion de l'espace de stockage (voir StorageManagerModal) — déclaré avant
+  // useAppManagement pour pouvoir lui signaler qu'il a besoin des données
+  // complètes de "Mes Apps" même si l'onglet actif est différent.
+  const [showStorageManager, setShowStorageManager] = useState(false);
+
   // Gestion de l'état des applications (avec sauvegarde utilisateur)
   const {
     activeTab,
@@ -237,6 +242,7 @@ const App = () => {
     isSearching,
     isLoadingAwards,
     isLoadingMyApps,
+    myAppsData,
     pagination,
     setActiveTab,
     setSearchTerm,
@@ -251,10 +257,7 @@ const App = () => {
     importMigrations,
     setSelectedApp,
     loadMoreApps,
-  } = useAppManagement(currentUser, saveUserData, getUserData, selectedCategory);
-
-  // Gestion de l'espace de stockage (voir StorageManagerModal)
-  const [showStorageManager, setShowStorageManager] = useState(false);
+  } = useAppManagement(currentUser, saveUserData, getUserData, selectedCategory, showStorageManager);
 
   // Une app "Mes Apps" est considérée migrée si elle est déjà au top (grade A)
   // ou si l'alternative recommandée est déjà utilisée.
@@ -668,6 +671,8 @@ const App = () => {
         onClose={() => setShowStorageManager(false)}
         myAppsCount={myApps.size}
         migrationsCount={migratedApps.size}
+        myAppsData={myAppsData}
+        isLoadingMyAppsData={isLoadingMyApps}
         onClearMyApps={clearMyApps}
         onClearMigrations={clearMigrations}
       />

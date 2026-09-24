@@ -1,6 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, HardDrive, Smartphone, RefreshCcw, Trash2, AlertTriangle } from 'lucide-react';
 import { getStorageStats, formatBytes, clearAllTrustiStorage } from '../../utils/storageStats';
+import { isNativeAndroid } from '../../utils/platform';
+import { extractPackageId } from '../../utils/androidPackage';
+import InstalledApps from '../../native/InstalledApps';
+import { sortMyApps } from '../../utils/myAppsSort';
+import MyAppsSortMenu from '../MyAppsSortMenu';
+import ScoreIndicator from '../ui/ScoreIndicator';
 
 // Une action de vidage se déroule en deux temps (armée -> confirmée) pour
 // éviter un vidage accidentel au premier clic, sans passer par un second
@@ -59,14 +65,62 @@ const StorageManagerModal = ({
   onClose,
   myAppsCount,
   migrationsCount,
+  myAppsData = [],
+  isLoadingMyAppsData = false,
   onClearMyApps,
   onClearMigrations,
 }) => {
   const [stats, setStats] = useState({ totalKeys: 0, totalBytes: 0 });
+  // null = scan pas encore lancé/terminé, [] = scan fait, rien trouvé.
+  const [installedPackages, setInstalledPackages] = useState(null);
+  // Tri propre à cette liste (indépendant du tri de l'onglet "Mes Apps"),
+  // par défaut le TrustiScore — le critère le plus utile pour repérer d'un
+  // coup d'œil les apps à risque qui pèsent sur l'appareil.
+  const [sortPref, setSortPref] = useState({ sortBy: 'trustiScore', direction: 'desc' });
 
   useEffect(() => {
     if (isOpen) setStats(getStorageStats());
   }, [isOpen]);
+
+  // Recherche, parmi "Mes Apps", lesquelles sont réellement installées sur cet
+  // appareil (uniquement possible dans l'app Android native — voir
+  // InstalledAppsPlugin). Relancé à chaque ouverture pour refléter une
+  // désinstallation faite entre-temps.
+  useEffect(() => {
+    if (!isOpen || !isNativeAndroid) {
+      setInstalledPackages(null);
+      return undefined;
+    }
+    let cancelled = false;
+    InstalledApps.getInstalledPackages()
+      .then(({ packages }) => {
+        if (!cancelled) setInstalledPackages(packages || []);
+      })
+      .catch(() => {
+        if (!cancelled) setInstalledPackages([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen]);
+
+  const installedAppsList = useMemo(() => {
+    if (!isNativeAndroid || !installedPackages) return [];
+    const withPackage = myAppsData
+      .map(app => ({ app, packageName: extractPackageId(app.playStoreUrl) }))
+      .filter(({ packageName }) => packageName && installedPackages.includes(packageName));
+    const packageByAppId = new Map(withPackage.map(({ app, packageName }) => [app.id, packageName]));
+    return sortMyApps(withPackage.map(({ app }) => app), sortPref)
+      .map(app => ({ ...app, packageName: packageByAppId.get(app.id) }));
+  }, [myAppsData, installedPackages, sortPref]);
+
+  const handleUninstall = (app) => {
+    if (!app.packageName) return;
+    InstalledApps.uninstallPackage({ packageName: app.packageName }).catch((error) => {
+      console.error('Désinstallation impossible:', error);
+      window.alert("Impossible d'ouvrir la désinstallation. Réessayez depuis les paramètres du téléphone.");
+    });
+  };
 
   // Réinitialisation totale : contrairement au vidage ciblé (état React, géré
   // par useAppManagement), on efface directement toutes les clés puis on
@@ -114,6 +168,62 @@ const StorageManagerModal = ({
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mt-0.5">Utilisé</p>
           </div>
         </div>
+
+        {isNativeAndroid && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-xs font-black uppercase tracking-wide text-slate-400">
+                Applications installées{installedPackages ? ` (${installedAppsList.length})` : ''}
+              </h3>
+              {installedAppsList.length > 0 && (
+                <MyAppsSortMenu
+                  sortBy={sortPref.sortBy}
+                  direction={sortPref.direction}
+                  onChange={setSortPref}
+                />
+              )}
+            </div>
+
+            {installedPackages === null || isLoadingMyAppsData ? (
+              <div className="flex items-center gap-2 text-xs text-slate-400 py-3">
+                <div className="w-4 h-4 rounded-full border-2 border-slate-300 border-t-indigo-500 animate-spin" />
+                Recherche des apps installées…
+              </div>
+            ) : installedAppsList.length === 0 ? (
+              <p className="text-xs text-slate-400 py-2">
+                Aucune app de votre sélection détectée sur cet appareil.
+              </p>
+            ) : (
+              <div className="space-y-2 max-h-56 overflow-y-auto pr-0.5">
+                {installedAppsList.map(app => (
+                  <div key={app.id} className="flex items-center gap-2.5 bg-slate-50 rounded-xl p-2.5">
+                    <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 bg-white flex items-center justify-center">
+                      {app.icon && app.icon.startsWith('http') ? (
+                        <img src={app.icon} alt={app.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-lg">{app.icon}</span>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-slate-800 truncate">{app.name}</p>
+                      <p className="text-[10px] text-slate-400 truncate">{app.category}</p>
+                    </div>
+                    <ScoreIndicator grade={app.grade} />
+                    <button
+                      type="button"
+                      onClick={() => handleUninstall(app)}
+                      className="p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-all flex-shrink-0"
+                      title={`Désinstaller ${app.name}`}
+                      aria-label={`Désinstaller ${app.name}`}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="space-y-3">
           <ConfirmableAction
