@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import AppCard from './AppCard';
 import LoadingSpinner from './ui/LoadingSpinner';
 import { TABS } from '../constants/tabs';
@@ -36,6 +36,7 @@ const AppsList = ({
   isLoadingMyApps = false
 }) => {
   const isMobile = useIsMobile();
+  const loadMoreSentinelRef = useRef(null);
 
   // Filtrer par catégorie dans l'onglet APPLICATIONS — "À tester" est un cas
   // particulier : il filtre par favoris plutôt que par catégorie réelle.
@@ -61,6 +62,25 @@ const AppsList = ({
   const showPagination = activeTab === TABS.APPLICATIONS && selectedCategory === 'Toutes' && !searchTerm.trim();
   const hasMore = showPagination && pagination.hasMore;
   const isLoadingMore = pagination.isLoadingMore;
+
+  // Chargement automatique au scroll : dès que la sentinelle en bas de liste
+  // devient visible, on charge la page suivante (remplace le bouton "Voir plus").
+  useEffect(() => {
+    if (!hasMore || !onLoadMore) return;
+    const sentinel = loadMoreSentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          onLoadMore();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, onLoadMore]);
 
   // Pour l'onglet MY_APPS, ne pas bloquer l'affichage pendant le chargement
   // On laisse les AppCard individuelles afficher leur loader
@@ -156,26 +176,18 @@ const AppsList = ({
         />
       ))}
       
-      {/* Bouton "Voir plus" pour la pagination serveur */}
+      {/* Sentinelle de chargement automatique au scroll pour la pagination serveur */}
       {hasMore && (
-        <div className="text-center py-6">
-          <button
-            onClick={onLoadMore}
-            disabled={isLoadingMore}
-            className="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 disabled:bg-indigo-300 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-sm transition-all shadow-md hover:shadow-lg"
-          >
-            {isLoadingMore ? (
-              <span className="flex items-center gap-2">
-                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                Chargement...
-              </span>
-            ) : (
-              `Voir plus (${pagination.total - apps.length} restantes)`
-            )}
-          </button>
+        <div ref={loadMoreSentinelRef} className="col-span-full text-center py-6">
+          {isLoadingMore && (
+            <span className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-500">
+              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Chargement...
+            </span>
+          )}
         </div>
       )}
     </div>
