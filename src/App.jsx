@@ -44,7 +44,7 @@ import AdminAppsModal from './components/modals/AdminAppsModal';
 import PinModal from './components/modals/PinModal';
 import WelcomeModal from './components/modals/WelcomeModal';
 import AgePromptModal from './components/modals/AgePromptModal';
-import StorageManagerModal from './components/modals/StorageManagerModal';
+import StoragePage from './components/StoragePage';
 
 const useIsSmallViewport = () => {
   const [isSmall, setIsSmall] = useState(() => window.innerWidth < 768);
@@ -496,6 +496,11 @@ const App = () => {
         return;
       }
 
+      if (showStorageManager) {
+        setShowStorageManager(false);
+        return;
+      }
+
       if (showMigrationSelector) {
         setShowMigrationSelector(null);
         return;
@@ -519,7 +524,7 @@ const App = () => {
       cancelled = true;
       listenerHandle?.remove();
     };
-  }, [selectedApp, showMigrationSelector, activeTab, setSelectedApp, setShowMigrationSelector, setActiveTab]);
+  }, [selectedApp, showStorageManager, showMigrationSelector, activeTab, setSelectedApp, setShowMigrationSelector, setActiveTab]);
 
   // Appelé par PinModal après validation serveur réussie
   const handleUnlockAdmin = async (token) => {
@@ -610,6 +615,21 @@ const App = () => {
     );
   }
 
+  // Écran dédié "Espace de stockage" (page à part entière, pas une popup)
+  if (showStorageManager) {
+    return (
+      <StoragePage
+        onClose={() => setShowStorageManager(false)}
+        myAppsCount={myApps.size}
+        migrationsCount={migratedApps.size}
+        myAppsData={myAppsData}
+        isLoadingMyAppsData={isLoadingMyApps}
+        onClearMyApps={clearMyApps}
+        onClearMigrations={clearMigrations}
+      />
+    );
+  }
+
   // Vue principale
   return (
     <AgeModeContext.Provider value={ageMode}>
@@ -664,17 +684,6 @@ const App = () => {
         onShowLandingPage={() => setShowLandingPage(true)}
         isAdminUnlocked={isAdminUnlocked}
         onRequestAdminUnlock={() => setShowPinModal(true)}
-      />
-
-      <StorageManagerModal
-        isOpen={showStorageManager}
-        onClose={() => setShowStorageManager(false)}
-        myAppsCount={myApps.size}
-        migrationsCount={migratedApps.size}
-        myAppsData={myAppsData}
-        isLoadingMyAppsData={isLoadingMyApps}
-        onClearMyApps={clearMyApps}
-        onClearMigrations={clearMigrations}
       />
 
       {/* items-start casserait le sticky du menu : sans stretch, la colonne du
