@@ -44,6 +44,7 @@ import AdminAppsModal from './components/modals/AdminAppsModal';
 import PinModal from './components/modals/PinModal';
 import WelcomeModal from './components/modals/WelcomeModal';
 import AgePromptModal from './components/modals/AgePromptModal';
+import StorageManagerModal from './components/modals/StorageManagerModal';
 
 const useIsSmallViewport = () => {
   const [isSmall, setIsSmall] = useState(() => window.innerWidth < 768);
@@ -84,21 +85,13 @@ const App = () => {
     logout: authLogout,
     getUserData,
     saveUserData,
-    resetUserData: authResetUserData
   } = useAuth();
-  
+
   // Wrapper pour logout qui réinitialise aussi l'état admin
   const logout = () => {
     setIsAdminUnlocked(false);
     clearAdminToken();
     authLogout();
-  };
-
-  // Wrapper pour resetUserData qui réinitialise aussi l'état admin
-  const resetUserData = () => {
-    setIsAdminUnlocked(false);
-    clearAdminToken();
-    authResetUserData();
   };
 
   // État pour la landing page
@@ -228,6 +221,11 @@ const App = () => {
     setMyAppsSortPref(mySort);
   }, [mySort]);
 
+  // Gestion de l'espace de stockage (voir StorageManagerModal) — déclaré avant
+  // useAppManagement pour pouvoir lui signaler qu'il a besoin des données
+  // complètes de "Mes Apps" même si l'onglet actif est différent.
+  const [showStorageManager, setShowStorageManager] = useState(false);
+
   // Gestion de l'état des applications (avec sauvegarde utilisateur)
   const {
     activeTab,
@@ -244,6 +242,7 @@ const App = () => {
     isSearching,
     isLoadingAwards,
     isLoadingMyApps,
+    myAppsData,
     pagination,
     setActiveTab,
     setSearchTerm,
@@ -251,12 +250,14 @@ const App = () => {
     toggleFavorite,
     addMyApps,
     removeMyApps,
+    clearMyApps,
+    clearMigrations,
     toggleMigrate,
     setCustomMigration,
     importMigrations,
     setSelectedApp,
     loadMoreApps,
-  } = useAppManagement(currentUser, saveUserData, getUserData, selectedCategory);
+  } = useAppManagement(currentUser, saveUserData, getUserData, selectedCategory, showStorageManager);
 
   // Une app "Mes Apps" est considérée migrée si elle est déjà au top (grade A)
   // ou si l'alternative recommandée est déjà utilisée.
@@ -658,11 +659,22 @@ const App = () => {
         currentUser={currentUser}
         onLogout={logout}
         onLogin={() => setShowLoginModal(true)}
-        onResetUserData={resetUserData}
+        onOpenStorageManager={() => setShowStorageManager(true)}
         onOpenAdmin={() => setShowAdminModal(true)}
         onShowLandingPage={() => setShowLandingPage(true)}
         isAdminUnlocked={isAdminUnlocked}
         onRequestAdminUnlock={() => setShowPinModal(true)}
+      />
+
+      <StorageManagerModal
+        isOpen={showStorageManager}
+        onClose={() => setShowStorageManager(false)}
+        myAppsCount={myApps.size}
+        migrationsCount={migratedApps.size}
+        myAppsData={myAppsData}
+        isLoadingMyAppsData={isLoadingMyApps}
+        onClearMyApps={clearMyApps}
+        onClearMigrations={clearMigrations}
       />
 
       {/* items-start casserait le sticky du menu : sans stretch, la colonne du

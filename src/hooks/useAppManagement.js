@@ -55,7 +55,7 @@ const buildAlternativeInfo = (app, candidatePool, myAppsSet) => {
  * Toutes les apps sont des Applications avec un GRADE (A, B, C, D, E)
  * Le filtrage se fait côté front selon les besoins
  */
-export const useAppManagement = (currentUser, saveUserData, getUserData, selectedCategory = 'Toutes') => {
+export const useAppManagement = (currentUser, saveUserData, getUserData, selectedCategory = 'Toutes', needsMyAppsData = false) => {
   // Un utilisateur qui rouvre l'app après avoir déjà fait l'onboarding
   // retombe directement sur "Mes Apps" (1er onglet) plutôt que le catalogue.
   const [activeTab, setActiveTab] = useState(
@@ -244,12 +244,14 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     loadAwardsApps();
   }, [activeTab]); // Recharger à chaque changement d'onglet
   
-  // Charger les apps "Mes Apps" par leurs IDs quand l'onglet MY_APPS est actif
+  // Charger les apps "Mes Apps" par leurs IDs quand l'onglet MY_APPS est actif,
+  // ou qu'un autre écran en a besoin indépendamment de l'onglet actif (ex: la
+  // gestion de l'espace de stockage, qui liste "Mes Apps" même si l'utilisateur
+  // est resté sur un autre onglet).
   useEffect(() => {
     const loadMyApps = async () => {
-      // Ne charger que si l'onglet Mes Apps est actif et qu'il y a des apps
-      if (activeTab !== TABS.MY_APPS || myApps.size === 0) {
-        if (activeTab !== TABS.MY_APPS) {
+      if ((activeTab !== TABS.MY_APPS && !needsMyAppsData) || myApps.size === 0) {
+        if (activeTab !== TABS.MY_APPS && !needsMyAppsData) {
           // Réinitialiser quand on quitte l'onglet
           setMyAppsLoaded(false);
         }
@@ -295,7 +297,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     };
     
     loadMyApps();
-  }, [activeTab, myApps]); // Recharger quand l'onglet change ou que myApps change
+  }, [activeTab, myApps, needsMyAppsData]); // Recharger quand l'onglet, myApps, ou ce besoin externe change
   
   // Charger toutes les apps quand nécessaire :
   // - Une catégorie est sélectionnée (sauf "Toutes")
@@ -609,6 +611,21 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     });
   };
 
+  // Vider "Mes Apps" (et les favoris du catalogue associés) — utilisé par la
+  // gestion de l'espace de stockage pour repartir d'une sélection vide sans
+  // toucher à l'historique de migrations.
+  const clearMyApps = () => {
+    setMyApps(new Set());
+    setFavoriteApps(new Set());
+  };
+
+  // Vider l'historique de migrations (statut migré + alternatives
+  // personnalisées) sans retirer les apps de "Mes Apps".
+  const clearMigrations = () => {
+    setMigratedApps(new Set());
+    setCustomMigrations(new Map());
+  };
+
   // Marquer/démarquer comme migré
   const toggleMigrate = (e, id) => {
     e.stopPropagation();
@@ -714,6 +731,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     isSearching,
     isLoadingAwards,
     isLoadingMyApps,
+    myAppsData,
     filteredApps,
     pagination,
     
@@ -724,6 +742,8 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     toggleFavorite,
     addMyApps,
     removeMyApps,
+    clearMyApps,
+    clearMigrations,
     toggleMigrate,
     setCustomMigration,
     importMigrations,

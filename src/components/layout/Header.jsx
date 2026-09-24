@@ -1,5 +1,5 @@
 import React from 'react';
-import { HelpCircle, LogOut, User, RotateCcw, Settings, Lock } from 'lucide-react';
+import { HelpCircle, LogOut, User, HardDrive, Settings, Lock } from 'lucide-react';
 import { useIsMobile } from '../../contexts/ViewModeContext';
 import { isNativeAndroid } from '../../utils/platform';
 
@@ -7,7 +7,7 @@ const Header = ({
   currentUser,
   onLogout,
   onLogin,
-  onResetUserData,
+  onOpenStorageManager,
   onOpenAdmin,
   onShowLandingPage,
   isAdminUnlocked,
@@ -55,16 +55,6 @@ const Header = ({
                 </button>
               )}
 
-              {!isMobile && (
-                <button
-                  onClick={onResetUserData}
-                  className="p-1.5 md:p-2.5 text-slate-300 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-all"
-                  title="Réinitialiser mes données (démo)"
-                >
-                  <RotateCcw size={16} />
-                </button>
-              )}
-
               <button
                 onClick={onLogout}
                 className="p-1.5 md:p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-all"
@@ -88,6 +78,15 @@ const Header = ({
               </div>
             )
           )}
+
+          <button
+            onClick={onOpenStorageManager}
+            className="p-1.5 md:p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all"
+            aria-label="Gérer mon espace de stockage"
+            title="Gérer mon espace de stockage"
+          >
+            <HardDrive size={18} />
+          </button>
 
           <button
             onClick={onShowLandingPage}
