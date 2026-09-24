@@ -524,14 +524,25 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     if (activeTab === TABS.APPLICATIONS) {
       // Toutes les apps du catalogue
       list = [...sourceApps];
-      
-      // Trier par grade (A > B > C > D > E) puis par nom
-      const gradeOrder = { 'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5 };
-      list.sort((a, b) => {
-        const gradeCompare = (gradeOrder[a.grade] || 999) - (gradeOrder[b.grade] || 999);
-        if (gradeCompare !== 0) return gradeCompare;
-        return a.name.localeCompare(b.name);
-      });
+
+      // Cas du flux paginé côté serveur (catégorie "Toutes", pas de recherche) :
+      // l'API renvoie déjà les pages triées par grade puis nom (sortBy=grade).
+      // Re-trier ici avec le comparateur JS (localeCompare, sensible à la
+      // locale) peut donner un ordre légèrement différent de celui de
+      // Postgres pour certains noms (accents, ponctuation, casse) et donc
+      // réordonner des cartes déjà affichées à chaque page chargée. On garde
+      // alors l'ordre du serveur tel quel pour que le lazyload ne fasse
+      // qu'ajouter des cartes en fin de liste, sans décaler les précédentes.
+      const isServerPaginatedStream = !searchTerm.trim() && selectedCategory === 'Toutes';
+      if (!isServerPaginatedStream) {
+        // Trier par grade (A > B > C > D > E) puis par nom
+        const gradeOrder = { 'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5 };
+        list.sort((a, b) => {
+          const gradeCompare = (gradeOrder[a.grade] || 999) - (gradeOrder[b.grade] || 999);
+          if (gradeCompare !== 0) return gradeCompare;
+          return a.name.localeCompare(b.name);
+        });
+      }
     } else if (activeTab === TABS.MY_APPS) {
       // Si recherche active dans MY_APPS, filtrer les résultats de recherche
       list = sourceApps
@@ -562,7 +573,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     }
     
     return list;
-  }, [activeTab, myApps, searchTerm, searchResults, apps, awardsApps, myAppsData, isLoadingMyApps]);
+  }, [activeTab, myApps, searchTerm, searchResults, apps, awardsApps, myAppsData, isLoadingMyApps, selectedCategory]);
 
   // Ajouter/retirer une app de "Mes Apps"
   const toggleMyApp = (e, id) => {
