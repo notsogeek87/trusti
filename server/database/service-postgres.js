@@ -107,40 +107,6 @@ async function getFDroidUrl(packageName) {
 }
 
 /**
- * Helper: Récupérer l'icône dynamiquement (Play Store puis F-Droid).
- * Le Play Store fait foi ; l'icône saisie à la main ne sert que de repli.
- */
-async function getAppIcon(playStoreUrl, currentIcon) {
-  const packageName = extractPackageId(playStoreUrl);
-  if (!packageName) return currentIcon;
-
-  const appInfo = await getPlayStoreAppInfo(packageName);
-  if (appInfo?.icon) return appInfo.icon;
-
-  try {
-    const fdroidIcon = await getFDroidIcon(packageName);
-    if (fdroidIcon) return fdroidIcon;
-  } catch (error) {
-    // App probablement pas sur F-Droid non plus
-  }
-
-  return currentIcon;
-}
-
-/**
- * Helper: Récupérer le nom officiel depuis le Play Store.
- * Le Play Store fait foi ; le nom saisi à la main ne sert que de repli
- * (app absente du Play Store, retirée, ou URL invalide).
- */
-async function getAppName(playStoreUrl, currentName) {
-  const packageName = extractPackageId(playStoreUrl);
-  if (!packageName) return currentName;
-
-  const appInfo = await getPlayStoreAppInfo(packageName);
-  return appInfo?.title || currentName;
-}
-
-/**
  * Helper: Construire l'URL Play Store depuis un package name
  */
 function buildPlayStoreUrl(packageName) {
@@ -156,14 +122,54 @@ function buildPlayStoreUrl(packageName) {
  */
 async function enrichFromPlayStore(appData) {
   const packageName = extractPackageId(appData.playStoreUrl);
-  if (!packageName) return appData;
 
-  const appInfo = await getPlayStoreAppInfo(packageName);
+  let name = appData.name;
+  let icon = appData.icon;
+  let playStoreUrl = appData.playStoreUrl;
+
+  if (packageName) {
+    const appInfo = await getPlayStoreAppInfo(packageName);
+    name = appInfo?.title || appData.name;
+    icon = appInfo?.icon || appData.icon;
+    playStoreUrl = appInfo?.url || buildPlayStoreUrl(packageName);
+
+    if (!appInfo?.icon) {
+      // Pas d'icône Play Store : tenter F-Droid comme repli
+      try {
+        const fdroidIcon = await getFDroidIcon(packageName);
+        if (fdroidIcon) icon = fdroidIcon;
+      } catch {
+        // App probablement pas sur F-Droid non plus
+      }
+    }
+  }
+
+  const grade = appData.grade || appData.trustiScore;
+  const isFDroidOnly = packageName && (
+    packageName.startsWith('com.github.') ||
+    packageName.startsWith('org.fdroid.') ||
+    packageName.startsWith('io.github.')
+  );
+
+  // App Store et F-Droid : recherchés une seule fois ici (à la création/mise
+  // à jour admin) plutôt qu'à chaque lecture du catalogue.
+  let appleStoreUrl = appData.appleStoreUrl;
+  if (!appleStoreUrl && name && !isFDroidOnly) {
+    appleStoreUrl = await searchAppStore(name);
+  }
+
+  let fDroidUrl = appData.fDroidUrl;
+  if (!fDroidUrl && packageName && ['A', 'B', 'C'].includes(grade)) {
+    fDroidUrl = await getFDroidUrl(packageName);
+  }
+
   return {
     ...appData,
-    name: appInfo?.title || appData.name,
-    icon: appInfo?.icon || appData.icon,
-    playStoreUrl: appInfo?.url || buildPlayStoreUrl(packageName),
+    name,
+    icon,
+    playStoreUrl,
+    appleStoreUrl,
+    fDroidUrl,
   };
 }
 
@@ -244,6 +250,13 @@ export async function initDatabase() {
       ADD COLUMN IF NOT EXISTS show_in_onboarding INTEGER DEFAULT 1
     `;
 
+    // Migration: colonne f_droid_url (calculée une fois à l'écriture au lieu
+    // d'être re-vérifiée par requête HTTP à chaque lecture)
+    await sql`
+      ALTER TABLE applications
+      ADD COLUMN IF NOT EXISTS f_droid_url TEXT
+    `;
+
     console.log('✅ Database initialized successfully');
     return true;
   } catch (error) {
@@ -319,7 +332,8 @@ export async function getAllApps(options = {}) {
       }
     }
     
-    const formattedApps = await Promise.all(apps.map(app => formatAppFromDB(app)));
+    const relationsMap = await buildRelationsMap();
+    const formattedApps = apps.map(app => formatAppFromDB(app, relationsMap.get(String(app.id)) || EMPTY_RELATIONS));
     
     return {
       apps: formattedApps,
@@ -419,7 +433,8 @@ export async function getAppsByType(appType, options = {}) {
     }
     
     const total = parseInt(totalResult[0].count);
-    const formattedApps = await Promise.all(apps.map(app => formatAppFromDB(app)));
+    const relationsMap = await buildRelationsMap();
+    const formattedApps = apps.map(app => formatAppFromDB(app, relationsMap.get(String(app.id)) || EMPTY_RELATIONS));
     
     return {
       apps: formattedApps,
@@ -483,7 +498,8 @@ export async function getOnboardingApps(options = {}) {
           `;
     }
 
-    const formatted = await Promise.all(apps.map(formatAppFromDB));
+    const relationsMap = await buildRelationsMap();
+    const formatted = apps.map(app => formatAppFromDB(app, relationsMap.get(String(app.id)) || EMPTY_RELATIONS));
     return { apps: formatted, total, limit, offset };
   } catch (error) {
     console.error('Error getting onboarding apps:', error);
@@ -568,7 +584,8 @@ export async function getAwardsApps(options = {}) {
       }
     }
     
-    const formattedApps = await Promise.all(apps.map(app => formatAppFromDB(app)));
+    const relationsMap = await buildRelationsMap();
+    const formattedApps = apps.map(app => formatAppFromDB(app, relationsMap.get(String(app.id)) || EMPTY_RELATIONS));
     
     return {
       apps: formattedApps,
@@ -594,7 +611,8 @@ export async function getAppById(id) {
     `;
     
     if (apps.length === 0) return null;
-    return await formatAppFromDB(apps[0]);
+    const relations = await getAppRelations(apps[0].id);
+    return formatAppFromDB(apps[0], relations);
   } catch (error) {
     console.error('Error getting app by id:', error);
     throw error;
@@ -626,7 +644,8 @@ export async function getAppsByIds(ids) {
     
     console.log(`✅ ${apps.length} apps trouvées sur ${ids.length} IDs demandés`);
     
-    const formattedApps = await Promise.all(apps.map(app => formatAppFromDB(app)));
+    const relationsMap = await buildRelationsMap();
+    const formattedApps = apps.map(app => formatAppFromDB(app, relationsMap.get(String(app.id)) || EMPTY_RELATIONS));
     
     return formattedApps;
   } catch (error) {
@@ -648,7 +667,7 @@ export async function createApp(appData) {
     const apps = await sql`
       INSERT INTO applications (
         id, name, trusti_score, grade, category, icon, color, reason,
-        play_store_url, apple_store_url, github_url, other_store_url,
+        play_store_url, apple_store_url, f_droid_url, github_url, other_store_url,
         website, description, developer, license,
         is_open_source, is_european, jurisdiction, app_type, show_in_awards, show_in_onboarding, popularity, privacy_features, permissions
       )
@@ -656,7 +675,7 @@ export async function createApp(appData) {
         ${id}, ${appData.name}, ${trustiScore}, ${grade},
         ${appData.category || 'Application'}, ${appData.icon || null},
         ${appData.color || 'bg-slate-600'}, ${appData.reason || ''},
-        ${appData.playStoreUrl || null}, ${appData.appleStoreUrl || null},
+        ${appData.playStoreUrl || null}, ${appData.appleStoreUrl || null}, ${appData.fDroidUrl || null},
         ${appData.githubUrl || null}, ${appData.otherStoreUrl || null},
         ${appData.website || null}, ${appData.description || null},
         ${appData.developer || null}, ${appData.license || null},
@@ -679,7 +698,8 @@ export async function createApp(appData) {
       await addRelations(id, appData.replacesAppIds, 'replaces');
     }
     
-    return await formatAppFromDB(apps[0]);
+    const relations = await getAppRelations(apps[0].id);
+    return formatAppFromDB(apps[0], relations);
   } catch (error) {
     console.error('Error creating app:', error);
     throw error;
@@ -706,6 +726,7 @@ export async function updateApp(id, appData) {
         reason = COALESCE(${appData.reason}, reason),
         play_store_url = COALESCE(${appData.playStoreUrl}, play_store_url),
         apple_store_url = COALESCE(${appData.appleStoreUrl}, apple_store_url),
+        f_droid_url = COALESCE(${appData.fDroidUrl}, f_droid_url),
         github_url = COALESCE(${appData.githubUrl}, github_url),
         other_store_url = COALESCE(${appData.otherStoreUrl}, other_store_url),
         website = COALESCE(${appData.website}, website),
@@ -743,7 +764,8 @@ export async function updateApp(id, appData) {
       await addRelations(id, appData.replacesAppIds, 'replaces');
     }
     
-    return await formatAppFromDB(apps[0]);
+    const relations = await getAppRelations(apps[0].id);
+    return formatAppFromDB(apps[0], relations);
   } catch (error) {
     console.error('Error updating app:', error);
     throw error;
@@ -834,7 +856,8 @@ export async function searchApps(query, filters = {}) {
       `;
     }
     
-    return Promise.all(apps.map(app => formatAppFromDB(app)));
+    const relationsMap = await buildRelationsMap();
+    return apps.map(app => formatAppFromDB(app, relationsMap.get(String(app.id)) || EMPTY_RELATIONS));
   } catch (error) {
     console.error('Error searching apps:', error);
     throw error;
@@ -1007,6 +1030,50 @@ async function getAppRelations(appId) {
 }
 
 /**
+ * Construit en une seule requête les relations (alternatives/remplace) de
+ * TOUTES les applications, groupées par catégorie et comparées par note.
+ *
+ * Remplace l'appel de getAppRelations() une fois par app (N+1 requêtes SQL,
+ * la cause principale des chargements lents du catalogue, de la recherche
+ * et des Awards) par une seule requête légère (id, category, trusti_score)
+ * suivie d'un calcul en mémoire.
+ *
+ * @returns {Promise<Map<string, {alternativeAppIds: string[], replacesAppIds: string[]}>>}
+ */
+async function buildRelationsMap() {
+  const rows = await sql`SELECT id, category, trusti_score FROM applications`;
+
+  const scoreOrder = { 'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5 };
+  const byCategory = new Map();
+  for (const row of rows) {
+    const list = byCategory.get(row.category) || [];
+    list.push(row);
+    byCategory.set(row.category, list);
+  }
+
+  const relationsMap = new Map();
+  for (const row of rows) {
+    const currentScoreValue = scoreOrder[row.trusti_score] || 999;
+    const peers = byCategory.get(row.category) || [];
+
+    const alternativeAppIds = [];
+    const replacesAppIds = [];
+    for (const peer of peers) {
+      if (peer.id === row.id) continue;
+      const peerScoreValue = scoreOrder[peer.trusti_score] || 999;
+      if (peerScoreValue < currentScoreValue) alternativeAppIds.push(String(peer.id));
+      if (peerScoreValue > currentScoreValue) replacesAppIds.push(String(peer.id));
+    }
+
+    relationsMap.set(String(row.id), { alternativeAppIds, replacesAppIds });
+  }
+
+  return relationsMap;
+}
+
+const EMPTY_RELATIONS = { alternativeAppIds: [], replacesAppIds: [] };
+
+/**
  * Obtenir les applications filtrées par note (grade)
  * @param {string|string[]} grades - Une note ou un tableau de notes (ex: 'A' ou ['A','B'])
  * @param {Object} options - Options de pagination
@@ -1039,7 +1106,8 @@ export async function getAppsByGrade(grades, options = {}) {
       `;
     }
 
-    const formattedApps = await Promise.all(apps.map(app => formatAppFromDB(app)));
+    const relationsMap = await buildRelationsMap();
+    const formattedApps = apps.map(app => formatAppFromDB(app, relationsMap.get(String(app.id)) || EMPTY_RELATIONS));
     return { apps: formattedApps, total, limit, offset };
   } catch (error) {
     console.error('Error getting apps by grade:', error);
@@ -1078,68 +1146,44 @@ function calculateAppType(trustiScore) {
 }
 
 /**
- * Formater une application depuis la DB
+ * Formater une application depuis la DB.
+ *
+ * Purement synchrone : aucune requête SQL ni appel réseau ici. Le nom,
+ * l'icône, l'URL App Store et l'URL F-Droid sont désormais résolus une
+ * seule fois à l'écriture (voir enrichFromPlayStore, appelé par createApp
+ * / updateApp) et simplement lus depuis les colonnes en base. Les relations
+ * (alternatives/remplace) sont calculées en une seule requête batchée par
+ * l'appelant (voir buildRelationsMap) plutôt qu'avec une requête par app.
  */
-async function formatAppFromDB(app) {
+function formatAppFromDB(app, relations = { alternativeAppIds: [], replacesAppIds: [] }) {
   const trustiScore = app.trusti_score;
   const appType = app.app_type || calculateAppType(trustiScore);
-  
-  // Charger les relations
-  const relations = await getAppRelations(app.id);
-  
-  // Récupérer le nom et l'icône dynamiquement depuis le Play Store (fiabilise
-  // les entrées historiques saisies à la main, même sans re-sauvegarde admin)
-  let name = await getAppName(app.play_store_url, app.name);
-  let icon = await getAppIcon(app.play_store_url, app.icon);
 
-  // Récupérer les infos depuis Play Store si disponible
+  // Construire une URL Play Store valide si nécessaire (repli synchrone,
+  // sans appel réseau)
   let playStoreUrl = app.play_store_url;
-  let appleStoreUrl = app.apple_store_url;
-  let fDroidUrl = null;
-  
   const packageName = extractPackageId(playStoreUrl);
-  
-  if (playStoreUrl) {
-    if (packageName && !playStoreUrl.startsWith('https://play.google.com')) {
-      // Construire une URL Play Store valide si nécessaire
-      playStoreUrl = buildPlayStoreUrl(packageName);
-    }
+  if (playStoreUrl && packageName && !playStoreUrl.startsWith('https://play.google.com')) {
+    playStoreUrl = buildPlayStoreUrl(packageName);
   }
-  
-  // Si pas d'URL App Store, essayer de la trouver automatiquement
-  // Exception : ne pas chercher pour les apps F-Droid uniquement (com.github.*, etc.)
-  const isFDroidOnly = packageName && (
-    packageName.startsWith('com.github.') || 
-    packageName.startsWith('org.fdroid.') ||
-    packageName.startsWith('io.github.')
-  );
-  
-  if (!appleStoreUrl && name && !isFDroidOnly) {
-    appleStoreUrl = await searchAppStore(name);
-  }
-  
-  // Pour les TrustiApps (A/B/C), vérifier si l'app existe sur F-Droid
-  if (appType === 'trusti' && packageName) {
-    fDroidUrl = await getFDroidUrl(packageName);
-  }
-  
+
   // Récupérer les permissions depuis la base de données
-  let permissions = typeof app.permissions === 'string' 
-    ? JSON.parse(app.permissions) 
+  let permissions = typeof app.permissions === 'string'
+    ? JSON.parse(app.permissions)
     : (Array.isArray(app.permissions) ? app.permissions : []);
-  
+
   return {
     id: app.id,
-    name: name,
+    name: app.name,
     trustiScore: trustiScore,
     grade: app.grade,
     category: app.category,
-    icon: icon, // Icône récupérée dynamiquement
+    icon: app.icon,
     color: app.color,
     reason: app.reason,
     playStoreUrl: playStoreUrl, // URL Play Store vérifiée/construite
-    appleStoreUrl: appleStoreUrl, // URL App Store (existante ou recherchée)
-    fDroidUrl: fDroidUrl, // URL F-Droid (uniquement pour TrustiApps A/B/C)
+    appleStoreUrl: app.apple_store_url, // URL App Store (résolue à l'écriture)
+    fDroidUrl: app.f_droid_url, // URL F-Droid (résolue à l'écriture, TrustiApps A/B/C)
     githubUrl: app.github_url,
     otherStoreUrl: app.other_store_url,
     website: app.website,
