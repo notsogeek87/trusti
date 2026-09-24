@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { App as CapacitorApp } from '@capacitor/app';
 import {
-  ChevronLeft, HardDrive, Smartphone, RefreshCcw, Trash2, AlertTriangle, ShieldAlert,
+  ChevronLeft, HardDrive, Smartphone, RefreshCcw, Trash2, AlertTriangle, ShieldAlert, X,
 } from 'lucide-react';
-import { getStorageStats, formatBytes, clearAllTrustiStorage } from '../utils/storageStats';
+import { formatBytes, clearAllTrustiStorage } from '../utils/storageStats';
 import { isNativeAndroid } from '../utils/platform';
 import { extractPackageId } from '../utils/androidPackage';
 import InstalledApps from '../native/InstalledApps';
@@ -90,17 +90,15 @@ const StoragePage = ({
   onClearMyApps,
   onClearMigrations,
 }) => {
-  const [stats, setStats] = useState({ totalKeys: 0, totalBytes: 0 });
   // null = scan pas encore terminé, [] = scan fait, rien trouvé.
   const [installedPackages, setInstalledPackages] = useState(null);
   const [usageAccessGranted, setUsageAccessGranted] = useState(null);
   const [appSizes, setAppSizes] = useState(null);
   const [isLoadingSizes, setIsLoadingSizes] = useState(false);
   const [sortPref, setSortPref] = useState({ sortBy: 'size', direction: 'desc' });
-
-  useEffect(() => {
-    setStats(getStorageStats());
-  }, []);
+  // Note sélectionnée en tapant le camembert ou sa légende — filtre la liste
+  // des apps installées ci-dessous plutôt que de dupliquer l'info ailleurs.
+  const [gradeFilter, setGradeFilter] = useState(null);
 
   // Apps du catalogue "Mes Apps" réellement installées sur l'appareil.
   useEffect(() => {
@@ -185,6 +183,11 @@ const StoragePage = ({
     [gradeStorageEntries]
   );
 
+  const displayedInstalledApps = useMemo(
+    () => (gradeFilter ? installedAppsList.filter((app) => app.grade === gradeFilter) : installedAppsList),
+    [installedAppsList, gradeFilter]
+  );
+
   const handleUninstall = (app) => {
     if (!app.packageName) return;
     InstalledApps.uninstallPackage({ packageName: app.packageName }).catch((error) => {
@@ -220,21 +223,24 @@ const StoragePage = ({
       </header>
 
       <main className="max-w-2xl mx-auto p-4 md:p-6 space-y-6">
-        {/* Données propres à TrustiScore — volume minime, à ne pas confondre
-            avec l'espace pris par les apps elles-mêmes (section suivante). */}
+        {/* Vue d'ensemble : suivi TrustiScore + espace total réellement occupé
+            par les apps elles-mêmes (détail par note dans la section suivante). */}
         <section className="bg-white rounded-2xl border border-slate-100 p-4">
           <h2 className="text-xs font-black uppercase tracking-wide text-slate-400 mb-2">
             Données TrustiScore sur cet appareil
           </h2>
           <p className="text-xs text-slate-500 mb-3">
-            Vos apps suivies, migrations et préférences sont stockées uniquement
-            ici, pas sur nos serveurs — un volume minime, distinct de l'espace
-            occupé par vos applications elles-mêmes, ci-dessous.
+            Vos apps suivies et migrations sont enregistrées uniquement ici, pas
+            sur nos serveurs. L'espace total correspond au poids réel de vos
+            applications installées (APK + données + cache).
           </p>
           <div className="grid grid-cols-3 gap-2">
             <StatTile value={myAppsCount} label="Apps suivies" />
             <StatTile value={migrationsCount} label="Migrations" />
-            <StatTile value={formatBytes(stats.totalBytes)} label="Données TrustiScore" />
+            <StatTile
+              value={usageAccessGranted && appSizes ? formatBytes(totalDeviceBytes) : '—'}
+              label="Espace total (apps)"
+            />
           </div>
         </section>
 
@@ -296,25 +302,46 @@ const StoragePage = ({
                 </p>
               ) : (
                 <div className="mb-5">
-                  <GradeStorageDonut entries={gradeStorageEntries} totalBytes={totalDeviceBytes} />
+                  <GradeStorageDonut
+                    entries={gradeStorageEntries}
+                    totalBytes={totalDeviceBytes}
+                    selectedGrade={gradeFilter}
+                    onSelectGrade={setGradeFilter}
+                  />
                 </div>
               )}
 
               {installedAppsList.length > 0 && (
                 <>
-                  <div className="flex items-center justify-between mb-2 mt-1">
-                    <h3 className="text-xs font-black uppercase tracking-wide text-slate-400">
-                      Applications installées ({installedAppsList.length})
+                  <div className="flex items-center justify-between mb-2 mt-1 gap-2">
+                    <h3 className="text-xs font-black uppercase tracking-wide text-slate-400 truncate">
+                      Applications installées ({displayedInstalledApps.length})
                     </h3>
-                    <MyAppsSortMenu
-                      sortBy={sortPref.sortBy}
-                      direction={sortPref.direction}
-                      onChange={setSortPref}
-                    />
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      {gradeFilter && (
+                        <button
+                          type="button"
+                          onClick={() => setGradeFilter(null)}
+                          className="flex items-center gap-1 pl-2.5 pr-1.5 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold"
+                        >
+                          Note {gradeFilter}
+                          <X size={12} />
+                        </button>
+                      )}
+                      <MyAppsSortMenu
+                        sortBy={sortPref.sortBy}
+                        direction={sortPref.direction}
+                        onChange={setSortPref}
+                      />
+                    </div>
                   </div>
 
+                  {displayedInstalledApps.length === 0 && (
+                    <p className="text-xs text-slate-400 py-2">Aucune app avec cette note installée.</p>
+                  )}
+
                   <div className="space-y-2">
-                    {installedAppsList.map((app) => (
+                    {displayedInstalledApps.map((app) => (
                       <div key={app.id} className="flex items-center gap-2.5 bg-slate-50 rounded-xl p-2.5">
                         <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 bg-white flex items-center justify-center">
                           {app.icon && app.icon.startsWith('http') ? (

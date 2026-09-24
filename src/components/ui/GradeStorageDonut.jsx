@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { GRADE_COLORS } from '../../constants/grades';
 import { formatBytes } from '../../utils/storageStats';
 
@@ -31,10 +31,13 @@ const pointOnRing = (angleDeg, radius = RADIUS) => {
  * par note TrustiScore (A à E). `entries` = [{ grade, bytes, count }], déjà
  * filtré aux grades effectivement présents (bytes > 0) — l'ordre A→E fixe de
  * la marque est préservé, jamais réordonné par taille.
+ *
+ * Composant contrôlé : `selectedGrade`/`onSelectGrade` viennent du parent
+ * (StoragePage), qui s'en sert aussi pour filtrer la liste des apps
+ * installées — taper une zone du camembert ou sa légende doit filtrer cette
+ * liste, pas seulement mettre en avant la légende localement.
  */
-const GradeStorageDonut = ({ entries, totalBytes }) => {
-  const [activeGrade, setActiveGrade] = useState(null);
-
+const GradeStorageDonut = ({ entries, totalBytes, selectedGrade = null, onSelectGrade }) => {
   let cumulative = 0;
   const segments = entries.map(({ grade, bytes, count }) => {
     const fraction = totalBytes > 0 ? bytes / totalBytes : 0;
@@ -45,7 +48,11 @@ const GradeStorageDonut = ({ entries, totalBytes }) => {
     return { grade, bytes, count, fraction, length, offset, midAngle: angleForOffset(offset + rawLength / 2) };
   });
 
-  const active = segments.find((s) => s.grade === activeGrade);
+  const toggleGrade = (grade) => {
+    onSelectGrade?.(selectedGrade === grade ? null : grade);
+  };
+
+  const active = segments.find((s) => s.grade === selectedGrade);
 
   return (
     <div className="flex flex-col items-center">
@@ -64,11 +71,11 @@ const GradeStorageDonut = ({ entries, totalBytes }) => {
               r={RADIUS}
               fill="none"
               stroke={GRADE_HEX[seg.grade]}
-              strokeWidth={activeGrade === seg.grade ? STROKE + 6 : STROKE}
+              strokeWidth={selectedGrade === seg.grade ? STROKE + 6 : STROKE}
               strokeDasharray={`${seg.length} ${CIRCUMFERENCE - seg.length}`}
               strokeDashoffset={-(seg.offset + GAP / 2)}
               strokeLinecap="butt"
-              onClick={() => setActiveGrade((g) => (g === seg.grade ? null : seg.grade))}
+              onClick={() => toggleGrade(seg.grade)}
               style={{ cursor: 'pointer', transition: 'stroke-width 0.15s ease-out' }}
             />
           ))}
@@ -94,13 +101,6 @@ const GradeStorageDonut = ({ entries, totalBytes }) => {
               </text>
             );
           })}
-
-        <text x={CENTER} y={CENTER - 6} textAnchor="middle" className="fill-slate-900 text-[20px] font-black">
-          {formatBytes(totalBytes)}
-        </text>
-        <text x={CENTER} y={CENTER + 14} textAnchor="middle" className="fill-slate-400 text-[10px] font-bold uppercase tracking-wide">
-          Total apps
-        </text>
       </svg>
 
       <div className="w-full mt-3 space-y-1.5">
@@ -108,9 +108,9 @@ const GradeStorageDonut = ({ entries, totalBytes }) => {
           <button
             key={seg.grade}
             type="button"
-            onClick={() => setActiveGrade((g) => (g === seg.grade ? null : seg.grade))}
+            onClick={() => toggleGrade(seg.grade)}
             className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-colors ${
-              activeGrade === seg.grade ? 'bg-slate-100' : 'hover:bg-slate-50'
+              selectedGrade === seg.grade ? 'bg-slate-100' : 'hover:bg-slate-50'
             }`}
           >
             <span
