@@ -44,6 +44,7 @@ import AdminAppsModal from './components/modals/AdminAppsModal';
 import PinModal from './components/modals/PinModal';
 import WelcomeModal from './components/modals/WelcomeModal';
 import AgePromptModal from './components/modals/AgePromptModal';
+import StorageManagerModal from './components/modals/StorageManagerModal';
 
 const useIsSmallViewport = () => {
   const [isSmall, setIsSmall] = useState(() => window.innerWidth < 768);
@@ -84,21 +85,13 @@ const App = () => {
     logout: authLogout,
     getUserData,
     saveUserData,
-    resetUserData: authResetUserData
   } = useAuth();
-  
+
   // Wrapper pour logout qui réinitialise aussi l'état admin
   const logout = () => {
     setIsAdminUnlocked(false);
     clearAdminToken();
     authLogout();
-  };
-
-  // Wrapper pour resetUserData qui réinitialise aussi l'état admin
-  const resetUserData = () => {
-    setIsAdminUnlocked(false);
-    clearAdminToken();
-    authResetUserData();
   };
 
   // État pour la landing page
@@ -251,12 +244,17 @@ const App = () => {
     toggleFavorite,
     addMyApps,
     removeMyApps,
+    clearMyApps,
+    clearMigrations,
     toggleMigrate,
     setCustomMigration,
     importMigrations,
     setSelectedApp,
     loadMoreApps,
   } = useAppManagement(currentUser, saveUserData, getUserData, selectedCategory);
+
+  // Gestion de l'espace de stockage (voir StorageManagerModal)
+  const [showStorageManager, setShowStorageManager] = useState(false);
 
   // Une app "Mes Apps" est considérée migrée si elle est déjà au top (grade A)
   // ou si l'alternative recommandée est déjà utilisée.
@@ -658,11 +656,20 @@ const App = () => {
         currentUser={currentUser}
         onLogout={logout}
         onLogin={() => setShowLoginModal(true)}
-        onResetUserData={resetUserData}
+        onOpenStorageManager={() => setShowStorageManager(true)}
         onOpenAdmin={() => setShowAdminModal(true)}
         onShowLandingPage={() => setShowLandingPage(true)}
         isAdminUnlocked={isAdminUnlocked}
         onRequestAdminUnlock={() => setShowPinModal(true)}
+      />
+
+      <StorageManagerModal
+        isOpen={showStorageManager}
+        onClose={() => setShowStorageManager(false)}
+        myAppsCount={myApps.size}
+        migrationsCount={migratedApps.size}
+        onClearMyApps={clearMyApps}
+        onClearMigrations={clearMigrations}
       />
 
       {/* items-start casserait le sticky du menu : sans stretch, la colonne du

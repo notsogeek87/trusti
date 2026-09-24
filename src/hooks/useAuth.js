@@ -77,17 +77,6 @@ export const useAuth = () => {
     localStorage.setItem(userDataKey, JSON.stringify(data));
   }, [currentUser]);
 
-  // Réinitialiser toutes les données de l'utilisateur
-  const resetUserData = useCallback(() => {
-    if (!currentUser) return;
-    const userEmail = currentUser.email || currentUser;
-    localStorage.removeItem(`trusti_${userEmail}_apps`);
-    // Forcer un rechargement en changeant l'utilisateur temporairement
-    const user = currentUser;
-    setCurrentUser(null);
-    setTimeout(() => setCurrentUser(user), 50);
-  }, [currentUser]);
-
   return {
     currentUser,
     isLoading,
@@ -96,6 +85,5 @@ export const useAuth = () => {
     logout,
     getUserData,
     saveUserData,
-    resetUserData
   };
 };

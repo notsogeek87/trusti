@@ -609,6 +609,21 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     });
   };
 
+  // Vider "Mes Apps" (et les favoris du catalogue associés) — utilisé par la
+  // gestion de l'espace de stockage pour repartir d'une sélection vide sans
+  // toucher à l'historique de migrations.
+  const clearMyApps = () => {
+    setMyApps(new Set());
+    setFavoriteApps(new Set());
+  };
+
+  // Vider l'historique de migrations (statut migré + alternatives
+  // personnalisées) sans retirer les apps de "Mes Apps".
+  const clearMigrations = () => {
+    setMigratedApps(new Set());
+    setCustomMigrations(new Map());
+  };
+
   // Marquer/démarquer comme migré
   const toggleMigrate = (e, id) => {
     e.stopPropagation();
@@ -724,6 +739,8 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     toggleFavorite,
     addMyApps,
     removeMyApps,
+    clearMyApps,
+    clearMigrations,
     toggleMigrate,
     setCustomMigration,
     importMigrations,
