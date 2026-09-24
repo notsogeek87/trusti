@@ -147,7 +147,9 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
         // et permettre le chargement progressif des applications
         const currentOffset = append ? pagination.offset + pagination.limit : 0;
         const limit = 20; // Charger 20 apps par page
-        const url = `${API_URL}/apps?limit=${limit}&offset=${currentOffset}`;
+        // Tri par grade (identique à l'ordre d'affichage du catalogue) pour que
+        // chaque page chargée s'ajoute à la fin sans réordonner les cartes déjà visibles
+        const url = `${API_URL}/apps?limit=${limit}&offset=${currentOffset}&sortBy=grade`;
         
         const response = await fetch(url);
         const data = await response.json();
@@ -685,7 +687,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
       
       // Charger la page suivante
       const nextOffset = pagination.offset + pagination.limit;
-      const response = await fetch(`${API_URL}/apps?limit=${pagination.limit}&offset=${nextOffset}`);
+      const response = await fetch(`${API_URL}/apps?limit=${pagination.limit}&offset=${nextOffset}&sortBy=grade`);
       const data = await response.json();
       const appsArray = data.success ? data.apps : [];
       
