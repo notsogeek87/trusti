@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -40,6 +41,18 @@
       accordée automatiquement à l'installation, aucune demande à l'utilisateur.
     -->
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+
+    <!--
+      Permission spéciale (non accordable via une boîte de dialogue runtime standard)
+      permettant de lire l'espace disque (APK + données + cache) des autres apps du
+      catalogue Trusti, pour l'écran "Espace de stockage". L'utilisateur doit
+      l'activer manuellement dans Réglages > Apps > Accès spécial > Accès à
+      l'utilisation (voir InstalledAppsPlugin.hasUsageAccess/openUsageAccessSettings).
+      Sans cet accès, l'app continue de fonctionner normalement : cette donnée est
+      simplement masquée derrière une invitation à l'activer.
+    -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
 
     <!--
       Visibilité des paquets pour le scan d'apps installées (onboarding natif Android).

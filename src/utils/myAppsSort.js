@@ -14,6 +14,10 @@ export const SORT_OPTIONS = [
   { id: 'alphabetical', label: 'Alphabétique', defaultDirection: 'asc' },
   { id: 'dateAdded', label: "Date d'ajout", defaultDirection: 'desc' },
   { id: 'popularity', label: 'Popularité', defaultDirection: 'asc' },
+  // Uniquement pertinent là où `app.sizeBytes` est renseigné (écran "Espace de
+  // stockage", voir StoragePage) — ailleurs, absent sur toutes les apps, il se
+  // rabat silencieusement sur l'ordre alphabétique (voir sortMyApps ci-dessous).
+  { id: 'size', label: 'Taille', defaultDirection: 'desc' },
 ];
 
 export const DEFAULT_MY_APPS_SORT = { sortBy: 'trustiScore', direction: 'desc' };
@@ -70,6 +74,12 @@ export const sortMyApps = (apps, { sortBy, direction } = DEFAULT_MY_APPS_SORT, a
         const popA = a.popularity ?? 9999;
         const popB = b.popularity ?? 9999;
         cmp = popA - popB;
+        break;
+      }
+      case 'size': {
+        const sizeA = a.sizeBytes ?? -1;
+        const sizeB = b.sizeBytes ?? -1;
+        cmp = sizeA - sizeB;
         break;
       }
       case 'trustiScore':
