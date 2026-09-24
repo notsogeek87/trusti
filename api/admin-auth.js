@@ -48,10 +48,10 @@ export default async function handler(req, res) {
     apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
 
     const mail = new brevo.SendSmtpEmail();
-    mail.subject = `${code} — Code administrateur TrustiScore`;
+    mail.subject = `${code} — Code administrateur Trusti`;
     mail.to = [{ email: cleanEmail }];
     mail.sender = {
-      name: process.env.BREVO_FROM_NAME || 'TrustiScore',
+      name: process.env.BREVO_FROM_NAME || 'Trusti',
       email: process.env.BREVO_FROM_EMAIL || 'noreply@trustiscore.fr',
     };
     mail.htmlContent = `

@@ -56,10 +56,10 @@ export default async function handler(req, res) {
     apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
 
     const sendSmtpEmail = new brevo.SendSmtpEmail();
-    sendSmtpEmail.subject = `${code} est votre code TrustiScore`;
+    sendSmtpEmail.subject = `${code} est votre code Trusti`;
     sendSmtpEmail.to = [{ email: cleanEmail }];
     sendSmtpEmail.sender = {
-      name: process.env.BREVO_FROM_NAME || 'TrustiScore',
+      name: process.env.BREVO_FROM_NAME || 'Trusti',
       email: process.env.BREVO_FROM_EMAIL || 'noreply@trustiscore.fr',
     };
 
@@ -73,7 +73,7 @@ export default async function handler(req, res) {
               <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,.08);">
                 <tr>
                   <td style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:32px 24px;text-align:center;">
-                    <p style="margin:0;color:#fff;font-size:28px;font-weight:800;">TrustiScore</p>
+                    <p style="margin:0;color:#fff;font-size:28px;font-weight:800;">Trusti</p>
                     <p style="margin:8px 0 0;color:#e0e7ff;font-size:13px;">Votre code de connexion</p>
                   </td>
                 </tr>
@@ -89,7 +89,7 @@ export default async function handler(req, res) {
                 </tr>
                 <tr>
                   <td style="background:#f8fafc;padding:20px;text-align:center;border-top:1px solid #e2e8f0;">
-                    <p style="margin:0;color:#94a3b8;font-size:11px;">TrustiScore — Évaluez la confidentialité de vos applications</p>
+                    <p style="margin:0;color:#94a3b8;font-size:11px;">Trusti — Évaluez la confidentialité de vos applications</p>
                   </td>
                 </tr>
               </table>

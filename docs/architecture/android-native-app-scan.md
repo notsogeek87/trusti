@@ -54,7 +54,7 @@ src/
   components/OnboardingAppsNative.jsx     Onboarding "scan auto" (Android natif)
   components/OnboardingApps.jsx           Onboarding "sélection manuelle" (web, inchangé)
 
-capacitor.config.json                     appId com.trusti.app, appName TrustiScore, webDir dist
+capacitor.config.json                     appId com.trusti.app, appName Trusti, webDir dist
 ```
 
 Flow de `OnboardingAppsNative.jsx` :

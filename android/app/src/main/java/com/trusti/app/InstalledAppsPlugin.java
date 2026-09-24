@@ -101,7 +101,7 @@ public class InstalledAppsPlugin extends Plugin {
 
     /**
      * Ouvre l'écran système "Accès à l'utilisation" où l'utilisateur peut activer
-     * cet accès pour TrustiScore. On ne peut pas savoir depuis ce seul appel s'il
+     * cet accès pour Trusti. On ne peut pas savoir depuis ce seul appel s'il
      * l'a réellement activé : l'app doit rappeler hasUsageAccess() au retour.
      */
     @PluginMethod
