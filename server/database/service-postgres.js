@@ -315,6 +315,23 @@ export async function getAllApps(options = {}) {
           ORDER BY name ASC
         `;
       }
+    } else if (sortBy === 'grade') {
+      // Tri par grade (A > B > C > D > E) puis par nom — même ordre que l'affichage
+      // du catalogue côté client, pour que la pagination n'entraîne pas de
+      // réordonnancement (et donc de "saut") des cartes déjà affichées.
+      if (limit > 0) {
+        apps = await sql`
+          SELECT * FROM applications
+          ORDER BY grade ASC, name ASC
+          LIMIT ${limit}
+          OFFSET ${offset}
+        `;
+      } else {
+        apps = await sql`
+          SELECT * FROM applications
+          ORDER BY grade ASC, name ASC
+        `;
+      }
     } else {
       // Tri par défaut: trusti_score
       if (limit > 0) {
