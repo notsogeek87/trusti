@@ -846,49 +846,27 @@ const App = () => {
           <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
         )}
 
-        {/* Filtre migrée / à migrer */}
+        {/* Filtres : statut de migration + disponibilité d'une alternative, sur une seule ligne */}
         {activeTab === TABS.MY_APPS && myApps.size > 0 && !searchTerm.trim() && (
-          <div className="flex gap-1.5 mb-4">
-            {[
-              { id: 'all', label: 'Toutes' },
-              { id: 'todo', label: `À migrer (${migrationCounts.todo})` },
-              { id: 'migrated', label: `Migrées (${migrationCounts.migrated})` },
-            ].map(({ id, label }) => (
-              <button
-                key={id}
-                onClick={() => setMigrationFilter(id)}
-                className={`flex-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
-                  migrationFilter === id
-                    ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md'
-                    : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300 hover:shadow-sm'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Filtre avec / sans alternative connue */}
-        {activeTab === TABS.MY_APPS && myApps.size > 0 && !searchTerm.trim() && (
-          <div className="flex gap-1.5 mb-4">
-            {[
-              { id: 'all', label: 'Toutes' },
-              { id: 'with', label: `Avec alternative (${alternativeCounts.with})` },
-              { id: 'without', label: `Sans alternative (${alternativeCounts.without})` },
-            ].map(({ id, label }) => (
-              <button
-                key={id}
-                onClick={() => setAlternativeFilter(id)}
-                className={`flex-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
-                  alternativeFilter === id
-                    ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md'
-                    : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300 hover:shadow-sm'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+          <div className="flex gap-2 mb-4">
+            <select
+              value={migrationFilter}
+              onChange={(e) => setMigrationFilter(e.target.value)}
+              className="flex-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold bg-white text-slate-600 border border-slate-200 shadow-sm"
+            >
+              <option value="all">Toutes</option>
+              <option value="todo">À migrer ({migrationCounts.todo})</option>
+              <option value="migrated">Migrées ({migrationCounts.migrated})</option>
+            </select>
+            <select
+              value={alternativeFilter}
+              onChange={(e) => setAlternativeFilter(e.target.value)}
+              className="flex-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold bg-white text-slate-600 border border-slate-200 shadow-sm"
+            >
+              <option value="all">Toutes</option>
+              <option value="with">Avec alternative ({alternativeCounts.with})</option>
+              <option value="without">Sans alternative ({alternativeCounts.without})</option>
+            </select>
           </div>
         )}
 
