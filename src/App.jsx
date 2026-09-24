@@ -74,7 +74,7 @@ const sortAppsByPopularity = (apps) => {
 };
 
 /**
- * Composant principal de l'application TrustiScore
+ * Composant principal de l'application Trusti
  */
 const App = () => {
   // Gestion de l'authentification
@@ -665,11 +665,11 @@ const App = () => {
       {isInitialLoading && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-indigo-50 via-white to-purple-50">
           <div style={{ animation: 'splashFadeIn 0.5s ease-out both' }}>
-            <img src="/assets/logo.png" alt="TrustiScore" className="w-28 h-28 mb-3 drop-shadow-lg" />
+            <img src="/assets/logo.png" alt="Trusti" className="w-28 h-28 mb-3 drop-shadow-lg" />
           </div>
 
           <p className="text-2xl font-black text-slate-800 tracking-tight mb-1" style={{ animation: 'splashFadeIn 0.5s 0.1s ease-out both', opacity: 0 }}>
-            TrustiScore
+            Trusti
           </p>
           <p className="text-sm text-slate-400 font-medium mb-10" style={{ animation: 'splashFadeIn 0.5s 0.2s ease-out both', opacity: 0 }}>
             {ageMode === AGE_MODE.KID

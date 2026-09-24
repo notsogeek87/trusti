@@ -45,5 +45,5 @@ app.get('/api/health', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`TrustiScore API running on http://localhost:${PORT}`);
+  console.log(`Trusti API running on http://localhost:${PORT}`);
 });

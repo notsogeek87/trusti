@@ -21,11 +21,11 @@ const Header = ({
         <div className="flex items-center gap-2 flex-shrink-0">
           <img
             src="/assets/logo.png"
-            alt="TrustiScore"
+            alt="Trusti"
             className="w-11 h-11 object-contain"
           />
           <h1 className="text-sm font-black tracking-tight text-slate-900 leading-none">
-            TrustiScore
+            Trusti
           </h1>
         </div>
 
@@ -92,7 +92,7 @@ const Header = ({
             onClick={onShowLandingPage}
             className="p-1.5 md:p-2.5 rounded-full transition-all duration-300 shadow-sm bg-indigo-500 text-white hover:bg-indigo-600"
             aria-label="Aide et explications"
-            title="À propos de TrustiScore"
+            title="À propos de Trusti"
           >
             <HelpCircle size={20} />
           </button>

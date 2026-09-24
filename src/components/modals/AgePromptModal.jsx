@@ -12,7 +12,7 @@ const AgePromptModal = ({ onSelect }) => {
       <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-indigo-500/30 max-w-sm w-full overflow-hidden">
         <div className="bg-gradient-to-r from-indigo-600/20 via-purple-600/20 to-pink-600/20 p-6 text-center border-b border-indigo-500/20">
           <div className="flex justify-center mb-3">
-            <img src="/assets/logo.png" alt="TrustiScore" className="w-16 h-16" />
+            <img src="/assets/logo.png" alt="Trusti" className="w-16 h-16" />
           </div>
           <h2 className="text-xl font-bold text-white mb-1.5">
             Avant de commencer

@@ -44,7 +44,7 @@ const LandingPage = ({ onClose }) => {
             <div className="flex justify-center mb-6">
               <div className="inline-flex items-center gap-2 bg-indigo-500/20 border border-indigo-500/40 px-4 py-1.5 rounded-full">
                 <ShieldCheck size={14} className="text-indigo-400" />
-                <span className="font-black text-xs uppercase tracking-widest text-indigo-300">TrustiScore</span>
+                <span className="font-black text-xs uppercase tracking-widest text-indigo-300">Trusti</span>
               </div>
             </div>
 
@@ -54,13 +54,13 @@ const LandingPage = ({ onClose }) => {
 
             {isKid ? (
               <p className="text-base leading-relaxed text-slate-400 font-medium mb-8">
-                TrustiScore t'aide à savoir si une appli est sympa avec tes
+                Trusti t'aide à savoir si une appli est sympa avec tes
                 <span className="text-white font-bold"> informations personnelles</span> (photos, messages,
                 position...) ou si elle les partage <span className="text-white font-bold">en douce</span>.
               </p>
             ) : (
               <p className="text-base leading-relaxed text-slate-400 font-medium mb-8">
-                TrustiScore évalue la confiance que vous pouvez accorder à vos applications.
+                Trusti évalue la confiance que vous pouvez accorder à vos applications.
                 Découvrez quelles apps respectent vraiment votre <span className="text-white font-bold">souveraineté numérique</span> et
                 protègent votre <span className="text-white font-bold">vie privée</span>.
               </p>

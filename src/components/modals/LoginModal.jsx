@@ -292,7 +292,7 @@ const LoginModal = ({ isOpen, onClose, onLogin }) => {
               <CheckCircle2 size={28} className="text-emerald-600" />
             </div>
             <h2 className="text-2xl font-black text-slate-900 mb-1">Connecté !</h2>
-            <p className="text-sm text-slate-500">Bienvenue sur TrustiScore</p>
+            <p className="text-sm text-slate-500">Bienvenue sur Trusti</p>
           </div>
         )}
       </div>

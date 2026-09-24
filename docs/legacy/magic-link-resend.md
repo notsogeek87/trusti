@@ -9,7 +9,7 @@
 
 ## Vue d'ensemble
 
-TrustiScore utilise maintenant l'authentification par Magic Link avec [Resend](https://resend.com), permettant aux utilisateurs de se connecter sans mot de passe en recevant un lien sécurisé par email.
+Trusti utilise maintenant l'authentification par Magic Link avec [Resend](https://resend.com), permettant aux utilisateurs de se connecter sans mot de passe en recevant un lien sécurisé par email.
 
 ## Configuration de Resend
 
@@ -23,7 +23,7 @@ TrustiScore utilise maintenant l'authentification par Magic Link avec [Resend](h
 
 1. Une fois connecté, allez dans **API Keys**
 2. Cliquez sur **Create API Key**
-3. Donnez un nom à votre clé (ex: "TrustiScore Production")
+3. Donnez un nom à votre clé (ex: "Trusti Production")
 4. Copiez la clé API (elle commence par `re_`)
 
 ### 3. Vérifier votre domaine (Recommandé pour la production)
@@ -47,10 +47,10 @@ RESEND_API_KEY=re_votre_cle_api_ici
 
 # Email d'envoi
 # Pour les tests :
-RESEND_FROM_EMAIL=TrustiScore <onboarding@resend.dev>
+RESEND_FROM_EMAIL=Trusti <onboarding@resend.dev>
 
 # Pour la production (après vérification du domaine) :
-RESEND_FROM_EMAIL=TrustiScore <noreply@votredomaine.com>
+RESEND_FROM_EMAIL=Trusti <noreply@votredomaine.com>
 
 # URL du frontend
 FRONTEND_URL=https://trusti.vercel.app
@@ -86,7 +86,7 @@ Quand l'utilisateur clique sur le lien :
 ## Template d'email
 
 L'email envoyé est un HTML responsive avec :
-- Header coloré avec le logo TrustiScore
+- Header coloré avec le logo Trusti
 - Bouton principal de connexion
 - Texte explicatif
 - Footer avec le lien du site

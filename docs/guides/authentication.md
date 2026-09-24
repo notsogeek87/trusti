@@ -37,7 +37,7 @@ Variables d'environnement (voir [.env.example](../../.env.example)) :
 
 ```env
 BREVO_API_KEY=xxx
-BREVO_FROM_NAME=TrustiScore
+BREVO_FROM_NAME=Trusti
 BREVO_FROM_EMAIL=noreply@trustiscore.fr
 ADMIN_EMAIL=admin@example.com   # protège /api/admin-auth (bypass si absent)
 ADMIN_SESSION_SECRET=xxx        # signe les jetons admin (voir section Admin)

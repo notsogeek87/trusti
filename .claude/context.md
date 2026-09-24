@@ -1,4 +1,4 @@
-# TrustiScore — Contexte projet
+# Trusti — Contexte projet
 
 Comparateur d'applications privacy-first. Évalue la souveraineté numérique des apps (notes A→E) et propose des alternatives européennes.
 

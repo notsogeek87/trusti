@@ -53,7 +53,7 @@ jobs:
       - name: Renommer l'APK avec sa version
         id: apk
         run: |
-          NAME="TrustiScore-${{ steps.version.outputs.name }}.apk"
+          NAME="Trusti-${{ steps.version.outputs.name }}.apk"
           SRC="android/app/build/outputs/apk/debug/app-debug.apk"
           DEST="android/app/build/outputs/apk/debug/$NAME"
           mv "$SRC" "$DEST"
@@ -62,7 +62,7 @@ jobs:
 
       - uses: actions/upload-artifact@v5
         with:
-          name: trustiscore-debug-${{ github.run_number }}
+          name: trusti-debug-${{ github.run_number }}
           path: ${{ steps.apk.outputs.path }}
 
       # Vraie release GitHub, versionnée et permanente : seulement pour main,
@@ -78,7 +78,7 @@ jobs:
           TAG="v${{ steps.version.outputs.name }}"
           gh release create "$TAG" \
             "${{ steps.apk.outputs.path }}" \
-            --title "TrustiScore $TAG" \
+            --title "Trusti $TAG" \
             --notes "Run #${{ github.run_number }} (${{ github.sha }}). Signé avec la clé debug (pas de clé de production configurée)." \
             --target "${{ github.sha }}"
 
@@ -106,7 +106,7 @@ jobs:
           gh release delete "$TAG" --yes --cleanup-tag || true
           gh release create "$TAG" \
             "${{ steps.apk.outputs.path }}" \
-            --title "TrustiScore — APK debug (${{ steps.reltag.outputs.branch }})" \
+            --title "Trusti — APK debug (${{ steps.reltag.outputs.branch }})" \
             --notes "Build automatique non signé, run #${{ github.run_number }} (${{ github.sha }})." \
             --prerelease \
             --target "${{ github.sha }}"
