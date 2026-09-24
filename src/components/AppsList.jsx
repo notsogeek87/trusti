@@ -133,7 +133,10 @@ const AppsList = ({
           <p className="text-slate-400 text-xs">Essayez une autre catégorie ou utilisez la recherche</p>
         </div>
       )}
-      {displayApps.length === 0 && activeTab === TABS.MY_APPS && !searchTerm.trim() && myApps.size > 0 && (
+      {displayApps.length === 0 && activeTab === TABS.MY_APPS && !searchTerm.trim() && myApps.size > 0 && isLoadingMyApps && (
+        <LoadingSpinner message="Chargement de tes applications..." size="medium" />
+      )}
+      {displayApps.length === 0 && activeTab === TABS.MY_APPS && !searchTerm.trim() && myApps.size > 0 && !isLoadingMyApps && (
         <div className="text-center py-8 px-4">
           <p className="text-slate-500 text-sm">Aucune application ne correspond à ce filtre</p>
         </div>
