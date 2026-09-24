@@ -214,6 +214,11 @@ const App = () => {
   // État pour le filtre migrée / à migrer dans l'onglet Mes Apps
   const [migrationFilter, setMigrationFilter] = useState('all');
 
+  // État pour le filtre avec/sans alternative connue dans l'onglet Mes Apps.
+  // Par défaut on masque les apps sans alternative connue (rien à proposer
+  // à l'utilisateur pour elles), pour que la liste reste actionnable.
+  const [alternativeFilter, setAlternativeFilter] = useState('with');
+
   // Réglage de tri de l'onglet "Mes Apps" (discret, persisté en local) :
   // TrustiScore décroissant par défaut, comme historiquement.
   const [mySort, setMySort] = useState(() => getMyAppsSortPref());
@@ -263,6 +268,12 @@ const App = () => {
   // ou si l'alternative recommandée est déjà utilisée.
   const isAppMigrated = (app) => app.grade === 'A' || app.alternativeAdopted === true;
 
+  // Une app est considérée comme ayant une alternative dès lors qu'elle est
+  // déjà au top (grade A, aucune alternative nécessaire), qu'une alternative
+  // recommandée existe, ou qu'une migration personnalisée a été choisie.
+  const appHasAlternative = (app) =>
+    app.grade === 'A' || !!app.alternative || !!customMigrations.get(app.id);
+
   // Compteurs pour le filtre migrée / à migrer (sur la liste non filtrée par ce critère)
   const migrationCounts = useMemo(() => {
     if (activeTab !== TABS.MY_APPS) return { migrated: 0, todo: 0 };
@@ -270,6 +281,14 @@ const App = () => {
     const migrated = realApps.filter(isAppMigrated).length;
     return { migrated, todo: realApps.length - migrated };
   }, [activeTab, filteredApps]);
+
+  // Compteurs pour le filtre avec / sans alternative (sur la liste non filtrée par ce critère)
+  const alternativeCounts = useMemo(() => {
+    if (activeTab !== TABS.MY_APPS) return { with: 0, without: 0 };
+    const realApps = filteredApps.filter(app => !app.isLoadingSkeleton);
+    const withAlt = realApps.filter(appHasAlternative).length;
+    return { with: withAlt, without: realApps.length - withAlt };
+  }, [activeTab, filteredApps, customMigrations]);
 
   // Ordre d'ajout à "Mes Apps" (le Set préserve l'ordre d'insertion), utilisé
   // par le tri "Date d'ajout".
@@ -288,15 +307,21 @@ const App = () => {
   }, [filteredApps, myApps, mySort, myAppsOrder]);
 
   // Liste effectivement affichée dans "Mes Apps" : version triée ci-dessus,
-  // avec en plus le filtre migrée / à migrer.
+  // avec en plus les filtres migrée / à migrer et avec / sans alternative.
   const myAppsDisplayed = useMemo(() => {
     if (activeTab !== TABS.MY_APPS) return filteredApps;
-    if (migrationFilter === 'all') return myAppsSorted;
+    if (migrationFilter === 'all' && alternativeFilter === 'all') return myAppsSorted;
     return myAppsSorted.filter(app => {
       if (app.isLoadingSkeleton) return false;
-      return migrationFilter === 'migrated' ? isAppMigrated(app) : !isAppMigrated(app);
+      if (migrationFilter !== 'all' && (migrationFilter === 'migrated') !== isAppMigrated(app)) {
+        return false;
+      }
+      if (alternativeFilter !== 'all' && (alternativeFilter === 'with') !== appHasAlternative(app)) {
+        return false;
+      }
+      return true;
     });
-  }, [activeTab, filteredApps, myAppsSorted, migrationFilter]);
+  }, [activeTab, filteredApps, myAppsSorted, migrationFilter, alternativeFilter, customMigrations]);
 
   // Import via lien de partage (?apps=... et/ou ?mig=...)
   const [pendingImport, setPendingImport] = useState(null);
@@ -828,6 +853,29 @@ const App = () => {
                 onClick={() => setMigrationFilter(id)}
                 className={`flex-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
                   migrationFilter === id
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300 hover:shadow-sm'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Filtre avec / sans alternative connue */}
+        {activeTab === TABS.MY_APPS && myApps.size > 0 && !searchTerm.trim() && (
+          <div className="flex gap-1.5 mb-4">
+            {[
+              { id: 'all', label: 'Toutes' },
+              { id: 'with', label: `Avec alternative (${alternativeCounts.with})` },
+              { id: 'without', label: `Sans alternative (${alternativeCounts.without})` },
+            ].map(({ id, label }) => (
+              <button
+                key={id}
+                onClick={() => setAlternativeFilter(id)}
+                className={`flex-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
+                  alternativeFilter === id
                     ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md'
                     : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300 hover:shadow-sm'
                 }`}
