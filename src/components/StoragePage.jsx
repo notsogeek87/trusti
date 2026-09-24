@@ -89,6 +89,7 @@ const StoragePage = ({
   isLoadingMyAppsData = false,
   onClearMyApps,
   onClearMigrations,
+  onSelectApp,
 }) => {
   // null = scan pas encore terminé, [] = scan fait, rien trouvé.
   const [installedPackages, setInstalledPackages] = useState(null);
@@ -342,7 +343,11 @@ const StoragePage = ({
 
                   <div className="space-y-2">
                     {displayedInstalledApps.map((app) => (
-                      <div key={app.id} className="flex items-center gap-2.5 bg-slate-50 rounded-xl p-2.5">
+                      <div
+                        key={app.id}
+                        onClick={() => onSelectApp?.(app)}
+                        className={`flex items-center gap-2.5 bg-slate-50 rounded-xl p-2.5 ${onSelectApp ? 'cursor-pointer active:bg-slate-100' : ''}`}
+                      >
                         <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 bg-white flex items-center justify-center">
                           {app.icon && app.icon.startsWith('http') ? (
                             <img src={app.icon} alt={app.name} className="w-full h-full object-cover" />
@@ -360,7 +365,10 @@ const StoragePage = ({
                         <ScoreIndicator grade={app.grade} />
                         <button
                           type="button"
-                          onClick={() => handleUninstall(app)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUninstall(app);
+                          }}
                           className="p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-all flex-shrink-0"
                           title={`Désinstaller ${app.name}`}
                           aria-label={`Désinstaller ${app.name}`}

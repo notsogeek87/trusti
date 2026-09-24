@@ -651,6 +651,7 @@ const App = () => {
         isLoadingMyAppsData={isLoadingMyApps}
         onClearMyApps={clearMyApps}
         onClearMigrations={clearMigrations}
+        onSelectApp={openAppDetail}
       />
     );
   }
