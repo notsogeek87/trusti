@@ -74,7 +74,7 @@ const ConfirmableAction = ({ icon: Icon, label, description, tone, onConfirm, di
 /**
  * Page dédiée "Espace de stockage" (pas une popup) : distingue clairement
  * deux choses souvent confondues —
- * 1) les données propres à TrustiScore (apps suivies, migrations,
+ * 1) les données propres à Trusti (apps suivies, migrations,
  *    préférences), minimes, stockées en localStorage sur cet appareil ;
  * 2) l'espace réellement occupé sur le disque par les apps elles-mêmes
  *    (APK + données + cache), lu via l'API Android StorageStatsManager —
@@ -223,11 +223,11 @@ const StoragePage = ({
       </header>
 
       <main className="max-w-2xl mx-auto p-4 md:p-6 space-y-6">
-        {/* Vue d'ensemble : suivi TrustiScore + espace total réellement occupé
+        {/* Vue d'ensemble : suivi Trusti + espace total réellement occupé
             par les apps elles-mêmes (détail par note dans la section suivante). */}
         <section className="bg-white rounded-2xl border border-slate-100 p-4">
           <h2 className="text-xs font-black uppercase tracking-wide text-slate-400 mb-2">
-            Données TrustiScore sur cet appareil
+            Données Trusti sur cet appareil
           </h2>
           <p className="text-xs text-slate-500 mb-3">
             Vos apps suivies et migrations sont enregistrées uniquement ici, pas
@@ -252,7 +252,7 @@ const StoragePage = ({
 
           {!isNativeAndroid && (
             <p className="text-xs text-slate-500">
-              Disponible uniquement dans l'app Android TrustiScore installée sur
+              Disponible uniquement dans l'app Android Trusti installée sur
               votre téléphone.
             </p>
           )}
@@ -269,7 +269,7 @@ const StoragePage = ({
               <p className="text-xs text-slate-500 mb-3">
                 Android protège cette information : pour afficher la taille
                 réelle de chaque app (et le camembert par note TrustiScore),
-                autorisez l'accès à l'utilisation pour TrustiScore.
+                autorisez l'accès à l'utilisation pour Trusti.
               </p>
               <button
                 type="button"
@@ -376,7 +376,7 @@ const StoragePage = ({
           )}
         </section>
 
-        {/* Réinitialisation des données TrustiScore */}
+        {/* Réinitialisation des données Trusti */}
         <section>
           <h2 className="text-xs font-black uppercase tracking-wide text-slate-400 mb-2">
             Réinitialisation

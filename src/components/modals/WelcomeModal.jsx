@@ -12,12 +12,12 @@ const WelcomeModal = ({ onFirstTimeYes, onFirstTimeNo }) => {
           <div className="flex justify-center mb-3">
             <img
               src="/assets/logo.png"
-              alt="TrustiScore"
+              alt="Trusti"
               className="w-16 h-16 animate-in spin-in duration-700"
             />
           </div>
           <h2 className="text-xl font-bold text-white mb-1.5">
-            Bienvenue sur TrustiScore !
+            Bienvenue sur Trusti !
           </h2>
           <p className="text-slate-300 text-sm">
             Votre compagnon pour une souveraineté numérique

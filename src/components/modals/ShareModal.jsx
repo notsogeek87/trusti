@@ -30,11 +30,11 @@ const ShareModal = ({ migratedApps, customMigrations, allApps = [], sortedAppIds
       `${app?.name} → ${customAlt || app?.alternative}`
     ).join('\n• ');
 
-    return `✅ Mes migrations TrustiScore:\n\n• ${migrations}`;
+    return `✅ Mes migrations Trusti:\n\n• ${migrations}`;
   };
 
   const handleShare = () => {
-    shareText('Mes migrations TrustiScore', generateShareText());
+    shareText('Mes migrations Trusti', generateShareText());
   };
 
   return (

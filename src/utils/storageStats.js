@@ -1,4 +1,4 @@
-// Toutes les données TrustiScore sont stockées en localStorage sous des clés
+// Toutes les données Trusti sont stockées en localStorage sous des clés
 // préfixées "trusti_" (voir useAuth, onboardingStorage, adminAuth, ageMode,
 // myAppsSort). On s'appuie sur ce préfixe commun pour mesurer l'espace
 // réellement utilisé par l'app, sans dépendre d'une liste de clés à maintenir.
@@ -22,7 +22,7 @@ export const getStorageStats = () => {
   return { totalKeys, totalBytes };
 };
 
-// Supprime toutes les clés TrustiScore du localStorage (apps, migrations,
+// Supprime toutes les clés Trusti du localStorage (apps, migrations,
 // onboarding, préférences, session admin...). Un rechargement de la page est
 // nécessaire ensuite pour que l'app reparte d'un état neuf partout où ces
 // données ne sont lues qu'une fois au montage (onboarding, mode enfant...).

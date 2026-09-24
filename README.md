@@ -1,4 +1,4 @@
-# TrustiScore
+# Trusti
 
 Application web moderne pour évaluer et comparer la fiabilité et la protection de la vie privée des applications numériques.
 
@@ -79,7 +79,7 @@ npm run preview
 
 ## 🔐 Authentification
 
-TrustiScore utilise l'authentification par **code OTP à 6 chiffres** envoyé par email via [Brevo](https://www.brevo.com) — plus de mot de passe.
+Trusti utilise l'authentification par **code OTP à 6 chiffres** envoyé par email via [Brevo](https://www.brevo.com) — plus de mot de passe.
 
 Détails complets (flow, sécurité, dépannage) : **[docs/guides/authentication.md](./docs/guides/authentication.md)**.
 
@@ -126,7 +126,7 @@ L'application est déployée sur **Vercel**.
 DATABASE_URL=postgresql://...
 BREVO_API_KEY=xkeysib-...
 BREVO_FROM_EMAIL=noreply@votredomaine.com
-BREVO_FROM_NAME=TrustiScore
+BREVO_FROM_NAME=Trusti
 FRONTEND_URL=https://votreapp.vercel.app
 ADMIN_EMAIL=votre@email.com
 ADMIN_SESSION_SECRET=valeur-aleatoire-longue
@@ -195,7 +195,7 @@ que tant que ce backend, non open et centralisé, reste disponible.
   [android/app/build.gradle](./android/app/build.gradle).
 - Sur `main`, chaque run publie une **release GitHub permanente** (jamais
   écrasée), taguée `v1.0.<run_number>`, avec l'APK en asset
-  (`TrustiScore-1.0.<run_number>.apk`).
+  (`Trusti-1.0.<run_number>.apk`).
 - Sur les autres branches/PR, la release est un pré-release `debug-<branche>`,
   écrasée à chaque run — non destinée à une distribution externe.
 - **Signature** : uniquement la clé debug committée
