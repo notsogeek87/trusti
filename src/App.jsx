@@ -783,7 +783,12 @@ const App = () => {
           <div className="mb-4">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <h2 className="text-lg font-black text-slate-900 leading-tight">Mes applications</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-black text-slate-900 leading-tight">Mes applications</h2>
+                  {isLoadingMyApps && (
+                    <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent shrink-0"></div>
+                  )}
+                </div>
                 <p className="text-xs text-slate-400 mt-0.5">
                   {myApps.size > 0
                     ? `${myApps.size} application${myApps.size > 1 ? 's' : ''} · ${migratedApps.size} migrée${migratedApps.size > 1 ? 's' : ''}`
