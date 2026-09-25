@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { TABS } from '../constants/tabs';
 import { API_URL } from '../utils/apiConfig';
+import { cachedFetchJSON } from '../utils/fetchCache';
 import { pickBestAlternative, isStrictlyBetterGrade } from '../utils/alternatives';
 import { hasCompletedOnboarding } from '../utils/onboardingStorage';
 
@@ -150,11 +151,10 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
         // Tri par grade (identique à l'ordre d'affichage du catalogue) pour que
         // chaque page chargée s'ajoute à la fin sans réordonner les cartes déjà visibles
         const url = `${API_URL}/apps?limit=${limit}&offset=${currentOffset}&sortBy=grade`;
-        
-        const response = await fetch(url);
-        const data = await response.json();
+
+        const data = await cachedFetchJSON(url);
         const appsArray = data.success ? data.apps : [];
-        
+
         // Normaliser les IDs en strings pour la cohérence
         const normalizedApps = appsArray.map(app => ({
           ...app,
@@ -162,7 +162,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
           replacesAppId: app.replacesAppId ? String(app.replacesAppId) : undefined,
           replacesAppIds: app.replacesAppIds ? app.replacesAppIds.map(id => String(id)) : undefined
         }));
-        
+
         // Mettre à jour les apps (ajouter ou remplacer)
         if (append) {
           setApps(prev => [...prev, ...normalizedApps]);
@@ -217,11 +217,9 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
       
       try {
         
-        // Ajouter un timestamp pour éviter le cache
-        const url = `${API_URL}/apps?awards=true&_t=${Date.now()}`;
-        
-        const response = await fetch(url);
-        const data = await response.json();
+        const url = `${API_URL}/apps?awards=true`;
+
+        const data = await cachedFetchJSON(url, { ttl: 10 * 60 * 1000 });
         const appsArray = data.success ? data.apps : [];
         
         // Normaliser les IDs en strings pour la cohérence
@@ -272,11 +270,10 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
         // Convertir le Set en tableau d'IDs
         const idsArray = Array.from(myApps);
         const idsParam = idsArray.join(',');
-        
-        const url = `${API_URL}/apps?ids=${encodeURIComponent(idsParam)}&_t=${Date.now()}`;
-        
-        const response = await fetch(url);
-        const data = await response.json();
+
+        const url = `${API_URL}/apps?ids=${encodeURIComponent(idsParam)}`;
+
+        const data = await cachedFetchJSON(url);
         const appsArray = data.success ? data.apps : [];
         
         // Normaliser les IDs en strings pour la cohérence
@@ -339,9 +336,8 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
         // Charger par lots jusqu'à avoir tout
         while (hasMore && offset < pagination.total) {
           const url = `${API_URL}/apps?limit=${batchSize}&offset=${offset}`;
-          
-          const response = await fetch(url);
-          const data = await response.json();
+
+          const data = await cachedFetchJSON(url);
           const appsArray = data.success ? data.apps : [];
           
           if (appsArray.length === 0) {
@@ -698,8 +694,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
       
       // Charger la page suivante
       const nextOffset = pagination.offset + pagination.limit;
-      const response = await fetch(`${API_URL}/apps?limit=${pagination.limit}&offset=${nextOffset}&sortBy=grade`);
-      const data = await response.json();
+      const data = await cachedFetchJSON(`${API_URL}/apps?limit=${pagination.limit}&offset=${nextOffset}&sortBy=grade`);
       const appsArray = data.success ? data.apps : [];
       
       // Normaliser les IDs en strings pour la cohérence
