@@ -253,6 +253,47 @@ const StoragePage = ({
       </header>
 
       <main className="max-w-2xl mx-auto p-4 md:p-6 space-y-6">
+        {/* Export / import des données locales — en tête de page pour rester visible immédiatement. */}
+        <section className="bg-white rounded-2xl border border-slate-100 p-4">
+          <h2 className="text-xs font-black uppercase tracking-wide text-slate-400 mb-2">
+            Exporter / importer mes données
+          </h2>
+          <p className="text-xs text-slate-500 mb-3">
+            Pour l'instant, seules vos notes par app ({getNotesCount()}) sont
+            concernées. Utile avant une réinstallation, ou en complément de la
+            sauvegarde Android classique.
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={handleExportData}
+              className="flex items-center justify-center gap-2 py-2.5 bg-slate-900 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-all active:scale-[0.98]"
+            >
+              <Download size={14} /> Exporter
+            </button>
+            <button
+              type="button"
+              onClick={() => importInputRef.current?.click()}
+              className="flex items-center justify-center gap-2 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl transition-all active:scale-[0.98]"
+            >
+              <Upload size={14} /> Importer
+            </button>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept="application/json,.json"
+              onChange={handleImportFileChange}
+              className="hidden"
+            />
+          </div>
+          {importFeedback && (
+            <p className={`mt-2 text-xs flex items-center gap-1.5 ${importFeedback.type === 'success' ? 'text-emerald-600' : 'text-rose-600'}`}>
+              {importFeedback.type === 'success' && <CheckCircle2 size={13} />}
+              {importFeedback.message}
+            </p>
+          )}
+        </section>
+
         {/* Vue d'ensemble : suivi Trusti + espace total réellement occupé
             par les apps elles-mêmes (détail par note dans la section suivante). */}
         <section className="bg-white rounded-2xl border border-slate-100 p-4">
@@ -410,47 +451,6 @@ const StoragePage = ({
                 </>
               )}
             </div>
-          )}
-        </section>
-
-        {/* Export / import des données locales */}
-        <section className="bg-white rounded-2xl border border-slate-100 p-4">
-          <h2 className="text-xs font-black uppercase tracking-wide text-slate-400 mb-2">
-            Exporter / importer mes données
-          </h2>
-          <p className="text-xs text-slate-500 mb-3">
-            Pour l'instant, seules vos notes par app ({getNotesCount()}) sont
-            concernées. Utile avant une réinstallation, ou en complément de la
-            sauvegarde Android classique.
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={handleExportData}
-              className="flex items-center justify-center gap-2 py-2.5 bg-slate-900 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-all active:scale-[0.98]"
-            >
-              <Download size={14} /> Exporter
-            </button>
-            <button
-              type="button"
-              onClick={() => importInputRef.current?.click()}
-              className="flex items-center justify-center gap-2 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl transition-all active:scale-[0.98]"
-            >
-              <Upload size={14} /> Importer
-            </button>
-            <input
-              ref={importInputRef}
-              type="file"
-              accept="application/json,.json"
-              onChange={handleImportFileChange}
-              className="hidden"
-            />
-          </div>
-          {importFeedback && (
-            <p className={`mt-2 text-xs flex items-center gap-1.5 ${importFeedback.type === 'success' ? 'text-emerald-600' : 'text-rose-600'}`}>
-              {importFeedback.type === 'success' && <CheckCircle2 size={13} />}
-              {importFeedback.message}
-            </p>
           )}
         </section>
 
