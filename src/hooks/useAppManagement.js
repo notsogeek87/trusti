@@ -317,7 +317,17 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
       if (allAppsLoaded) {
         return;
       }
-      
+
+      // Le premier chargement (pagination.total) n'est pas encore connu :
+      // `pagination.hasMore` vaut `false` par défaut à l'état initial, donc
+      // sans cette garde on conclurait à tort qu'il n'y a rien à charger
+      // avant même que le premier appel réseau n'ait répondu (arrivée
+      // directe sur l'onglet "Mes Apps" après onboarding). On attend que
+      // pagination.total soit connu pour statuer.
+      if (pagination.total === 0) {
+        return;
+      }
+
       // S'il n'y a plus d'apps à charger, marquer comme terminé
       if (!pagination.hasMore) {
         setAllAppsLoaded(true);
@@ -377,7 +387,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
     };
     
     loadAllAppsForCategory();
-  }, [selectedCategory, activeTab]);
+  }, [selectedCategory, activeTab, pagination.total]);
 
   // Détecter quand le chargement initial est terminé
   useEffect(() => {
