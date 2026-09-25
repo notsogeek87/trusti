@@ -12,7 +12,7 @@ import { sortMyApps } from '../utils/myAppsSort';
 import { GRADES } from '../constants/grades';
 import { getNotesCount } from '../utils/notesStorage';
 import { buildExportData, buildExportFilename, importExportData } from '../utils/dataExportImport';
-import downloadJSON from '../utils/downloadJSON';
+import { exportJSONFile } from '../utils/exportFile';
 import MyAppsSortMenu from './MyAppsSortMenu';
 import ScoreIndicator from './ui/ScoreIndicator';
 import GradeStorageDonut from './ui/GradeStorageDonut';
@@ -109,8 +109,15 @@ const StoragePage = ({
   const importInputRef = useRef(null);
   const [importFeedback, setImportFeedback] = useState(null); // { type: 'success'|'error', message }
 
-  const handleExportData = () => {
-    downloadJSON(buildExportData(), buildExportFilename());
+  const handleExportData = async () => {
+    try {
+      await exportJSONFile(buildExportData(), buildExportFilename(), { title: 'Export Trusti' });
+      setImportFeedback(null);
+    } catch (error) {
+      // Partage annulé par l'utilisateur : pas une erreur à afficher.
+      if (error?.message?.includes('cancel')) return;
+      setImportFeedback({ type: 'error', message: "Échec de l'export." });
+    }
   };
 
   const handleImportFileChange = async (e) => {
