@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, CheckCircle, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink, Trash2 } from 'lucide-react';
+import { ChevronLeft, CheckCircle, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink, Trash2, StickyNote } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { GRADE_INFO, GRADE_INFO_KID } from '../../constants/grades';
 import { useIsMobile } from '../../contexts/ViewModeContext';
@@ -11,6 +11,7 @@ import { extractPackageId } from '../../utils/androidPackage';
 import InstalledApps from '../../native/InstalledApps';
 import TechnicalAnalysisSection from '../technical/TechnicalAnalysisSection';
 import useTechnicalAnalysis from '../../hooks/useTechnicalAnalysis';
+import { getNote, setNote as saveNote } from '../../utils/notesStorage';
 
 const ANIM_STYLES = `
   @keyframes detailSlideUp {
@@ -50,6 +51,19 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
   // Détection app installée sur l'appareil (Android natif uniquement)
   const [isInstalledOnDevice, setIsInstalledOnDevice] = useState(false);
   const packageName = extractPackageId(app.playStoreUrl);
+
+  // Note personnelle sur l'app : stockée uniquement en local (voir
+  // notesStorage.js), jamais envoyée au serveur. Rechargée à chaque
+  // changement d'app affichée, sauvegardée avec un léger debounce pendant la
+  // frappe pour éviter d'écrire à localStorage à chaque caractère.
+  const [noteText, setNoteText] = useState(() => getNote(app.id));
+  useEffect(() => {
+    setNoteText(getNote(app.id));
+  }, [app.id]);
+  useEffect(() => {
+    const timer = setTimeout(() => saveNote(app.id, noteText), 400);
+    return () => clearTimeout(timer);
+  }, [app.id, noteText]);
 
   // Vérifie si cette app précise fait partie des apps détectées sur le téléphone,
   // pour proposer sa désinstallation directement depuis le détail.
@@ -290,6 +304,23 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
               </div>
             )}
             <ScoreIndicator grade={app.grade} size="large" />
+          </div>
+
+          {/* Ma note (locale uniquement, jamais envoyée au serveur) */}
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mb-4">
+            <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 mb-2 flex items-center gap-2">
+              <StickyNote size={16} className="text-amber-500" /> Ma note
+            </h3>
+            <textarea
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+              placeholder="Ajoutez une note personnelle sur cette app..."
+              rows={3}
+              className="w-full text-sm text-slate-700 placeholder:text-slate-300 bg-slate-50 rounded-xl p-3 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 resize-none"
+            />
+            <p className="text-[10px] text-slate-400 mt-1.5">
+              Visible uniquement sur cet appareil, jamais partagée.
+            </p>
           </div>
 
           {/* Installée sur cet appareil */}

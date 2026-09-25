@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { App as CapacitorApp } from '@capacitor/app';
 import {
   ChevronLeft, HardDrive, Smartphone, RefreshCcw, Trash2, AlertTriangle, ShieldAlert, X,
+  Download, Upload, CheckCircle2,
 } from 'lucide-react';
 import { formatBytes, clearAllTrustiStorage } from '../utils/storageStats';
 import { isNativeAndroid } from '../utils/platform';
@@ -9,6 +10,9 @@ import { extractPackageId } from '../utils/androidPackage';
 import InstalledApps from '../native/InstalledApps';
 import { sortMyApps } from '../utils/myAppsSort';
 import { GRADES } from '../constants/grades';
+import { getNotesCount } from '../utils/notesStorage';
+import { buildExportData, buildExportFilename, importExportData } from '../utils/dataExportImport';
+import downloadJSON from '../utils/downloadJSON';
 import MyAppsSortMenu from './MyAppsSortMenu';
 import ScoreIndicator from './ui/ScoreIndicator';
 import GradeStorageDonut from './ui/GradeStorageDonut';
@@ -100,6 +104,31 @@ const StoragePage = ({
   // Note sélectionnée en tapant le camembert ou sa légende — filtre la liste
   // des apps installées ci-dessous plutôt que de dupliquer l'info ailleurs.
   const [gradeFilter, setGradeFilter] = useState(null);
+
+  // Export / import des données locales (notes par app pour l'instant).
+  const importInputRef = useRef(null);
+  const [importFeedback, setImportFeedback] = useState(null); // { type: 'success'|'error', message }
+
+  const handleExportData = () => {
+    downloadJSON(buildExportData(), buildExportFilename());
+  };
+
+  const handleImportFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // permet de réimporter le même fichier ensuite
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const { notesImported } = importExportData(parsed);
+      setImportFeedback({
+        type: 'success',
+        message: `${notesImported} note${notesImported > 1 ? 's' : ''} importée${notesImported > 1 ? 's' : ''} ✓`,
+      });
+    } catch (error) {
+      setImportFeedback({ type: 'error', message: error.message || "Échec de l'import." });
+    }
+  };
 
   // Apps du catalogue "Mes Apps" réellement installées sur l'appareil.
   useEffect(() => {
@@ -381,6 +410,47 @@ const StoragePage = ({
                 </>
               )}
             </div>
+          )}
+        </section>
+
+        {/* Export / import des données locales */}
+        <section className="bg-white rounded-2xl border border-slate-100 p-4">
+          <h2 className="text-xs font-black uppercase tracking-wide text-slate-400 mb-2">
+            Exporter / importer mes données
+          </h2>
+          <p className="text-xs text-slate-500 mb-3">
+            Pour l'instant, seules vos notes par app ({getNotesCount()}) sont
+            concernées. Utile avant une réinstallation, ou en complément de la
+            sauvegarde Android classique.
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={handleExportData}
+              className="flex items-center justify-center gap-2 py-2.5 bg-slate-900 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-all active:scale-[0.98]"
+            >
+              <Download size={14} /> Exporter
+            </button>
+            <button
+              type="button"
+              onClick={() => importInputRef.current?.click()}
+              className="flex items-center justify-center gap-2 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl transition-all active:scale-[0.98]"
+            >
+              <Upload size={14} /> Importer
+            </button>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept="application/json,.json"
+              onChange={handleImportFileChange}
+              className="hidden"
+            />
+          </div>
+          {importFeedback && (
+            <p className={`mt-2 text-xs flex items-center gap-1.5 ${importFeedback.type === 'success' ? 'text-emerald-600' : 'text-rose-600'}`}>
+              {importFeedback.type === 'success' && <CheckCircle2 size={13} />}
+              {importFeedback.message}
+            </p>
           )}
         </section>
 

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Règles de sauvegarde/transfert Android modernes (API 31+, ex. via
+  android:dataExtractionRules). Même contenu que backup_rules.xml, pour la
+  sauvegarde cloud et le transfert direct d'appareil à appareil : les données
+  WebView (localStorage) sont incluses, aucune exclusion.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="file" path="." />
+        <include domain="database" path="." />
+        <include domain="sharedpref" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="file" path="." />
+        <include domain="database" path="." />
+        <include domain="sharedpref" path="." />
+    </device-transfer>
+</data-extraction-rules>
