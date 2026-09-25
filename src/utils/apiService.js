@@ -3,6 +3,7 @@
  */
 import { sanitizeApplication, migrateFromOldFormat } from '../models';
 import { API_URL } from './apiConfig';
+import { cachedFetchJSON } from './fetchCache';
 
 /**
  * Normalise et valide une application en utilisant le nouveau modèle
@@ -30,8 +31,9 @@ const normalizeApp = (appData) => {
  */
 export const fetchTrustiApps = async () => {
   try {
-    const response = await fetch(`${API_URL}/trusti-apps`);
-    const data = await response.json();
+    // TrustiApps change rarement et leur calcul est coûteux côté serveur
+    // (scraping Play Store/F-Droid pour chaque icône) : cache 1h.
+    const data = await cachedFetchJSON(`${API_URL}/trusti-apps`, { ttl: 60 * 60 * 1000 });
     
     if (data.success && data.apps.length > 0) {
       // Normaliser les données avec le nouveau modèle
