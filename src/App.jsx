@@ -728,7 +728,7 @@ const App = () => {
         : 'flex-1 min-w-0 px-6 py-3 pb-6'
       }>
         {activeTab !== TABS.MY_APPS && (
-          <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+          <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} isSearching={isSearching} />
         )}
 
         <div key={activeTab} style={{ animation: 'tabFadeIn 0.18s ease-out' }}>
@@ -843,7 +843,7 @@ const App = () => {
 
         {/* Recherche : positionnée sous le résumé, car elle porte sur les apps listées ci-dessous */}
         {activeTab === TABS.MY_APPS && (
-          <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+          <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} isSearching={isSearching} />
         )}
 
         {/* Filtres : statut de migration + disponibilité d'une alternative, sur une seule ligne */}

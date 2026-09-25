@@ -3,7 +3,7 @@ import { Search, X } from 'lucide-react';
 
 // Input non-contrôlé : React ne touche jamais la valeur dans le DOM,
 // ce qui empêche le clavier mobile de se fermer lors des re-renders parent.
-const SearchBar = ({ searchTerm, onSearchChange }) => {
+const SearchBar = ({ searchTerm, onSearchChange, isSearching = false }) => {
   const inputRef = useRef(null);
   const [hasValue, setHasValue] = useState(!!searchTerm);
   const debounceRef = useRef(null);
@@ -50,7 +50,13 @@ const SearchBar = ({ searchTerm, onSearchChange }) => {
         className="w-full pl-10 pr-10 py-3 bg-white border border-slate-100 rounded-2xl shadow-sm outline-none font-semibold text-sm text-slate-700 placeholder:text-slate-300 focus:ring-2 focus:ring-indigo-100 transition-all"
         onChange={handleChange}
       />
-      {hasValue && (
+      {isSearching && (
+        <div
+          className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin rounded-full h-4 w-4 border-2 border-indigo-400 border-t-transparent"
+          aria-label="Recherche en cours"
+        />
+      )}
+      {!isSearching && hasValue && (
         <button
           onClick={handleClear}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
