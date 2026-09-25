@@ -57,8 +57,12 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
   // changement d'app affichée, sauvegardée avec un léger debounce pendant la
   // frappe pour éviter d'écrire à localStorage à chaque caractère.
   const [noteText, setNoteText] = useState(() => getNote(app.id));
+  // Repliée par défaut, sauf si une note existe déjà pour cette app.
+  const [isNoteOpen, setIsNoteOpen] = useState(() => Boolean(getNote(app.id)));
   useEffect(() => {
-    setNoteText(getNote(app.id));
+    const existing = getNote(app.id);
+    setNoteText(existing);
+    setIsNoteOpen(Boolean(existing));
   }, [app.id]);
   useEffect(() => {
     const timer = setTimeout(() => saveNote(app.id, noteText), 400);
@@ -306,21 +310,36 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
             <ScoreIndicator grade={app.grade} size="large" />
           </div>
 
-          {/* Ma note (locale uniquement, jamais envoyée au serveur) */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mb-4">
-            <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 mb-2 flex items-center gap-2">
-              <StickyNote size={16} className="text-amber-500" /> Ma note
-            </h3>
-            <textarea
-              value={noteText}
-              onChange={(e) => setNoteText(e.target.value)}
-              placeholder="Ajoutez une note personnelle sur cette app..."
-              rows={3}
-              className="w-full text-sm text-slate-700 placeholder:text-slate-300 bg-slate-50 rounded-xl p-3 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-200 resize-none"
-            />
-            <p className="text-[10px] text-slate-400 mt-1.5">
-              Visible uniquement sur cet appareil, jamais partagée.
-            </p>
+          {/* Ma note (locale uniquement, jamais envoyée au serveur) — repliée
+              par défaut pour rester discrète, un simple lien suffit à l'ouvrir. */}
+          <div className="mb-4 px-1">
+            {isNoteOpen ? (
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setIsNoteOpen(false)}
+                  className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 hover:text-slate-600 mb-1.5"
+                >
+                  <StickyNote size={12} /> Ma note
+                </button>
+                <textarea
+                  autoFocus
+                  value={noteText}
+                  onChange={(e) => setNoteText(e.target.value)}
+                  placeholder="Note personnelle..."
+                  rows={2}
+                  className="w-full text-xs text-slate-600 placeholder:text-slate-300 bg-slate-50/70 rounded-lg p-2.5 border border-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-200 resize-none"
+                />
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsNoteOpen(true)}
+                className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-300 hover:text-slate-500 transition-colors"
+              >
+                <StickyNote size={12} /> Ajouter une note
+              </button>
+            )}
           </div>
 
           {/* Installée sur cet appareil */}
