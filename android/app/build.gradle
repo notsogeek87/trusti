@@ -1,5 +1,11 @@
 apply plugin: 'com.android.application'
 
+// Clé d'upload Play Store fournie par la CI depuis les secrets du dépôt.
+// Absente en local : Gradle retombe sur la signature debug (même logique que
+// swipernews, voir play-store-bundle.yml).
+def releaseKeystore = System.getenv('ANDROID_KEYSTORE_FILE')
+def hasReleaseKeystore = releaseKeystore && file(releaseKeystore).exists()
+
 android {
     namespace = "com.trusti.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -33,6 +39,14 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        if (hasReleaseKeystore) {
+            release {
+                storeFile file(releaseKeystore)
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ANDROID_KEY_ALIAS')
+                keyPassword System.getenv('ANDROID_KEY_PASSWORD')
+            }
+        }
     }
     buildTypes {
         debug {
@@ -41,8 +55,21 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (hasReleaseKeystore) {
+                signingConfig signingConfigs.release
+            }
         }
     }
+}
+
+// play-store-bundle.yml surcharge la version par -P, sans jamais toucher au
+// littéral ci-dessus — même principe que trustiVersionCode/trustiVersionName
+// pour android.yml.
+if (project.hasProperty('versionCode')) {
+    android.defaultConfig.versionCode = project.property('versionCode') as Integer
+}
+if (project.hasProperty('versionName')) {
+    android.defaultConfig.versionName = project.property('versionName')
 }
 
 repositories {
