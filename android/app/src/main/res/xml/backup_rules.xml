@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Règles de sauvegarde classique Android (Auto Backup, API < 31, ex. via
+  android:fullBackupContent). Inclut explicitement les données WebView
+  (localStorage, où Trusti stocke tout : apps suivies, migrations, notes...)
+  pour garantir qu'elles survivent à une réinstallation / un changement
+  d'appareil via la sauvegarde Google classique.
+-->
+<full-backup-content>
+    <include domain="file" path="." />
+    <include domain="database" path="." />
+    <include domain="sharedpref" path="." />
+</full-backup-content>
