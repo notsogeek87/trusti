@@ -111,11 +111,11 @@ const StoragePage = ({
 
   const handleExportData = async () => {
     try {
-      await exportJSONFile(buildExportData(), buildExportFilename(), { title: 'Export Trusti' });
+      await exportJSONFile(buildExportData(), buildExportFilename());
       setImportFeedback(null);
     } catch (error) {
-      // Partage annulé par l'utilisateur : pas une erreur à afficher.
-      if (error?.message?.includes('cancel')) return;
+      // Enregistrement annulé par l'utilisateur : pas une erreur à afficher.
+      if (error?.message?.toLowerCase().includes('annul')) return;
       setImportFeedback({ type: 'error', message: "Échec de l'export." });
     }
   };
