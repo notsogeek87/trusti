@@ -67,7 +67,7 @@ const ExplainerPanel = ({ onClose }) => {
         </div>
 
         <a
-          href="https://trusti-score.vercel.app/"
+          href="https://trusti-score.lielu.eu/"
           target="_blank"
           rel="noopener noreferrer"
           className="block mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 text-center shadow-lg hover:shadow-xl hover:scale-105 group"
