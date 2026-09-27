@@ -159,7 +159,7 @@ Trusti est une SPA Vite classique — c'est le cas d'usage le plus simple pour
 Capacitor : `webDir` pointe directement sur `dist/`, pas de mirroir à
 régénérer à la main.
 
-- `capacitor.config.json` : `appId com.trusti.app`, `webDir: "dist"`.
+- `capacitor.config.json` : `appId eu.trusti.app`, `webDir: "dist"`.
 - `android/` : projet natif généré par `npx cap add android`. Aucune
   personnalisation Java/Kotlin — `MainActivity` reste la sous-classe
   `BridgeActivity` par défaut, pas de plugin natif custom (contrairement à un

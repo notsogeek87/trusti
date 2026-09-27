@@ -127,6 +127,6 @@ jobs:
             exit 1
           fi
           python3 tools/publish_play_store.py \
-            --package com.trusti.app \
+            --package eu.trusti.app \
             --aab "${{ steps.build.outputs.aab }}" \
             --track "${{ inputs.track }}"

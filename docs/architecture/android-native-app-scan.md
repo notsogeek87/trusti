@@ -54,7 +54,7 @@ src/
   components/OnboardingAppsNative.jsx     Onboarding "scan auto" (Android natif)
   components/OnboardingApps.jsx           Onboarding "sélection manuelle" (web, inchangé)
 
-capacitor.config.json                     appId com.trusti.app, appName Trusti, webDir dist
+capacitor.config.json                     appId eu.trusti.app, appName Trusti, webDir dist
 ```
 
 Flow de `OnboardingAppsNative.jsx` :
@@ -88,6 +88,6 @@ que l'APK n'est pas reconstruit.
 - Même sans `QUERY_ALL_PACKAGES`, Google Play peut demander une justification
   pour un usage massif de `<queries>` — garder le formulaire de déclaration
   Play Console à jour si le catalogue grossit beaucoup.
-- `appId` actuel : `com.trusti.app` (à changer dans `capacitor.config.json`
+- `appId` actuel : `eu.trusti.app` (à changer dans `capacitor.config.json`
   + `android/app/build.gradle` si un autre identifiant est souhaité avant la
   première publication — il ne peut plus être changé après).

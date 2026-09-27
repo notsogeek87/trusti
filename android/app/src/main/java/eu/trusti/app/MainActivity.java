@@ -1,4 +1,4 @@
-package com.trusti.app;
+package eu.trusti.app;
 
 import android.os.Bundle;
 import com.getcapacitor.BridgeActivity;

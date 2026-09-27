@@ -7,10 +7,10 @@ def releaseKeystore = System.getenv('ANDROID_KEYSTORE_FILE')
 def hasReleaseKeystore = releaseKeystore && file(releaseKeystore).exists()
 
 android {
-    namespace = "com.trusti.app"
+    namespace = "eu.trusti.app"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.trusti.app"
+        applicationId "eu.trusti.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         // Surchargeable en CI via -PtrustiVersionCode=N -PtrustiVersionName=X.Y.N
