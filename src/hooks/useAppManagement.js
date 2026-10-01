@@ -345,7 +345,10 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
         
         // Charger par lots jusqu'à avoir tout
         while (hasMore && offset < pagination.total) {
-          const url = `${API_URL}/apps?limit=${batchSize}&offset=${offset}`;
+          // Même tri que la 1ère page (sortBy=grade) : sans ça, l'offset
+          // pointe dans un autre ordre et des apps (souvent les alternatives
+          // d'apps de "Mes Apps") ne sont jamais chargées.
+          const url = `${API_URL}/apps?limit=${batchSize}&offset=${offset}&sortBy=grade`;
 
           const data = await cachedFetchJSON(url);
           const appsArray = data.success ? data.apps : [];
@@ -362,7 +365,8 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
             replacesAppIds: app.replacesAppIds ? app.replacesAppIds.map(id => String(id)) : undefined
           }));
           
-          allApps = [...allApps, ...normalizedApps];
+          const knownIds = new Set(allApps.map(a => a.id));
+          allApps = [...allApps, ...normalizedApps.filter(a => !knownIds.has(a.id))];
           offset += appsArray.length;
           hasMore = data.pagination?.hasMore || false;
         }

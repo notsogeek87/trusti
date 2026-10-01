@@ -272,7 +272,7 @@ const App = () => {
   // déjà au top (grade A, aucune alternative nécessaire), qu'une alternative
   // recommandée existe, ou qu'une migration personnalisée a été choisie.
   const appHasAlternative = (app) =>
-    app.grade === 'A' || !!app.alternative || !!customMigrations.get(app.id);
+    app.grade === 'A' || !!app.alternative || !!customMigrations.get(app.id) || !!app.isLoadingAlternative;
 
   // Compteurs pour le filtre migrée / à migrer (sur la liste non filtrée par ce critère)
   const migrationCounts = useMemo(() => {
