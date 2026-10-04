@@ -8,6 +8,7 @@ import { formatBytes, clearAllTrustiStorage } from '../utils/storageStats';
 import { isNativeAndroid } from '../utils/platform';
 import { extractPackageId } from '../utils/androidPackage';
 import InstalledApps from '../native/InstalledApps';
+import AppUpdate from '../native/AppUpdate';
 import { sortMyApps } from '../utils/myAppsSort';
 import { GRADES } from '../constants/grades';
 import { getNotesCount } from '../utils/notesStorage';
@@ -108,6 +109,8 @@ const StoragePage = ({
   // Export / import des données locales (notes par app pour l'instant).
   const importInputRef = useRef(null);
   const [importFeedback, setImportFeedback] = useState(null); // { type: 'success'|'error', message }
+  const [updateChecking, setUpdateChecking] = useState(false);
+  const [updateFeedback, setUpdateFeedback] = useState(null); // { type: 'success'|'info'|'error', message }
 
   const handleExportData = async () => {
     try {
@@ -233,6 +236,31 @@ const StoragePage = ({
     });
   };
 
+  // Recherche forcée d'une mise à jour. Si une version existe, la fenêtre native (Compose) s'affiche
+  // par-dessus l'app et explique les étapes ; ici on n'affiche que le résultat.
+  const handleCheckUpdate = async () => {
+    setUpdateChecking(true);
+    setUpdateFeedback(null);
+    try {
+      const res = await AppUpdate.checkForUpdate();
+      if (res.status === 'available') {
+        setUpdateFeedback({ type: 'info', message: res.version ? `La version ${res.version} est disponible.` : 'Une mise à jour est disponible.' });
+      } else if (res.status === 'upToDate') {
+        setUpdateFeedback({ type: 'success', message: `Trusti est à jour (version ${res.currentVersion}).` });
+      } else if (res.status === 'busy') {
+        setUpdateFeedback({ type: 'info', message: 'Une mise à jour est déjà en cours.' });
+      } else if (res.status === 'disabled') {
+        setUpdateFeedback({ type: 'info', message: 'Les mises à jour automatiques ne sont pas actives sur cette version.' });
+      } else {
+        setUpdateFeedback({ type: 'error', message: res.message || 'La recherche a échoué. Réessayez plus tard.' });
+      }
+    } catch {
+      setUpdateFeedback({ type: 'error', message: 'La recherche a échoué. Réessayez plus tard.' });
+    } finally {
+      setUpdateChecking(false);
+    }
+  };
+
   // Contrairement au vidage ciblé (état React, géré par useAppManagement), on
   // efface directement toutes les clés puis on recharge la page, seul moyen
   // fiable de repartir à zéro sur des données lues une fois au montage
@@ -260,6 +288,35 @@ const StoragePage = ({
       </header>
 
       <main className="max-w-2xl mx-auto p-4 md:p-6 space-y-6">
+        {/* Mises à jour de l'app (APK GitHub) — uniquement dans l'app Android native. */}
+        {isNativeAndroid && (
+          <section className="bg-white rounded-2xl border border-slate-100 p-4">
+            <h2 className="text-xs font-black uppercase tracking-wide text-slate-400 mb-2">
+              Mises à jour
+            </h2>
+            <p className="text-xs text-slate-500 mb-3">
+              Trusti cherche une nouvelle version à chaque ouverture. Vous pouvez aussi lancer
+              la recherche ici : touchez « Installer », autorisez l'installation d'apps inconnues
+              si Android le demande, puis confirmez « Mettre à jour ». Vos données sont conservées.
+            </p>
+            <button
+              type="button"
+              onClick={handleCheckUpdate}
+              disabled={updateChecking}
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-900 hover:bg-slate-700 disabled:opacity-60 text-white text-xs font-bold rounded-xl transition-all active:scale-[0.98]"
+            >
+              <RefreshCcw size={14} className={updateChecking ? 'animate-spin' : ''} />
+              {updateChecking ? 'Recherche…' : 'Rechercher une mise à jour'}
+            </button>
+            {updateFeedback && (
+              <p className={`mt-2 text-xs flex items-center gap-1.5 ${updateFeedback.type === 'error' ? 'text-rose-600' : updateFeedback.type === 'success' ? 'text-emerald-600' : 'text-slate-600'}`}>
+                {updateFeedback.type === 'success' && <CheckCircle2 size={13} />}
+                {updateFeedback.message}
+              </p>
+            )}
+          </section>
+        )}
+
         {/* Export / import des données locales — en tête de page pour rester visible immédiatement. */}
         <section className="bg-white rounded-2xl border border-slate-100 p-4">
           <h2 className="text-xs font-black uppercase tracking-wide text-slate-400 mb-2">
