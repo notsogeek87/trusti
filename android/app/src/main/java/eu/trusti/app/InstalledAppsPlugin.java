@@ -1,4 +1,4 @@
-package com.trusti.app;
+package eu.trusti.app;
 
 import android.app.AppOpsManager;
 import android.content.Context;

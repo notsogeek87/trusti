@@ -141,7 +141,7 @@ const LandingPage = ({ onClose }) => {
             </button>
 
             <a
-              href="https://trusti-score.vercel.app/"
+              href="https://trusti-score.lielu.eu/"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full mt-4 bg-slate-800 hover:bg-slate-700 border-2 border-indigo-500/30 hover:border-indigo-500 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 group"

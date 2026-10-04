@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!--
+      Build release = Google Play (AAB) : pas d'auto-mise à jour. REQUEST_INSTALL_PACKAGES, ajoutée
+      par lielugit-updater, y est restreinte : on la retire. Les APK des releases GitHub sont des
+      builds debug et la gardent.
+    -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" tools:node="remove" />
+</manifest>

@@ -2,7 +2,7 @@
 """Publie un .aab sur un canal de test Google Play, via l'API Play Developer.
 
     PLAY_STORE_SERVICE_ACCOUNT_JSON='...' python3 tools/publish_play_store.py \
-        --package com.trusti.app --aab trusti-1.0.5.aab --track internal
+        --package eu.trusti.app --aab trusti-1.0.5.aab --track internal
 
 Repris de swipernews (voir son tools/publish_play_store.py), qui remplace
 l'action GitHub r0adkll/upload-google-play : elle ne permet pas de lister les

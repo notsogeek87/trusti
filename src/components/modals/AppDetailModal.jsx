@@ -429,7 +429,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                 )}
                 <p className="text-sm text-slate-600 leading-relaxed">{app.reason}</p>
                 <a
-                  href="https://trusti-score.vercel.app/"
+                  href="https://trusti-score.lielu.eu/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 mt-2 text-xs text-indigo-600 hover:text-indigo-800 font-semibold transition-colors"

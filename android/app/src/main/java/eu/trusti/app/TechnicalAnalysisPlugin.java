@@ -1,4 +1,4 @@
-package com.trusti.app;
+package eu.trusti.app;
 
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;

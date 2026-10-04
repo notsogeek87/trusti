@@ -1,4 +1,12 @@
 apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+
+// Version : versionCode ET tag de release doivent croître à chaque build CI, sinon Android refuse
+// la mise à jour / la bibliothèque ne la voit pas (un tag « v1.0-25 » serait une pré-version < 1.0).
+// BUILD_NUMBER = github.run_number en CI ; 1 en local.
+def buildNumber = (System.getenv('BUILD_NUMBER') ?: project.findProperty('buildNumber'))?.toString()?.toInteger() ?: 1
+def appVersionBase = project.property('appVersionBase')
 
 // Clé d'upload Play Store fournie par la CI depuis les secrets du dépôt.
 // Absente en local : Gradle retombe sur la signature debug (même logique que
@@ -7,16 +15,15 @@ def releaseKeystore = System.getenv('ANDROID_KEYSTORE_FILE')
 def hasReleaseKeystore = releaseKeystore && file(releaseKeystore).exists()
 
 android {
-    namespace = "com.trusti.app"
+    namespace = "eu.trusti.app"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.trusti.app"
+        applicationId "eu.trusti.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        // Surchargeable en CI via -PtrustiVersionCode=N -PtrustiVersionName=X.Y.N
-        // pour que chaque release GitHub porte une version unique et croissante.
-        versionCode project.hasProperty('trustiVersionCode') ? (trustiVersionCode as int) : 1
-        versionName project.hasProperty('trustiVersionName') ? trustiVersionName : "1.0"
+        // Même applicationId et même clé de signature pour tous les APK des releases GitHub.
+        versionCode buildNumber
+        versionName "$appVersionBase.$buildNumber"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -48,17 +55,31 @@ android {
             }
         }
     }
+    buildFeatures {
+        buildConfig = true
+    }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+            // Les APK des releases GitHub sont des builds debug : mises à jour automatiques actives.
+            buildConfigField "boolean", "UPDATER_ENABLED", "true"
         }
         release {
+            // Build Play Store (AAB) : pas d'auto-mise à jour (src/release/AndroidManifest.xml retire
+            // aussi REQUEST_INSTALL_PACKAGES, restreinte par Google Play).
+            buildConfigField "boolean", "UPDATER_ENABLED", "false"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             if (hasReleaseKeystore) {
                 signingConfig signingConfigs.release
             }
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
     }
 }
 
@@ -84,6 +105,14 @@ dependencies {
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
+    implementation "com.lielu:lielugit-updater:1.0.0"
+    // Fenêtre de mise à jour en Compose (par-dessus la WebView Capacitor).
+    implementation platform("androidx.compose:compose-bom:2025.10.01")
+    implementation "androidx.compose.material3:material3"
+    implementation "androidx.compose.ui:ui"
+    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
+    implementation "androidx.lifecycle:lifecycle-runtime-compose:2.9.4"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4"
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"

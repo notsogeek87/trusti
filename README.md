@@ -161,7 +161,7 @@ de mode hors-ligne avec données locales.
 
 ## 📱 Application Android (Capacitor)
 
-L'APK (`android/`, package `com.trusti.app`) est un **wrapper Capacitor** du
+L'APK (`android/`, package `eu.trusti.app`) est un **wrapper Capacitor** du
 même build web (`dist/`, généré par `npm run cap:sync`) : voir
 [docs/architecture/android-native-app-scan.md](./docs/architecture/android-native-app-scan.md)
 pour le détail de la couche native (scan des apps installées) et le workflow

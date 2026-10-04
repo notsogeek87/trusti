@@ -9,6 +9,9 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:8.13.0'
         classpath 'com.google.gms:google-services:4.4.4'
+        // Kotlin + Compose : uniquement pour la fenêtre de mise à jour (voir ui/update/).
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.21'
+        classpath 'org.jetbrains.kotlin:compose-compiler-gradle-plugin:2.2.21'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -21,6 +24,12 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        // Dépôt Maven de lielugit-updater, vendoré (zip de la release) et versionné dans git :
+        // aucun jeton ni secret. Mise à jour = remplacer le dossier par le zip de la nouvelle version.
+        maven {
+            url = uri("$rootDir/libs/lielugit-maven")
+            content { includeGroup("com.lielu") }
+        }
     }
 }
 

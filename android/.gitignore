@@ -3,6 +3,8 @@
 # Built application files
 *.apk
 *.aar
+# ...sauf le dépôt Maven vendoré de lielugit-updater (doit rester dans git)
+!libs/lielugit-maven/**/*.aar
 *.ap_
 *.aab
 

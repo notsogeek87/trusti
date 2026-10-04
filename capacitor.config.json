@@ -1,5 +1,5 @@
 {
-  "appId": "com.trusti.app",
+  "appId": "eu.trusti.app",
   "appName": "Trusti",
   "webDir": "dist",
   "server": {

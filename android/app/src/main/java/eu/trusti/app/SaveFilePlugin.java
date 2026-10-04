@@ -1,4 +1,4 @@
-package com.trusti.app;
+package eu.trusti.app;
 
 import android.app.Activity;
 import android.content.Intent;

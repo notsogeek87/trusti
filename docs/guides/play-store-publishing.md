@@ -1,7 +1,7 @@
 # Publier Trusti sur le Play Store
 
 Ce guide reprend la démarche déjà suivie pour swipernews (`eu.lielu.news`),
-adaptée à Trusti (`com.trusti.app`). Le code (signature release, workflow
+adaptée à Trusti (`eu.trusti.app`). Le code (signature release, workflow
 `play-store-bundle.yml`, `tools/publish_play_store.py`) est déjà en place ;
 ce qui suit est **la partie qui ne peut pas être automatisée depuis un
 environnement de dev sans accès à la Play Console**.
@@ -19,7 +19,7 @@ application**.
 - Langue par défaut : français
 - Type : Application
 - Gratuite
-- `applicationId` : **`com.trusti.app`** (déjà figé dans
+- `applicationId` : **`eu.trusti.app`** (déjà figé dans
   `android/app/build.gradle` et `capacitor.config.json` — ne pas en choisir
   un autre, il est définitif une fois la première version publiée).
 

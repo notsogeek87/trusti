@@ -12,6 +12,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # Lu par android/app/build.gradle : versionCode = BUILD_NUMBER, versionName = <appVersionBase>.<BUILD_NUMBER>.
+      BUILD_NUMBER: ${{ github.run_number }}
     steps:
       - uses: actions/checkout@v5
 
@@ -29,22 +32,20 @@ jobs:
 
       - run: npm run cap:sync
 
-      # versionCode/versionName ne sont plus figés dans build.gradle : ce run
-      # de CI leur donne une valeur unique et strictement croissante (run_number),
-      # nécessaire pour que les vraies releases (voir plus bas) portent chacune
-      # une version distincte au lieu de rester bloquées en "1.0".
+      # versionCode (BUILD_NUMBER) et tag de release croissent à chaque run. Le tag DOIT être
+      # <appVersionBase>.<run_number> (ex. v1.0.152) : un tag « v1.0-25 » serait lu comme une
+      # pré-version inférieure à 1.0 et plus aucune mise à jour ne serait proposée.
       - name: Déterminer la version
         id: version
         run: |
-          echo "code=${{ github.run_number }}" >> "$GITHUB_OUTPUT"
-          echo "name=1.0.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          BASE=$(grep '^appVersionBase=' android/gradle.properties | cut -d= -f2)
+          echo "code=${BUILD_NUMBER}" >> "$GITHUB_OUTPUT"
+          echo "name=${BASE}.${BUILD_NUMBER}" >> "$GITHUB_OUTPUT"
 
       - name: Build debug APK
         working-directory: android
         run: |
-          ./gradlew assembleDebug --no-daemon -q \
-            -PtrustiVersionCode=${{ steps.version.outputs.code }} \
-            -PtrustiVersionName=${{ steps.version.outputs.name }}
+          ./gradlew assembleDebug --no-daemon -q
 
       # Gradle nomme toujours sa sortie "app-debug.apk" (nom fixe lié au
       # buildType), quelle que soit la version : on la renomme pour que le
@@ -76,10 +77,25 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="v${{ steps.version.outputs.name }}"
+          cat > release-notes.md <<EOF
+          ## Trusti ${{ steps.version.outputs.name }}
+
+          Run #${{ github.run_number }} (${{ github.sha }}). Signé avec la clé debug (pas de clé de production configurée).
+
+          ### Installer
+
+          - **Trusti est déjà installé** : ouvrez l'app. Elle détecte cette version à l'ouverture et propose la mise à jour :
+            1. Touchez « Installer » : la mise à jour se télécharge.
+            2. Si Android demande d'autoriser Trusti à installer des applications, activez l'option, puis revenez en arrière.
+            3. Confirmez avec « Mettre à jour ». Vos données sont conservées.
+            Vous pouvez aussi lancer la recherche à la main : écran Paramètres (« Espace de stockage ») > « Rechercher une mise à jour ».
+          - **Première installation** (manuelle) : téléchargez l'APK ci-dessous (\`${{ steps.apk.outputs.name }}\`), ouvrez-le, autorisez la source si Android la bloque (« Autoriser depuis cette source »), puis touchez « Installer ».
+          EOF
           gh release create "$TAG" \
             "${{ steps.apk.outputs.path }}" \
             --title "Trusti $TAG" \
-            --notes "Run #${{ github.run_number }} (${{ github.sha }}). Signé avec la clé debug (pas de clé de production configurée)." \
+            --notes-file release-notes.md \
+            --latest \
             --target "${{ github.sha }}"
 
       # Les artifacts d'Actions sont hébergés sur Azure Blob Storage, souvent
