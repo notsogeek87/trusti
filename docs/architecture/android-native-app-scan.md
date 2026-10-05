@@ -44,6 +44,8 @@ android/                                  Projet Android natif (Capacitor)
     java/com/trusti/app/
       MainActivity.java                   Enregistre InstalledAppsPlugin
       InstalledAppsPlugin.java            Plugin Capacitor : getInstalledPackages()
+      AppUpdatePlugin.kt                  Plugin Capacitor : checkForUpdate() (voir guide mises à jour auto)
+      ui/update/                          Fenêtre Compose + ViewModel de l'updater (lielugit-updater)
 
 scripts/generate-android-catalog.js       Génère les 2 fichiers ci-dessus depuis la DB (ou apps.json en secours)
 
@@ -51,6 +53,7 @@ src/
   utils/apiConfig.js                      API_URL — bascule sur l'URL Vercel absolue en natif (pas de backend co-localisé dans l'APK)
   utils/platform.js                       isNativeAndroid (Capacitor.isNativePlatform() && platform === 'android')
   native/InstalledApps.js                 Wrapper JS du plugin Capacitor
+  native/AppUpdate.js                     Wrapper JS du plugin de mise à jour (voir ../guides/android-auto-update.md)
   components/OnboardingAppsNative.jsx     Onboarding "scan auto" (Android natif)
   components/OnboardingApps.jsx           Onboarding "sélection manuelle" (web, inchangé)
 

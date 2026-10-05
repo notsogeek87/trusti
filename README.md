@@ -179,6 +179,9 @@ que tant que ce backend, non open et centralisé, reste disponible.
 - `INTERNET` — requis pour tous les appels à l'API ci-dessus.
 - `REQUEST_DELETE_PACKAGES` — permission "normale" (aucune invite), utilisée
   pour proposer la désinstallation d'une autre app depuis l'écran de détail.
+- `REQUEST_INSTALL_PACKAGES` — ajoutée par l'updater, **uniquement dans les
+  APK des releases GitHub** (retirée du build Play Store) : permet d'installer
+  les mises à jour. Voir [docs/guides/android-auto-update.md](./docs/guides/android-auto-update.md).
 - `<queries>` sur une liste explicite de package names (générée par
   `npm run android:generate-catalog`) — permet de détecter quelles apps du
   catalogue Trusti sont installées, sans la permission restreinte
