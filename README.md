@@ -179,6 +179,9 @@ que tant que ce backend, non open et centralisé, reste disponible.
 - `INTERNET` — requis pour tous les appels à l'API ci-dessus.
 - `REQUEST_DELETE_PACKAGES` — permission "normale" (aucune invite), utilisée
   pour proposer la désinstallation d'une autre app depuis l'écran de détail.
+- `REQUEST_INSTALL_PACKAGES` — ajoutée par l'updater, **uniquement dans les
+  APK des releases GitHub** (retirée du build Play Store) : permet d'installer
+  les mises à jour. Voir [docs/guides/android-auto-update.md](./docs/guides/android-auto-update.md).
 - `<queries>` sur une liste explicite de package names (générée par
   `npm run android:generate-catalog`) — permet de détecter quelles apps du
   catalogue Trusti sont installées, sans la permission restreinte
@@ -189,15 +192,19 @@ que tant que ce backend, non open et centralisé, reste disponible.
 `.github/workflows/android.yml` construit l'APK à chaque push sur `main`/
 `staging` (et sur PR/`workflow_dispatch`, sans publication) :
 
-- `versionCode`/`versionName` sont injectés par la CI depuis
-  `${{ github.run_number }}` (`-PtrustiVersionCode=… -PtrustiVersionName=1.0.<run>`),
-  donc strictement croissants d'un run à l'autre — voir les commentaires dans
-  [android/app/build.gradle](./android/app/build.gradle).
+- `versionCode` = `github.run_number` et `versionName` = `<appVersionBase>.<run_number>`
+  (`appVersionBase` dans `android/gradle.properties`, ex. `1.0.152`), donc
+  strictement croissants d'un run à l'autre — voir
+  [android/app/build.gradle](./android/app/build.gradle) et
+  [docs/guides/android-auto-update.md](./docs/guides/android-auto-update.md).
 - Sur `main`, chaque run publie une **release GitHub permanente** (jamais
   écrasée), taguée `v1.0.<run_number>`, avec l'APK en asset
   (`Trusti-1.0.<run_number>.apk`).
 - Sur les autres branches/PR, la release est un pré-release `debug-<branche>`,
   écrasée à chaque run — non destinée à une distribution externe.
+- **Mises à jour automatiques** : les APK des releases GitHub vérifient et
+  proposent les nouvelles versions à chaque ouverture (désactivé dans le build
+  Play Store) — voir [le guide](./docs/guides/android-auto-update.md).
 - **Signature** : uniquement la clé debug committée
   (`android/app/debug.keystore`, mot de passe standard `android`). Aucune clé
   de production n'est configurée à ce jour — voir « Risqué, non touché » dans
@@ -210,7 +217,7 @@ dans **[/docs](./docs/README.md)** :
 
 - [Architecture](./docs/architecture/) — dont l'[app Android native](./docs/architecture/android-native-app-scan.md)
 - [Référence API](./docs/api/README.md)
-- [Guides](./docs/guides/) — déploiement, migration PostgreSQL, authentification, icônes
+- [Guides](./docs/guides/) — déploiement, migration PostgreSQL, authentification, icônes, Play Store, mises à jour Android
 - [Legacy](./docs/legacy/) — documentation obsolète conservée pour l'historique
 
 ## Licence

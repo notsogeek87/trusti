@@ -19,6 +19,8 @@ démarrage rapide.
 - [Migration vers PostgreSQL (Neon)](guides/postgres-migration.md)
 - [Authentification par code OTP (Brevo)](guides/authentication.md)
 - [Gestion automatique des icônes](guides/icons-management.md)
+- [Publication sur le Play Store](guides/play-store-publishing.md)
+- [Mises à jour automatiques de l'app Android](guides/android-auto-update.md)
 
 ## 🗄️ Legacy
 
