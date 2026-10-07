@@ -86,7 +86,8 @@ cet email. Ne délivre aucun jeton (session gérée côté client par `useAuth`)
 
 Même mécanisme OTP que `send-otp` (y compris le rate-limit d'envoi), restreint
 à `process.env.ADMIN_EMAIL` (bypass si la variable n'est pas définie, pratique
-en dev). Envoie le code que l'admin doit soumettre à `verify-admin-otp`.
+en dev ; en production Vercel l'accès admin est alors refusé). Les codes OTP
+sont générés avec `crypto.randomInt` et consommés de façon atomique. Envoie le code que l'admin doit soumettre à `verify-admin-otp`.
 
 ### `POST /api/verify-admin-otp` — `api/verify-admin-otp.js`
 

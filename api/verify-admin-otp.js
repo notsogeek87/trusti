@@ -2,7 +2,7 @@
 import 'dotenv/config';
 import { neon } from '@neondatabase/serverless';
 import { getOtpLock, registerOtpFailure, clearOtpFailures } from '../server/otpRateLimit.js';
-import { createAdminToken } from '../server/adminToken.js';
+import { createAdminToken, isAdminEmail } from '../server/adminToken.js';
 
 const sql = neon(process.env.DATABASE_URL);
 
@@ -23,8 +23,7 @@ export default async function handler(req, res) {
     const cleanCode = String(code).trim();
     const now = Date.now();
 
-    const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase().trim();
-    if (adminEmail && cleanEmail !== adminEmail) {
+    if (!isAdminEmail(cleanEmail)) {
       return res.status(403).json({ error: 'Accès non autorisé' });
     }
 
@@ -55,15 +54,21 @@ export default async function handler(req, res) {
 
     const tokenData = result[0];
 
-    if (now > tokenData.expires_at) {
+    if (now > Number(tokenData.expires_at)) {
       await sql`DELETE FROM magic_link_tokens WHERE token = ${cleanCode} AND email = ${cleanEmail}`;
       return res.status(401).json({ error: 'Code expiré. Demandez un nouveau code.' });
     }
 
-    await sql`
+    // Consommation atomique : deux requêtes concurrentes ne peuvent pas
+    // valider le même code.
+    const consumed = await sql`
       UPDATE magic_link_tokens SET used = true
-      WHERE token = ${cleanCode} AND email = ${cleanEmail}
+      WHERE token = ${cleanCode} AND email = ${cleanEmail} AND used = false
+      RETURNING token
     `;
+    if (consumed.length === 0) {
+      return res.status(401).json({ error: 'Code déjà utilisé. Demandez un nouveau code.' });
+    }
     await clearOtpFailures(sql, cleanEmail);
 
     const token = createAdminToken(cleanEmail);

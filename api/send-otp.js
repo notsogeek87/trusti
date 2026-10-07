@@ -2,6 +2,7 @@ import 'dotenv/config';
 import * as brevo from '@getbrevo/brevo';
 import { neon } from '@neondatabase/serverless';
 import { checkSendRateLimit } from '../server/otpRateLimit.js';
+import { generateOtpCode } from '../server/adminToken.js';
 
 const sql = neon(process.env.DATABASE_URL);
 
@@ -27,7 +28,7 @@ export default async function handler(req, res) {
     }
 
     // Générer le code à 6 chiffres
-    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const code = generateOtpCode();
     const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
 
     // Supprimer les anciens codes pour cet email

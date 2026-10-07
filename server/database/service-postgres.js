@@ -274,6 +274,9 @@ export async function initDatabase() {
  */
 export async function getAllApps(options = {}) {
   try {
+    // Lancée en parallèle des requêtes principales (plutôt qu'à la suite)
+    const relationsPromise = buildRelationsMap();
+    relationsPromise.catch(() => {}); // évite un rejet non géré si une requête précédente échoue
     const { limit = 0, offset = 0, sortBy = 'trusti_score' } = options;
     
     // Obtenir le total d'apps
@@ -349,7 +352,7 @@ export async function getAllApps(options = {}) {
       }
     }
     
-    const relationsMap = await buildRelationsMap();
+    const relationsMap = await relationsPromise;
     const formattedApps = apps.map(app => formatAppFromDB(app, relationsMap.get(String(app.id)) || EMPTY_RELATIONS));
     
     return {
@@ -377,6 +380,9 @@ export async function getAllApps(options = {}) {
  */
 export async function getAppsByType(appType, options = {}) {
   try {
+    // Lancée en parallèle des requêtes principales (plutôt qu'à la suite)
+    const relationsPromise = buildRelationsMap();
+    relationsPromise.catch(() => {}); // évite un rejet non géré si une requête précédente échoue
     const { limit = 0, offset = 0 } = options;
     let apps;
     let totalResult;
@@ -450,7 +456,7 @@ export async function getAppsByType(appType, options = {}) {
     }
     
     const total = parseInt(totalResult[0].count);
-    const relationsMap = await buildRelationsMap();
+    const relationsMap = await relationsPromise;
     const formattedApps = apps.map(app => formatAppFromDB(app, relationsMap.get(String(app.id)) || EMPTY_RELATIONS));
     
     return {
@@ -470,6 +476,9 @@ export async function getAppsByType(appType, options = {}) {
  */
 export async function getOnboardingApps(options = {}) {
   try {
+    // Lancée en parallèle des requêtes principales (plutôt qu'à la suite)
+    const relationsPromise = buildRelationsMap();
+    relationsPromise.catch(() => {}); // évite un rejet non géré si une requête précédente échoue
     const { limit = 0, offset = 0, categories = [] } = options;
 
     let apps;
@@ -515,7 +524,7 @@ export async function getOnboardingApps(options = {}) {
           `;
     }
 
-    const relationsMap = await buildRelationsMap();
+    const relationsMap = await relationsPromise;
     const formatted = apps.map(app => formatAppFromDB(app, relationsMap.get(String(app.id)) || EMPTY_RELATIONS));
     return { apps: formatted, total, limit, offset };
   } catch (error) {
@@ -534,6 +543,9 @@ export async function getOnboardingApps(options = {}) {
  */
 export async function getAwardsApps(options = {}) {
   try {
+    // Lancée en parallèle des requêtes principales (plutôt qu'à la suite)
+    const relationsPromise = buildRelationsMap();
+    relationsPromise.catch(() => {}); // évite un rejet non géré si une requête précédente échoue
     const { limit = 0, offset = 0, sortBy = 'category' } = options;
     
     console.log('🎯 getAwardsApps appelée avec:', { limit, offset, sortBy });
@@ -601,7 +613,7 @@ export async function getAwardsApps(options = {}) {
       }
     }
     
-    const relationsMap = await buildRelationsMap();
+    const relationsMap = await relationsPromise;
     const formattedApps = apps.map(app => formatAppFromDB(app, relationsMap.get(String(app.id)) || EMPTY_RELATIONS));
     
     return {
@@ -646,6 +658,10 @@ export async function getAppsByIds(ids) {
     if (!ids || ids.length === 0) {
       return [];
     }
+
+    // Lancée en parallèle des requêtes principales (plutôt qu'à la suite)
+    const relationsPromise = buildRelationsMap();
+    relationsPromise.catch(() => {}); // évite un rejet non géré si une requête précédente échoue
     
     console.log('🔍 getAppsByIds appelée avec:', ids.length, 'IDs');
     
@@ -661,7 +677,7 @@ export async function getAppsByIds(ids) {
     
     console.log(`✅ ${apps.length} apps trouvées sur ${ids.length} IDs demandés`);
     
-    const relationsMap = await buildRelationsMap();
+    const relationsMap = await relationsPromise;
     const formattedApps = apps.map(app => formatAppFromDB(app, relationsMap.get(String(app.id)) || EMPTY_RELATIONS));
     
     return formattedApps;
@@ -763,8 +779,8 @@ export async function updateApp(id, appData) {
           (appData.showInOnboarding !== undefined ? (appData.showInOnboarding ? 1 : 0) : null)
         }, show_in_onboarding),
         popularity = COALESCE(${appData.popularity !== undefined ? appData.popularity : null}, popularity),
-        privacy_features = COALESCE(${JSON.stringify(appData.privacyFeatures || {})}, privacy_features),
-        permissions = COALESCE(${JSON.stringify(appData.permissions || [])}, permissions),
+        privacy_features = COALESCE(${appData.privacyFeatures !== undefined ? JSON.stringify(appData.privacyFeatures || {}) : null}, privacy_features),
+        permissions = COALESCE(${appData.permissions !== undefined ? JSON.stringify(appData.permissions || []) : null}, permissions),
         updated_at = NOW()
       WHERE id = ${id}
       RETURNING *
@@ -819,15 +835,26 @@ export async function deleteApp(id) {
 }
 
 /**
+ * Échappe les jokers LIKE (% et _) saisis par l'utilisateur pour qu'ils
+ * soient cherchés littéralement (backslash = caractère d'échappement par défaut).
+ */
+function escapeLike(value) {
+  return String(value).replace(/[\\%_]/g, '\\$&');
+}
+
+/**
  * Rechercher des applications
  */
 export async function searchApps(query, filters = {}) {
   try {
+    // Lancée en parallèle des requêtes principales (plutôt qu'à la suite)
+    const relationsPromise = buildRelationsMap();
+    relationsPromise.catch(() => {}); // évite un rejet non géré si une requête précédente échoue
     let apps;
     
     // Recherche simple par nom (cas le plus courant)
     if (query && Object.keys(filters).length === 0) {
-      const searchPattern = `%${query}%`;
+      const searchPattern = `%${escapeLike(query)}%`;
       apps = await sql`
         SELECT * FROM applications
         WHERE name ILIKE ${searchPattern}
@@ -836,7 +863,7 @@ export async function searchApps(query, filters = {}) {
     } 
     // Recherche avec filtres additionnels
     else if (query && filters.category) {
-      const searchPattern = `%${query}%`;
+      const searchPattern = `%${escapeLike(query)}%`;
       apps = await sql`
         SELECT * FROM applications
         WHERE name ILIKE ${searchPattern} AND category = ${filters.category}
@@ -844,7 +871,7 @@ export async function searchApps(query, filters = {}) {
       `;
     }
     else if (query && filters.score) {
-      const searchPattern = `%${query}%`;
+      const searchPattern = `%${escapeLike(query)}%`;
       apps = await sql`
         SELECT * FROM applications
         WHERE name ILIKE ${searchPattern} AND trusti_score = ${filters.score}
@@ -873,7 +900,7 @@ export async function searchApps(query, filters = {}) {
       `;
     }
     
-    const relationsMap = await buildRelationsMap();
+    const relationsMap = await relationsPromise;
     return apps.map(app => formatAppFromDB(app, relationsMap.get(String(app.id)) || EMPTY_RELATIONS));
   } catch (error) {
     console.error('Error searching apps:', error);
@@ -1097,6 +1124,9 @@ const EMPTY_RELATIONS = { alternativeAppIds: [], replacesAppIds: [] };
  */
 export async function getAppsByGrade(grades, options = {}) {
   try {
+    // Lancée en parallèle des requêtes principales (plutôt qu'à la suite)
+    const relationsPromise = buildRelationsMap();
+    relationsPromise.catch(() => {}); // évite un rejet non géré si une requête précédente échoue
     const { limit = 0, offset = 0 } = options;
     const gradesArray = Array.isArray(grades) ? grades : [grades];
 
@@ -1123,7 +1153,7 @@ export async function getAppsByGrade(grades, options = {}) {
       `;
     }
 
-    const relationsMap = await buildRelationsMap();
+    const relationsMap = await relationsPromise;
     const formattedApps = apps.map(app => formatAppFromDB(app, relationsMap.get(String(app.id)) || EMPTY_RELATIONS));
     return { apps: formattedApps, total, limit, offset };
   } catch (error) {
