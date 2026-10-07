@@ -4,6 +4,10 @@ Index de toute la documentation du projet. Voir aussi le
 [README racine](../README.md) pour la présentation générale et le
 démarrage rapide.
 
+## 🗺️ Roadmap
+
+- [Backlog — idées de features et dette technique](BACKLOG.md)
+
 ## 🏗️ Architecture
 
 - [App Android native — scan automatique des apps installées](architecture/android-native-app-scan.md)
