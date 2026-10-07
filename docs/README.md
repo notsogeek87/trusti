@@ -4,6 +4,10 @@ Index de toute la documentation du projet. Voir aussi le
 [README racine](../README.md) pour la présentation générale et le
 démarrage rapide.
 
+## 🗺️ Roadmap
+
+- [Backlog — idées de features et dette technique](BACKLOG.md)
+
 ## 🏗️ Architecture
 
 - [App Android native — scan automatique des apps installées](architecture/android-native-app-scan.md)
@@ -22,6 +26,7 @@ démarrage rapide.
 - [Publication sur le Play Store](guides/play-store-publishing.md)
 - [Mises à jour automatiques de l'app Android](guides/android-auto-update.md)
 - [Hygiène numérique — gestionnaires de mots de passe et bilan de sécurité](guides/hygiene-numerique.md)
+- [Migration guidée — remplacer une app par une alternative, pas à pas](guides/migration-guidee.md)
 
 ## 🗄️ Legacy
 

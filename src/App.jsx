@@ -40,6 +40,7 @@ import ShareModal from './components/modals/ShareModal';
 import TrustiShareModal from './components/modals/TrustiShareModal';
 import ImportAppsModal from './components/modals/ImportAppsModal';
 import MigrationSelectorModal from './components/modals/MigrationSelectorModal';
+import MigrationGuideModal from './components/modals/MigrationGuideModal';
 import LoginModal from './components/modals/LoginModal';
 import AdminAppsModal from './components/modals/AdminAppsModal';
 import PinModal from './components/modals/PinModal';
@@ -214,6 +215,8 @@ const App = () => {
 
   // État pour le filtre migrée / à migrer dans l'onglet Mes Apps
   const [migrationFilter, setMigrationFilter] = useState(DEFAULT_MIGRATION_FILTER);
+  // App dont le parcours « Migration guidée » est ouvert depuis « Mes Apps »
+  const [migrationGuideApp, setMigrationGuideApp] = useState(null);
 
   // État pour le filtre avec/sans alternative connue dans l'onglet Mes Apps.
   // Par défaut on masque les apps sans alternative connue (rien à proposer
@@ -634,6 +637,7 @@ const App = () => {
           onToggleMyApp={toggleMyApp}
           onClose={closeAppDetail}
           onSelectApp={openAppDetail}
+          onCompleteMigration={(from, to) => importMigrations([{ id: from.id, customAlt: to?.name }])}
           allApps={apps}
         />
       </ViewModeContext.Provider>
@@ -901,6 +905,7 @@ const App = () => {
           onToggleMigrate={toggleMigrate}
           onSelectApp={openAppDetail}
           onSelectMigration={setShowMigrationSelector}
+          onStartMigration={setMigrationGuideApp}
           selectedCategory={selectedCategory}
           searchTerm={searchTerm}
           pagination={pagination}
@@ -941,6 +946,20 @@ const App = () => {
           isLoggedIn={Boolean(currentUser)}
           onConfirm={handleImportShared}
           onClose={() => setPendingImport(null)}
+        />
+      )}
+
+      {/* Parcours de migration guidée (depuis « Mes Apps ») */}
+      {migrationGuideApp && !selectedApp && (
+        <MigrationGuideModal
+          app={migrationGuideApp}
+          alternatives={apps.filter(a =>
+            migrationGuideApp.alternativeAppIds?.includes(String(a.id)) ||
+            a.replacesAppIds?.includes(migrationGuideApp.id) ||
+            a.replacesAppId === migrationGuideApp.id
+          )}
+          onComplete={(from, to) => importMigrations([{ id: from.id, customAlt: to?.name }])}
+          onClose={() => setMigrationGuideApp(null)}
         />
       )}
 

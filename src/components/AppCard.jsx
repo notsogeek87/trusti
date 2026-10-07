@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { PlusCircle, CheckCircle, Trash2, ShieldCheck, ChevronRight, ArrowUpRight, CornerDownRight } from 'lucide-react';
+import { PlusCircle, CheckCircle, Trash2, ShieldCheck, ChevronRight, ArrowUpRight, CornerDownRight, Route } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
 import { TABS } from '../constants/tabs';
 
@@ -16,6 +16,7 @@ const AppCard = React.memo(({
   onToggleMigrate,
   onSelectApp,
   onSelectMigration,
+  onStartMigration,
   isLoadingMyApps = false
 }) => {
   const isLoadingSkeleton = app.isLoadingSkeleton === true;
@@ -182,6 +183,16 @@ const AppCard = React.memo(({
                 </span>
               )}
             </button>
+
+            {/* Parcours guidé : app C/D/E dont l'alternative n'est pas encore adoptée */}
+            {onStartMigration && !['A', 'B'].includes(app.grade) && !app.alternativeAdopted && !isMigrated && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onStartMigration(app); }}
+                className="flex items-center gap-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-700 pl-0.5"
+              >
+                <Route size={12} className="shrink-0" /> Migrer pas à pas
+              </button>
+            )}
 
             {/* Une alternative encore mieux notée existe, mais n'est pas (encore) utilisée */}
             {app.betterAlternative && (
