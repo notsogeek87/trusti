@@ -57,6 +57,16 @@
         tools:ignore="ProtectedPermissions" />
 
     <!--
+      Accès spécial "Accès à tous les fichiers" (API 30+), requis uniquement par le nettoyeur de
+      stockage (SystemCleanerPlugin) pour parcourir le stockage partagé. Activé manuellement par
+      l'utilisateur dans les réglages Android ; jamais demandé tant qu'il n'ouvre pas le nettoyeur.
+      Retirée du build Play Store (src/release/AndroidManifest.xml), où Google la restreint :
+      le nettoyeur n'y est alors pas proposé. Présente dans les APK des releases GitHub.
+    -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+
+    <!--
       Visibilité des paquets pour le scan d'apps installées (onboarding natif Android).
       On liste explicitement chaque app connue du catalogue Trusti plutôt que de demander
       la permission QUERY_ALL_PACKAGES (très restreinte par Google Play depuis 2021 et

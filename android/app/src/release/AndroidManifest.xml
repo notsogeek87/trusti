@@ -7,4 +7,6 @@
       builds debug et la gardent.
     -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" tools:node="remove" />
+    <!-- Idem pour l'accès à tous les fichiers (nettoyeur de stockage) : réservé aux APK GitHub. -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" tools:node="remove" />
 </manifest>

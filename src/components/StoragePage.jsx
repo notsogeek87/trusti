@@ -17,6 +17,7 @@ import { exportJSONFile } from '../utils/exportFile';
 import MyAppsSortMenu from './MyAppsSortMenu';
 import ScoreIndicator from './ui/ScoreIndicator';
 import GradeStorageDonut from './ui/GradeStorageDonut';
+import SystemCleanerSection from './SystemCleanerSection';
 
 const StatTile = ({ value, label }) => (
   <div className="bg-slate-50 rounded-2xl p-3 text-center">
@@ -378,6 +379,9 @@ const StoragePage = ({
             />
           </div>
         </section>
+
+        {/* Nettoyeur de fichiers inutiles — app Android native (APK GitHub) uniquement. */}
+        {isNativeAndroid && <SystemCleanerSection />}
 
         {/* Espace réel occupé par les apps installées, par note TrustiScore */}
         <section className="bg-white rounded-2xl border border-slate-100 p-4">
