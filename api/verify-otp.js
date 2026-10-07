@@ -54,16 +54,21 @@ export default async function handler(req, res) {
     const tokenData = result[0];
 
     // Vérifier expiration
-    if (now > tokenData.expires_at) {
+    if (now > Number(tokenData.expires_at)) {
       await sql`DELETE FROM magic_link_tokens WHERE token = ${cleanCode} AND email = ${cleanEmail}`;
       return res.status(401).json({ error: 'Code expiré. Demandez un nouveau code.' });
     }
 
-    // Marquer comme utilisé
-    await sql`
+    // Consommation atomique : deux requêtes concurrentes ne peuvent pas
+    // valider le même code.
+    const consumed = await sql`
       UPDATE magic_link_tokens SET used = true
-      WHERE token = ${cleanCode} AND email = ${cleanEmail}
+      WHERE token = ${cleanCode} AND email = ${cleanEmail} AND used = false
+      RETURNING token
     `;
+    if (consumed.length === 0) {
+      return res.status(401).json({ error: 'Code déjà utilisé. Demandez un nouveau code.' });
+    }
 
     // Réinitialiser le compteur d'échecs
     await clearOtpFailures(sql, cleanEmail);

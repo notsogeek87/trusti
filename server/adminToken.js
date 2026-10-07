@@ -9,6 +9,33 @@ import crypto from 'crypto';
 
 const TOKEN_TTL_MS = 12 * 60 * 60 * 1000; // 12h
 
+/**
+ * Email admin configuré, ou null.
+ * Sans ADMIN_EMAIL, tout email est accepté (pratique en dev) — sauf en
+ * production Vercel où l'accès admin est refusé (fail-closed) pour éviter
+ * qu'un oubli de configuration ouvre l'administration à tout le monde.
+ */
+export function getAdminEmail() {
+  return process.env.ADMIN_EMAIL?.toLowerCase().trim() || null;
+}
+
+export function isAdminEmail(email) {
+  const adminEmail = getAdminEmail();
+  if (!adminEmail) {
+    if (process.env.VERCEL_ENV === 'production') {
+      console.error('ADMIN_EMAIL non défini en production : accès admin refusé');
+      return false;
+    }
+    return true;
+  }
+  return String(email || '').toLowerCase().trim() === adminEmail;
+}
+
+/** Code OTP à 6 chiffres, généré avec un RNG cryptographique. */
+export function generateOtpCode() {
+  return String(crypto.randomInt(100000, 1000000));
+}
+
 function getSecret() {
   const secret = process.env.ADMIN_SESSION_SECRET || process.env.API_KEY;
   if (!secret) {
@@ -54,8 +81,7 @@ export function verifyAdminToken(token) {
  * Autorise une requête de mutation si :
  * - elle porte un x-api-key correct (intégrations externes type n8n), ou
  * - elle porte un jeton admin (Authorization: Bearer ...) valide et non expiré,
- *   pour l'email admin configuré (ou n'importe quel email si ADMIN_EMAIL
- *   n'est pas défini, comme pour check-admin.js en dev).
+ *   pour l'email admin configuré (voir isAdminEmail).
  */
 export function isAuthorizedAdminRequest(req) {
   const apiKey = req.headers['x-api-key'];
@@ -70,6 +96,5 @@ export function isAuthorizedAdminRequest(req) {
   const claims = verifyAdminToken(token);
   if (!claims) return false;
 
-  const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase().trim();
-  return !adminEmail || claims.email === adminEmail;
+  return isAdminEmail(claims.email);
 }

@@ -2,6 +2,7 @@ import 'dotenv/config';
 import * as brevo from '@getbrevo/brevo';
 import { neon } from '@neondatabase/serverless';
 import { checkSendRateLimit } from '../server/otpRateLimit.js';
+import { isAdminEmail, generateOtpCode } from '../server/adminToken.js';
 
 const sql = neon(process.env.DATABASE_URL);
 
@@ -17,10 +18,8 @@ export default async function handler(req, res) {
     if (!email) return res.status(400).json({ error: 'Email requis' });
 
     const cleanEmail = email.toLowerCase().trim();
-    const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase().trim();
-
     // Vérifier que l'email est autorisé (dev bypass si ADMIN_EMAIL non défini)
-    if (adminEmail && cleanEmail !== adminEmail) {
+    if (!isAdminEmail(cleanEmail)) {
       return res.status(403).json({ error: 'Accès non autorisé' });
     }
 
@@ -31,7 +30,7 @@ export default async function handler(req, res) {
     }
 
     // Générer le code
-    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const code = generateOtpCode();
     const expiresAt = Date.now() + 10 * 60 * 1000;
 
     await sql`DELETE FROM magic_link_tokens WHERE email = ${cleanEmail} AND LENGTH(token) = 6`;

@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { isAdminEmail } from '../server/adminToken.js';
 
 export default function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -10,10 +11,6 @@ export default function handler(req, res) {
   const { email } = req.query;
   if (!email) return res.status(400).json({ isAdmin: false });
 
-  const cleanEmail = email.toLowerCase().trim();
-  const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase().trim();
-
-  // Dev bypass si ADMIN_EMAIL non défini
-  const isAdmin = !adminEmail || cleanEmail === adminEmail;
-  return res.status(200).json({ isAdmin });
+  // Dev bypass si ADMIN_EMAIL non défini (jamais en production)
+  return res.status(200).json({ isAdmin: isAdminEmail(email) });
 }

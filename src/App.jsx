@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef, Suspense, lazy } from 'react';
 import { App as CapacitorApp } from '@capacitor/app';
 import { useAppManagement } from './hooks/useAppManagement';
 import { useModals } from './hooks/useModals';
@@ -42,7 +42,8 @@ import ImportAppsModal from './components/modals/ImportAppsModal';
 import MigrationSelectorModal from './components/modals/MigrationSelectorModal';
 import MigrationGuideModal from './components/modals/MigrationGuideModal';
 import LoginModal from './components/modals/LoginModal';
-import AdminAppsModal from './components/modals/AdminAppsModal';
+// Chargée à la demande : l'administration (~2 000 lignes) n'est utile qu'à l'admin
+const AdminAppsModal = lazy(() => import('./components/modals/AdminAppsModal'));
 import PinModal from './components/modals/PinModal';
 import WelcomeModal from './components/modals/WelcomeModal';
 import AgePromptModal from './components/modals/AgePromptModal';
@@ -1005,13 +1006,15 @@ const App = () => {
 
       {/* Modal d'administration Apps (TrustiApps et StarApps) */}
       {showAdminModal && (
-        <AdminAppsModal
-          onClose={() => {
-            setShowAdminModal(false);
-            // Forcer le rechargement pour que tout le monde voit les changements
-            window.location.reload();
-          }}
-        />
+        <Suspense fallback={null}>
+          <AdminAppsModal
+            onClose={() => {
+              setShowAdminModal(false);
+              // Forcer le rechargement pour que tout le monde voit les changements
+              window.location.reload();
+            }}
+          />
+        </Suspense>
       )}
 
       </>

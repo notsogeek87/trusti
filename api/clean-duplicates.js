@@ -98,7 +98,7 @@ export default async function handler(req, res) {
 
   try {
     console.log('🔍 Récupération de toutes les applications...');
-    const apps = await dbService.getAllApps();
+    const { apps } = await dbService.getAllApps();
     console.log(`📱 ${apps.length} applications trouvées`);
     
     // Chercher spécifiquement leboncoin
@@ -184,10 +184,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('❌ Erreur dans clean-duplicates:', error);
-    return res.status(500).json({ 
-      error: 'Erreur serveur', 
-      details: error.message,
-      stack: error.stack 
-    });
+    return res.status(500).json({ error: 'Erreur serveur' });
   }
 }
