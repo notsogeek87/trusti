@@ -53,7 +53,7 @@ npm run preview
 - **Layout** : Header, Navigation
 - **Modals** : AppDetailModal, ShareModal, TrustiShareModal, MigrationSelectorModal
 - **UI** : ScoreIndicator, SearchBar
-- **Features** : AppCard, AppsList, ExplainerPanel, ShareButton, DataHygieneCard (hygiène numérique : gestionnaire de mots de passe, bilan de sécurité cochable, stocké en local uniquement dans `trusti_hygiene`)
+- **Features** : AppCard, AppsList, ExplainerPanel, ShareButton, DataHygieneCard (hygiène numérique, voir [le guide](./docs/guides/hygiene-numerique.md))
 
 ### Hooks Personnalisés
 
