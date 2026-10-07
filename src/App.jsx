@@ -26,6 +26,7 @@ import SearchBar from './components/ui/SearchBar';
 import ExplainerPanel from './components/ExplainerPanel';
 import AppsList from './components/AppsList';
 import MyAppsSummary from './components/MyAppsSummary';
+import DataHygieneCard from './components/DataHygieneCard';
 import MyAppsSortMenu from './components/MyAppsSortMenu';
 import LandingPage from './components/LandingPage';
 import TrustiChatWidget from './components/TrustiChatWidget';
@@ -839,6 +840,11 @@ const App = () => {
         {/* Résumé TrustiScore du téléphone + progression des migrations */}
         {activeTab === TABS.MY_APPS && !searchTerm.trim() && (
           <MyAppsSummary apps={filteredApps} />
+        )}
+
+        {/* Hygiène numérique : gestionnaire de mots de passe + bilan de sécurité */}
+        {activeTab === TABS.MY_APPS && !searchTerm.trim() && myApps.size > 0 && (
+          <DataHygieneCard myApps={filteredApps} catalogApps={apps} />
         )}
 
         {/* Recherche : positionnée sous le résumé, car elle porte sur les apps listées ci-dessous */}

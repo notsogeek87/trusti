@@ -53,7 +53,7 @@ npm run preview
 - **Layout** : Header, Navigation
 - **Modals** : AppDetailModal, ShareModal, TrustiShareModal, MigrationSelectorModal
 - **UI** : ScoreIndicator, SearchBar
-- **Features** : AppCard, AppsList, ExplainerPanel, ShareButton
+- **Features** : AppCard, AppsList, ExplainerPanel, ShareButton, DataHygieneCard (hygiène numérique, voir [le guide](./docs/guides/hygiene-numerique.md))
 
 ### Hooks Personnalisés
 
