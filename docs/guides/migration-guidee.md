@@ -5,7 +5,12 @@
 
 ## Ce que voit l'utilisateur
 
-Dans la fiche d'une app notée **C, D ou E** qui a au moins une alternative de meilleur grade, le bloc « Alternatives » affiche un bouton **Migrer pas à pas**. Il ouvre un parcours en quatre étapes :
+Deux points d'entrée, pour une app notée **C, D ou E** qui a au moins une alternative de meilleur grade :
+
+- dans sa fiche, le bloc « Alternatives » affiche un bouton **Migrer pas à pas** ;
+- dans « Mes Apps », la carte de l'app affiche le même lien sous son alternative, tant que celle-ci n'est pas adoptée.
+
+Le lien ouvre un parcours en quatre étapes :
 
 | Étape | Contenu |
 |---|---|
@@ -24,7 +29,8 @@ Dans la fiche d'une app notée **C, D ou E** qui a au moins une alternative de m
 | `src/utils/migrationGuide.js` | Logique pure : `getDataTips`, `getMigrationCandidates`, `canStartMigration`, `computeProgress` |
 | `src/utils/migrationGuideStorage.js` | Lecture/écriture de la progression |
 | `src/components/modals/MigrationGuideModal.jsx` | Interface du parcours |
-| `src/components/modals/AppDetailModal.jsx` | Bouton de lancement (prop `onCompleteMigration`) |
+| `src/components/modals/AppDetailModal.jsx` | Bouton de lancement depuis la fiche (prop `onCompleteMigration`) |
+| `src/components/AppCard.jsx` | Lien de lancement depuis « Mes Apps » (prop `onStartMigration`, état dans `App.jsx`) |
 | `tests/technical/migrationGuide.test.js` | Tests de la logique pure |
 
 ## Données et vie privée
@@ -35,7 +41,7 @@ La progression est stockée **uniquement** dans le `localStorage`, clé `trusti_
 
 - Textes en version adulte uniquement (pas de variante -15 ans).
 - Conseils d'export génériques par catégorie, pas de guide propre à chaque app.
-- Pas de point d'entrée depuis la liste « Mes Apps » : le parcours se lance depuis la fiche de l'app.
+- Depuis « Mes Apps », les alternatives proposées viennent des apps déjà chargées du catalogue (comme le sélecteur d'alternative).
 
 ## Exemple
 

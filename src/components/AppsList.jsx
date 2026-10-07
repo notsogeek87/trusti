@@ -28,6 +28,7 @@ const AppsList = ({
   onToggleMigrate,
   onSelectApp,
   onSelectMigration,
+  onStartMigration,
   selectedCategory = 'Toutes',
   searchTerm = '',
   pagination = { hasMore: false, isLoadingMore: false, total: 0 },
@@ -128,6 +129,7 @@ const AppsList = ({
                   onToggleMigrate={onToggleMigrate}
                   onSelectApp={onSelectApp}
                   onSelectMigration={onSelectMigration}
+                  onStartMigration={onStartMigration}
                   isLoadingMyApps={isLoadingMyApps}
                 />
               ))}
@@ -172,6 +174,7 @@ const AppsList = ({
           onToggleMigrate={onToggleMigrate}
           onSelectApp={onSelectApp}
           onSelectMigration={onSelectMigration}
+          onStartMigration={onStartMigration}
           isLoadingMyApps={isLoadingMyApps}
         />
       ))}
