@@ -9,8 +9,8 @@ import { AGE_MODE } from '../utils/ageMode';
 // global du téléphone (déduit des apps suivies) et la progression des
 // migrations, condensée dans une barre. Un tap révèle la répartition par
 // note (A-E) et le partage des migrations. `children` permet d'ajouter des
-// lignes secondaires dans la même carte (ex. hygiène numérique), pour garder
-// un seul bloc de synthèse au lieu d'empiler des cartes.
+// pastilles secondaires dans le pied de carte (ex. hygiène numérique), pour
+// garder un seul bloc de synthèse au lieu d'empiler des cartes.
 const MyAppsSummary = ({ apps, onShareMigrations, children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const isKid = useAgeMode() === AGE_MODE.KID;
@@ -39,7 +39,7 @@ const MyAppsSummary = ({ apps, onShareMigrations, children }) => {
             type="button"
             onClick={() => setIsOpen(prev => !prev)}
             aria-expanded={isOpen}
-            className="w-full text-left px-4 py-3.5 hover:bg-slate-100 transition-colors"
+            className="w-full text-left px-4 pt-3.5 pb-2.5 hover:bg-slate-100 transition-colors"
           >
             <div className="flex items-center gap-3">
               <div className={`${GRADE_COLORS[overallGrade]} w-11 h-11 rounded-full flex items-center justify-center shrink-0 text-white`}>
@@ -49,15 +49,7 @@ const MyAppsSummary = ({ apps, onShareMigrations, children }) => {
                 <p className="text-[15px] font-bold text-slate-900 truncate">TrustiScore du téléphone</p>
                 <p className="text-xs text-slate-500 truncate">{phoneGradeLabel[overallGrade]}</p>
               </div>
-              <div className="shrink-0 flex items-center gap-1.5">
-                {riskyCount > 0 && (
-                  <span className="text-sm font-bold text-indigo-600 whitespace-nowrap text-right leading-tight">
-                    {migratedCount} / {riskyCount}<br />
-                    <span className="text-[10px] font-semibold text-indigo-400">migrées</span>
-                  </span>
-                )}
-                <ChevronDown size={18} className={`text-slate-300 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-              </div>
+              <ChevronDown size={18} className={`shrink-0 text-slate-300 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
             </div>
 
             <div className="mt-3 w-full h-1.5 rounded-full overflow-hidden bg-slate-200">
@@ -69,7 +61,7 @@ const MyAppsSummary = ({ apps, onShareMigrations, children }) => {
           </button>
 
           {isOpen && (
-            <div className="px-4 pb-3 -mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <div className="px-4 pb-2 flex flex-wrap items-center gap-x-3 gap-y-1">
               {GRADES.map(grade => (
                 <span key={grade} className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500">
                   <span className={`${GRADE_COLORS[grade]} w-1.5 h-1.5 rounded-sm`} />
@@ -90,11 +82,20 @@ const MyAppsSummary = ({ apps, onShareMigrations, children }) => {
         </>
       )}
 
-      {children && (
-        <div className={hasScore ? 'border-t border-slate-200' : ''}>
+      {/* Pied de carte : progression des migrations + pastilles secondaires
+          (ex. hygiène numérique), sur une seule ligne */}
+      {(riskyCount > 0 && hasScore) || children ? (
+        <div className={`px-4 pb-3 flex items-center justify-between gap-2 ${hasScore ? '' : 'pt-3'}`}>
+          <span className="text-xs text-slate-500 truncate">
+            {hasScore && riskyCount > 0 && (
+              <>
+                <span className="font-bold text-slate-700">{migratedCount} / {riskyCount}</span> apps migrées
+              </>
+            )}
+          </span>
           {children}
         </div>
-      )}
+      ) : null}
     </div>
   );
 };
