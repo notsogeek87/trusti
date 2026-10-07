@@ -793,7 +793,7 @@ const App = () => {
                 </div>
                 <p className="text-xs text-slate-400 mt-0.5">
                   {myApps.size > 0
-                    ? `${myApps.size} application${myApps.size > 1 ? 's' : ''} · ${migratedApps.size} migrée${migratedApps.size > 1 ? 's' : ''}`
+                    ? `${myApps.size} application${myApps.size > 1 ? 's' : ''} suivie${myApps.size > 1 ? 's' : ''}`
                     : 'Relance un scan pour repérer tes apps'}
                 </p>
               </div>
@@ -826,25 +826,18 @@ const App = () => {
               </div>
             </div>
 
-            {migratedApps.size > 0 && (
-              <button
-                onClick={() => setShowShareModal(true)}
-                className="mt-2 text-[11px] font-semibold text-emerald-600 hover:text-emerald-700 underline underline-offset-2"
-              >
-                Partager aussi mes migrations ({migratedApps.size})
-              </button>
-            )}
           </div>
         )}
 
-        {/* Résumé TrustiScore du téléphone + progression des migrations */}
+        {/* Bilan en une seule carte : TrustiScore du téléphone + migrations,
+            puis une ligne compacte d'hygiène numérique (mots de passe) */}
         {activeTab === TABS.MY_APPS && !searchTerm.trim() && (
-          <MyAppsSummary apps={filteredApps} />
-        )}
-
-        {/* Hygiène numérique : gestionnaire de mots de passe + bilan de sécurité */}
-        {activeTab === TABS.MY_APPS && !searchTerm.trim() && myApps.size > 0 && (
-          <DataHygieneCard myApps={filteredApps} catalogApps={apps} />
+          <MyAppsSummary
+            apps={filteredApps}
+            onShareMigrations={migratedApps.size > 0 ? () => setShowShareModal(true) : undefined}
+          >
+            {myApps.size > 0 && <DataHygieneCard myApps={filteredApps} catalogApps={apps} />}
+          </MyAppsSummary>
         )}
 
         {/* Recherche : positionnée sous le résumé, car elle porte sur les apps listées ci-dessous */}

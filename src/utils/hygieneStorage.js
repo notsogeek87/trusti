@@ -1,10 +1,10 @@
 /**
- * État local du bilan "Hygiène numérique" (cases cochées, carte masquée).
+ * État local du bilan "Hygiène numérique" (cases cochées).
  * Stocké uniquement en localStorage (clé "trusti_hygiene", préfixe commun
  * voir storageStats.js) — jamais envoyé au serveur.
  */
 const STORAGE_KEY = 'trusti_hygiene';
-const DEFAULT_STATE = { checks: {}, cardDismissed: false };
+const DEFAULT_STATE = { checks: {} };
 
 export const getHygieneState = () => {
   try {
@@ -12,7 +12,6 @@ export const getHygieneState = () => {
     if (!parsed || typeof parsed !== 'object') return { ...DEFAULT_STATE, checks: {} };
     return {
       checks: parsed.checks && typeof parsed.checks === 'object' ? parsed.checks : {},
-      cardDismissed: parsed.cardDismissed === true,
     };
   } catch {
     return { ...DEFAULT_STATE, checks: {} };
