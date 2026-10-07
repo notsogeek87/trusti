@@ -22,6 +22,7 @@ démarrage rapide.
 - [Publication sur le Play Store](guides/play-store-publishing.md)
 - [Mises à jour automatiques de l'app Android](guides/android-auto-update.md)
 - [Hygiène numérique — gestionnaires de mots de passe et bilan de sécurité](guides/hygiene-numerique.md)
+- [Nettoyeur de stockage — fichiers inutiles, filtres et permission](guides/nettoyeur-stockage.md)
 
 ## 🗄️ Legacy
 
