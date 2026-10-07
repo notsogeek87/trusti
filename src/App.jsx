@@ -27,7 +27,7 @@ import ExplainerPanel from './components/ExplainerPanel';
 import AppsList from './components/AppsList';
 import MyAppsSummary from './components/MyAppsSummary';
 import DataHygieneCard from './components/DataHygieneCard';
-import MyAppsSortMenu from './components/MyAppsSortMenu';
+import MyAppsFilterMenu, { DEFAULT_MIGRATION_FILTER, DEFAULT_ALTERNATIVE_FILTER } from './components/MyAppsFilterMenu';
 import LandingPage from './components/LandingPage';
 import TrustiChatWidget from './components/TrustiChatWidget';
 import OnboardingApps from './components/OnboardingApps';
@@ -213,12 +213,12 @@ const App = () => {
   const [selectedCategory, setSelectedCategory] = useState('Toutes');
 
   // État pour le filtre migrée / à migrer dans l'onglet Mes Apps
-  const [migrationFilter, setMigrationFilter] = useState('all');
+  const [migrationFilter, setMigrationFilter] = useState(DEFAULT_MIGRATION_FILTER);
 
   // État pour le filtre avec/sans alternative connue dans l'onglet Mes Apps.
   // Par défaut on masque les apps sans alternative connue (rien à proposer
   // à l'utilisateur pour elles), pour que la liste reste actionnable.
-  const [alternativeFilter, setAlternativeFilter] = useState('with');
+  const [alternativeFilter, setAlternativeFilter] = useState(DEFAULT_ALTERNATIVE_FILTER);
 
   // Réglage de tri de l'onglet "Mes Apps" (discret, persisté en local) :
   // TrustiScore décroissant par défaut, comme historiquement.
@@ -798,13 +798,6 @@ const App = () => {
                 </p>
               </div>
               <div className="shrink-0 flex items-center gap-2">
-                {myApps.size > 1 && (
-                  <MyAppsSortMenu
-                    sortBy={mySort.sortBy}
-                    direction={mySort.direction}
-                    onChange={setMySort}
-                  />
-                )}
                 <button
                   onClick={() => setShowRescan(true)}
                   className="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
@@ -840,33 +833,37 @@ const App = () => {
           </MyAppsSummary>
         )}
 
-        {/* Recherche : positionnée sous le résumé, car elle porte sur les apps listées ci-dessous */}
+        {/* Recherche + réglages (tri, filtres) sur une seule ligne, sous le
+            bilan, car ils portent sur les apps listées ci-dessous */}
         {activeTab === TABS.MY_APPS && (
-          <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} isSearching={isSearching} />
+          <div className="flex items-start gap-2 mb-3">
+            <div className="flex-1 min-w-0">
+              <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} isSearching={isSearching} className="" />
+            </div>
+            {myApps.size > 0 && (
+              <MyAppsFilterMenu
+                sort={mySort}
+                onSortChange={setMySort}
+                migrationFilter={migrationFilter}
+                onMigrationFilterChange={setMigrationFilter}
+                alternativeFilter={alternativeFilter}
+                onAlternativeFilterChange={setAlternativeFilter}
+                migrationCounts={migrationCounts}
+                alternativeCounts={alternativeCounts}
+              />
+            )}
+          </div>
         )}
 
-        {/* Filtres : statut de migration + disponibilité d'une alternative, sur une seule ligne */}
-        {activeTab === TABS.MY_APPS && myApps.size > 0 && !searchTerm.trim() && (
-          <div className="flex gap-2 mb-4">
-            <select
-              value={migrationFilter}
-              onChange={(e) => setMigrationFilter(e.target.value)}
-              className="flex-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold bg-white text-slate-600 border border-slate-200 shadow-sm"
-            >
-              <option value="all">Toutes</option>
-              <option value="todo">À migrer ({migrationCounts.todo})</option>
-              <option value="migrated">Migrées ({migrationCounts.migrated})</option>
-            </select>
-            <select
-              value={alternativeFilter}
-              onChange={(e) => setAlternativeFilter(e.target.value)}
-              className="flex-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold bg-white text-slate-600 border border-slate-200 shadow-sm"
-            >
-              <option value="all">Toutes</option>
-              <option value="with">Avec alternative ({alternativeCounts.with})</option>
-              <option value="without">Sans alternative ({alternativeCounts.without})</option>
-            </select>
-          </div>
+        {/* Les filtres étant repliés, on rappelle discrètement ce qui est masqué */}
+        {activeTab === TABS.MY_APPS && myApps.size > 0 && myAppsDisplayed.length < myAppsSorted.length && (
+          <p className="text-[11px] text-slate-400 -mt-1 mb-3 px-1">
+            {myAppsDisplayed.length} sur {myAppsSorted.length} apps
+            {migrationFilter === 'todo' && ' · à migrer'}
+            {migrationFilter === 'migrated' && ' · migrées'}
+            {alternativeFilter === 'with' && ' · avec alternative'}
+            {alternativeFilter === 'without' && ' · sans alternative'}
+          </p>
         )}
 
         {/* Titre pour l'onglet Nos recommandations */}
