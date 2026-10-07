@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, CheckCircle, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink, Trash2, StickyNote } from 'lucide-react';
+import { ChevronLeft, CheckCircle, Route, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink, Trash2, StickyNote } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { GRADE_INFO, GRADE_INFO_KID } from '../../constants/grades';
 import { useIsMobile } from '../../contexts/ViewModeContext';
@@ -12,6 +12,8 @@ import InstalledApps from '../../native/InstalledApps';
 import TechnicalAnalysisSection from '../technical/TechnicalAnalysisSection';
 import useTechnicalAnalysis from '../../hooks/useTechnicalAnalysis';
 import { getNote, setNote as saveNote } from '../../utils/notesStorage';
+import { canStartMigration } from '../../utils/migrationGuide';
+import MigrationGuideModal from './MigrationGuideModal';
 
 const ANIM_STYLES = `
   @keyframes detailSlideUp {
@@ -43,8 +45,9 @@ const sectionAnim = (delay = 0) => ({
 /**
  * Modal des détails d'une application
  */
-const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, allApps = [] }) => {
+const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, onCompleteMigration, allApps = [] }) => {
   const [isExiting, setIsExiting] = useState(false);
+  const [showMigrationGuide, setShowMigrationGuide] = useState(false);
   // State pour stocker les apps chargées dynamiquement
   const [loadedApps, setLoadedApps] = useState([]);
   const [isLoadingRelations, setIsLoadingRelations] = useState(false);
@@ -476,6 +479,14 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                       : alternatives.map(alt => <RelatedAppRow key={alt.id} app={alt} />)
                     }
                   </div>
+                  {!isLoadingRelations && canStartMigration(app, alternatives) && (
+                    <button
+                      onClick={() => setShowMigrationGuide(true)}
+                      className="w-full mt-3 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition-all active:scale-[0.98]"
+                    >
+                      <Route size={14} /> Migrer pas à pas
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -542,6 +553,15 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
         </div>
 
       </main>
+
+      {showMigrationGuide && (
+        <MigrationGuideModal
+          app={app}
+          alternatives={alternatives}
+          onComplete={onCompleteMigration}
+          onClose={() => setShowMigrationGuide(false)}
+        />
+      )}
     </div>
   );
 };

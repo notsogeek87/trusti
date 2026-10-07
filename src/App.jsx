@@ -634,6 +634,7 @@ const App = () => {
           onToggleMyApp={toggleMyApp}
           onClose={closeAppDetail}
           onSelectApp={openAppDetail}
+          onCompleteMigration={(from, to) => importMigrations([{ id: from.id, customAlt: to?.name }])}
           allApps={apps}
         />
       </ViewModeContext.Provider>

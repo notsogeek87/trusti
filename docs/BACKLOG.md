@@ -7,7 +7,7 @@ Statut : 💡 idée · 📝 à cadrer · 🚧 en cours · ✅ fait
 
 | # | Feature | Priorité | Effort | Statut |
 |---|---------|----------|--------|--------|
-| 1 | Migration guidée vers une alternative | Haute | Moyen | 💡 |
+| 1 | Migration guidée vers une alternative | Haute | Moyen | 🚧 MVP fait (voir [guide](guides/migration-guidee.md)) |
 | 2 | Alertes et suivi des notes dans le temps | Haute | Moyen–élevé | 💡 |
 | 3 | Détail du score par critères sourcés | Haute | Moyen | 💡 |
 | 4 | Contribution communautaire | Moyenne | Moyen | 💡 |
@@ -16,6 +16,8 @@ Statut : 💡 idée · 📝 à cadrer · 🚧 en cours · ✅ fait
 | 7 | Partage et gamification du bilan | Basse | Faible | 💡 |
 
 ### 1. Migration guidée
+**MVP livré** : parcours en 4 étapes depuis la fiche d'une app C/D/E. Reste à faire : point d'entrée depuis « Mes Apps », variante -15 ans, guides d'export par app, suivi des migrations en cours.
+
 Pour une app notée D/E installée, proposer pas à pas le passage à l'alternative A/B :
 lien de téléchargement, guide d'export des données, désinstallation (permission
 `REQUEST_DELETE_PACKAGES` déjà déclarée), checklist de migration sauvegardée.
