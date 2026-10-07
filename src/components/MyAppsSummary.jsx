@@ -1,15 +1,17 @@
 import React, { useMemo, useState } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { GRADES, GRADE_COLORS, PHONE_GRADE_LABEL, PHONE_GRADE_LABEL_KID } from '../constants/grades';
 import { computeTrustiSummary } from '../utils/trustiScore';
 import { useAgeMode } from '../contexts/AgeModeContext';
 import { AGE_MODE } from '../utils/ageMode';
 
-// Résumé compact affiché en haut de l'onglet "Mes Apps" : le TrustiScore
+// Carte de bilan affichée en haut de l'onglet "Mes Apps" : le TrustiScore
 // global du téléphone (déduit des apps suivies) et la progression des
-// migrations, condensée dans une simple barre de progression. Un tap
-// révèle la répartition détaillée par note (A-E).
-const MyAppsSummary = ({ apps }) => {
+// migrations, condensée dans une barre. Un tap révèle la répartition par
+// note (A-E) et le partage des migrations. `children` permet d'ajouter des
+// lignes secondaires dans la même carte (ex. hygiène numérique), pour garder
+// un seul bloc de synthèse au lieu d'empiler des cartes.
+const MyAppsSummary = ({ apps, onShareMigrations, children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const isKid = useAgeMode() === AGE_MODE.KID;
   const phoneGradeLabel = isKid ? PHONE_GRADE_LABEL_KID : PHONE_GRADE_LABEL;
@@ -24,56 +26,76 @@ const MyAppsSummary = ({ apps }) => {
     };
   }, [apps]);
 
-  if (total === 0 || !overallGrade) return null;
+  const hasScore = total > 0 && !!overallGrade;
+  if (!hasScore && !children) return null;
 
   const progressPct = riskyCount > 0 ? Math.round((migratedCount / riskyCount) * 100) : 100;
 
   return (
-    <button
-      type="button"
-      onClick={() => setIsOpen(prev => !prev)}
-      aria-expanded={isOpen}
-      className="w-full text-left bg-slate-50 hover:bg-slate-100 border border-slate-100 rounded-2xl px-4 py-3.5 mb-4 transition-colors"
-    >
-      <div className="flex items-center gap-3">
-        <div className={`${GRADE_COLORS[overallGrade]} w-11 h-11 rounded-full flex items-center justify-center shrink-0 text-white`}>
-          <span className="text-base font-black leading-none">{overallGrade}</span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[15px] font-bold text-slate-900 truncate">TrustiScore du téléphone</p>
-          <p className="text-xs text-slate-500 truncate">{phoneGradeLabel[overallGrade]}</p>
-        </div>
-        <div className="shrink-0 flex items-center gap-1.5">
-          {riskyCount > 0 && (
-            <span className="text-sm font-bold text-indigo-600 whitespace-nowrap text-right leading-tight">
-              {migratedCount} / {riskyCount}<br />
-              <span className="text-[10px] font-semibold text-indigo-400">migrées</span>
-            </span>
+    <div className="bg-slate-50 border border-slate-100 rounded-2xl mb-4 overflow-hidden">
+      {hasScore && (
+        <>
+          <button
+            type="button"
+            onClick={() => setIsOpen(prev => !prev)}
+            aria-expanded={isOpen}
+            className="w-full text-left px-4 py-3.5 hover:bg-slate-100 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className={`${GRADE_COLORS[overallGrade]} w-11 h-11 rounded-full flex items-center justify-center shrink-0 text-white`}>
+                <span className="text-base font-black leading-none">{overallGrade}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[15px] font-bold text-slate-900 truncate">TrustiScore du téléphone</p>
+                <p className="text-xs text-slate-500 truncate">{phoneGradeLabel[overallGrade]}</p>
+              </div>
+              <div className="shrink-0 flex items-center gap-1.5">
+                {riskyCount > 0 && (
+                  <span className="text-sm font-bold text-indigo-600 whitespace-nowrap text-right leading-tight">
+                    {migratedCount} / {riskyCount}<br />
+                    <span className="text-[10px] font-semibold text-indigo-400">migrées</span>
+                  </span>
+                )}
+                <ChevronDown size={18} className={`text-slate-300 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+              </div>
+            </div>
+
+            <div className="mt-3 w-full h-1.5 rounded-full overflow-hidden bg-slate-200">
+              <div
+                className="h-full bg-emerald-500 rounded-full transition-all"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+          </button>
+
+          {isOpen && (
+            <div className="px-4 pb-3 -mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+              {GRADES.map(grade => (
+                <span key={grade} className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500">
+                  <span className={`${GRADE_COLORS[grade]} w-1.5 h-1.5 rounded-sm`} />
+                  {grade}·{counts[grade]}
+                </span>
+              ))}
+              {onShareMigrations && (
+                <button
+                  type="button"
+                  onClick={onShareMigrations}
+                  className="ml-auto text-[11px] font-semibold text-emerald-600 hover:text-emerald-700 underline underline-offset-2"
+                >
+                  Partager mes migrations
+                </button>
+              )}
+            </div>
           )}
-          <ChevronRight size={18} className="text-slate-300" />
-        </div>
-      </div>
+        </>
+      )}
 
-      <div className="mt-3 w-full h-1.5 rounded-full overflow-hidden bg-slate-200">
-        <div
-          className="h-full bg-emerald-500 rounded-full transition-all"
-          style={{ width: `${progressPct}%` }}
-        />
-      </div>
-
-      {isOpen && (
-        <div className="mt-3 pt-3 border-t border-slate-200">
-          <div className="flex flex-wrap gap-x-3 gap-y-1">
-            {GRADES.map(grade => (
-              <span key={grade} className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500">
-                <span className={`${GRADE_COLORS[grade]} w-1.5 h-1.5 rounded-sm`} />
-                {grade}·{counts[grade]}
-              </span>
-            ))}
-          </div>
+      {children && (
+        <div className={hasScore ? 'border-t border-slate-200' : ''}>
+          {children}
         </div>
       )}
-    </button>
+    </div>
   );
 };
 
