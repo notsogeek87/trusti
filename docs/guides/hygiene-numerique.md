@@ -10,6 +10,8 @@ Sous le TrustiScore du téléphone (onglet « Mes Apps », hors recherche, si au
 - une **pastille** `Hygiène x/5` (icône clé) dans le pied de la carte du TrustiScore, à côté du compteur de migrations : orange si aucun gestionnaire indépendant n'est utilisé, verte à 5/5, indigo sinon. Le statut détaillé est dans l'infobulle et le libellé accessible. Pas de carte séparée, pour ne pas empiler les blocs au-dessus de la liste ;
 - une **fiche** (au tap) : bilan cochable, six bons réflexes, trois gestionnaires conseillés avec leur note Trusti.
 
+Le bilan est aussi demandé **en fin de scan** (onboarding et re-scan manuel, natif comme sélection à la main) : après l'écran du TrustiScore, une étape « Et vos comptes, bien protégés ? » propose les cases du bilan, pré-remplies avec les réponses existantes ; le gestionnaire détecté parmi les apps scannées est coché d'office. Pas d'étape si aucune app n'est sélectionnée.
+
 Le statut (infobulle de la pastille) dépend des apps de « Mes Apps » :
 
 | Situation détectée | Message |
@@ -32,6 +34,7 @@ Tous les textes existent en version adulte et en version -15 ans (`useAgeMode`).
 | `src/utils/hygieneStorage.js` | Lecture/écriture de l'état local |
 | `src/components/DataHygieneCard.jsx` | Pastille, passée en `children` de `MyAppsSummary` (pied de carte) dans `App.jsx` |
 | `src/components/modals/DataHygieneModal.jsx` | Fiche détaillée |
+| `src/components/OnboardingHygiene.jsx` | Étape bilan de fin de scan, affichée par `OnboardingSummary` |
 | `tests/technical/passwordManagers.test.js` | Tests de la logique pure |
 
 ## Données et vie privée

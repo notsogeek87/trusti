@@ -1,6 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
+import OnboardingHygiene from './OnboardingHygiene';
 import { GRADE_INFO, GRADE_INFO_KID, PHONE_GRADE_LABEL, PHONE_GRADE_LABEL_KID } from '../constants/grades';
 import { computeTrustiSummary } from '../utils/trustiScore';
 import { useAgeMode } from '../contexts/AgeModeContext';
@@ -8,13 +9,20 @@ import { AGE_MODE } from '../utils/ageMode';
 
 // Écran de récapitulatif affiché après un scan (natif) ou une sélection
 // (manuelle/web), avant d'arriver sur "Mes Apps" : combien d'apps par
-// TrustiScore, une note globale déduite du téléphone, et un bouton pour
-// accéder au détail (la liste "Mes Apps").
+// TrustiScore, une note globale déduite du téléphone. Le bouton mène à une
+// seconde étape, le bilan d'hygiène numérique (OnboardingHygiene), puis au
+// détail (la liste "Mes Apps").
 const OnboardingSummary = ({ apps, onDetails }) => {
   const isKid = useAgeMode() === AGE_MODE.KID;
   const gradeInfo = isKid ? GRADE_INFO_KID : GRADE_INFO;
   const phoneGradeLabel = isKid ? PHONE_GRADE_LABEL_KID : PHONE_GRADE_LABEL;
   const { counts, total, overallGrade } = useMemo(() => computeTrustiSummary(apps), [apps]);
+  const [showHygiene, setShowHygiene] = useState(false);
+  const detailsLabel = `Détails de mes ${total} app${total !== 1 ? 's' : ''}`;
+
+  if (showHygiene) {
+    return <OnboardingHygiene apps={apps} ctaLabel={detailsLabel} onDone={onDetails} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-white to-purple-50 flex flex-col items-center justify-center px-6 text-center">
@@ -52,10 +60,10 @@ const OnboardingSummary = ({ apps, onDetails }) => {
         </div>
 
         <button
-          onClick={onDetails}
+          onClick={() => setShowHygiene(true)}
           className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-indigo-200 transition-all active:scale-95"
         >
-          Détails de mes {total} app{total !== 1 ? 's' : ''}
+          Continuer
           <ArrowRight size={18} />
         </button>
       </div>
