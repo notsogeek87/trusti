@@ -27,6 +27,19 @@ Endpoint principal, backé par PostgreSQL (`service-postgres.js`).
 - **GET** `?type=trusti|star`, plus filtres optionnels : `limit`, `offset`,
   `page`, `search`/`q`, `sortBy`, `awards`, `showInAwards`, `onboarding`,
   `categories`, `ids`, `grade`, `alternatives_for`.
+- **GET** `?assessment_for=:id` : détail de l'évaluation TrustiScore d'une app,
+  lu dans la table `app_assessments` (alimentée depuis le dépôt `trustillm`,
+  schéma dans `trustillm/migrations/001_app_assessments.sql`). Réponse :
+  `{ success: true, assessment }`, avec `assessment = null` si l'app n'a pas
+  été évaluée ou si la table n'existe pas encore. `assessment` contient `grade`,
+  `score`, `scoreRange`, `computedGrade`, `overridden`, `provisional`,
+  `hasUnverifiedSources`, `assessedAt`, `summary` et `criteria[]` (par critère :
+  `name`, `points`, `levelTitle`, `levelDescription`, `confidence`, `rationale`,
+  `provisional`, `sources[]` avec `toConfirm` pour les sources non vérifiées).
+  Mise en forme : `server/assessment.js`. Affiché par
+  `src/components/assessment/AssessmentDetail.jsx` dans la fiche d'une app
+  (masqué en mode enfant pour l'instant) ; sans connexion ou sans évaluation, la
+  fiche garde le texte court `reason`.
 - **POST / PUT / DELETE** : création, mise à jour, suppression d'une
   application (réservé aux clients authentifiés).
 
