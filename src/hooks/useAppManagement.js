@@ -410,6 +410,10 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
       return;
     }
 
+    // Ignore la réponse d'une recherche dépassée (frappe rapide : une réponse
+    // lente à « fa » ne doit pas écraser celle de « facebook »)
+    let cancelled = false;
+
     // Lancer la recherche immédiatement (le debounce est déjà fait dans SearchBar)
     const performSearch = async () => {
       setIsSearching(true);
@@ -418,6 +422,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
         const url = `${API_URL}/apps?search=${encodeURIComponent(searchTerm)}`;
         const response = await fetch(url);
         const data = await response.json();
+        if (cancelled) return;
         
         if (data.success) {
           // Normaliser les IDs en strings pour la cohérence
@@ -431,14 +436,16 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
           setSearchResults(normalizedApps);
         }
       } catch (error) {
+        if (cancelled) return;
         console.error('Erreur lors de la recherche:', error);
         setSearchResults([]);
       } finally {
-        setIsSearching(false);
+        if (!cancelled) setIsSearching(false);
       }
     };
 
     performSearch();
+    return () => { cancelled = true; };
   }, [searchTerm]);
 
   // Filtrer les applications selon l'onglet actif et la recherche

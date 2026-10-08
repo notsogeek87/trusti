@@ -19,11 +19,35 @@ const readCache = (key) => {
   }
 };
 
+// Supprime les entrées du cache plus vieilles que maxAge (toutes si 0)
+const pruneCache = (maxAge) => {
+  const now = Date.now();
+  Object.keys(localStorage)
+    .filter((k) => k.startsWith(CACHE_PREFIX))
+    .forEach((k) => {
+      try {
+        const { ts } = JSON.parse(localStorage.getItem(k)) || {};
+        if (!maxAge || !Number.isFinite(ts) || now - ts > maxAge) localStorage.removeItem(k);
+      } catch {
+        localStorage.removeItem(k);
+      }
+    });
+};
+
 const writeCache = (key, data) => {
+  const value = JSON.stringify({ data, ts: Date.now() });
   try {
-    localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({ data, ts: Date.now() }));
+    localStorage.setItem(CACHE_PREFIX + key, value);
   } catch {
-    // localStorage plein ou indisponible (navigation privée) : tant pis, pas de cache
+    // localStorage plein : les entrées (une par URL, recherche et pagination
+    // comprises) ne sont jamais supprimées sinon. On purge le cache du
+    // catalogue puis on réessaie une fois.
+    try {
+      pruneCache(0);
+      localStorage.setItem(CACHE_PREFIX + key, value);
+    } catch {
+      // Indisponible (navigation privée) ou toujours plein : pas de cache
+    }
   }
 };
 
@@ -42,6 +66,12 @@ export const cachedFetchJSON = async (url, { ttl = DEFAULT_TTL } = {}) => {
   try {
     const response = await fetch(url);
     const data = await response.json();
+    // Ne jamais mettre en cache une erreur serveur : sinon une panne de
+    // quelques secondes viderait le catalogue pendant toute la durée du TTL.
+    if (!response.ok || data?.success === false) {
+      if (cached) return cached.data;
+      return data;
+    }
     writeCache(url, data);
     return data;
   } catch (error) {

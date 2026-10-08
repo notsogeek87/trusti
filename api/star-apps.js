@@ -19,7 +19,8 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       // Récupérer toutes les apps de type 'star'
-      const apps = await dbService.getAppsByType('star');
+      // getAppsByType renvoie { apps, total, ... } : ne renvoyer que la liste
+      const { apps } = await dbService.getAppsByType('star');
       return res.status(200).json({
         success: true,
         apps: apps

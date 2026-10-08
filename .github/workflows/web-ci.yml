@@ -26,5 +26,8 @@ jobs:
             node --check "$f"
           done
 
+      - name: Tests unitaires
+        run: npm test
+
       - name: Build (Vite)
         run: npm run build
