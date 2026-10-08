@@ -88,73 +88,67 @@
   <p>
     Trusti (<code>eu.trusti.app</code>) est une application qui évalue la fiabilité et le
     respect de la vie privée d'autres applications, et vous aide à trouver des alternatives
-    plus respectueuses. Cette page explique quelles données l'application traite, pourquoi,
-    et comment les contrôler.
+    plus respectueuses. Cette page explique quelles données Trusti traite, pourquoi, et
+    comment les contrôler. Elle couvre l'application Android et le site
+    <a href="https://trusti.lielu.eu">trusti.lielu.eu</a>.
   </p>
 
   <div class="card">
-    <strong>En résumé&nbsp;:</strong> Trusti fonctionne par défaut entièrement en local, sans
-    compte. La seule donnée personnelle que l'application peut traiter est votre adresse
-    e-mail, et uniquement si vous choisissez de vous connecter — jamais de mot de passe,
-    jamais de suivi publicitaire, jamais de revente de données.
+    <strong>En résumé&nbsp;:</strong> Trusti ne crée aucun compte, ne vous demande aucune
+    donnée personnelle et n'en envoie aucune à nos serveurs. Aucun suivi publicitaire, aucun
+    outil d'analyse, aucune revente de données.
   </div>
 
-  <h2>Quelles données sont collectées</h2>
+  <h2>Quelles données sont traitées</h2>
   <ul>
     <li>
-      <strong>Sans connexion (usage par défaut)&nbsp;:</strong> aucune donnée personnelle
-      n'est envoyée à nos serveurs. L'application consulte notre catalogue d'évaluations
-      (public, anonyme) pour afficher les notes des applications.
+      <strong>Aucun compte, aucune connexion&nbsp;:</strong> ni l'application ni le site ne
+      demandent d'adresse e-mail, de nom, d'identifiant ou de localisation.
     </li>
     <li>
-      <strong>Si vous choisissez de vous connecter (« Se connecter »)&nbsp;:</strong> vous
-      saisissez votre adresse e-mail, et nous vous envoyons un code à usage unique (OTP) à 6
-      chiffres pour la vérifier. Cette adresse e-mail est alors enregistrée dans notre base
-      de données, uniquement pour vous permettre de vous reconnecter.
+      <strong>Liste de vos applications installées (application Android)&nbsp;:</strong> pour
+      afficher leurs notes, Trusti repère sur votre téléphone lesquelles des applications de
+      son catalogue sont installées. Cette analyse est faite uniquement sur votre appareil&nbsp;;
+      la liste n'est jamais transmise.
     </li>
     <li>
-      <strong>Votre sélection d'applications, notes consultées et préférences</strong> sont
-      stockées uniquement sur votre appareil (stockage local du navigateur ou de
-      l'application) — jamais transmises à nos serveurs, connecté ou non.
+      <strong>Espace de stockage, facultatif (application Android)&nbsp;:</strong> si vous
+      activez dans les réglages Android l'accès à l'utilisation, Trusti lit la taille occupée
+      par ces applications pour l'afficher. Ces informations restent sur votre appareil.
+    </li>
+    <li>
+      <strong>Vos choix et préférences</strong> (applications sélectionnées, réglages) sont
+      stockés uniquement sur votre appareil ou dans votre navigateur, jamais transmis à nos
+      serveurs.
+    </li>
+    <li>
+      <strong>Connexion réseau&nbsp;:</strong> Trusti consulte notre catalogue d'évaluations
+      (public et anonyme) pour afficher les notes. Comme pour toute requête internet,
+      l'hébergeur (Vercel) peut enregistrer techniquement l'adresse IP et la date de la requête
+      pour assurer la sécurité du service&nbsp;; nous n'utilisons pas ces données pour vous
+      identifier ni vous suivre.
     </li>
   </ul>
 
-  <h2>Pourquoi nous traitons ces données</h2>
-  <ul>
-    <li>L'adresse e-mail sert exclusivement à l'authentification par code à usage unique
-      (aucun mot de passe n'est jamais demandé ni stocké).</li>
-    <li>Aucune donnée n'est utilisée à des fins publicitaires, de profilage ou de revente à
-      des tiers.</li>
-  </ul>
-
-  <h2>Avec qui nous partageons des données</h2>
+  <h2>Partage de données</h2>
   <p>
-    Pour l'envoi du code de connexion, nous utilisons un prestataire d'envoi d'e-mails
-    (<a href="https://www.brevo.com" target="_blank" rel="noopener">Brevo</a>), qui reçoit
-    votre adresse e-mail dans ce seul but. Nous ne partageons vos données avec aucun autre
-    tiers, et ne les vendons jamais.
-  </p>
-
-  <h2>Hébergement et sécurité</h2>
-  <p>
-    Les données de compte (adresse e-mail) sont hébergées sur une base de données
-    PostgreSQL gérée par <a href="https://neon.tech" target="_blank" rel="noopener">Neon</a>.
-    L'application elle-même est hébergée sur
-    <a href="https://vercel.com" target="_blank" rel="noopener">Vercel</a>.
+    Ne collectant pas de données personnelles, nous n'en partageons ni n'en vendons
+    aucune. Le catalogue et le site sont hébergés sur
+    <a href="https://vercel.com" target="_blank" rel="noopener">Vercel</a>&nbsp;; les échanges
+    sont chiffrés (HTTPS).
   </p>
 
   <h2>Vos droits</h2>
   <p>
-    Vous pouvez utiliser Trusti sans jamais créer de compte. Si vous vous êtes connecté et
-    souhaitez faire supprimer votre adresse e-mail de notre base de données, contactez-nous
-    à l'adresse ci-dessous — nous la supprimons sous 30 jours.
+    Aucune donnée personnelle n'étant conservée par Trusti, il n'y a rien à supprimer côté
+    serveur. Désinstaller l'application ou effacer ses données (ou celles du site dans votre
+    navigateur) supprime tout ce qui est stocké sur votre appareil.
   </p>
 
   <h2>Enfants</h2>
   <p>
-    Trusti ne cible pas spécifiquement les enfants et ne collecte sciemment aucune donnée
-    personnelle d'enfants au-delà de ce qui est décrit ci-dessus (adresse e-mail, uniquement
-    sur action volontaire de connexion).
+    Trusti ne cible pas spécifiquement les enfants et ne collecte aucune donnée personnelle,
+    y compris d'enfants.
   </p>
 
   <h2>Modifications de cette politique</h2>
