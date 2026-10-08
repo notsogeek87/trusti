@@ -7,7 +7,7 @@ import { SORT_OPTIONS } from '../utils/myAppsSort';
 // tri de l'en-tête et les deux listes déroulantes qui chargeaient l'écran.
 // Une pastille signale un réglage différent de celui par défaut.
 export const DEFAULT_MIGRATION_FILTER = 'all';
-export const DEFAULT_ALTERNATIVE_FILTER = 'with';
+export const DEFAULT_ALTERNATIVE_FILTER = 'all';
 
 // Le tri "Taille" n'a de sens que sur l'écran Espace de stockage.
 const LIST_SORT_OPTIONS = SORT_OPTIONS.filter(option => option.id !== 'size');
