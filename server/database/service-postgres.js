@@ -4,6 +4,7 @@
 import { neon } from '@neondatabase/serverless';
 import gplay from 'google-play-scraper';
 import { fetchWithTimeout } from '../fetchWithTimeout.js';
+import { formatAssessmentFromDB } from '../assessment.js';
 
 // Charger .env en développement local
 if (process.env.NODE_ENV !== 'production') {
@@ -624,6 +625,29 @@ export async function getAwardsApps(options = {}) {
     };
   } catch (error) {
     console.error('Error getting awards apps:', error);
+    throw error;
+  }
+}
+
+/**
+ * Détail d'évaluation TrustiScore d'une app (table app_assessments), ou null
+ * si l'app n'a pas encore été évaluée ou si la table n'existe pas encore.
+ */
+export async function getAssessmentForApp(id) {
+  try {
+    const rows = await sql`
+      SELECT app_id, grade, score, computed_grade, overridden, provisional,
+             score_range, has_unverified_sources, summary, criteria,
+             assessed_at::text AS assessed_at
+      FROM app_assessments
+      WHERE app_id = ${String(id)}
+      LIMIT 1
+    `;
+    return formatAssessmentFromDB(rows[0]);
+  } catch (error) {
+    // 42P01 : table absente (base pas encore migrée) -> pas de détail, pas d'erreur.
+    if (error?.code === '42P01') return null;
+    console.error('Error getting assessment:', error);
     throw error;
   }
 }
@@ -1265,6 +1289,7 @@ export default {
   getAppById,
   getAppsByIds,
   getAlternativesForApp,
+  getAssessmentForApp,
   createApp,
   updateApp,
   deleteApp,

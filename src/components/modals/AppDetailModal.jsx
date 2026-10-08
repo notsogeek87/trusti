@@ -11,6 +11,8 @@ import { extractPackageId } from '../../utils/androidPackage';
 import InstalledApps from '../../native/InstalledApps';
 import TechnicalAnalysisSection from '../technical/TechnicalAnalysisSection';
 import useTechnicalAnalysis from '../../hooks/useTechnicalAnalysis';
+import useAssessment from '../../hooks/useAssessment';
+import AssessmentDetail from '../assessment/AssessmentDetail';
 import { getNote, setNote as saveNote } from '../../utils/notesStorage';
 import { canStartMigration } from '../../utils/migrationGuide';
 import MigrationGuideModal from './MigrationGuideModal';
@@ -220,6 +222,8 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
   const isMobile = useIsMobile();
   const isKid = useAgeMode() === AGE_MODE.KID;
   const gradeInfo = isKid ? GRADE_INFO_KID : GRADE_INFO;
+  // Détail d'évaluation chargé en ligne ; masqué en mode enfant pour l'instant.
+  const assessmentState = useAssessment(isKid ? null : app.id);
 
   const handleClose = () => {
     setIsExiting(true);
@@ -449,6 +453,9 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
               </div>
             );
           })()}
+
+          {/* Détail de l'évaluation TrustiScore (critères, sources) — masqué en mode enfant */}
+          {!isKid && <AssessmentDetail status={assessmentState.status} assessment={assessmentState.assessment} />}
 
           {/* Alternatives */}
           {((isLoadingRelations && app.alternativeAppIds?.length > 0) || alternatives.length > 0) && (

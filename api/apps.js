@@ -21,7 +21,7 @@ export default async function handler(req, res) {
 
   try {
     // Extraire le type depuis l'URL ou le body
-    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, onboarding, categories, ids, grade, alternatives_for } = req.query;
+    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, onboarding, categories, ids, grade, alternatives_for, assessment_for } = req.query;
     
     if (req.method === 'GET') {
       // GET /api/apps?type=trusti
@@ -51,6 +51,12 @@ export default async function handler(req, res) {
         });
       }
       
+      // GET /api/apps?assessment_for=:id — détail de l'évaluation TrustiScore (null si non évaluée)
+      if (assessment_for) {
+        const assessment = await dbService.getAssessmentForApp(assessment_for);
+        return res.status(200).json({ success: true, assessment });
+      }
+
       // GET /api/apps?alternatives_for=:id — alternatives pour une app
       if (alternatives_for) {
         const app = await dbService.getAppById(alternatives_for);
