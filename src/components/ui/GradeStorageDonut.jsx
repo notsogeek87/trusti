@@ -60,7 +60,7 @@ const GradeStorageDonut = ({ entries, totalBytes, selectedGrade = null, onSelect
       <svg viewBox="0 0 200 200" className="w-32 h-32 flex-shrink-0" role="img" aria-label="Répartition de l'espace de stockage par note TrustiScore">
         {/* Piste de fond : visible si aucune app avec taille connue */}
         {totalBytes === 0 && (
-          <circle cx={CENTER} cy={CENTER} r={RADIUS} fill="none" stroke="#DDE5D3" strokeWidth={STROKE} />
+          <circle cx={CENTER} cy={CENTER} r={RADIUS} fill="none" stroke="#DCE8EF" strokeWidth={STROKE} />
         )}
 
         <g transform={`rotate(-90 ${CENTER} ${CENTER})`}>

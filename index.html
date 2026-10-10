@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="robots" content="noindex, nofollow" />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="theme-color" content="#2D6A4F" />
+    <meta name="theme-color" content="#1F3A5F" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" href="/icons/icon-192.png" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
@@ -15,8 +15,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      // Design « Solarpunk Utópico » : indigo = Verdant Green (primaire), purple/blue = Sky Blue,
-      // pink = Terracotta, slate = neutres sauge ; fond ciel dégradé (voir index.css).
+      // Palette « Ciel & encre bleue » : indigo = bleu nuit (principale), purple/blue/pink = bleu franc (accent),
+      // slate = neutres bleutés ; fond ciel dégradé (voir index.css). Les notes A à E gardent leurs couleurs.
       tailwind.config = {
         theme: {
           extend: {
@@ -31,19 +31,18 @@
               '3xl': '2.5rem',
             },
             boxShadow: {
-              sm: '0 2px 12px rgba(45, 106, 79, 0.08)',
-              DEFAULT: '0 2px 12px rgba(45, 106, 79, 0.10)',
+              sm: '0 2px 12px rgba(31, 58, 95, 0.08)',
+              DEFAULT: '0 2px 12px rgba(31, 58, 95, 0.10)',
             },
             colors: {
               white: '#FFFFFF',
-              indigo: { 50: '#eef8f2', 100: '#d9f0e3', 200: '#b5e2c8', 300: '#86cfa8', 400: '#52B788', 500: '#3d9a6f', 600: '#2D6A4F', 700: '#245840', 800: '#1c4632', 900: '#143425', 950: '#0b2016' },
-              purple: { 50: '#e9f6fa', 100: '#cfeaf2', 200: '#a3d7e6', 300: '#6fbfd6', 400: '#3fadc9', 500: '#219EBC', 600: '#1b86a1', 700: '#166d84', 800: '#12566a', 900: '#0d4050', 950: '#082935' },
-              blue: { 50: '#e9f6fa', 100: '#cfeaf2', 200: '#a3d7e6', 300: '#6fbfd6', 400: '#3fadc9', 500: '#219EBC', 600: '#1b86a1', 700: '#166d84', 800: '#12566a', 900: '#0d4050', 950: '#082935' },
-              pink: { 50: '#fdf0e9', 100: '#fadccc', 200: '#f4b99c', 300: '#ec9068', 400: '#df6c3a', 500: '#d2561f', 600: '#C1440E', 700: '#9d360b', 800: '#7a2a09', 900: '#592007', 950: '#391404' },
-              slate: { 50: '#F5F8F2', 100: '#ECF1E6', 200: '#DDE5D3', 300: '#B3BFA5', 400: '#6B7862', 500: '#56604F', 600: '#424B3D', 700: '#424B3D', 800: '#2F362C', 900: '#1F241C', 950: '#13170F' },
-              solar: '#FFB703',
-              lavender: '#C7B8EA',
-              earth: '#6B4226',
+              indigo: { 50: '#EEF3F9', 100: '#DCE7F3', 200: '#B9CFE6', 300: '#8EAED2', 400: '#5E86B5', 500: '#3B6498', 600: '#1F3A5F', 700: '#162B47', 800: '#0F1F35', 900: '#0A1526', 950: '#060D18' },
+              purple: { 50: '#EBF3FA', 100: '#D3E5F4', 200: '#A8CBE8', 300: '#7BAEDB', 400: '#5595CF', 500: '#3B82C4', 600: '#2F6BA5', 700: '#265786', 800: '#1E4468', 900: '#17334E', 950: '#0E2033' },
+              blue: { 50: '#EBF3FA', 100: '#D3E5F4', 200: '#A8CBE8', 300: '#7BAEDB', 400: '#5595CF', 500: '#3B82C4', 600: '#2F6BA5', 700: '#265786', 800: '#1E4468', 900: '#17334E', 950: '#0E2033' },
+              pink: { 50: '#EBF3FA', 100: '#D3E5F4', 200: '#A8CBE8', 300: '#7BAEDB', 400: '#5595CF', 500: '#3B82C4', 600: '#2F6BA5', 700: '#265786', 800: '#1E4468', 900: '#17334E', 950: '#0E2033' },
+              slate: { 50: '#F4F8FB', 100: '#E9F0F5', 200: '#DCE8EF', 300: '#B8C8D5', 400: '#6B7C8D', 500: '#5B6B7D', 600: '#44546A', 700: '#34445A', 800: '#1B2A3A', 900: '#121C27', 950: '#0A1119' },
+              nuit: '#1F3A5F',
+              azur: '#3B82C4',
             },
           },
         },

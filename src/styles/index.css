@@ -8,38 +8,36 @@ html, body {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
- * Design « Solarpunk Utópico » (palette : config Tailwind dans index.html ; formes et police inchangées)
- * Fond ciel dégradé, Nunito, focus Sky Blue, transitions à
+ * Palette « Ciel & encre bleue » (palette : config Tailwind dans index.html ; formes et police inchangées)
+ * Fond ciel dégradé, Nunito, focus bleu franc, transitions à
  * ressort sur transform/opacité uniquement. Mode clair seulement.
  * ────────────────────────────────────────────────────────────────────── */
 :root {
   color-scheme: light;
-  --sp-green: #2D6A4F;
-  --sp-gold: #FFB703;
-  --sp-sky: #219EBC;
-  --sp-moss: #52B788;
-  --sp-ink: #1F241C;
+  --sp-nuit: #1F3A5F;
+  --sp-azur: #3B82C4;
+  --sp-ink: #1B2A3A;
 }
 
-/* Ciel : dégradé du bleu franc vers un bleu très pâle, avec un halo solaire en haut à droite */
+/* Ciel : dégradé du bleu franc vers un bleu très pâle, avec un halo de lumière en haut à droite */
 body {
   font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
   color: var(--sp-ink);
   background-color: #BFE6F2;
   background-image:
-    radial-gradient(45rem 28rem at 88% -6%, rgba(255, 224, 130, 0.55), transparent 65%),
+    radial-gradient(45rem 28rem at 88% -6%, rgba(255, 255, 255, 0.55), transparent 65%),
     linear-gradient(180deg, #8FD0EA 0%, #B4E1F0 45%, #DCF2F8 100%);
   background-attachment: fixed;
   min-height: 100dvh;
 }
 
 :focus-visible {
-  outline: 2px solid var(--sp-sky);
+  outline: 2px solid var(--sp-azur);
   outline-offset: 2px;
 }
 
 ::selection {
-  background: rgba(255, 183, 3, 0.35);
+  background: rgba(59, 130, 196, 0.3);
 }
 
 button:not(:disabled),
@@ -84,17 +82,17 @@ button:not(:disabled):active,
   }
   
   .scrollbar-custom-dark::-webkit-scrollbar-track {
-    background: rgba(31, 36, 28, 0.5);
+    background: rgba(27, 42, 58, 0.5);
     border-radius: 10px;
   }
   
   .scrollbar-custom-dark::-webkit-scrollbar-thumb {
-    background: rgb(66, 75, 61);
+    background: rgb(52, 68, 90);
     border-radius: 10px;
   }
   
   .scrollbar-custom-dark::-webkit-scrollbar-thumb:hover {
-    background: rgb(86, 96, 79);
+    background: rgb(68, 84, 106);
   }
   
   /* Masquer la scrollbar pour les conteneurs à défilement horizontal (mobile) */
