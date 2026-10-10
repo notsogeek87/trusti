@@ -1,5 +1,5 @@
 // Toutes les données Trusti sont stockées en localStorage sous des clés
-// préfixées "trusti_" (voir useAuth, onboardingStorage, adminAuth, ageMode,
+// préfixées "trusti_" (voir useAuth, onboardingStorage, adminAuth,
 // myAppsSort). On s'appuie sur ce préfixe commun pour mesurer l'espace
 // réellement utilisé par l'app, sans dépendre d'une liste de clés à maintenir.
 const PREFIX = 'trusti_';

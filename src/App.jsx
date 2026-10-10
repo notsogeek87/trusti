@@ -7,11 +7,9 @@ import { TABS } from './constants/tabs';
 import { CATEGORIES, FAVORITES_FILTER } from './constants/categories';
 import { Sparkles, Share2, RefreshCw, Star } from 'lucide-react';
 import { ViewModeContext } from './contexts/ViewModeContext';
-import { AgeModeContext } from './contexts/AgeModeContext';
 import { parseShareParams, clearShareParams, hasShareParams } from './utils/shareUtils';
 import { getAdminTokenEmail, clearAdminToken, setAdminToken } from './utils/adminAuth';
 import { hasCompletedOnboarding, markOnboardingComplete } from './utils/onboardingStorage';
-import { AGE_MODE, getAgeMode, hasSetAgeMode, setAgeMode } from './utils/ageMode';
 import { getMyAppsSortPref, setMyAppsSortPref, sortMyApps } from './utils/myAppsSort';
 
 // Layout
@@ -46,7 +44,6 @@ import LoginModal from './components/modals/LoginModal';
 const AdminAppsModal = lazy(() => import('./components/modals/AdminAppsModal'));
 import PinModal from './components/modals/PinModal';
 import WelcomeModal from './components/modals/WelcomeModal';
-import AgePromptModal from './components/modals/AgePromptModal';
 import StoragePage from './components/StoragePage';
 
 const useIsSmallViewport = () => {
@@ -109,24 +106,6 @@ const App = () => {
   const handleOpenLandingPage = () => {
     setShowLandingPage(true);
   };
-
-  // Demande d'âge (+ ou - 15 ans) : posée une seule fois, avant tout le
-  // reste (même la landing page/l'onboarding), pour déterminer le style
-  // graphique à appliquer. Sauvegardée par appareil, comme l'onboarding.
-  const [ageMode, setAgeModeState] = useState(() => getAgeMode() || AGE_MODE.ADULT);
-  const [showAgePrompt, setShowAgePrompt] = useState(() => !hasSetAgeMode());
-
-  const handleAgeSelect = (mode) => {
-    setAgeMode(mode);
-    setAgeModeState(mode);
-    setShowAgePrompt(false);
-  };
-
-  // Applique le style graphique "moins de 15 ans" globalement (y compris aux
-  // modales/écrans qui ne sont pas dans l'arbre React sous ce composant).
-  useEffect(() => {
-    document.documentElement.classList.toggle('theme-kids', ageMode === AGE_MODE.KID);
-  }, [ageMode]);
 
   // Est-on arrivé via un lien de partage ? (évalué une seule fois au montage,
   // avant que l'URL ne soit nettoyée). Dans ce cas on court-circuite le
@@ -569,17 +548,10 @@ const App = () => {
 
   const isMobile = useIsSmallViewport();
 
-  // Demande d'âge : priorité sur tout le reste, y compris la landing page.
-  if (showAgePrompt) {
-    return <AgePromptModal onSelect={handleAgeSelect} />;
-  }
-
   // Afficher la landing page en premier si c'est la première visite
   if (showLandingPage) {
     return (
-      <AgeModeContext.Provider value={ageMode}>
-        <LandingPage onClose={handleCloseLandingPage} />
-      </AgeModeContext.Provider>
+      <LandingPage onClose={handleCloseLandingPage} />
     );
   }
 
@@ -590,19 +562,15 @@ const App = () => {
     const onSignUp = (isNativeAndroid || currentUser) ? undefined : () => setShowLoginModal(true);
     if (isNativeAndroid && !forceManualOnboarding) {
       return (
-        <AgeModeContext.Provider value={ageMode}>
-          <OnboardingAppsNative
-            onComplete={handleOnboardingComplete}
-            onSignUp={onSignUp}
-            onManualSelection={() => setForceManualOnboarding(true)}
-          />
-        </AgeModeContext.Provider>
+        <OnboardingAppsNative
+          onComplete={handleOnboardingComplete}
+          onSignUp={onSignUp}
+          onManualSelection={() => setForceManualOnboarding(true)}
+        />
       );
     }
     return (
-      <AgeModeContext.Provider value={ageMode}>
-        <OnboardingApps onComplete={handleOnboardingComplete} onSignUp={onSignUp} />
-      </AgeModeContext.Provider>
+      <OnboardingApps onComplete={handleOnboardingComplete} onSignUp={onSignUp} />
     );
   }
 
@@ -611,38 +579,32 @@ const App = () => {
   if (showRescan) {
     if (isNativeAndroid && !forceManualRescan) {
       return (
-        <AgeModeContext.Provider value={ageMode}>
-          <OnboardingAppsNative
-            onComplete={handleRescanComplete}
-            onManualSelection={() => setForceManualRescan(true)}
-          />
-        </AgeModeContext.Provider>
+        <OnboardingAppsNative
+          onComplete={handleRescanComplete}
+          onManualSelection={() => setForceManualRescan(true)}
+        />
       );
     }
     return (
-      <AgeModeContext.Provider value={ageMode}>
-        <OnboardingApps onComplete={handleRescanComplete} />
-      </AgeModeContext.Provider>
+      <OnboardingApps onComplete={handleRescanComplete} />
     );
   }
 
   // Affichage du détail d'une application
   if (selectedApp) {
     return (
-      <AgeModeContext.Provider value={ageMode}>
-      <ViewModeContext.Provider value={isMobile}>
-        <AppDetailModal
-          key={selectedApp?.id}
-          app={selectedApp}
-          isInMyApps={myApps.has(selectedApp.id)}
-          onToggleMyApp={toggleMyApp}
-          onClose={closeAppDetail}
-          onSelectApp={openAppDetail}
-          onCompleteMigration={(from, to) => importMigrations([{ id: from.id, customAlt: to?.name }])}
-          allApps={apps}
-        />
-      </ViewModeContext.Provider>
-      </AgeModeContext.Provider>
+    <ViewModeContext.Provider value={isMobile}>
+      <AppDetailModal
+        key={selectedApp?.id}
+        app={selectedApp}
+        isInMyApps={myApps.has(selectedApp.id)}
+        onToggleMyApp={toggleMyApp}
+        onClose={closeAppDetail}
+        onSelectApp={openAppDetail}
+        onCompleteMigration={(from, to) => importMigrations([{ id: from.id, customAlt: to?.name }])}
+        allApps={apps}
+      />
+    </ViewModeContext.Provider>
     );
   }
 
@@ -664,380 +626,376 @@ const App = () => {
 
   // Vue principale
   return (
-    <AgeModeContext.Provider value={ageMode}>
-    <ViewModeContext.Provider value={isMobile}>
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
-      <>
-      {/* Écran de chargement initial */}
-      {isInitialLoading && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-indigo-50 via-white to-purple-50">
-          <div style={{ animation: 'splashFadeIn 0.5s ease-out both' }}>
-            <img src="/assets/logo.png" alt="Trusti" className="w-28 h-28 mb-3 drop-shadow-lg" />
-          </div>
-
-          <p className="text-2xl font-black text-slate-800 tracking-tight mb-1" style={{ animation: 'splashFadeIn 0.5s 0.1s ease-out both', opacity: 0 }}>
-            Trusti
-          </p>
-          <p className="text-sm text-slate-400 font-medium mb-10" style={{ animation: 'splashFadeIn 0.5s 0.2s ease-out both', opacity: 0 }}>
-            {ageMode === AGE_MODE.KID
-              ? 'Ton copain pour bien choisir tes applis ! 🚀'
-              : 'Votre guide pour maîtriser vos apps et vos données'}
-          </p>
-
-          <div className="flex items-center gap-2" style={{ animation: 'splashFadeIn 0.5s 0.35s ease-out both', opacity: 0 }}>
-            {[0, 1, 2].map(i => (
-              <span
-                key={i}
-                className="w-2 h-2 rounded-full bg-indigo-400"
-                style={{ animation: `splashBounce 1.2s ease-in-out ${i * 0.18}s infinite` }}
-              />
-            ))}
-          </div>
-
-          <style>{`
-            @keyframes splashFadeIn {
-              from { opacity: 0; transform: translateY(8px); }
-              to   { opacity: 1; transform: translateY(0); }
-            }
-            @keyframes splashBounce {
-              0%, 80%, 100% { transform: translateY(0);    opacity: 0.35; }
-              40%            { transform: translateY(-8px); opacity: 1; }
-            }
-          `}</style>
+  <ViewModeContext.Provider value={isMobile}>
+  <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+    <>
+    {/* Écran de chargement initial */}
+    {isInitialLoading && (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-indigo-50 via-white to-purple-50">
+        <div style={{ animation: 'splashFadeIn 0.5s ease-out both' }}>
+          <img src="/assets/logo.png" alt="Trusti" className="w-28 h-28 mb-3 drop-shadow-lg" />
         </div>
+
+        <p className="text-2xl font-black text-slate-800 tracking-tight mb-1" style={{ animation: 'splashFadeIn 0.5s 0.1s ease-out both', opacity: 0 }}>
+          Trusti
+        </p>
+        <p className="text-sm text-slate-400 font-medium mb-10" style={{ animation: 'splashFadeIn 0.5s 0.2s ease-out both', opacity: 0 }}>
+          Votre guide pour maîtriser vos apps et vos données
+        </p>
+
+        <div className="flex items-center gap-2" style={{ animation: 'splashFadeIn 0.5s 0.35s ease-out both', opacity: 0 }}>
+          {[0, 1, 2].map(i => (
+            <span
+              key={i}
+              className="w-2 h-2 rounded-full bg-indigo-400"
+              style={{ animation: `splashBounce 1.2s ease-in-out ${i * 0.18}s infinite` }}
+            />
+          ))}
+        </div>
+
+        <style>{`
+          @keyframes splashFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes splashBounce {
+            0%, 80%, 100% { transform: translateY(0);    opacity: 0.35; }
+            40%            { transform: translateY(-8px); opacity: 1; }
+          }
+        `}</style>
+      </div>
+    )}
+    
+    <Header
+      currentUser={currentUser}
+      onLogout={logout}
+      onLogin={() => setShowLoginModal(true)}
+      onOpenStorageManager={() => setShowStorageManager(true)}
+      onOpenAdmin={() => setShowAdminModal(true)}
+      onShowLandingPage={() => setShowLandingPage(true)}
+      isAdminUnlocked={isAdminUnlocked}
+      onRequestAdminUnlock={() => setShowPinModal(true)}
+    />
+
+    {/* items-start casserait le sticky du menu : sans stretch, la colonne du
+        menu ne fait que la hauteur d'un écran (h-screen) et n'a donc aucune
+        marge pour rester "collée" au scroll — elle disparaît avec le reste
+        dès qu'on dépasse un écran de contenu (visible en tablette/paysage,
+        où le menu latéral remplace la barre du bas). */}
+    <div className={isMobile ? '' : 'flex'}>
+    <Navigation
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      myAppsCount={myApps.size}
+    />
+    <main className={isMobile
+      ? 'max-w-md mx-auto px-4 py-3 pb-24'
+      : 'flex-1 min-w-0 px-6 py-3 pb-6'
+    }>
+      {activeTab !== TABS.MY_APPS && (
+        <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} isSearching={isSearching} />
       )}
-      
-      <Header
-        currentUser={currentUser}
-        onLogout={logout}
-        onLogin={() => setShowLoginModal(true)}
-        onOpenStorageManager={() => setShowStorageManager(true)}
-        onOpenAdmin={() => setShowAdminModal(true)}
-        onShowLandingPage={() => setShowLandingPage(true)}
-        isAdminUnlocked={isAdminUnlocked}
-        onRequestAdminUnlock={() => setShowPinModal(true)}
-      />
 
-      {/* items-start casserait le sticky du menu : sans stretch, la colonne du
-          menu ne fait que la hauteur d'un écran (h-screen) et n'a donc aucune
-          marge pour rester "collée" au scroll — elle disparaît avec le reste
-          dès qu'on dépasse un écran de contenu (visible en tablette/paysage,
-          où le menu latéral remplace la barre du bas). */}
-      <div className={isMobile ? '' : 'flex'}>
-      <Navigation
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        myAppsCount={myApps.size}
-      />
-      <main className={isMobile
-        ? 'max-w-md mx-auto px-4 py-3 pb-24'
-        : 'flex-1 min-w-0 px-6 py-3 pb-6'
-      }>
-        {activeTab !== TABS.MY_APPS && (
-          <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} isSearching={isSearching} />
-        )}
+      <div key={activeTab} style={{ animation: 'tabFadeIn 0.18s ease-out' }}>
 
-        <div key={activeTab} style={{ animation: 'tabFadeIn 0.18s ease-out' }}>
-
-        {/* Titre pour l'onglet Applications */}
-        {activeTab === TABS.APPLICATIONS && (
-          <div className="mb-3 text-center">
-            <div className="flex items-center justify-center gap-2 mb-0.5">
-              <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
-                Apps populaires
-              </p>
-              {isLoadingApps && (
-                <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
-              )}
-            </div>
-            {/* Sélecteur de catégorie - scrollable horizontal pour mobile */}
-            <div className="mt-2">
-              <div className="relative">
-              <div className="overflow-x-auto scrollbar-hide">
-                <div className="flex gap-1.5 pb-1.5 px-0.5">
-                  {['Toutes', FAVORITES_FILTER, ...CATEGORIES].map((category) => (
-                    <button
-                      key={category}
-                      onClick={() => setSelectedCategory(category)}
-                      className={`
-                        flex-shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition-all inline-flex items-center gap-1
-                        ${
-                          selectedCategory === category
-                            ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md scale-105'
-                            : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300 hover:shadow-sm'
-                        }
-                      `}
-                    >
-                      {category === FAVORITES_FILTER && (
-                        <Star size={11} className={selectedCategory === category ? 'fill-current' : ''} />
-                      )}
-                      {category}
-                      {category === FAVORITES_FILTER && favoriteApps.size > 0 && (
-                        <span>({favoriteApps.size})</span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="pointer-events-none absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-slate-50 to-transparent" />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Titre pour l'onglet Mes Apps */}
-        {activeTab === TABS.MY_APPS && (
-          <div className="mb-4">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-black text-slate-900 leading-tight">Mes applications</h2>
-                  {isLoadingMyApps && (
-                    <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent shrink-0"></div>
-                  )}
-                </div>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  {myApps.size > 0
-                    ? `${myApps.size} application${myApps.size > 1 ? 's' : ''} suivie${myApps.size > 1 ? 's' : ''}`
-                    : 'Relance un scan pour repérer tes apps'}
-                </p>
-              </div>
-              <div className="shrink-0 flex items-center gap-2">
-                <button
-                  onClick={() => setShowRescan(true)}
-                  className="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
-                  aria-label="Actualiser"
-                  title="Relancer un scan pour actualiser ton TrustiScore avec tes apps récentes"
-                >
-                  <RefreshCw size={16} />
-                </button>
-                {myApps.size > 0 && (
-                  <button
-                    onClick={() => setShowTrustiShareModal(true)}
-                    className="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
-                    aria-label="Partager"
-                    title="Partager mon TrustiScore"
-                  >
-                    <Share2 size={16} />
-                  </button>
-                )}
-              </div>
-            </div>
-
-          </div>
-        )}
-
-        {/* Bilan en une seule carte : TrustiScore du téléphone + migrations,
-            puis une ligne compacte d'hygiène numérique (mots de passe) */}
-        {activeTab === TABS.MY_APPS && !searchTerm.trim() && (
-          <MyAppsSummary
-            apps={filteredApps}
-            onShareMigrations={migratedApps.size > 0 ? () => setShowShareModal(true) : undefined}
-          >
-            {myApps.size > 0 && <DataHygieneCard myApps={filteredApps} catalogApps={apps} />}
-          </MyAppsSummary>
-        )}
-
-        {/* Recherche + réglages (tri, filtres) sur une seule ligne, sous le
-            bilan, car ils portent sur les apps listées ci-dessous */}
-        {activeTab === TABS.MY_APPS && (
-          <div className="flex items-start gap-2 mb-3">
-            <div className="flex-1 min-w-0">
-              <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} isSearching={isSearching} className="" />
-            </div>
-            {myApps.size > 0 && (
-              <MyAppsFilterMenu
-                sort={mySort}
-                onSortChange={setMySort}
-                migrationFilter={migrationFilter}
-                onMigrationFilterChange={setMigrationFilter}
-                alternativeFilter={alternativeFilter}
-                onAlternativeFilterChange={setAlternativeFilter}
-                migrationCounts={migrationCounts}
-                alternativeCounts={alternativeCounts}
-              />
+      {/* Titre pour l'onglet Applications */}
+      {activeTab === TABS.APPLICATIONS && (
+        <div className="mb-3 text-center">
+          <div className="flex items-center justify-center gap-2 mb-0.5">
+            <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+              Apps populaires
+            </p>
+            {isLoadingApps && (
+              <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
             )}
           </div>
-        )}
+          {/* Sélecteur de catégorie - scrollable horizontal pour mobile */}
+          <div className="mt-2">
+            <div className="relative">
+            <div className="overflow-x-auto scrollbar-hide">
+              <div className="flex gap-1.5 pb-1.5 px-0.5">
+                {['Toutes', FAVORITES_FILTER, ...CATEGORIES].map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`
+                      flex-shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition-all inline-flex items-center gap-1
+                      ${
+                        selectedCategory === category
+                          ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md scale-105'
+                          : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300 hover:shadow-sm'
+                      }
+                    `}
+                  >
+                    {category === FAVORITES_FILTER && (
+                      <Star size={11} className={selectedCategory === category ? 'fill-current' : ''} />
+                    )}
+                    {category}
+                    {category === FAVORITES_FILTER && favoriteApps.size > 0 && (
+                      <span>({favoriteApps.size})</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="pointer-events-none absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-slate-50 to-transparent" />
+            </div>
+          </div>
+        </div>
+      )}
 
-        {/* Les filtres étant repliés, on rappelle discrètement ce qui est masqué */}
-        {activeTab === TABS.MY_APPS && myApps.size > 0 && myAppsDisplayed.length < myAppsSorted.length && (
-          <p className="text-[11px] text-slate-400 -mt-1 mb-3 px-1">
-            {myAppsDisplayed.length} sur {myAppsSorted.length} apps
-            {migrationFilter === 'todo' && ' · à migrer'}
-            {migrationFilter === 'migrated' && ' · migrées'}
-            {alternativeFilter === 'with' && ' · avec alternative'}
-            {alternativeFilter === 'without' && ' · sans alternative'}
-          </p>
-        )}
-
-        {/* Titre pour l'onglet Nos recommandations */}
-        {activeTab === TABS.TOP_ALTERNATIVES && (
-          <div className="mb-3 text-center">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
-                Nos Awards
+      {/* Titre pour l'onglet Mes Apps */}
+      {activeTab === TABS.MY_APPS && (
+        <div className="mb-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-black text-slate-900 leading-tight">Mes applications</h2>
+                {isLoadingMyApps && (
+                  <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent shrink-0"></div>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {myApps.size > 0
+                  ? `${myApps.size} application${myApps.size > 1 ? 's' : ''} suivie${myApps.size > 1 ? 's' : ''}`
+                  : 'Relance un scan pour repérer tes apps'}
               </p>
-              {isLoadingApps && (
-                <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
+            </div>
+            <div className="shrink-0 flex items-center gap-2">
+              <button
+                onClick={() => setShowRescan(true)}
+                className="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
+                aria-label="Actualiser"
+                title="Relancer un scan pour actualiser ton TrustiScore avec tes apps récentes"
+              >
+                <RefreshCw size={16} />
+              </button>
+              {myApps.size > 0 && (
+                <button
+                  onClick={() => setShowTrustiShareModal(true)}
+                  className="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
+                  aria-label="Partager"
+                  title="Partager mon TrustiScore"
+                >
+                  <Share2 size={16} />
+                </button>
               )}
             </div>
-            <p className="text-[11px] text-slate-400 px-2 leading-relaxed">
-              Nos conseils d'apps avec un TrustiScore respectueux (A, B ou C) par catégorie
-            </p>
           </div>
-        )}
 
-        {/* Panneau explicatif */}
-        {showExplainer && (
-          <ExplainerPanel onClose={() => setShowExplainer(false)} />
-        )}
-
-        {/* Liste des applications */}
-        <AppsList
-          apps={activeTab === TABS.MY_APPS ? myAppsDisplayed : filteredApps}
-          activeTab={activeTab}
-          myApps={myApps}
-          favoriteApps={favoriteApps}
-          migratedApps={migratedApps}
-          customMigrations={customMigrations}
-          onToggleMyApp={toggleMyApp}
-          onToggleFavorite={toggleFavorite}
-          onToggleMigrate={toggleMigrate}
-          onSelectApp={openAppDetail}
-          onSelectMigration={setShowMigrationSelector}
-          onStartMigration={setMigrationGuideApp}
-          selectedCategory={selectedCategory}
-          searchTerm={searchTerm}
-          pagination={pagination}
-          onLoadMore={loadMoreApps}
-          isLoadingAwards={isLoadingAwards}
-          isLoadingMyApps={isLoadingMyApps}
-        />
         </div>
-      </main>
-      </div>
-
-      {/* Modal de partage des migrations */}
-      {showShareModal && (
-        <ShareModal
-          migratedApps={migratedApps}
-          customMigrations={customMigrations}
-          allApps={apps}
-          sortedAppIds={myAppsSorted.map(app => app.id)}
-          onClose={() => setShowShareModal(false)}
-        />
       )}
 
-      {/* Modal de partage des TrustiApp */}
-      {showTrustiShareModal && (
-        <TrustiShareModal
-          selectedApps={myAppsSorted}
-          customMigrations={customMigrations}
-          allApps={apps}
-          onClose={() => setShowTrustiShareModal(false)}
-        />
+      {/* Bilan en une seule carte : TrustiScore du téléphone + migrations,
+          puis une ligne compacte d'hygiène numérique (mots de passe) */}
+      {activeTab === TABS.MY_APPS && !searchTerm.trim() && (
+        <MyAppsSummary
+          apps={filteredApps}
+          onShareMigrations={migratedApps.size > 0 ? () => setShowShareModal(true) : undefined}
+        >
+          {myApps.size > 0 && <DataHygieneCard myApps={filteredApps} catalogApps={apps} />}
+        </MyAppsSummary>
       )}
 
-      {/* Modal d'import via lien de partage */}
-      {pendingImport && (
-        <ImportAppsModal
-          appIds={pendingImport.appIds}
-          migrations={pendingImport.migrations}
-          isLoggedIn={Boolean(currentUser)}
-          onConfirm={handleImportShared}
-          onClose={() => setPendingImport(null)}
-        />
-      )}
-
-      {/* Parcours de migration guidée (depuis « Mes Apps ») */}
-      {migrationGuideApp && !selectedApp && (
-        <MigrationGuideModal
-          app={migrationGuideApp}
-          alternatives={apps.filter(a =>
-            migrationGuideApp.alternativeAppIds?.includes(String(a.id)) ||
-            a.replacesAppIds?.includes(migrationGuideApp.id) ||
-            a.replacesAppId === migrationGuideApp.id
+      {/* Recherche + réglages (tri, filtres) sur une seule ligne, sous le
+          bilan, car ils portent sur les apps listées ci-dessous */}
+      {activeTab === TABS.MY_APPS && (
+        <div className="flex items-start gap-2 mb-3">
+          <div className="flex-1 min-w-0">
+            <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} isSearching={isSearching} className="" />
+          </div>
+          {myApps.size > 0 && (
+            <MyAppsFilterMenu
+              sort={mySort}
+              onSortChange={setMySort}
+              migrationFilter={migrationFilter}
+              onMigrationFilterChange={setMigrationFilter}
+              alternativeFilter={alternativeFilter}
+              onAlternativeFilterChange={setAlternativeFilter}
+              migrationCounts={migrationCounts}
+              alternativeCounts={alternativeCounts}
+            />
           )}
-          onComplete={(from, to) => importMigrations([{ id: from.id, customAlt: to?.name }])}
-          onClose={() => setMigrationGuideApp(null)}
-        />
+        </div>
       )}
 
-      {/* Modal de sélection de migration */}
-      {showMigrationSelector && !selectedApp && (
-        <MigrationSelectorModal
-          currentAppId={showMigrationSelector}
-          currentSelection={customMigrations.get(showMigrationSelector)}
-          onSelect={(altName) => setCustomMigration(showMigrationSelector, altName)}
-          onClose={() => setShowMigrationSelector(null)}
-          onSelectApp={(app) => {
-            setShowMigrationSelector(null);
-            openAppDetail(app);
-          }}
-          allApps={apps}
-        />
+      {/* Les filtres étant repliés, on rappelle discrètement ce qui est masqué */}
+      {activeTab === TABS.MY_APPS && myApps.size > 0 && myAppsDisplayed.length < myAppsSorted.length && (
+        <p className="text-[11px] text-slate-400 -mt-1 mb-3 px-1">
+          {myAppsDisplayed.length} sur {myAppsSorted.length} apps
+          {migrationFilter === 'todo' && ' · à migrer'}
+          {migrationFilter === 'migrated' && ' · migrées'}
+          {alternativeFilter === 'with' && ' · avec alternative'}
+          {alternativeFilter === 'without' && ' · sans alternative'}
+        </p>
       )}
 
-      {/* Modal de connexion (fonctionnalité retirée sur l'app mobile) */}
-      {!isNativeAndroid && (
-        <LoginModal
-          isOpen={showLoginModal}
-          onClose={() => setShowLoginModal(false)}
-          onLogin={(email) => { login(email); setShowLoginModal(false); }}
-        />
+      {/* Titre pour l'onglet Nos recommandations */}
+      {activeTab === TABS.TOP_ALTERNATIVES && (
+        <div className="mb-3 text-center">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+              Nos Awards
+            </p>
+            {isLoadingApps && (
+              <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
+            )}
+          </div>
+          <p className="text-[11px] text-slate-400 px-2 leading-relaxed">
+            Nos conseils d'apps avec un TrustiScore respectueux (A, B ou C) par catégorie
+          </p>
+        </div>
       )}
 
-      {/* Modal de code PIN admin */}
-      <PinModal
-        isOpen={showPinModal}
-        onClose={() => setShowPinModal(false)}
-        onSuccess={handleUnlockAdmin}
-        userEmail={currentUser?.email || currentUser}
+      {/* Panneau explicatif */}
+      {showExplainer && (
+        <ExplainerPanel onClose={() => setShowExplainer(false)} />
+      )}
+
+      {/* Liste des applications */}
+      <AppsList
+        apps={activeTab === TABS.MY_APPS ? myAppsDisplayed : filteredApps}
+        activeTab={activeTab}
+        myApps={myApps}
+        favoriteApps={favoriteApps}
+        migratedApps={migratedApps}
+        customMigrations={customMigrations}
+        onToggleMyApp={toggleMyApp}
+        onToggleFavorite={toggleFavorite}
+        onToggleMigrate={toggleMigrate}
+        onSelectApp={openAppDetail}
+        onSelectMigration={setShowMigrationSelector}
+        onStartMigration={setMigrationGuideApp}
+        selectedCategory={selectedCategory}
+        searchTerm={searchTerm}
+        pagination={pagination}
+        onLoadMore={loadMoreApps}
+        isLoadingAwards={isLoadingAwards}
+        isLoadingMyApps={isLoadingMyApps}
       />
-
-      {/* Modal de bienvenue (première visite) */}
-      {showWelcomeModal && (
-        <WelcomeModal
-          onFirstTimeYes={handleFirstTimeYes}
-          onFirstTimeNo={handleFirstTimeNo}
-        />
-      )}
-
-      {/* Modal d'administration Apps (TrustiApps et StarApps) */}
-      {showAdminModal && (
-        <Suspense fallback={null}>
-          <AdminAppsModal
-            onClose={() => {
-              setShowAdminModal(false);
-              // Forcer le rechargement pour que tout le monde voit les changements
-              window.location.reload();
-            }}
-          />
-        </Suspense>
-      )}
-
-      </>
-
-      {/* Widget de chat Trusti (visible partout sauf pendant la vérification du token, la page de bienvenue, l'onboarding, le chargement initial et la console admin) */}
-      {!showWelcomeModal && !showOnboarding && !showRescan && !showAdminModal && !isLoadingApps && <TrustiChatWidget onOpenLandingPage={handleOpenLandingPage} />}
-
-      <style>{`
-        @keyframes pulse-subtle {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.85; }
-        }
-        .animate-pulse-subtle {
-          animation: pulse-subtle 3s infinite ease-in-out;
-        }
-        @keyframes tabFadeIn {
-          from { opacity: 0; transform: translateY(6px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+      </div>
+    </main>
     </div>
-    </ViewModeContext.Provider>
-    </AgeModeContext.Provider>
+
+    {/* Modal de partage des migrations */}
+    {showShareModal && (
+      <ShareModal
+        migratedApps={migratedApps}
+        customMigrations={customMigrations}
+        allApps={apps}
+        sortedAppIds={myAppsSorted.map(app => app.id)}
+        onClose={() => setShowShareModal(false)}
+      />
+    )}
+
+    {/* Modal de partage des TrustiApp */}
+    {showTrustiShareModal && (
+      <TrustiShareModal
+        selectedApps={myAppsSorted}
+        customMigrations={customMigrations}
+        allApps={apps}
+        onClose={() => setShowTrustiShareModal(false)}
+      />
+    )}
+
+    {/* Modal d'import via lien de partage */}
+    {pendingImport && (
+      <ImportAppsModal
+        appIds={pendingImport.appIds}
+        migrations={pendingImport.migrations}
+        isLoggedIn={Boolean(currentUser)}
+        onConfirm={handleImportShared}
+        onClose={() => setPendingImport(null)}
+      />
+    )}
+
+    {/* Parcours de migration guidée (depuis « Mes Apps ») */}
+    {migrationGuideApp && !selectedApp && (
+      <MigrationGuideModal
+        app={migrationGuideApp}
+        alternatives={apps.filter(a =>
+          migrationGuideApp.alternativeAppIds?.includes(String(a.id)) ||
+          a.replacesAppIds?.includes(migrationGuideApp.id) ||
+          a.replacesAppId === migrationGuideApp.id
+        )}
+        onComplete={(from, to) => importMigrations([{ id: from.id, customAlt: to?.name }])}
+        onClose={() => setMigrationGuideApp(null)}
+      />
+    )}
+
+    {/* Modal de sélection de migration */}
+    {showMigrationSelector && !selectedApp && (
+      <MigrationSelectorModal
+        currentAppId={showMigrationSelector}
+        currentSelection={customMigrations.get(showMigrationSelector)}
+        onSelect={(altName) => setCustomMigration(showMigrationSelector, altName)}
+        onClose={() => setShowMigrationSelector(null)}
+        onSelectApp={(app) => {
+          setShowMigrationSelector(null);
+          openAppDetail(app);
+        }}
+        allApps={apps}
+      />
+    )}
+
+    {/* Modal de connexion (fonctionnalité retirée sur l'app mobile) */}
+    {!isNativeAndroid && (
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLogin={(email) => { login(email); setShowLoginModal(false); }}
+      />
+    )}
+
+    {/* Modal de code PIN admin */}
+    <PinModal
+      isOpen={showPinModal}
+      onClose={() => setShowPinModal(false)}
+      onSuccess={handleUnlockAdmin}
+      userEmail={currentUser?.email || currentUser}
+    />
+
+    {/* Modal de bienvenue (première visite) */}
+    {showWelcomeModal && (
+      <WelcomeModal
+        onFirstTimeYes={handleFirstTimeYes}
+        onFirstTimeNo={handleFirstTimeNo}
+      />
+    )}
+
+    {/* Modal d'administration Apps (TrustiApps et StarApps) */}
+    {showAdminModal && (
+      <Suspense fallback={null}>
+        <AdminAppsModal
+          onClose={() => {
+            setShowAdminModal(false);
+            // Forcer le rechargement pour que tout le monde voit les changements
+            window.location.reload();
+          }}
+        />
+      </Suspense>
+    )}
+
+    </>
+
+    {/* Widget de chat Trusti (visible partout sauf pendant la vérification du token, la page de bienvenue, l'onboarding, le chargement initial et la console admin) */}
+    {!showWelcomeModal && !showOnboarding && !showRescan && !showAdminModal && !isLoadingApps && <TrustiChatWidget onOpenLandingPage={handleOpenLandingPage} />}
+
+    <style>{`
+      @keyframes pulse-subtle {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.85; }
+      }
+      .animate-pulse-subtle {
+        animation: pulse-subtle 3s infinite ease-in-out;
+      }
+      @keyframes tabFadeIn {
+        from { opacity: 0; transform: translateY(6px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+    `}</style>
+  </div>
+  </ViewModeContext.Provider>
   );
 };
 

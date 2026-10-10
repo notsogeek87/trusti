@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, CheckCircle, Route, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink, Trash2, StickyNote } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
-import { GRADE_INFO, GRADE_INFO_KID } from '../../constants/grades';
+import { GRADE_INFO } from '../../constants/grades';
 import { useIsMobile } from '../../contexts/ViewModeContext';
-import { useAgeMode } from '../../contexts/AgeModeContext';
-import { AGE_MODE } from '../../utils/ageMode';
 import { API_URL } from '../../utils/apiConfig';
 import { isNativeAndroid } from '../../utils/platform';
 import { extractPackageId } from '../../utils/androidPackage';
@@ -220,10 +218,9 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
   };
 
   const isMobile = useIsMobile();
-  const isKid = useAgeMode() === AGE_MODE.KID;
-  const gradeInfo = isKid ? GRADE_INFO_KID : GRADE_INFO;
+  const gradeInfo = GRADE_INFO;
   // Détail d'évaluation chargé en ligne ; masqué en mode enfant pour l'instant.
-  const assessmentState = useAssessment(isKid ? null : app.id);
+  const assessmentState = useAssessment(app.id);
 
   const handleClose = () => {
     setIsExiting(true);
@@ -442,7 +439,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                   className="inline-flex items-center gap-1.5 mt-2 text-xs text-indigo-600 hover:text-indigo-800 font-semibold transition-colors"
                 >
                   <ExternalLink size={12} />
-                  {isKid ? 'Pour les curieux : la méthode complète' : 'En savoir plus sur notre méthodologie'}
+                  En savoir plus sur notre méthodologie
                 </a>
                 {app.updatedAt && (
                   <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-400">
@@ -455,7 +452,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
           })()}
 
           {/* Détail de l'évaluation TrustiScore (critères, sources) — masqué en mode enfant */}
-          {!isKid && <AssessmentDetail status={assessmentState.status} assessment={assessmentState.assessment} />}
+          <AssessmentDetail status={assessmentState.status} assessment={assessmentState.assessment} />
 
           {/* Alternatives */}
           {((isLoadingRelations && app.alternativeAppIds?.length > 0) || alternatives.length > 0) && (

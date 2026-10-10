@@ -2,15 +2,12 @@ import React from 'react';
 import { X, KeyRound, ExternalLink, CheckCircle2, Circle } from 'lucide-react';
 import { BEST_PRACTICES, HYGIENE_CHECKS } from '../../constants/dataHygiene';
 import { GRADE_COLORS } from '../../constants/grades';
-import { useAgeMode } from '../../contexts/AgeModeContext';
-import { AGE_MODE } from '../../utils/ageMode';
 
 /**
  * Fiche "Bonnes pratiques" : bilan cochable, rappels sur les mots de passe et
  * gestionnaires suggérés. Les cases sont enregistrées en local uniquement.
  */
 const DataHygieneModal = ({ hygiene, managerDetected, managerSuggestions, ecosystemManager, onToggleCheck, onClose }) => {
-  const isKid = useAgeMode() === AGE_MODE.KID;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-in fade-in duration-200 p-4">
@@ -29,12 +26,10 @@ const DataHygieneModal = ({ hygiene, managerDetected, managerSuggestions, ecosys
             <h4 className="font-black text-xs uppercase tracking-widest">Hygiène numérique</h4>
           </div>
           <h3 className="text-xl font-black mb-2 text-white leading-tight">
-            {isKid ? 'Protège tes comptes' : 'Protéger vos comptes au quotidien'}
+            Protéger vos comptes au quotidien
           </h3>
           <p className="text-[13px] leading-relaxed text-slate-400 font-medium mb-6">
-            {isKid
-              ? 'Quelques réflexes simples pour que personne ne puisse entrer dans tes comptes à ta place.'
-              : 'Un bon score de confiance ne suffit pas : la façon dont vous protégez vos accès compte autant. Quelques réflexes suffisent.'}
+            Un bon score de confiance ne suffit pas : la façon dont vous protégez vos accès compte autant. Quelques réflexes suffisent.
           </p>
 
           <h4 className="font-black text-[11px] uppercase tracking-widest mb-3 text-slate-500 flex items-center gap-2">
@@ -62,7 +57,7 @@ const DataHygieneModal = ({ hygiene, managerDetected, managerSuggestions, ecosys
                   >
                     <Icon size={20} className={`shrink-0 mt-0.5 ${checked ? 'text-emerald-400' : 'text-slate-600'}`} />
                     <span className={`text-[13px] font-semibold leading-snug ${checked ? 'text-slate-300' : 'text-white'}`}>
-                      {isKid ? item.labelKid : item.label}
+                      {item.label}
                       {locked && <span className="block text-[11px] font-medium text-slate-500">Détecté dans tes apps</span>}
                     </span>
                   </button>
@@ -83,8 +78,8 @@ const DataHygieneModal = ({ hygiene, managerDetected, managerSuggestions, ecosys
                   {index + 1}
                 </div>
                 <div>
-                  <p className="text-sm font-black text-white leading-tight mb-1">{isKid ? practice.titleKid : practice.title}</p>
-                  <p className="text-[12px] leading-relaxed text-slate-400 font-medium">{isKid ? practice.textKid : practice.text}</p>
+                  <p className="text-sm font-black text-white leading-tight mb-1">{practice.title}</p>
+                  <p className="text-[12px] leading-relaxed text-slate-400 font-medium">{practice.text}</p>
                 </div>
               </div>
             ))}
@@ -125,7 +120,7 @@ const DataHygieneModal = ({ hygiene, managerDetected, managerSuggestions, ecosys
                       </span>
                     )}
                   </p>
-                  <p className="text-[11px] leading-snug text-slate-400 font-medium">{isKid ? manager.pitchKid : manager.pitch}</p>
+                  <p className="text-[11px] leading-snug text-slate-400 font-medium">{manager.pitch}</p>
                 </div>
                 <ExternalLink size={14} className="text-slate-500 shrink-0" />
               </a>

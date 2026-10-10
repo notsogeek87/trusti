@@ -1,9 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { GRADES, GRADE_COLORS, PHONE_GRADE_LABEL, PHONE_GRADE_LABEL_KID } from '../constants/grades';
+import { GRADES, GRADE_COLORS, PHONE_GRADE_LABEL } from '../constants/grades';
 import { computeTrustiSummary } from '../utils/trustiScore';
-import { useAgeMode } from '../contexts/AgeModeContext';
-import { AGE_MODE } from '../utils/ageMode';
 
 // Carte de bilan affichée en haut de l'onglet "Mes Apps" : le TrustiScore
 // global du téléphone (déduit des apps suivies) et la progression des
@@ -13,8 +11,7 @@ import { AGE_MODE } from '../utils/ageMode';
 // garder un seul bloc de synthèse au lieu d'empiler des cartes.
 const MyAppsSummary = ({ apps, onShareMigrations, children }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const isKid = useAgeMode() === AGE_MODE.KID;
-  const phoneGradeLabel = isKid ? PHONE_GRADE_LABEL_KID : PHONE_GRADE_LABEL;
+  const phoneGradeLabel = PHONE_GRADE_LABEL;
 
   const { counts, total, overallGrade } = useMemo(() => computeTrustiSummary(apps), [apps]);
 

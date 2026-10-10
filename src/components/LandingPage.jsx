@@ -1,15 +1,12 @@
 import React from 'react';
 import { ShieldCheck, ArrowRight, Lock, Globe, Eye, CheckCircle, BookOpen, X } from 'lucide-react';
-import { GRADE_INFO, GRADE_INFO_KID } from '../constants/grades';
-import { useAgeMode } from '../contexts/AgeModeContext';
-import { AGE_MODE } from '../utils/ageMode';
+import { GRADE_INFO } from '../constants/grades';
 
 /**
  * Landing Page affichée uniquement lors de la première visite
  */
 const LandingPage = ({ onClose }) => {
-  const isKid = useAgeMode() === AGE_MODE.KID;
-  const gradeInfo = isKid ? GRADE_INFO_KID : GRADE_INFO;
+  const gradeInfo = GRADE_INFO;
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900 overflow-y-auto">
@@ -49,22 +46,14 @@ const LandingPage = ({ onClose }) => {
             </div>
 
             <h1 className="text-4xl font-black mb-4 text-white leading-tight">
-              {isKid ? 'Deviens un champion de tes données ! 🦸' : 'Reprenez votre souveraineté numérique européenne'}
+              Reprenez votre souveraineté numérique européenne
             </h1>
 
-            {isKid ? (
-              <p className="text-base leading-relaxed text-slate-400 font-medium mb-8">
-                Trusti t'aide à savoir si une appli est sympa avec tes
-                <span className="text-white font-bold"> informations personnelles</span> (photos, messages,
-                position...) ou si elle les partage <span className="text-white font-bold">en douce</span>.
-              </p>
-            ) : (
               <p className="text-base leading-relaxed text-slate-400 font-medium mb-8">
                 Trusti évalue la confiance que vous pouvez accorder à vos applications.
                 Découvrez quelles apps respectent vraiment votre <span className="text-white font-bold">souveraineté numérique</span> et
                 protègent votre <span className="text-white font-bold">vie privée</span>.
               </p>
-            )}
 
             {/* Fonctionnalités clés */}
             <div className="grid gap-4 mb-10 text-left">
@@ -74,10 +63,10 @@ const LandingPage = ({ onClose }) => {
                 </div>
                 <div>
                   <h3 className="text-white font-bold text-sm mb-1">
-                    {isKid ? 'Fabriquée près de chez toi 🌍' : 'Souveraineté européenne'}
+                    Souveraineté européenne
                   </h3>
                   <p className="text-slate-400 text-xs">
-                    {isKid ? 'Tes données restent en Europe, là où les lois te protègent le mieux.' : 'Données hébergées en Europe, conformité RGPD'}
+                    Données hébergées en Europe, conformité RGPD
                   </p>
                 </div>
               </div>
@@ -88,10 +77,10 @@ const LandingPage = ({ onClose }) => {
                 </div>
                 <div>
                   <h3 className="text-white font-bold text-sm mb-1">
-                    {isKid ? 'Tes secrets bien gardés 🔒' : 'Vie privée protégée'}
+                    Vie privée protégée
                   </h3>
                   <p className="text-slate-400 text-xs">
-                    {isKid ? "On vérifie qu'aucune appli n'espionne ce que tu fais en cachette." : 'Protection contre le Cloud Act et surveillance'}
+                    Protection contre le Cloud Act et surveillance
                   </p>
                 </div>
               </div>
@@ -102,10 +91,10 @@ const LandingPage = ({ onClose }) => {
                 </div>
                 <div>
                   <h3 className="text-white font-bold text-sm mb-1">
-                    {isKid ? 'Des notes claires, sans blabla 🔍' : 'Évaluations transparentes'}
+                    Évaluations transparentes
                   </h3>
                   <p className="text-slate-400 text-xs">
-                    {isKid ? 'Chaque note est expliquée simplement, sans mots compliqués.' : 'Scores basés sur 12 critères objectifs'}
+                    Scores basés sur 12 critères objectifs
                   </p>
                 </div>
               </div>
@@ -136,7 +125,7 @@ const LandingPage = ({ onClose }) => {
               onClick={onClose}
               className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl hover:scale-105"
             >
-              {isKid ? "C'est parti pour l'aventure !" : "Commencer l'exploration"}
+              Commencer l'exploration
               <ArrowRight size={20} />
             </button>
 
@@ -147,14 +136,12 @@ const LandingPage = ({ onClose }) => {
               className="w-full mt-4 bg-slate-800 hover:bg-slate-700 border-2 border-indigo-500/30 hover:border-indigo-500 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 group"
             >
               <BookOpen size={20} className="text-indigo-400 group-hover:text-indigo-300" />
-              {isKid ? 'Pour les curieux : tout savoir' : 'En savoir plus sur le TrustiScore'}
+              En savoir plus sur le TrustiScore
               <ArrowRight size={18} className="text-indigo-400 group-hover:text-indigo-300 group-hover:translate-x-1 transition-transform" />
             </a>
 
             <p className="text-[11px] text-slate-500 mt-6 italic">
-              {isKid
-                ? 'On vérifie plein de choses pour toi : où sont rangées tes données, si l\'appli les vend, et bien plus encore. 🕵️'
-                : 'Basé sur 12 critères : RGPD, Cloud Act, Open Source, Localisation des données, et plus encore.'}
+              Basé sur 12 critères : RGPD, Cloud Act, Open Source, Localisation des données, et plus encore.
             </p>
           </div>
         </div>

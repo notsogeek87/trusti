@@ -23,7 +23,7 @@ Le statut (infobulle de la pastille) dépend des apps de « Mes Apps » :
 
 Le conseil détaillé, la déclaration manuelle (case « gestionnaire » du bilan) et les suggestions sont dans la fiche.
 
-Tous les textes existent en version adulte et en version -15 ans (`useAgeMode`).
+Les textes n'existent qu'en une version (le mode -15 ans a été retiré).
 
 ## Code
 
@@ -51,12 +51,11 @@ Ajouter un gestionnaire recommandé (`RECOMMENDED_MANAGERS`) :
   name: 'Mon Gestionnaire',          // doit correspondre au nom du catalogue pour afficher la note
   packageId: 'com.example.manager',  // identifiant Play Store
   pitch: 'Argument adulte.',
-  pitchKid: 'Argument -15 ans.',
   url: 'https://play.google.com/store/apps/details?id=com.example.manager',
 }
 ```
 
-Ajouter une case au bilan (`HYGIENE_CHECKS`) : `{ id, label, labelKid }`. Le score `x/N` s'adapte automatiquement.
+Ajouter une case au bilan (`HYGIENE_CHECKS`) : `{ id, label }`. Le score `x/N` s'adapte automatiquement.
 
 ## Règles éditoriales
 

@@ -16,7 +16,7 @@ Statut : 💡 idée · 📝 à cadrer · 🚧 en cours · ✅ fait
 | 7 | Partage et gamification du bilan | Basse | Faible | 💡 |
 
 ### 1. Migration guidée
-**MVP livré** : parcours en 4 étapes depuis la fiche d'une app C/D/E. Point d'entrée « Mes Apps » ajouté. Reste à faire : variante -15 ans, guides d'export par app, suivi des migrations en cours.
+**MVP livré** : parcours en 4 étapes depuis la fiche d'une app C/D/E. Point d'entrée « Mes Apps » ajouté. Reste à faire : guides d'export par app, suivi des migrations en cours.
 
 Pour une app notée D/E installée, proposer pas à pas le passage à l'alternative A/B :
 lien de téléchargement, guide d'export des données, désinstallation (permission

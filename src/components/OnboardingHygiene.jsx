@@ -3,8 +3,6 @@ import { ArrowRight, CheckCircle2, Circle, KeyRound } from 'lucide-react';
 import { HYGIENE_CHECKS } from '../constants/dataHygiene';
 import { computeHygiene, detectPasswordManagers } from '../utils/passwordManagers';
 import { getHygieneState, saveHygieneState } from '../utils/hygieneStorage';
-import { useAgeMode } from '../contexts/AgeModeContext';
-import { AGE_MODE } from '../utils/ageMode';
 
 // Étape "Hygiène numérique" de fin de scan (onboarding et re-scan manuel),
 // juste après le récapitulatif du TrustiScore : l'utilisateur coche les
@@ -13,7 +11,6 @@ import { AGE_MODE } from '../utils/ageMode';
 // apps scannées est coché d'office. Réponses enregistrées en local
 // uniquement (voir hygieneStorage), modifiables ensuite depuis "Mes Apps".
 const OnboardingHygiene = ({ apps, ctaLabel, onDone }) => {
-  const isKid = useAgeMode() === AGE_MODE.KID;
   const [checks, setChecks] = useState(() => getHygieneState().checks);
   const { dedicated } = useMemo(() => detectPasswordManagers(apps), [apps]);
   const hygiene = computeHygiene(checks, !!dedicated);
@@ -42,12 +39,10 @@ const OnboardingHygiene = ({ apps, ctaLabel, onDone }) => {
             Hygiène numérique
           </p>
           <h2 className="text-lg font-black text-slate-900 leading-snug">
-            {isKid ? 'Et tes comptes, ils sont bien protégés ?' : 'Et vos comptes, bien protégés ?'}
+            Et vos comptes, bien protégés ?
           </h2>
           <p className="text-xs text-slate-500 mt-1.5 mb-5 leading-relaxed">
-            {isKid
-              ? 'Coche ce qui est vrai pour toi. Tes réponses restent sur ton téléphone.'
-              : 'Cochez ce qui est déjà en place. Vos réponses restent sur ce téléphone.'}
+            Cochez ce qui est déjà en place. Vos réponses restent sur ce téléphone.
           </p>
         </div>
 
@@ -68,7 +63,7 @@ const OnboardingHygiene = ({ apps, ctaLabel, onDone }) => {
                 >
                   <Icon size={20} className={`shrink-0 mt-px ${checked ? 'text-emerald-500' : 'text-slate-300'}`} />
                   <span className="text-[13px] font-semibold leading-snug text-slate-700">
-                    {isKid ? item.labelKid : item.label}
+                    {item.label}
                     {locked && (
                       <span className="block text-[11px] font-medium text-emerald-600">{dedicated.name} détecté</span>
                     )}

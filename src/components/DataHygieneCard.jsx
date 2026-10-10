@@ -3,8 +3,6 @@ import { KeyRound } from 'lucide-react';
 import DataHygieneModal from './modals/DataHygieneModal';
 import { computeHygiene, detectPasswordManagers, buildManagerSuggestions } from '../utils/passwordManagers';
 import { getHygieneState, saveHygieneState } from '../utils/hygieneStorage';
-import { useAgeMode } from '../contexts/AgeModeContext';
-import { AGE_MODE } from '../utils/ageMode';
 
 // Pastille "Mots de passe" en pied de la carte bilan de "Mes Apps" (à côté
 // du compteur de migrations) : score du bilan (x/5), en orange quand aucun
@@ -12,7 +10,6 @@ import { AGE_MODE } from '../utils/ageMode';
 // (conseil, cases à cocher, gestionnaires conseillés) est dans la fiche.
 // Aucune donnée ne quitte l'appareil (voir hygieneStorage).
 const DataHygieneCard = ({ myApps, catalogApps }) => {
-  const isKid = useAgeMode() === AGE_MODE.KID;
   const [state, setState] = useState(getHygieneState);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -48,7 +45,7 @@ const DataHygieneCard = ({ myApps, catalogApps }) => {
     : needsAttention
       ? 'bg-amber-50 text-amber-700 border-amber-200'
       : 'bg-indigo-50 text-indigo-600 border-indigo-100';
-  const label = isKid ? 'Mots de passe' : 'Hygiène';
+  const label = 'Hygiène';
 
   return (
     <>

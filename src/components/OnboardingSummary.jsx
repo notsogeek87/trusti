@@ -2,10 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
 import OnboardingHygiene from './OnboardingHygiene';
-import { GRADE_INFO, GRADE_INFO_KID, PHONE_GRADE_LABEL, PHONE_GRADE_LABEL_KID } from '../constants/grades';
+import { GRADE_INFO, PHONE_GRADE_LABEL } from '../constants/grades';
 import { computeTrustiSummary } from '../utils/trustiScore';
-import { useAgeMode } from '../contexts/AgeModeContext';
-import { AGE_MODE } from '../utils/ageMode';
 
 // Écran de récapitulatif affiché après un scan (natif) ou une sélection
 // (manuelle/web), avant d'arriver sur "Mes Apps" : combien d'apps par
@@ -13,9 +11,8 @@ import { AGE_MODE } from '../utils/ageMode';
 // seconde étape, le bilan d'hygiène numérique (OnboardingHygiene), puis au
 // détail (la liste "Mes Apps").
 const OnboardingSummary = ({ apps, onDetails }) => {
-  const isKid = useAgeMode() === AGE_MODE.KID;
-  const gradeInfo = isKid ? GRADE_INFO_KID : GRADE_INFO;
-  const phoneGradeLabel = isKid ? PHONE_GRADE_LABEL_KID : PHONE_GRADE_LABEL;
+  const gradeInfo = GRADE_INFO;
+  const phoneGradeLabel = PHONE_GRADE_LABEL;
   const { counts, total, overallGrade } = useMemo(() => computeTrustiSummary(apps), [apps]);
   const [showHygiene, setShowHygiene] = useState(false);
   const detailsLabel = `Détails de mes ${total} app${total !== 1 ? 's' : ''}`;

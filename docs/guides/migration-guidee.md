@@ -39,7 +39,7 @@ La progression est stockée **uniquement** dans le `localStorage`, clé `trusti_
 
 ## Limites actuelles
 
-- Textes en version adulte uniquement (pas de variante -15 ans).
+- Textes en version unique.
 - Conseils d'export génériques par catégorie, pas de guide propre à chaque app.
 - Depuis « Mes Apps », les alternatives proposées viennent des apps déjà chargées du catalogue (comme le sélecteur d'alternative).
 
