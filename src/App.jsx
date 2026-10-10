@@ -27,7 +27,6 @@ import MyAppsSummary from './components/MyAppsSummary';
 import DataHygieneCard from './components/DataHygieneCard';
 import MyAppsFilterMenu, { DEFAULT_MIGRATION_FILTER, DEFAULT_ALTERNATIVE_FILTER } from './components/MyAppsFilterMenu';
 import LandingPage from './components/LandingPage';
-import TrustiChatWidget from './components/TrustiChatWidget';
 import OnboardingApps from './components/OnboardingApps';
 import OnboardingAppsNative from './components/OnboardingAppsNative';
 import { isNativeAndroid } from './utils/platform';
@@ -978,7 +977,7 @@ const App = () => {
     </>
 
     {/* Widget de chat Trusti (visible partout sauf pendant la vérification du token, la page de bienvenue, l'onboarding, le chargement initial et la console admin) */}
-    {!showWelcomeModal && !showOnboarding && !showRescan && !showAdminModal && !isLoadingApps && <TrustiChatWidget onOpenLandingPage={handleOpenLandingPage} />}
+    {/* Petit chatbot masqué (composant TrustiChatWidget conservé, à réactiver ici) */}
 
     <style>{`
       @keyframes pulse-subtle {
