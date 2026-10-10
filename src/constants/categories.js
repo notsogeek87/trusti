@@ -51,6 +51,7 @@ export const ADMIN_CATEGORIES = [
     'Podcasts',
     'Lecteurs Multimédia',
     'Photo & Vidéo',
+    'Retouche Photo',
     'Banque & Finance',
     'Paiement Mobile',
     'Transport & Mobilité',
@@ -105,6 +106,7 @@ export const CATEGORY_MAPPING = {
   'Podcasts': 'Multimédia',
   'Lecteurs Multimédia': 'Multimédia',
   'Photo & Vidéo': 'Multimédia',
+  'Retouche Photo': 'Multimédia',
   'Multimédia': 'Multimédia',
   
   // Finance
