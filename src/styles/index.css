@@ -8,37 +8,32 @@ html, body {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
- * Design « Solarpunk Utópico » (palette et rayons : config Tailwind dans index.html)
- * Fond sauge très clair avec un ciel doux, Nunito, focus Sky Blue, transitions à
+ * Couleurs « Cerâmica Wabi-Sabi » (palette : config Tailwind dans index.html ; formes et police inchangées)
+ * Fond crème uni, Nunito, focus Indigo, transitions à
  * ressort sur transform/opacité uniquement. Mode clair seulement.
  * ────────────────────────────────────────────────────────────────────── */
 :root {
   color-scheme: light;
-  --sp-green: #2D6A4F;
-  --sp-gold: #FFB703;
-  --sp-sky: #219EBC;
-  --sp-warm: #F5F8F2;
-  --sp-moss: #52B788;
-  --sp-ink: #1F241C;
+  --sp-clay: #A0522D;
+  --sp-gold: #D4AF37;
+  --sp-accent: #3F51B5;
+  --sp-warm: #FAF6F1;
+  --sp-ink: #232D34;
 }
 
 body {
   font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
   color: var(--sp-ink);
   background-color: var(--sp-warm);
-  background-image:
-    radial-gradient(60rem 30rem at 85% -10%, rgba(82, 183, 136, 0.14), transparent 60%),
-    radial-gradient(50rem 30rem at -10% 0%, rgba(33, 158, 188, 0.12), transparent 60%);
-  background-attachment: fixed;
 }
 
 :focus-visible {
-  outline: 2px solid var(--sp-sky);
+  outline: 2px solid var(--sp-accent);
   outline-offset: 2px;
 }
 
 ::selection {
-  background: rgba(82, 183, 136, 0.35);
+  background: rgba(212, 175, 55, 0.35);
 }
 
 button:not(:disabled),
@@ -83,17 +78,17 @@ button:not(:disabled):active,
   }
   
   .scrollbar-custom-dark::-webkit-scrollbar-track {
-    background: rgba(31, 36, 28, 0.5);
+    background: rgba(35, 45, 52, 0.5);
     border-radius: 10px;
   }
   
   .scrollbar-custom-dark::-webkit-scrollbar-thumb {
-    background: rgb(66, 75, 61);
+    background: rgb(67, 80, 90);
     border-radius: 10px;
   }
   
   .scrollbar-custom-dark::-webkit-scrollbar-thumb:hover {
-    background: rgb(86, 96, 79);
+    background: rgb(85, 89, 92);
   }
   
   /* Masquer la scrollbar pour les conteneurs à défilement horizontal (mobile) */

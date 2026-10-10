@@ -38,7 +38,7 @@ class ErrorBoundary extends React.Component {
           fontFamily: 'Nunito, system-ui, sans-serif',
         }}>
           <h1 style={{ fontSize: '20px', fontWeight: 700 }}>Une erreur est survenue</h1>
-          <p style={{ color: '#6B7862', maxWidth: '400px' }}>
+          <p style={{ color: '#8B8680', maxWidth: '400px' }}>
             L'application a rencontré un problème inattendu. Rechargez la page pour continuer.
           </p>
           <button
@@ -47,7 +47,7 @@ class ErrorBoundary extends React.Component {
               padding: '10px 20px',
               borderRadius: '20px',
               border: 'none',
-              background: '#2D6A4F',
+              background: '#A0522D',
               color: '#fff',
               fontWeight: 600,
               cursor: 'pointer',
