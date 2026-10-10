@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="robots" content="noindex, nofollow" />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="theme-color" content="#A0522D" />
+    <meta name="theme-color" content="#1C1B18" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" href="/icons/icon-192.png" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
@@ -15,8 +15,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      // Couleurs « Cerâmica Wabi-Sabi » (forme et police inchangées) : indigo = Clay Brown (primaire),
-      // purple/blue = Indigo accent, pink = Gold Repair, emerald = Matcha, slate = Charcoal/Stone/Cream.
+      // Couleurs « CHROMA LAB » (forme et police inchangées) : papier #F5F4F0, encre #1C1B18, graphite #8B887F,
+      // filet #E3E1D8. Les teintes d'accent (indigo/purple/blue/pink) sont toutes ramenées à l'encre ; slate = neutres chauds.
       tailwind.config = {
         theme: {
           extend: {
@@ -35,20 +35,16 @@
               DEFAULT: '0 2px 12px rgba(54, 69, 79, 0.10)',
             },
             colors: {
-              white: '#FFFAF5',
-              indigo: { 50: '#FBF1EC', 100: '#F5DED2', 200: '#EBBFA9', 300: '#DE9A7A', 400: '#C77650', 500: '#B4623C', 600: '#A0522D', 700: '#85431F', 800: '#6A3519', 900: '#502913', 950: '#331A0C' },
-              purple: { 50: '#EBEDF8', 100: '#D3D8EF', 200: '#A9B1DF', 300: '#7F8BCE', 400: '#5967C0', 500: '#3F51B5', 600: '#3544A0', 700: '#2C3987', 800: '#232E6B', 900: '#1A2250', 950: '#10153A' },
-              blue: { 50: '#EBEDF8', 100: '#D3D8EF', 200: '#A9B1DF', 300: '#7F8BCE', 400: '#5967C0', 500: '#3F51B5', 600: '#3544A0', 700: '#2C3987', 800: '#232E6B', 900: '#1A2250', 950: '#10153A' },
-              pink: { 50: '#FBF6E4', 100: '#F5EAC1', 200: '#EBD58B', 300: '#E0C25E', 400: '#D4AF37', 500: '#BF9B2C', 600: '#A38425', 700: '#80661C', 800: '#5E4A15', 900: '#44360F', 950: '#2A220A' },
-              emerald: { 50: '#F3F5EA', 100: '#E3E9CE', 200: '#C9D3A0', 300: '#A9B876', 400: '#899A52', 500: '#6B7B3A', 600: '#5A6830', 700: '#495527', 800: '#39431E', 900: '#2A3216', 950: '#1A200E' },
-              slate: { 50: '#FAF6F1', 100: '#F2EBE2', 200: '#E5DBCF', 300: '#CFC4B6', 400: '#8B8680', 500: '#6F6C68', 600: '#55595C', 700: '#43505A', 800: '#36454F', 900: '#232D34', 950: '#161C20' },
-              clay: '#A0522D',
-              stone: '#8B8680',
-              cream: '#FAF0E6',
-              charcoal: '#36454F',
-              matcha: '#6B7B3A',
-              kintsugi: '#D4AF37',
-              blush: '#E8C4B8',
+              white: '#FFFFFF',
+              indigo: { 50: '#F5F4F0', 100: '#E3E1D8', 200: '#CFCCC1', 300: '#B0ADA2', 400: '#8B887F', 500: '#4A4843', 600: '#1C1B18', 700: '#12110F', 800: '#0C0B0A', 900: '#070706', 950: '#030303' },
+              purple: { 50: '#F5F4F0', 100: '#E3E1D8', 200: '#CFCCC1', 300: '#B0ADA2', 400: '#8B887F', 500: '#4A4843', 600: '#1C1B18', 700: '#12110F', 800: '#0C0B0A', 900: '#070706', 950: '#030303' },
+              blue: { 50: '#F5F4F0', 100: '#E3E1D8', 200: '#CFCCC1', 300: '#B0ADA2', 400: '#8B887F', 500: '#4A4843', 600: '#1C1B18', 700: '#12110F', 800: '#0C0B0A', 900: '#070706', 950: '#030303' },
+              pink: { 50: '#F5F4F0', 100: '#E3E1D8', 200: '#CFCCC1', 300: '#B0ADA2', 400: '#8B887F', 500: '#4A4843', 600: '#1C1B18', 700: '#12110F', 800: '#0C0B0A', 900: '#070706', 950: '#030303' },
+              slate: { 50: '#F5F4F0', 100: '#EEECE6', 200: '#E3E1D8', 300: '#CFCCC1', 400: '#8B887F', 500: '#6B6860', 600: '#4F4D47', 700: '#3A3834', 800: '#1C1B18', 900: '#141311', 950: '#0C0B0A' },
+              paper: '#F5F4F0',
+              ink: '#1C1B18',
+              graphite: '#8B887F',
+              rule: '#E3E1D8',
             },
           },
         },
