@@ -4,13 +4,66 @@
     <meta charset="UTF-8" />
     <meta name="robots" content="noindex, nofollow" />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="theme-color" content="#4f46e5" />
+    <meta name="theme-color" content="#2D6A4F" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" href="/icons/icon-192.png" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Trusti</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Design « Solarpunk Utópico » : la palette Tailwind est remappée une fois pour toute l'app.
+      // indigo = Verdant Green (primaire), purple/blue = Sky Blue, pink = Terracotta,
+      // slate = neutres chauds (Warm White -> Earth), rayons organiques.
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Nunito', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+              mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+            },
+            borderRadius: {
+              lg: '0.875rem',
+              xl: '1.25rem',
+              '2xl': '1.5rem',
+              '3xl': '2.5rem',
+            },
+            boxShadow: {
+              sm: '0 2px 12px rgba(45, 106, 79, 0.08)',
+              DEFAULT: '0 2px 12px rgba(45, 106, 79, 0.10)',
+            },
+            colors: {
+              indigo: {
+                50: '#eef8f2', 100: '#d9f0e3', 200: '#b5e2c8', 300: '#86cfa8', 400: '#52B788',
+                500: '#3d9a6f', 600: '#2D6A4F', 700: '#245840', 800: '#1c4632', 900: '#143425', 950: '#0b2016',
+              },
+              purple: {
+                50: '#e9f6fa', 100: '#cfeaf2', 200: '#a3d7e6', 300: '#6fbfd6', 400: '#3fadc9',
+                500: '#219EBC', 600: '#1b86a1', 700: '#166d84', 800: '#12566a', 900: '#0d4050', 950: '#082935',
+              },
+              blue: {
+                50: '#e9f6fa', 100: '#cfeaf2', 200: '#a3d7e6', 300: '#6fbfd6', 400: '#3fadc9',
+                500: '#219EBC', 600: '#1b86a1', 700: '#166d84', 800: '#12566a', 900: '#0d4050', 950: '#082935',
+              },
+              pink: {
+                50: '#fdf0e9', 100: '#fadccc', 200: '#f4b99c', 300: '#ec9068', 400: '#df6c3a',
+                500: '#d2561f', 600: '#C1440E', 700: '#9d360b', 800: '#7a2a09', 900: '#592007', 950: '#391404',
+              },
+              slate: {
+                50: '#FFFBF0', 100: '#FAF2DC', 200: '#EDE3C8', 300: '#D6CAA9', 400: '#9A8F78',
+                500: '#7A705C', 600: '#5F5646', 700: '#4A4237', 800: '#362F27', 900: '#241F19', 950: '#171310',
+              },
+              solar: '#FFB703',
+              lavender: '#C7B8EA',
+              earth: '#6B4226',
+            },
+          },
+        },
+      };
+    </script>
   </head>
   <body style="overflow-x: hidden">
     <div id="root"></div>

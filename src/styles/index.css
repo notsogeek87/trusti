@@ -10,6 +10,58 @@ html, body {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
+ * Design « Solarpunk Utópico » (palette et rayons : config Tailwind dans index.html)
+ * Fond Warm White avec un ciel doux, Nunito, focus Sky Blue, transitions à
+ * ressort sur transform/opacité uniquement. Mode clair seulement.
+ * ────────────────────────────────────────────────────────────────────── */
+:root {
+  color-scheme: light;
+  --sp-green: #2D6A4F;
+  --sp-gold: #FFB703;
+  --sp-sky: #219EBC;
+  --sp-warm: #FFF8E7;
+  --sp-moss: #52B788;
+  --sp-ink: #241F19;
+}
+
+body {
+  font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+  color: var(--sp-ink);
+  background-color: var(--sp-warm);
+  background-image:
+    radial-gradient(60rem 30rem at 85% -10%, rgba(255, 183, 3, 0.16), transparent 60%),
+    radial-gradient(50rem 30rem at -10% 0%, rgba(33, 158, 188, 0.12), transparent 60%);
+  background-attachment: fixed;
+}
+
+:focus-visible {
+  outline: 2px solid var(--sp-sky);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(82, 183, 136, 0.35);
+}
+
+button:not(:disabled),
+[role="button"] {
+  transition: transform 200ms cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 200ms ease-out,
+    background-color 200ms ease-out, opacity 200ms ease-out;
+}
+
+button:not(:disabled):active,
+[role="button"]:active {
+  transform: translateY(1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
  * Style graphique "moins de 15 ans"
  * Activé via la classe `theme-kids` posée sur <html> (voir App.jsx) quand
  * l'utilisateur a répondu "moins de 15 ans" à la demande d'âge du premier
@@ -261,7 +313,7 @@ html, body {
   }
   
   .animate-slide-up {
-    animation: slide-up 0.3s ease-out;
+    animation: slide-up 0.54s ease-out;
   }
   
   /* Scrollbar personnalisée pour les fonds sombres */
@@ -270,17 +322,17 @@ html, body {
   }
   
   .scrollbar-custom-dark::-webkit-scrollbar-track {
-    background: rgba(30, 41, 59, 0.5);
+    background: rgba(36, 31, 25, 0.5);
     border-radius: 10px;
   }
   
   .scrollbar-custom-dark::-webkit-scrollbar-thumb {
-    background: rgb(51, 65, 85);
+    background: rgb(74, 66, 55);
     border-radius: 10px;
   }
   
   .scrollbar-custom-dark::-webkit-scrollbar-thumb:hover {
-    background: rgb(71, 85, 105);
+    background: rgb(95, 86, 70);
   }
   
   /* Masquer la scrollbar pour les conteneurs à défilement horizontal (mobile) */
@@ -315,7 +367,7 @@ html, body {
 
 @keyframes slide-up {
   from {
-    transform: translateY(20px);
+    transform: translateY(16px);
     opacity: 0;
   }
   to {

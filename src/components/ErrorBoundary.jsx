@@ -35,19 +35,19 @@ class ErrorBoundary extends React.Component {
           gap: '16px',
           padding: '24px',
           textAlign: 'center',
-          fontFamily: 'system-ui, sans-serif',
+          fontFamily: 'Nunito, system-ui, sans-serif',
         }}>
           <h1 style={{ fontSize: '20px', fontWeight: 700 }}>Une erreur est survenue</h1>
-          <p style={{ color: '#64748b', maxWidth: '400px' }}>
+          <p style={{ color: '#7A705C', maxWidth: '400px' }}>
             L'application a rencontré un problème inattendu. Rechargez la page pour continuer.
           </p>
           <button
             onClick={this.handleReload}
             style={{
               padding: '10px 20px',
-              borderRadius: '10px',
+              borderRadius: '20px',
               border: 'none',
-              background: '#4f46e5',
+              background: '#2D6A4F',
               color: '#fff',
               fontWeight: 600,
               cursor: 'pointer',
