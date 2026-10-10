@@ -459,7 +459,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
             <div className="mb-4 relative">
               {!isLoadingRelations && (
                 <div className="absolute -top-2 -right-2 z-10">
-                  <div className="bg-gradient-to-r from-pink-500 to-purple-500 text-white text-xs font-black px-2.5 py-1 rounded-full shadow-lg animate-bounce">
+                  <div className="bg-indigo-600 text-white text-xs font-black px-2.5 py-1 rounded-full shadow-lg animate-bounce">
                     {alternatives.length} alternative{alternatives.length > 1 ? 's' : ''}
                   </div>
                 </div>

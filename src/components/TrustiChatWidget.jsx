@@ -75,7 +75,7 @@ const TrustiChatWidget = ({ onOpenLandingPage }) => {
                 alt="Assistant Trusti"
                 className="w-14 h-14 rounded-full shadow-xl border-[3px] border-white transition-transform duration-200 group-hover:scale-110"
               />
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-md">
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-md">
                 ?
               </div>
               <div className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">

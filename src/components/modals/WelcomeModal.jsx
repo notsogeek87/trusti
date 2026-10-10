@@ -8,7 +8,7 @@ const WelcomeModal = ({ onFirstTimeYes, onFirstTimeNo }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-300 px-4">
       <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-indigo-500/30 max-w-sm w-full overflow-hidden animate-in zoom-in duration-500">
         {/* En-tête avec logo */}
-        <div className="bg-gradient-to-r from-indigo-600/20 via-purple-600/20 to-pink-600/20 p-6 text-center border-b border-indigo-500/20">
+        <div className="bg-gradient-to-r from-indigo-600/20 via-purple-600/20 to-indigo-600/20 p-6 text-center border-b border-indigo-500/20">
           <div className="flex justify-center mb-3">
             <img
               src="/assets/logo.png"
