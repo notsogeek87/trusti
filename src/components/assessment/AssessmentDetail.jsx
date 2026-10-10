@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, ExternalLink } from 'lucide-react';
+import { AlertTriangle, ExternalLink, Info } from 'lucide-react';
 
 const CONFIDENCE_LABEL = { high: 'Confiance élevée', medium: 'Confiance moyenne', low: 'Confiance faible' };
 
@@ -73,6 +73,17 @@ const AssessmentDetail = ({ status, assessment }) => {
       {hasUnverifiedSources && (
         <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1 mb-2">
           Certaines informations ne sont pas encore vérifiées sur une source et restent à confirmer.
+        </p>
+      )}
+
+      {hasCriteria && (
+        <p className="flex items-start gap-1.5 text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 mb-3 leading-snug">
+          <Info size={12} className="shrink-0 mt-px text-slate-400" />
+          <span>
+            Ces éléments sont des repères <span className="font-semibold">non exhaustifs</span> : ils éclairent la note
+            sans l'expliquer entièrement. L'évaluation complète repose sur d'autres informations qui ne sont pas toutes
+            affichées ici.
+          </span>
         </p>
       )}
 
