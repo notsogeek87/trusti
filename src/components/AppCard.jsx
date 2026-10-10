@@ -174,12 +174,13 @@ const AppCard = React.memo(({
               className="w-full flex items-center gap-1.5 pl-0.5 text-left"
             >
               <CornerDownRight size={14} className="text-emerald-500 shrink-0" />
+              <span className="text-[11px] font-semibold text-emerald-700 shrink-0">Alternative :</span>
               <span className="text-xs font-bold text-emerald-600 hover:underline truncate">
                 {app.alternative || customMigration}
               </span>
               {app.alternativeAdopted && (
-                <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-500 shrink-0">
-                  <CheckCircle size={11} /> Dans vos apps
+                <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-700 bg-emerald-100 rounded-full px-1.5 py-0.5 shrink-0">
+                  <CheckCircle size={11} /> Déjà installée
                 </span>
               )}
             </button>
@@ -198,11 +199,14 @@ const AppCard = React.memo(({
             {app.betterAlternative && (
               <button
                 onClick={(e) => { e.stopPropagation(); onSelectMigration(app.id); }}
-                className="w-full flex items-center gap-1.5 pl-0.5 text-[11px] font-semibold text-amber-600 hover:text-amber-700 transition-colors"
+                className="w-full flex items-center gap-1.5 pl-0.5 text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 transition-colors"
               >
-                <ArrowUpRight size={12} className="shrink-0" />
+                <ArrowUpRight size={12} className="shrink-0 text-emerald-500" />
                 <span className="flex-grow text-left truncate">
-                  Encore mieux noté : <span className="font-black">{app.betterAlternative.name}</span> (grade {app.betterAlternative.grade})
+                  <span className="font-black">{app.betterAlternative.name}</span> (grade {app.betterAlternative.grade})
+                </span>
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 rounded-full px-1.5 py-0.5 shrink-0">
+                  Encore mieux notée
                 </span>
               </button>
             )}

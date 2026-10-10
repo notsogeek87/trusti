@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="index, follow" />
+<title>Politique de confidentialité — Trusti</title>
+<link rel="icon" type="image/png" href="/icons/icon-192.png" />
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f8fafc;
+    --fg: #0f172a;
+    --muted: #475569;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --accent: #4f46e5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a;
+      --fg: #f1f5f9;
+      --muted: #94a3b8;
+      --card: #1e293b;
+      --border: #334155;
+      --accent: #818cf8;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 4rem;
+  }
+  header {
+    margin-bottom: 2rem;
+  }
+  header h1 {
+    font-size: 1.75rem;
+    margin: 0 0 0.35rem;
+  }
+  header p {
+    color: var(--muted);
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  h2 {
+    font-size: 1.15rem;
+    margin: 2.25rem 0 0.75rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+  }
+  h2:first-of-type { border-top: none; padding-top: 0; }
+  p, li { color: var(--fg); }
+  ul { padding-left: 1.25rem; }
+  li { margin-bottom: 0.4rem; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
+  }
+  a { color: var(--accent); }
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Politique de confidentialité de Trusti</h1>
+    <p>Dernière mise à jour : 8 octobre 2026</p>
+  </header>
+
+  <p>
+    Trusti (<code>eu.trusti.app</code>) est une application qui évalue la fiabilité et le
+    respect de la vie privée d'autres applications, et vous aide à trouver des alternatives
+    plus respectueuses. Cette page explique quelles données l'application traite, pourquoi,
+    et comment les contrôler.
+  </p>
+
+  <div class="card">
+    <strong>En résumé&nbsp;:</strong> Trusti fonctionne par défaut entièrement en local, sans
+    compte. La seule donnée personnelle que l'application peut traiter est votre adresse
+    e-mail, et uniquement si vous choisissez de vous connecter — jamais de mot de passe,
+    jamais de suivi publicitaire, jamais de revente de données.
+  </div>
+
+  <h2>Quelles données sont collectées</h2>
+  <ul>
+    <li>
+      <strong>Sans connexion (usage par défaut)&nbsp;:</strong> aucune donnée personnelle
+      n'est envoyée à nos serveurs. L'application consulte notre catalogue d'évaluations
+      (public, anonyme) pour afficher les notes des applications.
+    </li>
+    <li>
+      <strong>Si vous choisissez de vous connecter (« Se connecter »)&nbsp;:</strong> vous
+      saisissez votre adresse e-mail, et nous vous envoyons un code à usage unique (OTP) à 6
+      chiffres pour la vérifier. Cette adresse e-mail est alors enregistrée dans notre base
+      de données, uniquement pour vous permettre de vous reconnecter.
+    </li>
+    <li>
+      <strong>Votre sélection d'applications, notes consultées et préférences</strong> sont
+      stockées uniquement sur votre appareil (stockage local du navigateur ou de
+      l'application) — jamais transmises à nos serveurs, connecté ou non.
+    </li>
+  </ul>
+
+  <h2>Pourquoi nous traitons ces données</h2>
+  <ul>
+    <li>L'adresse e-mail sert exclusivement à l'authentification par code à usage unique
+      (aucun mot de passe n'est jamais demandé ni stocké).</li>
+    <li>Aucune donnée n'est utilisée à des fins publicitaires, de profilage ou de revente à
+      des tiers.</li>
+  </ul>
+
+  <h2>Avec qui nous partageons des données</h2>
+  <p>
+    Pour l'envoi du code de connexion, nous utilisons un prestataire d'envoi d'e-mails
+    (<a href="https://www.brevo.com" target="_blank" rel="noopener">Brevo</a>), qui reçoit
+    votre adresse e-mail dans ce seul but. Nous ne partageons vos données avec aucun autre
+    tiers, et ne les vendons jamais.
+  </p>
+
+  <h2>Hébergement et sécurité</h2>
+  <p>
+    Les données de compte (adresse e-mail) sont hébergées sur une base de données
+    PostgreSQL gérée par <a href="https://neon.tech" target="_blank" rel="noopener">Neon</a>.
+    L'application elle-même est hébergée sur
+    <a href="https://vercel.com" target="_blank" rel="noopener">Vercel</a>.
+  </p>
+
+  <h2>Vos droits</h2>
+  <p>
+    Vous pouvez utiliser Trusti sans jamais créer de compte. Si vous vous êtes connecté et
+    souhaitez faire supprimer votre adresse e-mail de notre base de données, contactez-nous
+    à l'adresse ci-dessous — nous la supprimons sous 30 jours.
+  </p>
+
+  <h2>Enfants</h2>
+  <p>
+    Trusti ne cible pas spécifiquement les enfants et ne collecte sciemment aucune donnée
+    personnelle d'enfants au-delà de ce qui est décrit ci-dessus (adresse e-mail, uniquement
+    sur action volontaire de connexion).
+  </p>
+
+  <h2>Modifications de cette politique</h2>
+  <p>
+    Cette page peut être mise à jour si le fonctionnement de l'application évolue. La date
+    de dernière mise à jour est indiquée en haut de cette page.
+  </p>
+
+  <h2>Nous contacter</h2>
+  <p>
+    Pour toute question sur cette politique de confidentialité ou vos données :
+    <a href="mailto:davidg.c.d@proton.me">davidg.c.d@proton.me</a>.
+  </p>
+
+  <footer>
+    Trusti — <a href="/">retour à l'application</a>
+  </footer>
+</main>
+</body>
+</html>

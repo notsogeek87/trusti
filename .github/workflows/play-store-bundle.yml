@@ -27,6 +27,10 @@ on:
         description: "Canal Play Store cible"
         required: true
         default: "internal"
+      status:
+        description: "Statut de la release (draft tant que l'app est en brouillon dans la Play Console, sinon completed)"
+        required: true
+        default: "completed"
 
 permissions:
   contents: read
@@ -129,4 +133,5 @@ jobs:
           python3 tools/publish_play_store.py \
             --package eu.trusti.app \
             --aab "${{ steps.build.outputs.aab }}" \
-            --track "${{ inputs.track }}"
+            --track "${{ inputs.track }}" \
+            --status "${{ inputs.status }}"
