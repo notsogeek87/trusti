@@ -9,7 +9,7 @@ html, body {
 
 /* ─────────────────────────────────────────────────────────────────────────
  * Design « Solarpunk Utópico » (palette et rayons : config Tailwind dans index.html)
- * Fond Warm White avec un ciel doux, Nunito, focus Sky Blue, transitions à
+ * Fond sauge très clair avec un ciel doux, Nunito, focus Sky Blue, transitions à
  * ressort sur transform/opacité uniquement. Mode clair seulement.
  * ────────────────────────────────────────────────────────────────────── */
 :root {
@@ -17,9 +17,9 @@ html, body {
   --sp-green: #2D6A4F;
   --sp-gold: #FFB703;
   --sp-sky: #219EBC;
-  --sp-warm: #FFF8E7;
+  --sp-warm: #F5F8F2;
   --sp-moss: #52B788;
-  --sp-ink: #241F19;
+  --sp-ink: #1F241C;
 }
 
 body {
@@ -27,7 +27,7 @@ body {
   color: var(--sp-ink);
   background-color: var(--sp-warm);
   background-image:
-    radial-gradient(60rem 30rem at 85% -10%, rgba(255, 183, 3, 0.16), transparent 60%),
+    radial-gradient(60rem 30rem at 85% -10%, rgba(82, 183, 136, 0.14), transparent 60%),
     radial-gradient(50rem 30rem at -10% 0%, rgba(33, 158, 188, 0.12), transparent 60%);
   background-attachment: fixed;
 }
@@ -83,17 +83,17 @@ button:not(:disabled):active,
   }
   
   .scrollbar-custom-dark::-webkit-scrollbar-track {
-    background: rgba(36, 31, 25, 0.5);
+    background: rgba(31, 36, 28, 0.5);
     border-radius: 10px;
   }
   
   .scrollbar-custom-dark::-webkit-scrollbar-thumb {
-    background: rgb(74, 66, 55);
+    background: rgb(66, 75, 61);
     border-radius: 10px;
   }
   
   .scrollbar-custom-dark::-webkit-scrollbar-thumb:hover {
-    background: rgb(95, 86, 70);
+    background: rgb(86, 96, 79);
   }
   
   /* Masquer la scrollbar pour les conteneurs à défilement horizontal (mobile) */
