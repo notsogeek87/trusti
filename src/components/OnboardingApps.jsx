@@ -54,7 +54,7 @@ const STEPS = [
     id: 'media',
     emoji: '🎵',
     question: 'Pour la musique et les vidéos ?',
-    categories: ['Multimédia', 'Streaming Musical', 'Streaming Vidéo', 'Podcasts', 'Lecteurs Multimédia'],
+    categories: ['Multimédia', 'Streaming Musical', 'Streaming Vidéo', 'Podcasts', 'Lecteurs Multimédia', 'Photo & Vidéo', 'Retouche Photo'],
   },
   {
     id: 'work',
