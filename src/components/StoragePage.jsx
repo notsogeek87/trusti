@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { App as CapacitorApp } from '@capacitor/app';
 import {
-  ChevronLeft, HardDrive, Smartphone, RefreshCcw, Trash2, AlertTriangle, ShieldAlert, X,
+  ChevronLeft, PieChart, Smartphone, RefreshCcw, Trash2, AlertTriangle, ShieldAlert, X,
   Download, Upload, CheckCircle2,
 } from 'lucide-react';
 import { formatBytes, clearAllTrustiStorage } from '../utils/storageStats';
@@ -281,8 +281,8 @@ const StoragePage = ({
           >
             <ChevronLeft size={24} />
           </button>
-          <div className="w-9 h-9 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-            <HardDrive size={18} className="text-indigo-600" />
+          <div className="w-9 h-9 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0">
+            <PieChart size={18} className="text-indigo-600" />
           </div>
           <h1 className="text-base font-black text-slate-900">Espace de stockage</h1>
         </div>

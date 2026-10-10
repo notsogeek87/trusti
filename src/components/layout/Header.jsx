@@ -1,5 +1,5 @@
 import React from 'react';
-import { HelpCircle, LogOut, User, HardDrive, Settings, Lock } from 'lucide-react';
+import { HelpCircle, LogOut, User, PieChart, Settings, Lock } from 'lucide-react';
 import { useIsMobile } from '../../contexts/ViewModeContext';
 import { isNativeAndroid } from '../../utils/platform';
 
@@ -85,7 +85,7 @@ const Header = ({
             aria-label="Gérer mon espace de stockage"
             title="Gérer mon espace de stockage"
           >
-            <HardDrive size={18} />
+            <PieChart size={18} />
           </button>
 
           <button

@@ -41,10 +41,10 @@ const DataHygieneCard = ({ myApps, catalogApps }) => {
 
   const isComplete = hygiene.done === hygiene.total;
   const tone = isComplete
-    ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+    ? 'bg-emerald-400/15 text-emerald-200 border-emerald-300/30'
     : needsAttention
-      ? 'bg-amber-50 text-amber-700 border-amber-200'
-      : 'bg-indigo-50 text-indigo-600 border-indigo-100';
+      ? 'bg-amber-400/15 text-amber-200 border-amber-300/30'
+      : 'bg-white/10 text-slate-100 border-white/20';
   const label = 'Hygiène';
 
   return (
