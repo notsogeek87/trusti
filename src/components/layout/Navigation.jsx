@@ -36,7 +36,7 @@ const Navigation = ({ activeTab, onTabChange, myAppsCount }) => {
 
   if (isMobile) {
     return (
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 py-3 px-4 max-w-md mx-auto flex justify-around items-center z-40 rounded-t-[2.5rem] shadow-2xl">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-white/60 py-3 px-4 max-w-md mx-auto flex justify-around items-center z-40 rounded-t-[2.5rem] shadow-2xl">
         {TABS_CONFIG.map(({ id, label, icon: Icon, activeColor, inactiveColor, badge }) => {
           const active = activeTab === id;
           return (
@@ -67,7 +67,7 @@ const Navigation = ({ activeTab, onTabChange, myAppsCount }) => {
     // dessous. `fixed` plutôt que `sticky` : le menu ne doit jamais bouger,
     // même d'un pixel, pendant le scroll.
     <aside className="w-52 shrink-0">
-      <nav className="fixed top-14 left-0 bottom-0 w-52 flex flex-col gap-1 py-6 px-3 border-r border-slate-100 bg-white overflow-y-auto z-20">
+      <nav className="fixed top-14 left-0 bottom-0 w-52 flex flex-col gap-1 py-6 px-3 border-r border-white/60 bg-white/75 backdrop-blur-md overflow-y-auto z-20">
         <p className="text-[10px] font-black uppercase tracking-widest text-slate-300 px-3 mb-2">Navigation</p>
         {TABS_CONFIG.map(({ id, label, icon: Icon, activeColor, activeBg, inactiveColor, badge }) => {
           const active = activeTab === id;

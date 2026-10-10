@@ -16,7 +16,7 @@ const Header = ({
   const isMobile = useIsMobile();
 
   return (
-    <header className="h-14 bg-white border-b border-slate-100 sticky top-0 z-30 shadow-sm">
+    <header className="h-14 bg-white/75 backdrop-blur-md border-b border-white/60 sticky top-0 z-30 shadow-sm">
       <div className="h-full max-w-full md:max-w-none px-4 md:px-6 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 flex-shrink-0">
           <img

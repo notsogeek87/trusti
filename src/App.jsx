@@ -627,7 +627,7 @@ const App = () => {
   // Vue principale
   return (
   <ViewModeContext.Provider value={isMobile}>
-  <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+  <div className="min-h-screen bg-transparent font-sans text-slate-900">
     <>
     {/* Écran de chargement initial */}
     {isInitialLoading && (
@@ -738,7 +738,6 @@ const App = () => {
                 ))}
               </div>
             </div>
-            <div className="pointer-events-none absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-slate-50 to-transparent" />
             </div>
           </div>
         </div>

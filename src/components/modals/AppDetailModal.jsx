@@ -267,7 +267,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
 
   return (
     <div
-      className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-16 md:pb-0"
+      className="min-h-screen bg-transparent font-sans text-slate-900 pb-16 md:pb-0"
       style={{ animation: pageAnim }}
     >
       <style>{ANIM_STYLES}</style>

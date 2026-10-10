@@ -328,7 +328,7 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
   // ── ERREUR (scan natif indisponible) ────────────────────────────────
   if (phase === 'error') {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-6 text-center">
+      <div className="min-h-screen bg-transparent flex flex-col items-center justify-center px-6 text-center">
         <style>{ANIM_CSS}</style>
         <div style={{ animation: 'onbFadeUp 0.4s ease-out' }}>
           <h1 className="text-xl font-black text-slate-900 mb-3">Le scan n'a pas fonctionné</h1>
@@ -454,7 +454,7 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
   const count = selected.size;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-transparent flex flex-col">
       <style>{ANIM_CSS}</style>
 
       <div className="flex-1 max-w-md mx-auto w-full px-4 pb-40" style={{ animation: 'onbFadeUp 0.4s ease-out' }}>

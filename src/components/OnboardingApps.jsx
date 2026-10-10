@@ -384,7 +384,7 @@ const OnboardingApps = ({ onComplete, onSignUp }) => {
   const currentStepData = STEPS[step];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-transparent flex flex-col">
       <style>{ANIM_CSS}</style>
 
       {/* Header fixe */}
