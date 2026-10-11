@@ -30,6 +30,7 @@ export default function AppIconImage({ src, name = '', className = 'w-full h-ful
       src={sizedIconUrl(src)}
       alt={alt ?? name}
       loading={loading}
+      referrerPolicy="no-referrer"
       className={className}
       onError={() => setFailed(true)}
     />
