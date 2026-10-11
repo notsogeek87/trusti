@@ -239,7 +239,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
           <AppIconImage src={relatedApp.icon} name={relatedApp.name} />
         ) : (
           <div className={`${relatedApp.color || 'bg-slate-500'} w-full h-full flex items-center justify-center text-lg text-white`}>
-            {relatedApp.icon}
+            {relatedApp.icon || relatedApp.name?.charAt(0)}
           </div>
         )}
       </div>
@@ -302,7 +302,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                 <AppIconImage src={app.icon} name={app.name} />
               ) : (
                 <div className={`${app.color} w-full h-full flex items-center justify-center text-4xl text-white`}>
-                  {app.icon}
+                  {app.icon || app.name?.charAt(0)}
                 </div>
               )}
             </div>

@@ -94,7 +94,7 @@ const AppCard = React.memo(({
               <AppIconImage src={app.icon} name={app.name} />
             ) : (
               <div className={`${isLoadingSkeleton ? 'text-slate-400' : app.color} w-full h-full flex items-center justify-center text-xl text-white`}>
-                {app.icon}
+                {app.icon || app.name?.charAt(0)}
               </div>
             )}
           </div>
