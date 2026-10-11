@@ -12,6 +12,8 @@ démarrage rapide.
 
 - [App Android native — scan automatique des apps installées](architecture/android-native-app-scan.md)
 - [Analyse technique — architecture](architecture/technical-analysis.md)
+- [2026-10-11 : suppression de la connexion et de l'administration](architecture/2026-10-11-suppression-connexion-et-administration.md)
+- [2026-10-11 : audit de sécurité](architecture/2026-10-11-audit-securite.md)
 
 ## 📡 API
 
@@ -33,4 +35,5 @@ démarrage rapide.
 Documentation obsolète mais conservée pour l'historique :
 
 - [Audit des données en dur (18/02/2026)](legacy/donnees-en-dur-audit.md)
-- [Ancienne authentification par Magic Link (Resend)](legacy/magic-link-resend.md) — remplacée par le guide OTP ci-dessus
+- [Ancienne authentification par Magic Link (Resend)](legacy/magic-link-resend.md)
+- [Ancienne authentification par code OTP (Brevo)](legacy/otp-brevo-authentication.md) — supprimée le 2026-10-11

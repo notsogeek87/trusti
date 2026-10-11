@@ -77,7 +77,8 @@ même contrainte que swipernews a rencontrée.
      (Trusti étant déployé sur Vercel, une page `/privacy` ou équivalent
      hébergée dessus convient).
    - **Formulaire "Sécurité des données"** (Data safety) : quelles données
-     Trusti collecte (email pour l'OTP, a priori) et pourquoi.
+     Trusti collecte : aucune donnée personnelle envoyée aux serveurs (plus de compte ni d'e-mail
+     depuis le 2026-10-11) ; à compléter selon les autorisations du manifeste (voir la politique de confidentialité).
    - **Classification du contenu** : questionnaire IARC.
    - **Public cible et contenu** (âge).
    - **Coordonnées de contact** développeur.

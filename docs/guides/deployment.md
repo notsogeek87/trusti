@@ -109,8 +109,7 @@ curl https://trusti-[random].vercel.app/api/star-apps
 Si tu en as besoin, ajouter dans **Environment Variables**:
 
 ```
-API_KEY=xxx
-ADMIN_PASSWORD=xxx
+API_KEY=xxx   # clé aléatoire longue (openssl rand -hex 32), exigée en x-api-key pour toute écriture
 ```
 
 ## 📊 Monitoring
@@ -183,11 +182,11 @@ git push origin main
 
 ## 💾 Gestion des données
 
-### Ajouter des applications via l'admin
+### Ajouter des applications
 
-Les interfaces admin fonctionnent automatiquement:
-- `/admin` - Gestion des Custom Trusti Apps
-- Les ajouts/modifications sont **persistés** dans PostgreSQL
+Il n'y a plus d'interface d'administration. Les ajouts et modifications se font par l'API
+(`POST`/`PUT`/`DELETE` sur `/api/apps`, `/api/custom-trusti-apps`, `/api/star-apps`) avec l'en-tête
+`x-api-key` (n8n, scripts). Ils sont **persistés** dans PostgreSQL.
 
 ### Backup manuel de la base
 
@@ -232,7 +231,7 @@ Si tu veux changer (ex: Supabase, PlanetScale):
 - [ ] Site accessible via l'URL Vercel
 - [ ] API `/api/custom-trusti-apps` fonctionne
 - [ ] API `/api/star-apps` fonctionne
-- [ ] Interface admin fonctionnelle
+- [ ] Une écriture sans `x-api-key` est refusée (401) et une écriture avec la bonne clé passe
 - [ ] Domaine personnalisé configuré (optionnel)
 - [ ] Monitoring activé
 

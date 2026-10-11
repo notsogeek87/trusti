@@ -25,8 +25,8 @@ Prolonge le scan Android, la carte bilan et les alternatives existantes.
 
 ### 2. Alertes et suivi dans le temps
 Notification quand la note d'une app installée change ou en cas d'incident (fuite,
-changement de politique, rachat). Historique des notes par app. Canaux : email (Brevo)
-et push Android. Donne une raison de revenir dans l'app après l'onboarding.
+changement de politique, rachat). Historique des notes par app. Canal : push Android
+(plus d'e-mail : la connexion a été supprimée). Donne une raison de revenir dans l'app après l'onboarding.
 
 ### 3. Détail du score par critères
 Décomposer le score : juridiction, open source, trackers, permissions, modèle

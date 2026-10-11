@@ -4,11 +4,11 @@
 
 Le système récupère **automatiquement** les icônes officielles depuis le Google Play Store en utilisant le package ID.
 
-## Pour l'admin
+## Pour l'éditeur du catalogue
 
 ### Ajouter une nouvelle app
 
-Quand vous ajoutez une app via l'interface admin, indiquez simplement :
+Quand vous ajoutez une app via l'API (`x-api-key`), indiquez simplement :
 - Le **lien Play Store** complet : `https://play.google.com/store/apps/details?id=com.example.app`
 
 Le système va extraire le package ID (`com.example.app`) et récupérer automatiquement l'icône officielle.
