@@ -1,10 +1,10 @@
 import { test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { isAdminEmail, generateOtpCode, createAdminToken, verifyAdminToken } from '../../server/adminToken.js';
+import { isAdminEmail, generateOtpCode, createAdminToken, verifyAdminToken, safeEqual } from '../../server/adminToken.js';
 
 const saved = { ...process.env };
 afterEach(() => {
-  for (const key of ['ADMIN_EMAIL', 'VERCEL_ENV', 'ADMIN_SESSION_SECRET']) {
+  for (const key of ['ADMIN_EMAIL', 'VERCEL', 'VERCEL_ENV', 'ADMIN_SESSION_SECRET']) {
     if (saved[key] === undefined) delete process.env[key];
     else process.env[key] = saved[key];
   }
@@ -16,10 +16,23 @@ test('isAdminEmail compare sans tenir compte de la casse ni des espaces', () => 
   assert.equal(isAdminEmail('other@example.com'), false);
 });
 
-test('isAdminEmail accepte tout email sans ADMIN_EMAIL hors production', () => {
+test('isAdminEmail accepte tout email sans ADMIN_EMAIL en local uniquement', () => {
+  delete process.env.ADMIN_EMAIL;
+  delete process.env.VERCEL;
+  delete process.env.VERCEL_ENV;
+  assert.equal(isAdminEmail('anyone@example.com'), true);
+});
+
+test('isAdminEmail refuse tout email sans ADMIN_EMAIL en preview Vercel', () => {
   delete process.env.ADMIN_EMAIL;
   process.env.VERCEL_ENV = 'preview';
-  assert.equal(isAdminEmail('anyone@example.com'), true);
+  assert.equal(isAdminEmail('anyone@example.com'), false);
+});
+
+test('safeEqual compare en temps constant', () => {
+  assert.equal(safeEqual('abc', 'abc'), true);
+  assert.equal(safeEqual('abc', 'abd'), false);
+  assert.equal(safeEqual('abc', 'abcd'), false);
 });
 
 test('isAdminEmail refuse tout email sans ADMIN_EMAIL en production', () => {

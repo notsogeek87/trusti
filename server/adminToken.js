@@ -22,8 +22,10 @@ export function getAdminEmail() {
 export function isAdminEmail(email) {
   const adminEmail = getAdminEmail();
   if (!adminEmail) {
-    if (process.env.VERCEL_ENV === 'production') {
-      console.error('ADMIN_EMAIL non défini en production : accès admin refusé');
+    // Fail-closed sur tout déploiement Vercel (production ET preview, qui partagent souvent la base) :
+    // le bypass n'existe qu'en local.
+    if (process.env.VERCEL || process.env.VERCEL_ENV) {
+      console.error('ADMIN_EMAIL non défini sur Vercel : accès admin refusé');
       return false;
     }
     return true;
@@ -34,6 +36,13 @@ export function isAdminEmail(email) {
 /** Code OTP à 6 chiffres, généré avec un RNG cryptographique. */
 export function generateOtpCode() {
   return String(crypto.randomInt(100000, 1000000));
+}
+
+/** Comparaison en temps constant (évite de deviner la clé par mesure du temps de réponse). */
+export function safeEqual(a, b) {
+  const ha = crypto.createHash('sha256').update(String(a)).digest();
+  const hb = crypto.createHash('sha256').update(String(b)).digest();
+  return crypto.timingSafeEqual(ha, hb);
 }
 
 function getSecret() {
@@ -85,7 +94,7 @@ export function verifyAdminToken(token) {
  */
 export function isAuthorizedAdminRequest(req) {
   const apiKey = req.headers['x-api-key'];
-  if (apiKey && process.env.API_KEY && apiKey === process.env.API_KEY) {
+  if (apiKey && process.env.API_KEY && safeEqual(apiKey, process.env.API_KEY)) {
     return true;
   }
 

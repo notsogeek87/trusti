@@ -32,13 +32,14 @@ export default async function handler(req, res) {
     const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
 
     // Supprimer les anciens codes pour cet email
+    // Invalider (et non supprimer) : les codes émis comptent pour la limite d'envoi
     await sql`
-      DELETE FROM magic_link_tokens
-      WHERE email = ${cleanEmail} AND LENGTH(token) = 6
+      UPDATE magic_link_tokens SET used = true
+      WHERE email = ${cleanEmail} AND LENGTH(token) = 6 AND used = false
     `;
 
-    // Nettoyer les tokens expirés
-    await sql`DELETE FROM magic_link_tokens WHERE expires_at < ${Date.now()}`;
+    // Nettoyer les tokens expirés depuis plus d'une heure
+    await sql`DELETE FROM magic_link_tokens WHERE expires_at < ${Date.now() - 60 * 60 * 1000}`;
 
     // Stocker le code
     await sql`

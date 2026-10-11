@@ -17,18 +17,19 @@ export async function getOtpLock(sql, email) {
 
 export async function registerOtpFailure(sql, email, { maxAttempts = 5, lockoutMs = 15 * 60 * 1000 } = {}) {
   const now = Date.now();
-  const current = await getOtpLock(sql, email);
-  const count = current.count + 1;
-  const lockedUntil = count >= maxAttempts ? now + lockoutMs : 0;
-
-  await sql`
+  // Incrément atomique : des tentatives concurrentes ne peuvent pas contourner la limite
+  // (l'ancienne lecture puis écriture laissait passer N devinettes en parallèle).
+  const rows = await sql`
     INSERT INTO otp_attempts (email, failed_count, locked_until, updated_at)
-    VALUES (${email}, ${count}, ${lockedUntil}, ${now})
-    ON CONFLICT (email) DO UPDATE
-      SET failed_count = ${count}, locked_until = ${lockedUntil}, updated_at = ${now}
+    VALUES (${email}, 1, ${1 >= maxAttempts ? now + lockoutMs : 0}, ${now})
+    ON CONFLICT (email) DO UPDATE SET
+      failed_count = otp_attempts.failed_count + 1,
+      locked_until = CASE WHEN otp_attempts.failed_count + 1 >= ${maxAttempts}
+                          THEN ${now + lockoutMs} ELSE otp_attempts.locked_until END,
+      updated_at = ${now}
+    RETURNING failed_count, locked_until
   `;
-
-  return { count, lockedUntil };
+  return { count: Number(rows[0].failed_count), lockedUntil: Number(rows[0].locked_until) };
 }
 
 export async function clearOtpFailures(sql, email) {
@@ -37,7 +38,9 @@ export async function clearOtpFailures(sql, email) {
 
 /**
  * Limite d'envoi de codes OTP (anti-spam email), indépendante des échecs
- * de vérification. Basée sur le nombre de codes déjà émis dans la fenêtre.
+ * de vérification. Basée sur le nombre de codes déjà émis dans la fenêtre : les anciens
+ * codes doivent donc être invalidés (used = true) et non supprimés à chaque renvoi,
+ * sinon le compte reste à 1 et la limite ne se déclenche jamais.
  */
 export async function checkSendRateLimit(sql, email, { maxPerWindow = 3, windowMs = 5 * 60 * 1000 } = {}) {
   const recentResult = await sql`

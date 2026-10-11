@@ -33,8 +33,9 @@ export default async function handler(req, res) {
     const code = generateOtpCode();
     const expiresAt = Date.now() + 10 * 60 * 1000;
 
-    await sql`DELETE FROM magic_link_tokens WHERE email = ${cleanEmail} AND LENGTH(token) = 6`;
-    await sql`DELETE FROM magic_link_tokens WHERE expires_at < ${Date.now()}`;
+    // Invalider (et non supprimer) : les codes émis comptent pour la limite d'envoi
+    await sql`UPDATE magic_link_tokens SET used = true WHERE email = ${cleanEmail} AND LENGTH(token) = 6 AND used = false`;
+    await sql`DELETE FROM magic_link_tokens WHERE expires_at < ${Date.now() - 60 * 60 * 1000}`;
     await sql`INSERT INTO magic_link_tokens (token, email, expires_at, used) VALUES (${code}, ${cleanEmail}, ${expiresAt}, false)`;
 
     // Dev sans Brevo → console
