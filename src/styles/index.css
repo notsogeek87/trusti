@@ -9,7 +9,7 @@ html, body {
 
 /* ─────────────────────────────────────────────────────────────────────────
  * Palette « Ciel & encre bleue » (palette : config Tailwind dans index.html ; formes et police inchangées)
- * Fond ciel dégradé, Nunito, focus bleu franc, transitions à
+ * Fond uni bleu-gris clair, Nunito, focus bleu franc, transitions à
  * ressort sur transform/opacité uniquement. Mode clair seulement.
  * ────────────────────────────────────────────────────────────────────── */
 :root {
@@ -19,15 +19,11 @@ html, body {
   --sp-ink: #1B2A3A;
 }
 
-/* Ciel : dégradé du bleu franc vers un bleu très pâle, avec un halo de lumière en haut à droite */
+/* Fond uni bleu-gris très clair : les cartes blanches ressortent sans dégradé */
 body {
   font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
   color: var(--sp-ink);
-  background-color: #BFE6F2;
-  background-image:
-    radial-gradient(45rem 28rem at 88% -6%, rgba(255, 255, 255, 0.55), transparent 65%),
-    linear-gradient(180deg, #8FD0EA 0%, #B4E1F0 45%, #DCF2F8 100%);
-  background-attachment: fixed;
+  background-color: #E9F0F6;
   min-height: 100dvh;
 }
 
