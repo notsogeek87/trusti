@@ -53,7 +53,7 @@ const WelcomeModal = ({ onFirstTimeYes, onFirstTimeNo }) => {
             >
               <span className="flex items-center justify-center gap-1.5">
                 <span>👍</span>
-                <span>Non, je connais et souhaite me connecter</span>
+                <span>Non, je connais déjà Trusti</span>
               </span>
             </button>
           </div>
