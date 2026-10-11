@@ -1,17 +1,10 @@
 import React from 'react';
-import { HelpCircle, LogOut, User, PieChart, Settings, Lock } from 'lucide-react';
+import { HelpCircle, PieChart } from 'lucide-react';
 import { useIsMobile } from '../../contexts/ViewModeContext';
-import { isNativeAndroid } from '../../utils/platform';
 
 const Header = ({
-  currentUser,
-  onLogout,
-  onLogin,
   onOpenStorageManager,
-  onOpenAdmin,
   onShowLandingPage,
-  isAdminUnlocked,
-  onRequestAdminUnlock,
 }) => {
   const isMobile = useIsMobile();
 
@@ -30,55 +23,6 @@ const Header = ({
         </div>
 
         <div className="flex items-center gap-1 md:gap-2 flex-shrink min-w-0">
-          {currentUser ? (
-            <div className="flex items-center gap-1 md:gap-2">
-              <div className="bg-indigo-100 text-indigo-700 px-2 md:px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                <User size={14} className="flex-shrink-0" />
-                <span className="hidden md:block text-xs font-bold truncate max-w-[120px]">{currentUser.email || currentUser}</span>
-              </div>
-
-              {isAdminUnlocked ? (
-                <button
-                  onClick={onOpenAdmin}
-                  className="p-1.5 md:p-2.5 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-full transition-all"
-                  title="Administration des Applications"
-                >
-                  <Settings size={18} />
-                </button>
-              ) : (
-                <button
-                  onClick={onRequestAdminUnlock}
-                  className="p-1.5 md:p-2.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-all"
-                  title="Déverrouiller l'administration"
-                >
-                  <Lock size={18} />
-                </button>
-              )}
-
-              <button
-                onClick={onLogout}
-                className="p-1.5 md:p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-all"
-                title="Se déconnecter"
-              >
-                <LogOut size={18} />
-              </button>
-            </div>
-          ) : (
-            // Fonctionnalité de connexion retirée sur l'app mobile (Android) : pas
-            // de bouton dans ce cas, l'app reste en mode invité (voir useAuth).
-            !isNativeAndroid && (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={onLogin}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2"
-                >
-                  <User size={16} />
-                  Se connecter
-                </button>
-              </div>
-            )
-          )}
-
           <button
             onClick={onOpenStorageManager}
             className="p-1.5 md:p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all"

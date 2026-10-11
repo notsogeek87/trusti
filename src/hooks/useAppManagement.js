@@ -56,7 +56,7 @@ const buildAlternativeInfo = (app, candidatePool, myAppsSet) => {
  * Toutes les apps sont des Applications avec un GRADE (A, B, C, D, E)
  * Le filtrage se fait côté front selon les besoins
  */
-export const useAppManagement = (currentUser, saveUserData, getUserData, selectedCategory = 'Toutes', needsMyAppsData = false) => {
+export const useAppManagement = (saveUserData, getUserData, selectedCategory = 'Toutes', needsMyAppsData = false) => {
   // Un utilisateur qui rouvre l'app après avoir déjà fait l'onboarding
   // retombe directement sur "Mes Apps" (1er onglet) plutôt que le catalogue.
   const [activeTab, setActiveTab] = useState(
@@ -103,8 +103,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
   const [isLoadingMyApps, setIsLoadingMyApps] = useState(false);
   const [myAppsLoaded, setMyAppsLoaded] = useState(false);
 
-  // Charger les données sauvegardées (compte connecté, ou stockage local
-  // "invité" tant qu'il n'y a pas de compte — voir useAuth.getUserData)
+  // Charger les données sauvegardées en local (voir useAuth.getUserData)
   useEffect(() => {
     setIsInitialized(false); // Réinitialiser avant de charger
 
@@ -124,7 +123,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
 
     // Petite temporisation pour s'assurer que les states sont bien définis
     setTimeout(() => setIsInitialized(true), 100);
-  }, [currentUser, getUserData]);
+  }, [getUserData]);
 
   // Sauvegarder les données quand elles changent (mais pas au premier chargement)
   useEffect(() => {
@@ -137,7 +136,7 @@ export const useAppManagement = (currentUser, saveUserData, getUserData, selecte
       });
     }
   }, [myApps, favoriteApps, migratedApps, customMigrations]);
-  // Note: On ne met pas saveUserData et currentUser dans les dépendances pour éviter la boucle
+  // Note: On ne met pas saveUserData dans les dépendances pour éviter la boucle
 
   // Charger toutes les applications au montage
   useEffect(() => {

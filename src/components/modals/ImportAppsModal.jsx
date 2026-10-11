@@ -8,7 +8,7 @@ import { API_URL } from '../../utils/apiConfig';
  * (?apps=... et/ou ?mig=...). Il montre un aperçu de la sélection partagée
  * et propose de l'ajouter à « Mes Apps ».
  */
-const ImportAppsModal = ({ appIds = [], migrations = [], isLoggedIn, onConfirm, onClose }) => {
+const ImportAppsModal = ({ appIds = [], migrations = [], onConfirm, onClose }) => {
   const [apps, setApps] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -153,11 +153,6 @@ const ImportAppsModal = ({ appIds = [], migrations = [], isLoggedIn, onConfirm, 
                 >
                   <span>➕</span> Ajouter à Mes Apps
                 </button>
-                {!isLoggedIn && (
-                  <p className="text-xs text-center text-slate-400 px-2">
-                    Tu devras te connecter pour conserver cette sélection sur ton compte.
-                  </p>
-                )}
                 <button
                   onClick={onClose}
                   className="w-full bg-slate-50 hover:bg-slate-100 text-slate-900 py-3 rounded-xl font-bold text-sm transition-colors"

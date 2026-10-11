@@ -18,9 +18,8 @@ En local, ces mêmes fonctions ne tournent pas nativement — voir
 Endpoint principal, backé par PostgreSQL (`service-postgres.js`).
 
 - **Auth** : `GET` est public (catalogue en lecture). `POST`/`PUT`/`DELETE`
-  exigent soit l'en-tête `x-api-key` égal à `process.env.API_KEY` (automations
-  externes type n8n), soit `Authorization: Bearer <jeton admin>` valide (voir
-  [../guides/authentication.md](../guides/authentication.md)). Vérification
+  exigent l'en-tête `x-api-key` égal à `process.env.API_KEY` (automations
+  externes type n8n ; il n'y a plus de connexion ni d'interface admin). Vérification
   faite par `isAuthorizedAdminRequest` (`server/adminToken.js`) — ni `Origin`
   ni `Referer` ne sont utilisés comme preuve d'identité (falsifiables par tout
   client non-navigateur).
@@ -46,8 +45,8 @@ Endpoint principal, backé par PostgreSQL (`service-postgres.js`).
 ### `GET/POST/PUT/DELETE /api/custom-trusti-apps` — `api/custom-trusti-apps.js`
 
 Gestion des « Custom Trusti Apps » (apps notées A/B/C par l'équipe Trusti,
-utilisées par l'interface admin `/admin`). Même règle d'auth que `/api/apps` :
-mutations réservées à `x-api-key` ou jeton admin.
+gérées uniquement par API). Même règle d'auth que `/api/apps` :
+mutations réservées à `x-api-key`.
 
 ### `GET/POST/PUT/DELETE /api/star-apps` — `api/star-apps.js`
 
@@ -72,50 +71,16 @@ qui documente pourquoi cette liste est encore codée en dur plutôt qu'en base.
 
 Utilitaire de maintenance : détecte (`list`) ou supprime (`delete`) les
 doublons d'applications en base. Jamais appelé par le front — entièrement
-protégé par la même auth que les mutations de `/api/apps` (`x-api-key` ou
-jeton admin), y compris pour `list`.
+protégé par la même auth que les mutations de `/api/apps` (`x-api-key`), y compris pour `list`.
 
 ## Authentification
 
-Voir le guide dédié : [../guides/authentication.md](../guides/authentication.md)
-pour le flow complet (OTP par email via Brevo).
-
-### `POST /api/send-otp` — `api/send-otp.js`
-
-Génère un code à 6 chiffres, le stocke dans la table `magic_link_tokens`
-(nom historique, conservé pour ne pas casser le schéma existant) et
-l'envoie par email via Brevo. Rate-limit : 3 envois / 5 min / email.
-En l'absence de `BREVO_API_KEY` (dev local), le code est loggé en console
-au lieu d'être envoyé.
-
-### `POST /api/verify-otp` — `api/verify-otp.js`
-
-Vérifie le couple `(email, code)` pour la connexion utilisateur standard.
-Rate-limit anti-bruteforce persistant en base (table `otp_attempts`, voir
-`server/otpRateLimit.js`) : 5 tentatives échouées → verrouillage 15 min pour
-cet email. Ne délivre aucun jeton (session gérée côté client par `useAuth`).
-
-### `POST /api/admin-auth` — `api/admin-auth.js`
-
-Même mécanisme OTP que `send-otp` (y compris le rate-limit d'envoi), restreint
-à `process.env.ADMIN_EMAIL` (bypass si la variable n'est pas définie, pratique
-en dev ; en production Vercel l'accès admin est alors refusé). Les codes OTP
-sont générés avec `crypto.randomInt` et consommés de façon atomique. Envoie le code que l'admin doit soumettre à `verify-admin-otp`.
-
-### `POST /api/verify-admin-otp` — `api/verify-admin-otp.js`
-
-Vérifie le couple `(email, code)` émis par `admin-auth` et, si valide, émet un
-**jeton de session admin** signé (HMAC, `server/adminToken.js`, 12h de durée
-de vie, `ADMIN_SESSION_SECRET`). Ce jeton est stocké côté client
-(`src/utils/adminAuth.js`) et envoyé en `Authorization: Bearer` sur chaque
-mutation admin (`adminFetch`). Même rate-limit anti-bruteforce que
-`verify-otp`.
-
-### `GET /api/check-admin` — `api/check-admin.js`
-
-Indique si un email correspond à `ADMIN_EMAIL` (ou tout email si la variable
-n'est pas définie). Sert uniquement à décider d'afficher l'entrée « Admin »
-dans l'UI — ne prouve rien et n'autorise aucune action seule.
+Il n'y a ni connexion utilisateur ni interface d'administration. Les routes qui
+modifient le catalogue (`POST`/`PUT`/`DELETE` sur `/api/apps`, `/api/star-apps`,
+`/api/custom-trusti-apps`, ainsi que `/api/clean-duplicates` et
+`/api/lookup-playstore`) exigent l'en-tête `x-api-key` égal à `API_KEY`
+(comparaison en temps constant, `server/adminToken.js`). Sans `API_KEY`
+configurée, elles répondent `401`. Les `GET` du catalogue restent publics.
 
 ## Notes
 

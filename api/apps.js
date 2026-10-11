@@ -12,8 +12,8 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // Lecture publique (catalogue), mutations réservées à l'admin (jeton) ou
-  // aux intégrations externes (x-api-key). Ni Origin ni Referer ne sont des
+  // Lecture publique (catalogue), mutations réservées aux
+  // intégrations externes (x-api-key). Ni Origin ni Referer ne sont des
   // preuves d'identité fiables : un client non-navigateur peut les falsifier.
   if (req.method !== 'GET' && !isAuthorizedAdminRequest(req)) {
     return res.status(401).json({ success: false, error: 'Unauthorized' });

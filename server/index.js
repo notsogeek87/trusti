@@ -14,11 +14,6 @@ import starAppsHandler from '../api/star-apps.js';
 import trustiAppsHandler from '../api/trusti-apps.js';
 import topAppsHandler from '../api/top-apps.js';
 import cleanDuplicatesHandler from '../api/clean-duplicates.js';
-import checkAdminHandler from '../api/check-admin.js';
-import adminAuthHandler from '../api/admin-auth.js';
-import sendOtpHandler from '../api/send-otp.js';
-import verifyOtpHandler from '../api/verify-otp.js';
-import verifyAdminOtpHandler from '../api/verify-admin-otp.js';
 import lookupPlayStoreHandler from '../api/lookup-playstore.js';
 
 const app = express();
@@ -32,11 +27,6 @@ app.all('/api/star-apps', starAppsHandler);
 app.all('/api/trusti-apps', trustiAppsHandler);
 app.all('/api/top-apps', topAppsHandler);
 app.all('/api/clean-duplicates', cleanDuplicatesHandler);
-app.all('/api/check-admin', checkAdminHandler);
-app.all('/api/admin-auth', adminAuthHandler);
-app.all('/api/send-otp', sendOtpHandler);
-app.all('/api/verify-otp', verifyOtpHandler);
-app.all('/api/verify-admin-otp', verifyAdminOtpHandler);
 app.all('/api/lookup-playstore', lookupPlayStoreHandler);
 
 // Health check endpoint

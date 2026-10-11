@@ -8,7 +8,6 @@ import { CATEGORIES, FAVORITES_FILTER } from './constants/categories';
 import { Sparkles, Share2, RefreshCw, Star } from 'lucide-react';
 import { ViewModeContext } from './contexts/ViewModeContext';
 import { parseShareParams, clearShareParams, hasShareParams } from './utils/shareUtils';
-import { getAdminTokenEmail, clearAdminToken, setAdminToken } from './utils/adminAuth';
 import { hasCompletedOnboarding, markOnboardingComplete } from './utils/onboardingStorage';
 import { getMyAppsSortPref, setMyAppsSortPref, sortMyApps } from './utils/myAppsSort';
 
@@ -39,10 +38,6 @@ import TrustiShareModal from './components/modals/TrustiShareModal';
 import ImportAppsModal from './components/modals/ImportAppsModal';
 import MigrationSelectorModal from './components/modals/MigrationSelectorModal';
 import MigrationGuideModal from './components/modals/MigrationGuideModal';
-import LoginModal from './components/modals/LoginModal';
-// Chargée à la demande : l'administration (~2 000 lignes) n'est utile qu'à l'admin
-const AdminAppsModal = lazy(() => import('./components/modals/AdminAppsModal'));
-import PinModal from './components/modals/PinModal';
 import WelcomeModal from './components/modals/WelcomeModal';
 import StoragePage from './components/StoragePage';
 
@@ -79,20 +74,10 @@ const sortAppsByPopularity = (apps) => {
 const App = () => {
   // Gestion de l'authentification
   const {
-    currentUser,
     isLoading: isAuthLoading,
-    login,
-    logout: authLogout,
     getUserData,
     saveUserData,
   } = useAuth();
-
-  // Wrapper pour logout qui réinitialise aussi l'état admin
-  const logout = () => {
-    setIsAdminUnlocked(false);
-    clearAdminToken();
-    authLogout();
-  };
 
   // État pour la landing page
   // La landing page ne s'affiche plus automatiquement, seulement sur demande
@@ -142,7 +127,6 @@ const App = () => {
   const handleFirstTimeNo = () => {
     markOnboardingComplete();
     setShowWelcomeModal(false);
-    setShowLoginModal(true);
   };
 
   // Handler pour la fin de l'onboarding
@@ -246,7 +230,7 @@ const App = () => {
     importMigrations,
     setSelectedApp,
     loadMoreApps,
-  } = useAppManagement(currentUser, saveUserData, getUserData, selectedCategory, showStorageManager);
+  } = useAppManagement(saveUserData, getUserData, selectedCategory, showStorageManager);
 
   // Une app "Mes Apps" est considérée migrée si elle est déjà au top (grade A)
   // ou si l'alternative recommandée est déjà utilisée.
@@ -333,31 +317,7 @@ const App = () => {
     setShowTrustiShareModal,
     showMigrationSelector,
     setShowMigrationSelector,
-    showLoginModal,
-    setShowLoginModal,
   } = useModals();
-
-  // Modal admin
-  const [showAdminModal, setShowAdminModal] = useState(false);
-
-  // État de déverrouillage admin (code PIN)
-  const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
-  const [showPinModal, setShowPinModal] = useState(false);
-
-  // Déverrouiller l'admin si un jeton de session valide existe déjà pour cet
-  // utilisateur (évite de redemander le PIN à chaque visite). Le jeton n'est
-  // obtenu qu'après vérification OTP réelle (voir handleUnlockAdmin) : on ne
-  // peut pas se fier à /api/check-admin seul pour accorder l'accès, il ne
-  // fait que comparer un email fourni par le client sans preuve d'identité.
-  useEffect(() => {
-    if (!currentUser) {
-      setIsAdminUnlocked(false);
-      return;
-    }
-    const email = (currentUser?.email || currentUser || '').toLowerCase();
-    const tokenEmail = getAdminTokenEmail();
-    setIsAdminUnlocked(!!tokenEmail && tokenEmail === email);
-  }, [currentUser]);
 
   // Scroller en haut lors du changement d'onglet ou de catégorie
   useEffect(() => {
@@ -373,22 +333,6 @@ const App = () => {
     }
   }, [selectedApp]);
 
-  // Appliquer les apps sélectionnées en onboarding après connexion
-  useEffect(() => {
-    if (!currentUser) return;
-    const pending = localStorage.getItem('trusti_pending_onboarding_apps');
-    if (!pending) return;
-    try {
-      const pendingIds = JSON.parse(pending);
-      localStorage.removeItem('trusti_pending_onboarding_apps');
-      if (pendingIds.length > 0) {
-        // Délai > 100ms (délai interne de useAppManagement pour setIsInitialized)
-        // pour que la sauvegarde se déclenche après le chargement initial
-        setTimeout(() => addMyApps(pendingIds.map(String)), 150);
-      }
-    } catch {}
-  }, [currentUser]); // eslint-disable-line react-hooks/exhaustive-deps
-
   // Détecter un lien de partage au chargement (?apps=... et/ou ?mig=...)
   // et ouvrir la modal d'import, puis nettoyer l'URL.
   useEffect(() => {
@@ -399,36 +343,11 @@ const App = () => {
     }
   }, []);
 
-  // Appliquer une sélection partagée en attente après connexion
-  useEffect(() => {
-    if (!currentUser) return;
-    const pending = localStorage.getItem('trusti_pending_shared_selection');
-    if (!pending) return;
-    try {
-      const { appIds = [], migrations = [] } = JSON.parse(pending);
-      localStorage.removeItem('trusti_pending_shared_selection');
-      // Délai > 100ms (setIsInitialized dans useAppManagement) pour que la
-      // sauvegarde utilisateur se déclenche après le chargement initial.
-      setTimeout(() => {
-        if (appIds.length > 0) addMyApps(appIds.map(String));
-        if (migrations.length > 0) importMigrations(migrations);
-      }, 150);
-    } catch {}
-  }, [currentUser]); // eslint-disable-line react-hooks/exhaustive-deps
-
   // Confirmer l'import depuis la modal de partage.
-  // On applique directement, sans forcer la connexion. Si l'utilisateur n'est
-  // pas connecté, on garde la sélection en attente pour la ré-appliquer s'il se
-  // connecte plus tard (via le useEffect ci-dessus), mais sans popup imposée.
+  // On applique directement la sélection sur cet appareil.
   const handleImportShared = ({ appIds = [], migrations = [] }) => {
     if (appIds.length > 0) addMyApps(appIds.map(String));
     if (migrations.length > 0) importMigrations(migrations);
-    if (!currentUser) {
-      localStorage.setItem(
-        'trusti_pending_shared_selection',
-        JSON.stringify({ appIds, migrations })
-      );
-    }
     setActiveTab(TABS.MY_APPS);
     setPendingImport(null);
   };
@@ -535,17 +454,6 @@ const App = () => {
     };
   }, [selectedApp, showStorageManager, showMigrationSelector, activeTab, setSelectedApp, setShowMigrationSelector, setActiveTab]);
 
-  // Appelé par PinModal après validation serveur réussie
-  const handleUnlockAdmin = async (token) => {
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (isLocal && !currentUser) {
-      await login('admin@local');
-    }
-    setAdminToken(token);
-    setIsAdminUnlocked(true);
-    setShowPinModal(false);
-  };
-
   const isMobile = useIsSmallViewport();
 
   // Afficher la landing page en premier si c'est la première visite
@@ -557,20 +465,16 @@ const App = () => {
 
   // Afficher la page d'onboarding de sélection des apps
   if (showOnboarding) {
-    // Pas de proposition de connexion sur l'app mobile (fonctionnalité retirée) :
-    // l'onboarding natif reste toujours en mode invité (voir useAuth).
-    const onSignUp = (isNativeAndroid || currentUser) ? undefined : () => setShowLoginModal(true);
     if (isNativeAndroid && !forceManualOnboarding) {
       return (
         <OnboardingAppsNative
           onComplete={handleOnboardingComplete}
-          onSignUp={onSignUp}
           onManualSelection={() => setForceManualOnboarding(true)}
         />
       );
     }
     return (
-      <OnboardingApps onComplete={handleOnboardingComplete} onSignUp={onSignUp} />
+      <OnboardingApps onComplete={handleOnboardingComplete} />
     );
   }
 
@@ -667,14 +571,8 @@ const App = () => {
     )}
     
     <Header
-      currentUser={currentUser}
-      onLogout={logout}
-      onLogin={() => setShowLoginModal(true)}
       onOpenStorageManager={() => setShowStorageManager(true)}
-      onOpenAdmin={() => setShowAdminModal(true)}
       onShowLandingPage={() => setShowLandingPage(true)}
-      isAdminUnlocked={isAdminUnlocked}
-      onRequestAdminUnlock={() => setShowPinModal(true)}
     />
 
     {/* items-start casserait le sticky du menu : sans stretch, la colonne du
@@ -902,7 +800,6 @@ const App = () => {
       <ImportAppsModal
         appIds={pendingImport.appIds}
         migrations={pendingImport.migrations}
-        isLoggedIn={Boolean(currentUser)}
         onConfirm={handleImportShared}
         onClose={() => setPendingImport(null)}
       />
@@ -937,23 +834,6 @@ const App = () => {
       />
     )}
 
-    {/* Modal de connexion (fonctionnalité retirée sur l'app mobile) */}
-    {!isNativeAndroid && (
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onLogin={(email) => { login(email); setShowLoginModal(false); }}
-      />
-    )}
-
-    {/* Modal de code PIN admin */}
-    <PinModal
-      isOpen={showPinModal}
-      onClose={() => setShowPinModal(false)}
-      onSuccess={handleUnlockAdmin}
-      userEmail={currentUser?.email || currentUser}
-    />
-
     {/* Modal de bienvenue (première visite) */}
     {showWelcomeModal && (
       <WelcomeModal
@@ -962,23 +842,10 @@ const App = () => {
       />
     )}
 
-    {/* Modal d'administration Apps (TrustiApps et StarApps) */}
-    {showAdminModal && (
-      <Suspense fallback={null}>
-        <AdminAppsModal
-          onClose={() => {
-            setShowAdminModal(false);
-            // Forcer le rechargement pour que tout le monde voit les changements
-            window.location.reload();
-          }}
-        />
-      </Suspense>
-    )}
-
     </>
 
-    {/* Widget de chat Trusti (visible partout sauf pendant la vérification du token, la page de bienvenue, l'onboarding, le chargement initial et la console admin) */}
-    {!showWelcomeModal && !showOnboarding && !showRescan && !showAdminModal && !isLoadingApps && <TrustiChatWidget onOpenLandingPage={handleOpenLandingPage} />}
+    {/* Widget de chat Trusti (visible partout sauf pendant la vérification du token, la page de bienvenue, l'onboarding, le chargement initial) */}
+    {!showWelcomeModal && !showOnboarding && !showRescan && !isLoadingApps && <TrustiChatWidget onOpenLandingPage={handleOpenLandingPage} />}
 
     <style>{`
       @keyframes pulse-subtle {

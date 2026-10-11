@@ -160,7 +160,7 @@ export const AppTile = ({ app, selected, onToggle, replacedBy, isChosenAlternati
   </button>
 );
 
-const OnboardingApps = ({ onComplete, onSignUp }) => {
+const OnboardingApps = ({ onComplete }) => {
   const [step, setStep] = useState(-1); // -1 = intro
   const [direction, setDirection] = useState('forward');
   const [selected, setSelected] = useState(new Set());
@@ -351,30 +351,6 @@ const OnboardingApps = ({ onComplete, onSignUp }) => {
             <ArrowRight size={18} />
           </button>
 
-          {/* Nudge inscription — discret, sous le CTA */}
-          {onSignUp && (
-            <div
-              className="mt-5 bg-white/10 rounded-2xl px-5 py-4 max-w-xs w-full text-left"
-              style={{ animation: 'onbFadeUp 0.4s 0.35s ease-out both' }}
-            >
-              <p className="text-sm font-black text-white mb-1">💾 Ne perds pas ta sélection</p>
-              <p className="text-xs text-white/65 leading-relaxed mb-3">
-                Crée un compte gratuit pour retrouver tes apps sur tous tes appareils.
-              </p>
-              <button
-                onClick={() => {
-                  if (selected.size > 0) {
-                    localStorage.setItem('trusti_pending_onboarding_apps', JSON.stringify([...selected]));
-                  }
-                  onComplete(selected);
-                  onSignUp();
-                }}
-                className="text-xs font-bold text-white border border-white/30 rounded-xl px-4 py-2 hover:bg-white/10 transition-colors active:scale-95"
-              >
-                S'inscrire gratuitement →
-              </button>
-            </div>
-          )}
         </div>
       </div>
     );

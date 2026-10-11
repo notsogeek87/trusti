@@ -130,7 +130,7 @@ const FloatingApps = ({ apps, count }) => {
 // Onboarding Android natif : scanne les apps installées sur l'appareil au lieu
 // de demander une sélection manuelle. Ne s'affiche que dans l'app Android
 // packagée (voir src/utils/platform.js) — le web garde OnboardingApps.jsx.
-const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
+const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
   // 'intro' | 'scanning' | 'results' | 'finalizing' | 'summary' | 'error'
   const [phase, setPhase] = useState('intro');
   const [matches, setMatches] = useState([]); // apps du catalogue trouvées installées
@@ -516,18 +516,6 @@ const OnboardingAppsNative = ({ onComplete, onSignUp, onManualSelection }) => {
             {count > 0 ? `Ajouter mes ${count} app${count !== 1 ? 's' : ''}` : 'Continuer'}
             <ArrowRight size={16} />
           </button>
-          {onSignUp && count > 0 && (
-            <button
-              onClick={() => {
-                localStorage.setItem('trusti_pending_onboarding_apps', JSON.stringify([...selected]));
-                onComplete(selected);
-                onSignUp();
-              }}
-              className="w-full py-2 text-xs text-slate-400 hover:text-slate-600 transition-colors"
-            >
-              Créer un compte pour retrouver mes apps partout
-            </button>
-          )}
         </div>
       </div>
     </div>

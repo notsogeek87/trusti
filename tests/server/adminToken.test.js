@@ -1,33 +1,14 @@
 import { test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { isAdminEmail, generateOtpCode, createAdminToken, verifyAdminToken, safeEqual } from '../../server/adminToken.js';
+import { isAuthorizedAdminRequest, safeEqual } from '../../server/adminToken.js';
 
-const saved = { ...process.env };
+const saved = process.env.API_KEY;
 afterEach(() => {
-  for (const key of ['ADMIN_EMAIL', 'VERCEL', 'VERCEL_ENV', 'ADMIN_SESSION_SECRET']) {
-    if (saved[key] === undefined) delete process.env[key];
-    else process.env[key] = saved[key];
-  }
+  if (saved === undefined) delete process.env.API_KEY;
+  else process.env.API_KEY = saved;
 });
 
-test('isAdminEmail compare sans tenir compte de la casse ni des espaces', () => {
-  process.env.ADMIN_EMAIL = 'Admin@Example.com';
-  assert.equal(isAdminEmail(' admin@example.COM '), true);
-  assert.equal(isAdminEmail('other@example.com'), false);
-});
-
-test('isAdminEmail accepte tout email sans ADMIN_EMAIL en local uniquement', () => {
-  delete process.env.ADMIN_EMAIL;
-  delete process.env.VERCEL;
-  delete process.env.VERCEL_ENV;
-  assert.equal(isAdminEmail('anyone@example.com'), true);
-});
-
-test('isAdminEmail refuse tout email sans ADMIN_EMAIL en preview Vercel', () => {
-  delete process.env.ADMIN_EMAIL;
-  process.env.VERCEL_ENV = 'preview';
-  assert.equal(isAdminEmail('anyone@example.com'), false);
-});
+const req = (headers) => ({ headers });
 
 test('safeEqual compare en temps constant', () => {
   assert.equal(safeEqual('abc', 'abc'), true);
@@ -35,22 +16,20 @@ test('safeEqual compare en temps constant', () => {
   assert.equal(safeEqual('abc', 'abcd'), false);
 });
 
-test('isAdminEmail refuse tout email sans ADMIN_EMAIL en production', () => {
-  delete process.env.ADMIN_EMAIL;
-  process.env.VERCEL_ENV = 'production';
-  assert.equal(isAdminEmail('anyone@example.com'), false);
+test('écriture autorisée avec la bonne x-api-key', () => {
+  process.env.API_KEY = 'secret';
+  assert.equal(isAuthorizedAdminRequest(req({ 'x-api-key': 'secret' })), true);
 });
 
-test('generateOtpCode produit 6 chiffres', () => {
-  for (let i = 0; i < 200; i++) {
-    assert.match(generateOtpCode(), /^[1-9]\d{5}$/);
-  }
+test('écriture refusée avec une mauvaise clé, sans clé ou avec un Bearer', () => {
+  process.env.API_KEY = 'secret';
+  assert.equal(isAuthorizedAdminRequest(req({ 'x-api-key': 'autre' })), false);
+  assert.equal(isAuthorizedAdminRequest(req({})), false);
+  assert.equal(isAuthorizedAdminRequest(req({ authorization: 'Bearer secret' })), false);
 });
 
-test('un jeton admin falsifié est rejeté', () => {
-  process.env.ADMIN_SESSION_SECRET = 'test-secret';
-  const token = createAdminToken('admin@example.com');
-  assert.deepEqual(verifyAdminToken(token), { email: 'admin@example.com' });
-  const [payload, sig] = token.split('.');
-  assert.equal(verifyAdminToken(`${payload}.${sig.replace(/^./, c => (c === 'a' ? 'b' : 'a'))}`), null);
+test('écriture refusée si API_KEY n\'est pas configurée (fail-closed)', () => {
+  delete process.env.API_KEY;
+  assert.equal(isAuthorizedAdminRequest(req({ 'x-api-key': '' })), false);
+  assert.equal(isAuthorizedAdminRequest(req({ 'x-api-key': 'undefined' })), false);
 });

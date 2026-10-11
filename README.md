@@ -77,11 +77,12 @@ npm run preview
 - **Tailwind CSS** - Framework CSS
 - **Lucide React** - Icônes
 
-## 🔐 Authentification
+## 🔐 Pas de compte, pas d'administration
 
-Trusti utilise l'authentification par **code OTP à 6 chiffres** envoyé par email via [Brevo](https://www.brevo.com) — plus de mot de passe.
-
-Détails complets (flow, sécurité, dépannage) : **[docs/guides/authentication.md](./docs/guides/authentication.md)**.
+Trusti n'a **ni connexion ni interface d'administration** : les choix de l'utilisateur
+restent sur son appareil (localStorage). Le catalogue d'apps n'est modifiable que par
+des appels serveur à serveur portant l'en-tête `x-api-key` (variable `API_KEY`), par
+exemple depuis n8n. Sans `API_KEY`, toute écriture est refusée.
 
 ## 🗄️ Base de données
 
@@ -113,7 +114,7 @@ npm run db:backup
 ✅ Documentation JSDoc
 ✅ Structure de dossiers claire et scalable
 ✅ Nommage cohérent et explicite
-✅ Authentification sécurisée par code OTP (Brevo)
+✅ Écritures de l'API protégées par clé (`x-api-key`), sans compte utilisateur
 ✅ Base de données PostgreSQL avec Neon
 
 ## 🚢 Déploiement
@@ -124,33 +125,24 @@ L'application est déployée sur **Vercel**.
 
 ```env
 DATABASE_URL=postgresql://...
-BREVO_API_KEY=xkeysib-...
-BREVO_FROM_EMAIL=noreply@votredomaine.com
-BREVO_FROM_NAME=Trusti
 FRONTEND_URL=https://votreapp.vercel.app
-ADMIN_EMAIL=votre@email.com
-ADMIN_SESSION_SECRET=valeur-aleatoire-longue
 API_KEY=cle-pour-les-integrations-externes
 NODE_ENV=production
 ```
 
-`ADMIN_SESSION_SECRET` signe les jetons de session admin après vérification
-OTP et **doit** être une valeur aléatoire en production (`openssl rand -hex
-32`). `API_KEY` est la clé attendue dans l'en-tête `x-api-key` pour toute
+`API_KEY` est la clé attendue dans l'en-tête `x-api-key` pour toute
 modification du catalogue d'apps via l'API depuis un outil externe (n8n,
-etc.), hors navigateur admin.
+etc.). Elle **doit** être une valeur aléatoire longue en production
+(`openssl rand -hex 32`).
 
-Voir [.env.example](./.env.example) pour un modèle complet, y compris la
-configuration Resend historique (optionnelle).
+Voir [.env.example](./.env.example) pour un modèle.
 
 ### Auto-hébergement complet
 
 Faire tourner la totalité de la pile (web + API + app Android) demande donc
-trois services externes, tous requis :
+deux services externes, tous requis :
 
 - une base **PostgreSQL** sur [Neon](https://neon.tech) (`DATABASE_URL`) ;
-- un compte **[Brevo](https://www.brevo.com)** pour l'envoi des codes OTP
-  (`BREVO_API_KEY`) — voir [docs/guides/authentication.md](./docs/guides/authentication.md) ;
 - un déploiement **Vercel** (ou équivalent Node compatible avec `api/` et
   `server/`) exposant ces routes à l'URL renseignée dans
   `src/utils/apiConfig.js` (voir section Android ci-dessous).
@@ -171,7 +163,7 @@ de développement (`npm run cap:sync`, `npm run android:open`).
 contient aucune donnée : au runtime, la WebView interroge directement le
 backend Vercel de production (`https://trusti-alpha.vercel.app/api`, codé en
 dur dans `src/utils/apiConfig.js` pour la cible native), lui-même dépendant
-de Neon (PostgreSQL) et Brevo (emails). L'app ne fonctionne donc pleinement
+de Neon (PostgreSQL). L'app ne fonctionne donc pleinement
 que tant que ce backend, non open et centralisé, reste disponible.
 
 ### Permissions déclarées (`AndroidManifest.xml`)

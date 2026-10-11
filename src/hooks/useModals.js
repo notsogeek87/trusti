@@ -8,7 +8,6 @@ export const useModals = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showTrustiShareModal, setShowTrustiShareModal] = useState(false);
   const [showMigrationSelector, setShowMigrationSelector] = useState(null);
-  const [showLoginModal, setShowLoginModal] = useState(false);
 
   return {
     showExplainer,
@@ -19,7 +18,5 @@ export const useModals = () => {
     setShowTrustiShareModal,
     showMigrationSelector,
     setShowMigrationSelector,
-    showLoginModal,
-    setShowLoginModal,
   };
 };
