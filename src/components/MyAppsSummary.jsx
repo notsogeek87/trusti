@@ -29,14 +29,14 @@ const MyAppsSummary = ({ apps, onShareMigrations, children }) => {
   const progressPct = riskyCount > 0 ? Math.round((migratedCount / riskyCount) * 100) : 100;
 
   return (
-    <div className="bg-indigo-800 border border-indigo-700 rounded-2xl mb-4 overflow-hidden shadow-md">
+    <div className="bg-indigo-600 border border-indigo-500 rounded-2xl mb-4 overflow-hidden shadow-md">
       {hasScore && (
         <>
           <button
             type="button"
             onClick={() => setIsOpen(prev => !prev)}
             aria-expanded={isOpen}
-            className="w-full text-left px-4 pt-3.5 pb-2.5 hover:bg-indigo-700/60 transition-colors"
+            className="w-full text-left px-4 pt-3.5 pb-2.5 hover:bg-indigo-500/60 transition-colors"
           >
             <div className="flex items-center gap-3">
               <div className={`${GRADE_COLORS[overallGrade]} w-11 h-11 rounded-full flex items-center justify-center shrink-0 text-white`}>
