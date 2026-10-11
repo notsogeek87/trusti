@@ -5,6 +5,7 @@ import { AppTile, ANIM_CSS, computeReplacementMap } from './OnboardingApps';
 import OnboardingSummary from './OnboardingSummary';
 import { API_URL } from '../utils/apiConfig';
 import { extractPackageId } from '../utils/androidPackage';
+import AppIconImage from './ui/AppIconImage';
 
 const rand = (min, max) => Math.random() * (max - min) + min;
 
@@ -115,7 +116,7 @@ const FloatingApps = ({ apps, count }) => {
           }}
         >
           {app.icon && app.icon.startsWith('http') ? (
-            <img src={app.icon} alt="" className="w-full h-full object-cover" loading="lazy" />
+            <AppIconImage src={app.icon} name={app.name} alt="" />
           ) : (
             <div className={`w-full h-full ${app.color || 'bg-slate-400'} flex items-center justify-center text-lg`}>
               {app.icon || app.name.charAt(0)}
@@ -396,7 +397,7 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
                 }}
               >
                 {app.icon && app.icon.startsWith('http') ? (
-                  <img src={app.icon} alt="" className="w-full h-full object-cover" />
+                  <AppIconImage src={app.icon} name={app.name} alt="" loading="eager" />
                 ) : (
                   <div className={`w-full h-full ${app.color || 'bg-slate-400'} flex items-center justify-center text-lg`}>
                     {app.icon || app.name.charAt(0)}

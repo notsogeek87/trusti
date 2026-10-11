@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { PlusCircle, CheckCircle, Trash2, ShieldCheck, ChevronRight, ArrowUpRight, CornerDownRight, Route } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
 import { TABS } from '../constants/tabs';
+import AppIconImage from './ui/AppIconImage';
 
 const SWIPE_THRESHOLD = 72;
 const SWIPE_MAX = 88;
@@ -90,7 +91,7 @@ const AppCard = React.memo(({
         <div className="flex items-center gap-3">
           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center overflow-hidden shrink-0 ${isLoadingSkeleton ? 'bg-slate-200 animate-pulse' : 'bg-slate-100'}`}>
             {!isLoadingSkeleton && app.icon && app.icon.startsWith('http') ? (
-              <img src={app.icon} alt={app.name} loading="lazy" className="w-full h-full object-cover" />
+              <AppIconImage src={app.icon} name={app.name} />
             ) : (
               <div className={`${isLoadingSkeleton ? 'text-slate-400' : app.color} w-full h-full flex items-center justify-center text-xl text-white`}>
                 {app.icon}

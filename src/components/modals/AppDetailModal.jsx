@@ -14,6 +14,7 @@ import AssessmentDetail from '../assessment/AssessmentDetail';
 import { getNote, setNote as saveNote } from '../../utils/notesStorage';
 import { canStartMigration } from '../../utils/migrationGuide';
 import MigrationGuideModal from './MigrationGuideModal';
+import AppIconImage from '../ui/AppIconImage';
 
 const ANIM_STYLES = `
   @keyframes detailSlideUp {
@@ -235,7 +236,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
     >
       <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
         {relatedApp.icon && relatedApp.icon.startsWith('http') ? (
-          <img src={relatedApp.icon} alt={relatedApp.name} loading="lazy" className="w-full h-full object-cover" />
+          <AppIconImage src={relatedApp.icon} name={relatedApp.name} />
         ) : (
           <div className={`${relatedApp.color || 'bg-slate-500'} w-full h-full flex items-center justify-center text-lg text-white`}>
             {relatedApp.icon}
@@ -298,7 +299,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col items-center text-center mb-4">
             <div className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-md mb-4 overflow-hidden">
               {app.icon && app.icon.startsWith('http') ? (
-                <img src={app.icon} alt={app.name} loading="lazy" className="w-full h-full object-cover" />
+                <AppIconImage src={app.icon} name={app.name} />
               ) : (
                 <div className={`${app.color} w-full h-full flex items-center justify-center text-4xl text-white`}>
                   {app.icon}

@@ -3,6 +3,7 @@ import { Check, ChevronRight, ChevronLeft, Sparkles, ShieldCheck, ArrowRight } f
 import { API_URL } from '../utils/apiConfig';
 import { pickBestAlternative } from '../utils/alternatives';
 import OnboardingSummary from './OnboardingSummary';
+import AppIconImage from './ui/AppIconImage';
 
 const GOOD_GRADES = ['A', 'B', 'C'];
 
@@ -135,7 +136,7 @@ export const AppTile = ({ app, selected, onToggle, replacedBy, isChosenAlternati
       </div>
     )}
     {app.icon && app.icon.startsWith('http') ? (
-      <img src={app.icon} alt={app.name} className="w-12 h-12 rounded-xl object-cover" loading="lazy" />
+      <div className="w-12 h-12 rounded-xl overflow-hidden"><AppIconImage src={app.icon} name={app.name} /></div>
     ) : (
       <div className={`w-12 h-12 rounded-xl ${app.color || 'bg-slate-400'} flex items-center justify-center text-2xl`}>
         {app.icon || app.name.charAt(0)}

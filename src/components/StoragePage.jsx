@@ -18,6 +18,7 @@ import MyAppsSortMenu from './MyAppsSortMenu';
 import ScoreIndicator from './ui/ScoreIndicator';
 import GradeStorageDonut from './ui/GradeStorageDonut';
 import SystemCleanerSection from './SystemCleanerSection';
+import AppIconImage from './ui/AppIconImage';
 
 const StatTile = ({ value, label }) => (
   <div className="bg-slate-50 rounded-2xl p-3 text-center">
@@ -488,7 +489,7 @@ const StoragePage = ({
                       >
                         <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 bg-white flex items-center justify-center">
                           {app.icon && app.icon.startsWith('http') ? (
-                            <img src={app.icon} alt={app.name} className="w-full h-full object-cover" />
+                            <AppIconImage src={app.icon} name={app.name} loading="eager" />
                           ) : (
                             <span className="text-lg">{app.icon}</span>
                           )}
