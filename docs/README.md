@@ -14,6 +14,7 @@ démarrage rapide.
 - [Analyse technique — architecture](architecture/technical-analysis.md)
 - [2026-10-11 : suppression de la connexion et de l'administration](architecture/2026-10-11-suppression-connexion-et-administration.md)
 - [2026-10-11 : audit de sécurité](architecture/2026-10-11-audit-securite.md)
+- [2026-10-11 : Tailwind compilé au build, fin du CDN](architecture/2026-10-11-tailwind-compile-au-build.md)
 
 ## 📡 API
 
