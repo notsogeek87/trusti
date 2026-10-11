@@ -43,8 +43,39 @@ def main():
                 )
             if not t.get("releases"):
                 print("  (aucune release)")
+        diagnostic(api, edits, args.package, edit_id)
     finally:
         edits.delete(packageName=args.package, editId=edit_id).execute()
+
+
+def essaie(titre, fn):
+    """Affiche le résultat d'un appel de diagnostic ; une erreur ne coupe pas le reste."""
+    print(f"\n== {titre}")
+    try:
+        print(json.dumps(fn(), indent=2, ensure_ascii=False, default=str))
+    except Exception as e:  # noqa: BLE001 - diagnostic en lecture seule
+        print(f"  (indisponible : {type(e).__name__}: {str(e)[:300]})")
+
+
+def diagnostic(api, edits, package, edit_id):
+    """Détails utiles pour comprendre pourquoi une release n'arrive pas aux testeurs."""
+    e = {"packageName": package, "editId": edit_id}
+    for track in ("alpha", "internal"):
+        essaie(f"Canal {track} (JSON complet)", lambda t=track: edits.tracks().get(track=t, **e).execute())
+        essaie(f"Testeurs du canal {track}", lambda t=track: edits.testers().get(track=t, **e).execute())
+        essaie(
+            f"Disponibilité par pays du canal {track}",
+            lambda t=track: edits.countryavailability().get(track=t, **e).execute(),
+        )
+    essaie("Bundles uploadés", lambda: edits.bundles().list(**e).execute())
+    essaie("Détails de l'app", lambda: edits.details().get(**e).execute())
+    essaie(
+        "Fiches Play Store (langues renseignées)",
+        lambda: [
+            {k: (v if k in ("language", "title") else f"{len(v)} car.") for k, v in l.items()}
+            for l in edits.listings().list(**e).execute().get("listings", [])
+        ],
+    )
 
 
 if __name__ == "__main__":
