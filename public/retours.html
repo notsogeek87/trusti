@@ -297,6 +297,7 @@
     fd.append('description', text);
     fd.append('pseudo', pseudo);
     if (ownerKey) fd.append('ownerKey', ownerKey);
+    try { fd.append('voter', voterKey()); } catch (e) {}
     fd.append('website', $('website').value);
     if (current) fd.append('capture', current, current.type === 'image/png' ? 'capture.png' : current.type === 'image/webp' ? 'capture.webp' : 'capture.jpg');
     var btn = $('send');

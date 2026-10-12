@@ -3,6 +3,9 @@ name: Android APK
 on:
   push:
     branches: [main, staging]
+    # La page publique des retours testeurs n'est pas dans l'app : inutile de reconstruire l'APK.
+    paths-ignore:
+      - 'public/retours.html'
   pull_request:
   workflow_dispatch:
 
