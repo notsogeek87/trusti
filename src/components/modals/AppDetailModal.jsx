@@ -107,7 +107,11 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
   };
 
   // Fusionner allApps avec les apps chargées dynamiquement
-  const availableApps = [...allApps, ...loadedApps];
+  // Dédoublonné par id : une app chargée dynamiquement peut aussi arriver
+  // ensuite dans allApps, ce qui l'afficherait deux fois dans les relations.
+  const availableApps = [...new Map(
+    [...allApps, ...loadedApps].map(a => [String(a.id), a])
+  ).values()];
 
   // Charger les apps manquantes pour les relations
   useEffect(() => {
