@@ -505,7 +505,7 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
             onClick={handleFinish}
             className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98]"
           >
-            {count > 0 ? `Ajouter mes ${count} app${count !== 1 ? 's' : ''}` : 'Continuer'}
+            {count > 0 ? 'Voir mon score' : 'Continuer'}
             <ArrowRight size={16} />
           </button>
         </div>
