@@ -118,8 +118,9 @@ export const ANIM_CSS = `
 // autre app à risque du scan (ex: sur la tuile Mastodon).
 export const AppTile = ({ app, selected, onToggle, replacedBy, isChosenAlternative }) => (
   <button
-    onClick={() => onToggle(app.id)}
-    className={`relative flex flex-col items-center gap-1 p-3 rounded-2xl transition-all duration-150 active:scale-95 border-2
+    onClick={onToggle ? () => onToggle(app.id) : undefined}
+    disabled={!onToggle}
+    className={`relative flex flex-col items-center gap-1 p-3 rounded-2xl transition-all duration-150 border-2 ${onToggle ? 'active:scale-95' : 'cursor-default'}
       ${selected
         ? 'bg-indigo-600 border-indigo-500 shadow-lg shadow-indigo-200'
         : 'bg-white border-transparent shadow-sm hover:border-indigo-200 hover:shadow-md'

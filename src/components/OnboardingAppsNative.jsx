@@ -162,14 +162,6 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
     };
   }, [phase]);
 
-  const toggleApp = (id) => {
-    setSelected(prev => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  };
-
   // Repère, parmi les apps trouvées, celles déjà remplacées par une
   // alternative également trouvée sur le téléphone (ex: Facebook + Mastodon
   // installés tous les deux). Calculé avant les `return` conditionnels
@@ -468,7 +460,7 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
               <h2 className="text-lg font-black text-slate-900 leading-snug">
                 {matches.length} app{matches.length !== 1 ? 's' : ''} reconnue{matches.length !== 1 ? 's' : ''} sur ton téléphone
               </h2>
-              <p className="text-xs text-slate-400 mt-1">Décoche celles que tu ne veux pas suivre</p>
+              <p className="text-xs text-slate-400 mt-1">Toutes tes apps comptent dans ton score, sans filtre</p>
             </>
           ) : (
             <>
@@ -489,7 +481,6 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
                 key={app.id}
                 app={app}
                 selected={selected.has(app.id)}
-                onToggle={toggleApp}
                 replacedBy={replacementMap.get(String(app.id))}
                 isChosenAlternative={alternativeIds.has(String(app.id))}
               />
