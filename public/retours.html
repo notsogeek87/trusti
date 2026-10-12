@@ -111,6 +111,9 @@
   .item p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
   .clip { font-size: .8rem; color: var(--muted); margin-top: 6px; }
   .empty, .loading { color: var(--muted); text-align: center; padding: 20px 0; }
+  .hint { font-size: .82rem; color: var(--muted); margin: 4px 0 0; }
+  .shot { display: block; max-width: 100%; max-height: 260px; margin-top: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); }
+  .del { margin-top: 6px; font-size: .85rem; color: var(--bug); padding-left: 0; }
   .legal { font-size: .82rem; color: var(--muted); margin-top: 28px; }
   .legal p { margin: 6px 0; }
 </style>
@@ -136,6 +139,7 @@
     <div class="counter"><span id="count">0</span> / 2000</div>
 
     <div class="label">Capture d’écran <span class="opt">(facultatif)</span></div>
+    <div class="hint" style="margin:-2px 0 8px">Elle sera visible par tous les testeurs : masque les informations personnelles.</div>
     <div class="file-row">
       <button type="button" class="btn" id="pick">📎 Joindre une capture</button>
       <input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/*" hidden>
@@ -145,8 +149,9 @@
       </div>
     </div>
 
-    <label for="pseudo">Pseudo <span class="opt">(facultatif, visible des autres)</span></label>
-    <input type="text" id="pseudo" name="pseudo" maxlength="40" autocomplete="nickname" placeholder="Ex. : Julie">
+    <label for="pseudo">Ton prénom ou pseudo <span class="opt">(obligatoire, visible des autres)</span></label>
+    <input type="text" id="pseudo" name="pseudo" maxlength="40" minlength="2" required autocomplete="nickname" placeholder="Ex. : Julie">
+    <div class="hint">Pour que je sache à qui répondre 😄</div>
 
     <div class="hp" aria-hidden="true">
       <label for="website">Ne pas remplir</label>
@@ -169,9 +174,9 @@
   </section>
 
   <div class="legal">
-    <p><strong>Ce qui est enregistré :</strong> ton message, ton pseudo si tu en donnes un, ta capture si tu en joins une. Pas d’email, pas de compte, pas de cookie, pas de traceur.</p>
-    <p><strong>Ce que voient les autres :</strong> le type, le message, le pseudo et la date. Les captures ne sont visibles que par l’équipe Trusti. Évite d’écrire des données personnelles dans ton message et masque-les sur ta capture.</p>
-    <p>Données hébergées sur un serveur indépendant de l’équipe Trusti, pas chez un géant du numérique. Pour faire supprimer un retour : contact@lielu.eu.</p>
+    <p><strong>Ce qui est enregistré :</strong> ton message, ton prénom ou pseudo, ta capture si tu en joins une. Pas d’email, pas de compte, pas de cookie, pas de traceur. Une clé secrète est gardée dans ton navigateur, uniquement pour te permettre de supprimer ton retour.</p>
+    <p><strong>Ce que voient les autres :</strong> le type, le message, ton prénom ou pseudo, la date et ta capture. Évite d’écrire des données personnelles dans ton message et masque-les sur ta capture.</p>
+    <p>Données hébergées sur un serveur indépendant de l’équipe Trusti, pas chez un géant du numérique. Tu peux supprimer ton retour (et sa capture) depuis le navigateur où tu l’as envoyé, avec « Supprimer mon retour ». Pour toute autre demande de suppression : contact@lielu.eu.</p>
   </div>
 </main>
 
@@ -185,6 +190,15 @@
   var current = null;      // Blob prêt à l’envoi
   var filter = '';
   var all = [];
+  var MINE_KEY = 'trusti_mine', PSEUDO_KEY = 'trusti_pseudo';
+  function loadMine() { try { return JSON.parse(localStorage.getItem(MINE_KEY) || '{}') || {}; } catch (e) { return {}; } }
+  function saveMine(m) { try { localStorage.setItem(MINE_KEY, JSON.stringify(m)); } catch (e) {} }
+  function newKey() {
+    var a = new Uint8Array(16);
+    window.crypto.getRandomValues(a);
+    return Array.prototype.map.call(a, function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+  }
+  try { var savedPseudo = localStorage.getItem(PSEUDO_KEY); if (savedPseudo) $('pseudo').value = savedPseudo; } catch (e) {}
 
   desc.addEventListener('input', function () { $('count').textContent = desc.value.length; });
 
@@ -260,11 +274,16 @@
     ev.preventDefault();
     hideMsg();
     var text = desc.value.trim();
+    var pseudo = $('pseudo').value.trim();
     if (text.length < 3) { showMsg('err', 'Écris au moins quelques mots avant d’envoyer.'); desc.focus(); return; }
+    if (pseudo.length < 2) { showMsg('err', 'Indique ton prénom ou un pseudo (2 caractères minimum).'); $('pseudo').focus(); return; }
+    var ownerKey = '';
+    try { ownerKey = newKey(); } catch (e) {}
     var fd = new FormData();
     fd.append('type', form.elements.type.value);
     fd.append('description', text);
-    fd.append('pseudo', $('pseudo').value.trim());
+    fd.append('pseudo', pseudo);
+    if (ownerKey) fd.append('ownerKey', ownerKey);
     fd.append('website', $('website').value);
     if (current) fd.append('capture', current, current.type === 'image/png' ? 'capture.png' : current.type === 'image/webp' ? 'capture.webp' : 'capture.jpg');
     var btn = $('send');
@@ -277,7 +296,10 @@
       showMsg(warn ? 'warn' : 'ok', warn
         ? 'Merci, ton message est bien reçu. Ta capture n’a pas pu être enregistrée : tu peux la renvoyer dans un autre retour.'
         : 'Merci, ton retour est bien reçu ! 🙌');
+      if (data.id && data.deletable && ownerKey) { var m = loadMine(); m[data.id] = ownerKey; saveMine(m); }
+      try { localStorage.setItem(PSEUDO_KEY, pseudo); } catch (e) {}
       form.reset(); clearFile(); $('count').textContent = '0';
+      $('pseudo').value = pseudo;
       loadFeed();
     } catch (e) {
       showMsg('err', 'L’envoi a échoué. Vérifie ta connexion et réessaie. Ton texte est conservé.');
@@ -319,9 +341,35 @@
       meta.appendChild(b); meta.appendChild(who); meta.appendChild(when);
       var p = document.createElement('p'); p.textContent = x.description;
       it.appendChild(meta); it.appendChild(p);
-      if (x.has_capture) { var c = document.createElement('div'); c.className = 'clip'; c.textContent = '📎 Capture jointe (visible de l’équipe)'; it.appendChild(c); }
+      if (x.capture) {
+        var url = API + '/trusti-capture?t=' + encodeURIComponent(x.capture);
+        var link = document.createElement('a'); link.href = url; link.target = '_blank'; link.rel = 'noopener';
+        var im = document.createElement('img'); im.className = 'shot'; im.loading = 'lazy'; im.alt = 'Capture d’écran jointe'; im.src = url;
+        link.appendChild(im); it.appendChild(link);
+      }
+      if (loadMine()[x.id]) {
+        var del = document.createElement('button'); del.type = 'button'; del.className = 'link-btn del'; del.textContent = 'Supprimer mon retour';
+        del.addEventListener('click', function () { removeMine(x.id, del); });
+        it.appendChild(del);
+      }
       box.appendChild(it);
     });
+  }
+  async function removeMine(id, btn) {
+    if (!window.confirm('Supprimer définitivement ce retour (et sa capture) ?')) return;
+    var m = loadMine(), key = m[id];
+    if (!key) return;
+    btn.disabled = true;
+    try {
+      var fd = new FormData(); fd.append('id', String(id)); fd.append('key', key);
+      var r = await fetch(API + '/trusti-retours-supprimer', { method: 'POST', body: fd });
+      if (!r.ok && r.status !== 403 && r.status !== 400) throw new Error('http ' + r.status);
+      delete m[id]; saveMine(m);
+      await loadFeed();
+    } catch (e) {
+      btn.disabled = false;
+      window.alert('La suppression a échoué. Réessaie dans un instant.');
+    }
   }
   async function loadFeed() {
     try {
