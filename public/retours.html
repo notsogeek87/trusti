@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trusti – Retours testeurs</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="/icons/icon-192.png">
+<style>
+  :root {
+    --bg: #E9F0F6;
+    --card: #ffffff;
+    --text: #1B2A3A;
+    --muted: #44546A;
+    --line: #DCE8EF;
+    --accent: #1B2A3A;
+    --accent-ink: #ffffff;
+    --accent-soft: #DCE8EF;
+    --bug: #b3261e;
+    --bug-soft: #fbe9e7;
+    --tip: #8a5a00;
+    --tip-soft: #fff2d6;
+    --note: #2a5fa8;
+    --note-soft: #e6eefb;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1620;
+      --card: #182230;
+      --text: #e6edf5;
+      --muted: #9fb0c3;
+      --line: #2a3a4d;
+      --accent: #9ec5f5;
+      --accent-ink: #0b1420;
+      --accent-soft: #1d2e44;
+      --bug: #ff8a80;
+      --bug-soft: #3a1f1d;
+      --tip: #ffcf70;
+      --tip-soft: #3a2f14;
+      --note: #8db6f2;
+      --note-soft: #1c2a40;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 640px; margin: 0 auto; padding: 20px 16px 48px; }
+  h1 { font-size: 1.5rem; margin: 8px 0 4px; letter-spacing: -0.01em; }
+  h2 { font-size: 1.1rem; margin: 0 0 12px; }
+  .lead { color: var(--muted); margin: 0 0 20px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  label, .label { display: block; font-weight: 600; font-size: .92rem; margin: 14px 0 6px; }
+  .opt { font-weight: 400; color: var(--muted); }
+  .types { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .types input { position: absolute; opacity: 0; pointer-events: none; }
+  .types label {
+    margin: 0; text-align: center; padding: 10px 6px; border: 1.5px solid var(--line);
+    border-radius: 10px; cursor: pointer; font-weight: 600; font-size: .9rem; background: var(--card);
+  }
+  .types input:checked + label { border-color: var(--accent); background: var(--accent-soft); }
+  .types input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
+  textarea, input[type=text] {
+    width: 100%; font: inherit; color: inherit; background: var(--bg);
+    border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px;
+  }
+  textarea { min-height: 120px; resize: vertical; }
+  textarea:focus, input[type=text]:focus { outline: 2px solid var(--accent); border-color: transparent; }
+  .counter { text-align: right; font-size: .8rem; color: var(--muted); margin-top: 4px; }
+  .file-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .btn {
+    font: inherit; font-weight: 600; border-radius: 10px; padding: 10px 14px; cursor: pointer;
+    border: 1.5px solid var(--line); background: var(--card); color: var(--text);
+  }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); width: 100%; padding: 13px; font-size: 1rem; margin-top: 18px; }
+  .btn:disabled { opacity: .6; cursor: progress; }
+  .preview { display: none; align-items: center; gap: 10px; }
+  .preview.on { display: flex; }
+  .preview img { height: 64px; width: auto; max-width: 120px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); }
+  .preview small { color: var(--muted); }
+  .link-btn { background: none; border: 0; color: var(--accent); font: inherit; text-decoration: underline; cursor: pointer; padding: 4px; }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .msg { margin-top: 14px; padding: 10px 12px; border-radius: 10px; display: none; font-size: .95rem; }
+  .msg.on { display: block; }
+  .msg.ok { background: var(--accent-soft); }
+  .msg.warn { background: var(--tip-soft); }
+  .msg.err { background: var(--bug-soft); }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .chip {
+    font: inherit; font-size: .88rem; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+    border: 1.5px solid var(--line); background: var(--card); color: var(--text);
+  }
+  .chip[aria-pressed=true] { background: var(--accent-soft); border-color: var(--accent); font-weight: 600; }
+  .item { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; background: var(--card); }
+  .meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: .85rem; color: var(--muted); margin-bottom: 6px; }
+  .badge { padding: 2px 9px; border-radius: 999px; font-weight: 600; font-size: .78rem; }
+  .badge.Bug { background: var(--bug-soft); color: var(--bug); }
+  .badge.Conseil { background: var(--tip-soft); color: var(--tip); }
+  .badge.Retour { background: var(--note-soft); color: var(--note); }
+  .item p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .clip { font-size: .8rem; color: var(--muted); margin-top: 6px; }
+  .empty, .loading { color: var(--muted); text-align: center; padding: 20px 0; }
+  .legal { font-size: .82rem; color: var(--muted); margin-top: 28px; }
+  .legal p { margin: 6px 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Trusti – Retours testeurs</h1>
+  <p class="lead">Un bug, une idée, une impression ? Dis-le en 30 secondes, sans compte. Tu peux aussi joindre une capture d’écran.</p>
+
+  <form id="form" class="card" novalidate>
+    <h2>Ton retour</h2>
+
+    <div class="label" id="type-label">C’est plutôt…</div>
+    <div class="types" role="radiogroup" aria-labelledby="type-label">
+      <input type="radio" name="type" id="t-bug" value="Bug" checked><label for="t-bug">🐞 Bug</label>
+      <input type="radio" name="type" id="t-tip" value="Conseil"><label for="t-tip">💡 Conseil</label>
+      <input type="radio" name="type" id="t-note" value="Retour"><label for="t-note">💬 Retour</label>
+    </div>
+
+    <label for="description">Ce que tu as remarqué</label>
+    <textarea id="description" name="description" maxlength="2000" required
+      placeholder="Ex. : en ouvrant la fiche d’une appli, l’écran se fige…"></textarea>
+    <div class="counter"><span id="count">0</span> / 2000</div>
+
+    <div class="label">Capture d’écran <span class="opt">(facultatif)</span></div>
+    <div class="file-row">
+      <button type="button" class="btn" id="pick">📎 Joindre une capture</button>
+      <input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/*" hidden>
+      <div class="preview" id="preview">
+        <img id="thumb" alt="Aperçu de la capture">
+        <div><small id="fileinfo"></small><br><button type="button" class="link-btn" id="remove">Retirer</button></div>
+      </div>
+    </div>
+
+    <label for="pseudo">Pseudo <span class="opt">(facultatif, visible des autres)</span></label>
+    <input type="text" id="pseudo" name="pseudo" maxlength="40" autocomplete="nickname" placeholder="Ex. : Julie">
+
+    <div class="hp" aria-hidden="true">
+      <label for="website">Ne pas remplir</label>
+      <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+    </div>
+
+    <button class="btn primary" id="send" type="submit">Envoyer mon retour</button>
+    <div class="msg" id="msg" role="status" aria-live="polite"></div>
+  </form>
+
+  <section aria-labelledby="feed-title">
+    <h2 id="feed-title">Les retours des autres testeurs</h2>
+    <div class="filters" id="filters" role="group" aria-label="Filtrer par type">
+      <button class="chip" data-f="" aria-pressed="true">Tous</button>
+      <button class="chip" data-f="Bug" aria-pressed="false">🐞 Bugs</button>
+      <button class="chip" data-f="Conseil" aria-pressed="false">💡 Conseils</button>
+      <button class="chip" data-f="Retour" aria-pressed="false">💬 Retours</button>
+    </div>
+    <div id="feed"><div class="loading">Chargement…</div></div>
+  </section>
+
+  <div class="legal">
+    <p><strong>Ce qui est enregistré :</strong> ton message, ton pseudo si tu en donnes un, ta capture si tu en joins une. Pas d’email, pas de compte, pas de cookie, pas de traceur.</p>
+    <p><strong>Ce que voient les autres :</strong> le type, le message, le pseudo et la date. Les captures ne sont visibles que par l’équipe Trusti. Évite d’écrire des données personnelles dans ton message et masque-les sur ta capture.</p>
+    <p>Données hébergées sur un serveur indépendant de l’équipe Trusti, pas chez un géant du numérique. Pour faire supprimer un retour : contact@lielu.eu.</p>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var API = 'https://auto.lielu.eu/webhook';
+  var MAX_UPLOAD = 800 * 1024; // le reverse proxy limite les requêtes à ~1 Mo
+  var $ = function (id) { return document.getElementById(id); };
+  var form = $('form'), desc = $('description'), fileInput = $('file');
+  var current = null;      // Blob prêt à l’envoi
+  var filter = '';
+  var all = [];
+
+  desc.addEventListener('input', function () { $('count').textContent = desc.value.length; });
+
+  function showMsg(kind, text) {
+    var m = $('msg');
+    m.className = 'msg on ' + kind;
+    m.textContent = text;
+  }
+  function hideMsg() { $('msg').className = 'msg'; }
+
+  /* ---------- Capture : compression côté navigateur ---------- */
+  function loadBitmap(file) {
+    if (window.createImageBitmap) return createImageBitmap(file);
+    return new Promise(function (res, rej) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () { URL.revokeObjectURL(url); res(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); rej(new Error('decode')); };
+      img.src = url;
+    });
+  }
+  function toBlob(canvas, q) {
+    return new Promise(function (res) { canvas.toBlob(res, 'image/jpeg', q); });
+  }
+  async function compress(file) {
+    if (file.size <= 700 * 1024 && /^image\/(png|jpeg|webp)$/.test(file.type)) return file;
+    var bmp = await loadBitmap(file);
+    var w0 = bmp.width, h0 = bmp.height;
+    var steps = [[1600, 0.85], [1600, 0.7], [1280, 0.7], [1080, 0.6], [800, 0.55]];
+    var blob = null;
+    for (var i = 0; i < steps.length; i++) {
+      var scale = Math.min(1, steps[i][0] / Math.max(w0, h0));
+      var c = document.createElement('canvas');
+      c.width = Math.round(w0 * scale); c.height = Math.round(h0 * scale);
+      var ctx = c.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.drawImage(bmp, 0, 0, c.width, c.height);
+      blob = await toBlob(c, steps[i][1]);
+      if (blob && blob.size <= MAX_UPLOAD) return blob;
+    }
+    return blob;
+  }
+
+  $('pick').addEventListener('click', function () { fileInput.click(); });
+  $('remove').addEventListener('click', clearFile);
+  function clearFile() {
+    current = null; fileInput.value = '';
+    $('preview').classList.remove('on');
+    if ($('thumb').src) { URL.revokeObjectURL($('thumb').src); $('thumb').removeAttribute('src'); }
+  }
+  function fmt(n) { return n > 1048576 ? (n / 1048576).toFixed(1) + ' Mo' : Math.round(n / 1024) + ' Ko'; }
+
+  fileInput.addEventListener('change', async function () {
+    hideMsg();
+    var f = fileInput.files && fileInput.files[0];
+    if (!f) return;
+    if (!/^image\//.test(f.type)) { clearFile(); showMsg('err', 'Ce fichier n’est pas une image.'); return; }
+    $('fileinfo').textContent = 'Préparation de la capture…';
+    $('preview').classList.add('on');
+    try {
+      var blob = await compress(f);
+      if (!blob || blob.size > MAX_UPLOAD) throw new Error('size');
+      current = blob;
+      $('thumb').src = URL.createObjectURL(blob);
+      $('fileinfo').textContent = fmt(blob.size) + ' prête à être envoyée';
+    } catch (e) {
+      clearFile();
+      showMsg('err', 'Impossible de préparer cette image. Essaie une autre capture (PNG ou JPEG).');
+    }
+  });
+
+  /* ---------- Envoi ---------- */
+  form.addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    hideMsg();
+    var text = desc.value.trim();
+    if (text.length < 3) { showMsg('err', 'Écris au moins quelques mots avant d’envoyer.'); desc.focus(); return; }
+    var fd = new FormData();
+    fd.append('type', form.elements.type.value);
+    fd.append('description', text);
+    fd.append('pseudo', $('pseudo').value.trim());
+    fd.append('website', $('website').value);
+    if (current) fd.append('capture', current, current.type === 'image/png' ? 'capture.png' : current.type === 'image/webp' ? 'capture.webp' : 'capture.jpg');
+    var btn = $('send');
+    btn.disabled = true; btn.textContent = 'Envoi…';
+    try {
+      var r = await fetch(API + '/trusti-retours', { method: 'POST', body: fd });
+      if (!r.ok) throw new Error('http ' + r.status);
+      var data = await r.json().catch(function () { return {}; });
+      var warn = data.capture === 'format' || data.capture === 'trop_lourde';
+      showMsg(warn ? 'warn' : 'ok', warn
+        ? 'Merci, ton message est bien reçu. Ta capture n’a pas pu être enregistrée : tu peux la renvoyer dans un autre retour.'
+        : 'Merci, ton retour est bien reçu ! 🙌');
+      form.reset(); clearFile(); $('count').textContent = '0';
+      loadFeed();
+    } catch (e) {
+      showMsg('err', 'L’envoi a échoué. Vérifie ta connexion et réessaie. Ton texte est conservé.');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Envoyer mon retour';
+    }
+  });
+
+  /* ---------- Fil public ---------- */
+  var rtf = window.Intl && Intl.RelativeTimeFormat ? new Intl.RelativeTimeFormat('fr', { numeric: 'auto' }) : null;
+  function ago(iso) {
+    var d = new Date(iso); if (isNaN(d)) return '';
+    var s = Math.round((d.getTime() - Date.now()) / 1000), a = Math.abs(s);
+    if (!rtf) return d.toLocaleDateString('fr-FR');
+    if (a < 60) return 'à l’instant';
+    if (a < 3600) return rtf.format(Math.round(s / 60), 'minute');
+    if (a < 86400) return rtf.format(Math.round(s / 3600), 'hour');
+    if (a < 86400 * 30) return rtf.format(Math.round(s / 86400), 'day');
+    return d.toLocaleDateString('fr-FR');
+  }
+  var LABEL = { Bug: '🐞 Bug', Conseil: '💡 Conseil', Retour: '💬 Retour' };
+
+  function render() {
+    var box = $('feed');
+    box.textContent = '';
+    var rows = all.filter(function (x) { return !filter || x.type === filter; });
+    if (!rows.length) {
+      var e = document.createElement('div'); e.className = 'empty';
+      e.textContent = all.length ? 'Aucun retour de ce type pour l’instant.' : 'Aucun retour pour l’instant. Sois le premier !';
+      box.appendChild(e); return;
+    }
+    rows.forEach(function (x) {
+      var it = document.createElement('article'); it.className = 'item';
+      var meta = document.createElement('div'); meta.className = 'meta';
+      var b = document.createElement('span'); b.className = 'badge ' + (LABEL[x.type] ? x.type : 'Retour');
+      b.textContent = LABEL[x.type] || LABEL.Retour;
+      var who = document.createElement('span'); who.textContent = x.pseudo || 'Anonyme';
+      var when = document.createElement('span'); when.textContent = '· ' + ago(x.date);
+      meta.appendChild(b); meta.appendChild(who); meta.appendChild(when);
+      var p = document.createElement('p'); p.textContent = x.description;
+      it.appendChild(meta); it.appendChild(p);
+      if (x.has_capture) { var c = document.createElement('div'); c.className = 'clip'; c.textContent = '📎 Capture jointe (visible de l’équipe)'; it.appendChild(c); }
+      box.appendChild(it);
+    });
+  }
+  async function loadFeed() {
+    try {
+      var r = await fetch(API + '/trusti-retours-liste', { cache: 'no-store' });
+      if (!r.ok) throw new Error('http');
+      var data = await r.json();
+      all = Array.isArray(data.items) ? data.items : [];
+      render();
+    } catch (e) {
+      if (!all.length) { $('feed').innerHTML = ''; var d = document.createElement('div'); d.className = 'empty'; d.textContent = 'Impossible de charger les retours pour le moment.'; $('feed').appendChild(d); }
+    }
+  }
+  $('filters').addEventListener('click', function (ev) {
+    var b = ev.target.closest('.chip'); if (!b) return;
+    filter = b.getAttribute('data-f');
+    Array.prototype.forEach.call($('filters').children, function (c) { c.setAttribute('aria-pressed', c === b ? 'true' : 'false'); });
+    render();
+  });
+
+  loadFeed();
+  setInterval(function () { if (!document.hidden) loadFeed(); }, 60000);
+})();
+</script>
+</body>
+</html>
