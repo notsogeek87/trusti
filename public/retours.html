@@ -113,6 +113,10 @@
   .empty, .loading { color: var(--muted); text-align: center; padding: 20px 0; }
   .hint { font-size: .82rem; color: var(--muted); margin: 4px 0 0; }
   .shot { display: block; max-width: 100%; max-height: 260px; margin-top: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); }
+  .plus { margin-top: 8px; display: inline-flex; gap: 6px; align-items: center; font: inherit; font-size: .88rem; font-weight: 600; padding: 5px 12px; border-radius: 999px; cursor: pointer; border: 1.5px solid var(--line); background: var(--card); color: var(--text); }
+  .plus[aria-pressed=true] { background: var(--accent-soft); border-color: var(--accent); }
+  .plus:disabled { opacity: .6; cursor: progress; }
+  .actions { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
   .del { margin-top: 6px; font-size: .85rem; color: var(--bug); padding-left: 0; }
   .legal { font-size: .82rem; color: var(--muted); margin-top: 28px; }
   .legal p { margin: 6px 0; }
@@ -197,6 +201,15 @@
     var a = new Uint8Array(16);
     window.crypto.getRandomValues(a);
     return Array.prototype.map.call(a, function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+  }
+  var PLUS_KEY = 'trusti_plus', VOTER_KEY = 'trusti_voter';
+  function loadPlus() { try { return JSON.parse(localStorage.getItem(PLUS_KEY) || '{}') || {}; } catch (e) { return {}; } }
+  function savePlus(m) { try { localStorage.setItem(PLUS_KEY, JSON.stringify(m)); } catch (e) {} }
+  function voterKey() {
+    var k = '';
+    try { k = localStorage.getItem(VOTER_KEY) || ''; } catch (e) {}
+    if (!/^[0-9a-f]{32}$/.test(k)) { k = newKey(); try { localStorage.setItem(VOTER_KEY, k); } catch (e) {} }
+    return k;
   }
   try { var savedPseudo = localStorage.getItem(PSEUDO_KEY); if (savedPseudo) $('pseudo').value = savedPseudo; } catch (e) {}
 
@@ -347,13 +360,40 @@
         var im = document.createElement('img'); im.className = 'shot'; im.loading = 'lazy'; im.alt = 'Capture d’écran jointe'; im.src = url;
         link.appendChild(im); it.appendChild(link);
       }
+      var act = document.createElement('div'); act.className = 'actions';
+      var voted = !!loadPlus()[x.id];
+      var pb = document.createElement('button'); pb.type = 'button'; pb.className = 'plus';
+      pb.setAttribute('aria-pressed', voted ? 'true' : 'false');
+      pb.textContent = '👍 +1 · ' + (x.plus || 0);
+      pb.title = 'Je suis d’accord / ça m’arrive aussi';
+      pb.addEventListener('click', function () { togglePlus(x, pb); });
+      act.appendChild(pb);
       if (loadMine()[x.id]) {
         var del = document.createElement('button'); del.type = 'button'; del.className = 'link-btn del'; del.textContent = 'Supprimer mon retour';
         del.addEventListener('click', function () { removeMine(x.id, del); });
-        it.appendChild(del);
+        act.appendChild(del);
       }
+      it.appendChild(act);
       box.appendChild(it);
     });
+  }
+  async function togglePlus(x, btn) {
+    var m = loadPlus(), on = !m[x.id];
+    btn.disabled = true;
+    try {
+      var fd = new FormData(); fd.append('id', String(x.id)); fd.append('key', voterKey()); fd.append('on', on ? 'true' : 'false');
+      var r = await fetch(API + '/trusti-retours-plus', { method: 'POST', body: fd });
+      if (r.status === 404) { delete m[x.id]; savePlus(m); await loadFeed(); return; }
+      if (!r.ok) throw new Error('http ' + r.status);
+      var data = await r.json().catch(function () { return {}; });
+      if (on) m[x.id] = 1; else delete m[x.id];
+      savePlus(m);
+      if (typeof data.count === 'number') x.plus = data.count;
+      render();
+    } catch (e) {
+      btn.disabled = false;
+      window.alert('Le +1 n’a pas pu être enregistré. Réessaie dans un instant.');
+    }
   }
   async function removeMine(id, btn) {
     if (!window.confirm('Supprimer définitivement ce retour (et sa capture) ?')) return;
