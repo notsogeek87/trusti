@@ -12,6 +12,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(SaveFilePlugin.class);
         registerPlugin(AppUpdatePlugin.class);
         registerPlugin(SystemCleanerPlugin.class);
+        registerPlugin(ShareTargetPlugin.class);
         super.onCreate(savedInstanceState);
         // Fenêtre de mise à jour (Compose) ; la recherche a lieu à chaque ON_START (voir UpdatePrompt).
         UpdateUi.attachUpdatePrompt(this);

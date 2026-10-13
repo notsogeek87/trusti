@@ -29,6 +29,7 @@ import LandingPage from './components/LandingPage';
 import OnboardingApps from './components/OnboardingApps';
 import OnboardingAppsNative from './components/OnboardingAppsNative';
 import { isNativeAndroid } from './utils/platform';
+import ShareTarget from './native/ShareTarget';
 
 // Modals
 import AppDetailModal from './components/modals/AppDetailModal';
@@ -333,7 +334,7 @@ const App = () => {
 
   // Ajout à la main d'une app inconnue de Trusti (valeur = nom pré-rempli) et
   // fiche d'une app « pas encore évaluée » déjà ajoutée.
-  const [addLocalInitialName, setAddLocalInitialName] = useState(null);
+  const [addLocalPrefill, setAddLocalPrefill] = useState(null); // null = fermée ; { name?, link? } = ouverte
   const [localDetailApp, setLocalDetailApp] = useState(null);
 
   const openAppDetail = useCallback((app) => {
@@ -455,6 +456,28 @@ const App = () => {
   // "popstate" : il émet l'événement natif Capacitor "backButton". Sans
   // écouteur dessus, le comportement par défaut est de fermer l'app
   // directement, même si un détail d'app ou une modale est ouvert.
+  // Partage Android : depuis le Play Store ou F-Droid, « Partager » > Trusti
+  // envoie le lien ici. On ouvre la fenêtre d'ajout avec le lien pré-rempli ;
+  // le texte reçu vient d'une autre app, il est donc traité comme une donnée
+  // (analysé strictement par parseAppLink, jamais ouvert ni exécuté).
+  useEffect(() => {
+    if (!isNativeAndroid) return undefined;
+    let handle;
+    let cancelled = false;
+    ShareTarget.addListener('sharedText', ({ text }) => {
+      if (typeof text !== 'string' || !text.trim()) return;
+      setAddLocalPrefill({ link: text.slice(0, 2000) });
+    }).then((h) => {
+      if (cancelled) h.remove(); else handle = h;
+    }).catch(() => {
+      // Plugin de partage indisponible : l'ajout par lien collé reste possible.
+    });
+    return () => {
+      cancelled = true;
+      handle?.remove();
+    };
+  }, []);
+
   useEffect(() => {
     if (!isNativeAndroid) return;
 
@@ -712,7 +735,7 @@ const App = () => {
             </div>
             <div className="shrink-0 flex items-center gap-2">
               <button
-                onClick={() => setAddLocalInitialName('')}
+                onClick={() => setAddLocalPrefill({})}
                 className="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
                 aria-label="Ajouter une app à la main"
                 title="Ajouter à la main une app que Trusti ne connaît pas"
@@ -867,7 +890,7 @@ const App = () => {
           </p>
           <button
             type="button"
-            onClick={() => setAddLocalInitialName(searchTerm.trim())}
+            onClick={() => setAddLocalPrefill({ name: searchTerm.trim() })}
             className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-700 text-white text-xs font-bold rounded-full"
           >
             <Plus size={14} /> Ajouter comme « pas encore évaluée »
@@ -929,9 +952,10 @@ const App = () => {
     )}
 
     {/* Ajout à la main d'une app inconnue de Trusti */}
-    {addLocalInitialName !== null && (
+    {addLocalPrefill !== null && (
       <AddLocalAppModal
-        initialName={addLocalInitialName}
+        initialName={addLocalPrefill.name || ''}
+        initialLink={addLocalPrefill.link || ''}
         onAddLocal={(name, packageName) => {
           if (addLocalApp(name, packageName)) setActiveTab(TABS.MY_APPS);
         }}
@@ -939,7 +963,7 @@ const App = () => {
           addMyApps([id]);
           setActiveTab(TABS.MY_APPS);
         }}
-        onClose={() => setAddLocalInitialName(null)}
+        onClose={() => setAddLocalPrefill(null)}
       />
     )}
 
