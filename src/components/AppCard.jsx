@@ -26,7 +26,8 @@ const AppCard = React.memo(({
   const isLoadingSkeleton = app.isLoadingSkeleton === true;
   // Une app « à réinstaller » n'est pas dans Mes Apps : pas de balayage
   // « Retirer » (qui toucherait Mes Apps), ni de blocs migration/alternative.
-  const showMyAppsExtras = !notInstalled;
+  const isLocal = app.isLocal === true;
+  const showMyAppsExtras = !notInstalled && !isLocal;
 
   const [swipeX, setSwipeX] = useState(0);
   const [swiping, setSwiping] = useState(false);
@@ -118,7 +119,17 @@ const AppCard = React.memo(({
           </div>
 
           <div className="flex items-center gap-2">
-            <ScoreIndicator grade={app.grade} />
+            {isLocal ? (
+              <div
+                className="bg-slate-200 text-slate-500 w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                title="Pas encore évaluée par Trusti"
+                aria-label="Pas encore évaluée par Trusti"
+              >
+                <span className="text-sm font-black leading-none">?</span>
+              </div>
+            ) : (
+              <ScoreIndicator grade={app.grade} />
+            )}
 
             {activeTab === TABS.MY_APPS && onToggleDaily && !isLoadingSkeleton && (
               <button

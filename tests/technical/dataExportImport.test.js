@@ -42,9 +42,25 @@ test('import : plafonne la taille de la liste', () => {
 
 test('import : ancien export sans dailyApps toujours accepté', () => {
   const res = importExportData({ format: 'trusti-local-export', version: 1, data: { notes: {} } });
-  assert.deepEqual(res, { notesImported: 0, dailyAppIds: [] });
+  assert.deepEqual(res, { notesImported: 0, dailyAppIds: [], localApps: [] });
 });
 
 test('import : fichier étranger rejeté', () => {
   assert.throws(() => importExportData({ format: 'autre' }), /Fichier invalide/);
+});
+
+test('export/import : apps « pas encore évaluées » (aller-retour et nettoyage)', () => {
+  const exported = JSON.parse(JSON.stringify(buildExportData({
+    localApps: [
+      { id: 'local-abc123', name: '  Mon   App  ', packageName: 'org.exemple.monapp' },
+      { id: 'local-def456', name: 'Sans package', packageName: 'pas un package' },
+      { id: 'pas-local', name: 'Id invalide' },
+      { id: 'local-ghi789', name: '' },
+    ],
+  })));
+  assert.deepEqual(exported.data.localApps, [
+    { id: 'local-abc123', name: 'Mon App', packageName: 'org.exemple.monapp' },
+    { id: 'local-def456', name: 'Sans package' },
+  ]);
+  assert.deepEqual(importExportData(exported).localApps, exported.data.localApps);
 });

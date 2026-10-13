@@ -5,7 +5,7 @@ import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
 import { TABS } from './constants/tabs';
 import { CATEGORIES, FAVORITES_FILTER } from './constants/categories';
-import { Sparkles, Share2, RefreshCw, Star } from 'lucide-react';
+import { Sparkles, Share2, RefreshCw, Star, Plus } from 'lucide-react';
 import { ViewModeContext } from './contexts/ViewModeContext';
 import { parseShareParams, clearShareParams, hasShareParams } from './utils/shareUtils';
 import { hasCompletedOnboarding, markOnboardingComplete } from './utils/onboardingStorage';
@@ -35,6 +35,8 @@ import AppDetailModal from './components/modals/AppDetailModal';
 import ShareModal from './components/modals/ShareModal';
 import TrustiShareModal from './components/modals/TrustiShareModal';
 import ImportAppsModal from './components/modals/ImportAppsModal';
+import AddLocalAppModal from './components/modals/AddLocalAppModal';
+import LocalAppModal from './components/modals/LocalAppModal';
 import MigrationSelectorModal from './components/modals/MigrationSelectorModal';
 import MigrationGuideModal from './components/modals/MigrationGuideModal';
 import WelcomeModal from './components/modals/WelcomeModal';
@@ -209,6 +211,7 @@ const App = () => {
     migratedApps,
     customMigrations,
     dailyApps,
+    localApps,
     uninstalledDailyData,
     selectedApp,
     filteredApps,
@@ -226,6 +229,9 @@ const App = () => {
     toggleFavorite,
     toggleDaily,
     addDailyApps,
+    addLocalApp,
+    removeLocalApp,
+    importLocalApps,
     addMyApps,
     removeMyApps,
     clearMyApps,
@@ -250,7 +256,7 @@ const App = () => {
   // Compteurs pour le filtre migrée / à migrer (sur la liste non filtrée par ce critère)
   const migrationCounts = useMemo(() => {
     if (activeTab !== TABS.MY_APPS) return { migrated: 0, todo: 0 };
-    const realApps = filteredApps.filter(app => !app.isLoadingSkeleton);
+    const realApps = filteredApps.filter(app => !app.isLoadingSkeleton && !app.isLocal);
     const migrated = realApps.filter(isAppMigrated).length;
     return { migrated, todo: realApps.length - migrated };
   }, [activeTab, filteredApps]);
@@ -258,7 +264,7 @@ const App = () => {
   // Compteurs pour le filtre avec / sans alternative (sur la liste non filtrée par ce critère)
   const alternativeCounts = useMemo(() => {
     if (activeTab !== TABS.MY_APPS) return { with: 0, without: 0 };
-    const realApps = filteredApps.filter(app => !app.isLoadingSkeleton);
+    const realApps = filteredApps.filter(app => !app.isLoadingSkeleton && !app.isLocal);
     const withAlt = realApps.filter(appHasAlternative).length;
     return { with: withAlt, without: realApps.length - withAlt };
   }, [activeTab, filteredApps, customMigrations]);
@@ -303,7 +309,8 @@ const App = () => {
     const base = dailyOnly ? myAppsSorted.filter(app => dailyApps.has(String(app.id))) : myAppsSorted;
     if (migrationFilter === 'all' && alternativeFilter === 'all') return base;
     return base.filter(app => {
-      if (app.isLoadingSkeleton) return false;
+      // Une app non évaluée n'est ni « à migrer » ni « migrée »
+      if (app.isLoadingSkeleton || app.isLocal) return false;
       if (migrationFilter !== 'all' && (migrationFilter === 'migrated') !== isAppMigrated(app)) {
         return false;
       }
@@ -319,7 +326,16 @@ const App = () => {
 
   const shouldRestoreScroll = useRef(false);
 
+  // Ajout à la main d'une app inconnue de Trusti (valeur = nom pré-rempli) et
+  // fiche d'une app « pas encore évaluée » déjà ajoutée.
+  const [addLocalInitialName, setAddLocalInitialName] = useState(null);
+  const [localDetailApp, setLocalDetailApp] = useState(null);
+
   const openAppDetail = useCallback((app) => {
+    if (app?.isLocal) {
+      setLocalDetailApp(app);
+      return;
+    }
     savedScrollY.current = window.scrollY;
     window.scrollTo({ top: 0, behavior: 'instant' });
     setSelectedApp(app);
@@ -551,8 +567,10 @@ const App = () => {
         onSelectApp={openAppDetail}
         dailyApps={dailyApps}
         myApps={myApps}
-        dailyAppsInfo={[...myAppsData, ...uninstalledDailyData]}
+        dailyAppsInfo={[...myAppsData, ...uninstalledDailyData, ...localApps]}
+        localApps={localApps}
         onImportDailyApps={addDailyApps}
+        onImportLocalApps={importLocalApps}
       />
     );
   }
@@ -688,6 +706,14 @@ const App = () => {
               </p>
             </div>
             <div className="shrink-0 flex items-center gap-2">
+              <button
+                onClick={() => setAddLocalInitialName('')}
+                className="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
+                aria-label="Ajouter une app à la main"
+                title="Ajouter à la main une app que Trusti ne connaît pas"
+              >
+                <Plus size={16} />
+              </button>
               <button
                 onClick={() => setShowRescan(true)}
                 className="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
@@ -828,6 +854,22 @@ const App = () => {
         isLoadingMyApps={isLoadingMyApps}
       />
 
+      {/* Recherche sans résultat dans le catalogue : proposer l'ajout à la main */}
+      {activeTab === TABS.APPLICATIONS && searchTerm.trim() && !isSearching && filteredApps.length === 0 && (
+        <div className="text-center py-8 px-4">
+          <p className="text-slate-500 text-sm mb-3">
+            Trusti ne connaît pas encore « {searchTerm.trim()} »
+          </p>
+          <button
+            type="button"
+            onClick={() => setAddLocalInitialName(searchTerm.trim())}
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-700 text-white text-xs font-bold rounded-full"
+          >
+            <Plus size={14} /> Ajouter comme « pas encore évaluée »
+          </button>
+        </div>
+      )}
+
       {/* Apps du quotidien pas (encore) sur ce téléphone, p. ex. après import */}
       {activeTab === TABS.MY_APPS && dailyOnly && uninstalledDaily.length > 0 && (
         <section className="mt-6">
@@ -866,7 +908,7 @@ const App = () => {
         migratedApps={migratedApps}
         customMigrations={customMigrations}
         allApps={apps}
-        sortedAppIds={myAppsSorted.map(app => app.id)}
+        sortedAppIds={myAppsSorted.filter(app => !app.isLocal).map(app => app.id)}
         onClose={() => setShowShareModal(false)}
       />
     )}
@@ -874,10 +916,36 @@ const App = () => {
     {/* Modal de partage des TrustiApp */}
     {showTrustiShareModal && (
       <TrustiShareModal
-        selectedApps={myAppsSorted}
+        selectedApps={myAppsSorted.filter(app => !app.isLocal)}
         customMigrations={customMigrations}
         allApps={apps}
         onClose={() => setShowTrustiShareModal(false)}
+      />
+    )}
+
+    {/* Ajout à la main d'une app inconnue de Trusti */}
+    {addLocalInitialName !== null && (
+      <AddLocalAppModal
+        initialName={addLocalInitialName}
+        onAddLocal={(name, packageName) => {
+          if (addLocalApp(name, packageName)) setActiveTab(TABS.MY_APPS);
+        }}
+        onAddCatalogApp={(id) => {
+          addMyApps([id]);
+          setActiveTab(TABS.MY_APPS);
+        }}
+        onClose={() => setAddLocalInitialName(null)}
+      />
+    )}
+
+    {/* Fiche d'une app « pas encore évaluée » */}
+    {localDetailApp && (
+      <LocalAppModal
+        app={localDetailApp}
+        isDaily={dailyApps.has(String(localDetailApp.id))}
+        onToggleDaily={toggleDaily}
+        onRemove={removeLocalApp}
+        onClose={() => setLocalDetailApp(null)}
       />
     )}
 

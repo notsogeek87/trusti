@@ -43,10 +43,26 @@ export const setNote = (appId, text) => {
   writeAll(notes);
 };
 
+/**
+ * Déplace la note d'une app vers une autre (ex. fusion d'une app « pas encore
+ * évaluée » avec l'app du catalogue). Ne remplace jamais une note déjà
+ * présente sur la destination ; la note source est supprimée dans tous les cas.
+ */
+export const moveNote = (fromId, toId) => {
+  if (!fromId || !toId || String(fromId) === String(toId)) return;
+  const notes = readAll();
+  const from = String(fromId);
+  const to = String(toId);
+  if (!notes[from]) return;
+  if (!notes[to]) notes[to] = notes[from];
+  delete notes[from];
+  writeAll(notes);
+};
+
 /** Toutes les notes, telles que stockées : { [appId]: { text, updatedAt } }. */
 export const getAllNotes = () => readAll();
 
 /** Nombre de notes renseignées, pour affichage (ex. page Stockage). */
 export const getNotesCount = () => Object.keys(readAll()).length;
 
-export default { getNote, setNote, getAllNotes, getNotesCount };
+export default { getNote, setNote, moveNote, getAllNotes, getNotesCount };

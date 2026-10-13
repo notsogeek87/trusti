@@ -100,7 +100,9 @@ const StoragePage = ({
   dailyApps = new Set(),
   myApps = new Set(),
   dailyAppsInfo = [],
+  localApps = [],
   onImportDailyApps,
+  onImportLocalApps,
 }) => {
   // null = scan pas encore terminé, [] = scan fait, rien trouvé.
   const [installedPackages, setInstalledPackages] = useState(null);
@@ -123,7 +125,7 @@ const StoragePage = ({
       // Noms joints à titre informatif quand on les connaît (apps chargées)
       const namesById = new Map(dailyAppsInfo.map(app => [String(app.id), app.name]));
       const dailyList = Array.from(dailyApps).map(id => ({ id, name: namesById.get(id) }));
-      await exportJSONFile(buildExportData({ dailyApps: dailyList }), buildExportFilename());
+      await exportJSONFile(buildExportData({ dailyApps: dailyList, localApps }), buildExportFilename());
       setImportFeedback(null);
     } catch (error) {
       // Enregistrement annulé par l'utilisateur : pas une erreur à afficher.
@@ -139,11 +141,14 @@ const StoragePage = ({
     try {
       const text = await file.text();
       const parsed = JSON.parse(text);
-      const { notesImported, dailyAppIds } = importExportData(parsed);
+      const { notesImported, dailyAppIds, localApps: importedLocalApps } = importExportData(parsed);
+      if (importedLocalApps.length > 0) onImportLocalApps?.(importedLocalApps);
       if (dailyAppIds.length > 0) onImportDailyApps?.(dailyAppIds);
       // Apps du quotidien absentes de ce téléphone : elles seront listées dans
       // Mes Apps > Au quotidien > « À réinstaller ».
-      const toReinstall = dailyAppIds.filter(id => !myApps.has(id)).length;
+      // Les apps « pas encore évaluées » importées rejoignent Mes Apps : pas à réinstaller.
+      const importedLocalIds = new Set(importedLocalApps.map(local => local.id));
+      const toReinstall = dailyAppIds.filter(id => !myApps.has(id) && !importedLocalIds.has(id)).length;
       const parts = [];
       if (dailyAppIds.length > 0) {
         parts.push(
@@ -151,10 +156,13 @@ const StoragePage = ({
           + (toReinstall > 0 ? ` (dont ${toReinstall} à réinstaller)` : '')
         );
       }
+      if (importedLocalApps.length > 0) {
+        parts.push(`${importedLocalApps.length} app${importedLocalApps.length > 1 ? 's' : ''} non évaluée${importedLocalApps.length > 1 ? 's' : ''}`);
+      }
       if (notesImported > 0 || parts.length === 0) {
         parts.push(`${notesImported} note${notesImported > 1 ? 's' : ''}`);
       }
-      setImportFeedback({ type: 'success', message: `${parts.join(' et ')} importée${dailyAppIds.length + notesImported > 1 ? 's' : ''} ✓` });
+      setImportFeedback({ type: 'success', message: `${parts.join(', ')} importé${dailyAppIds.length + notesImported + importedLocalApps.length > 1 ? 's' : ''} ✓` });
     } catch (error) {
       setImportFeedback({ type: 'error', message: error.message || "Échec de l'import." });
     }
@@ -343,8 +351,9 @@ const StoragePage = ({
             Exporter / importer mes données
           </h2>
           <p className="text-xs text-slate-500 mb-3">
-            Sont sauvegardées vos apps utilisées au quotidien ({dailyApps.size})
-            et vos notes par app ({getNotesCount()}). Utile pour changer de
+            Sont sauvegardées vos apps utilisées au quotidien ({dailyApps.size}),
+            les apps ajoutées à la main ({localApps.length}) et vos commentaires
+            par app ({getNotesCount()}). Utile pour changer de
             téléphone : après un nouveau scan, importez ce fichier et retrouvez
             votre sélection (les apps pas encore installées sont listées « À
             réinstaller »).

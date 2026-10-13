@@ -23,6 +23,9 @@ const MyAppsSummary = ({ apps, onShareMigrations, children }) => {
     };
   }, [apps]);
 
+  // Apps ajoutées à la main, sans note : hors du calcul, mais signalées
+  const unratedCount = useMemo(() => apps.filter(app => app?.isLocal).length, [apps]);
+
   const hasScore = total > 0 && !!overallGrade;
   if (!hasScore && !children) return null;
 
@@ -44,7 +47,10 @@ const MyAppsSummary = ({ apps, onShareMigrations, children }) => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[15px] font-bold text-white truncate">TrustiScore du téléphone</p>
-                <p className="text-xs text-indigo-100 truncate">{phoneGradeLabel[overallGrade]}</p>
+                <p className="text-xs text-indigo-100 truncate">
+                  {phoneGradeLabel[overallGrade]}
+                  {unratedCount > 0 && ` · ${unratedCount} non évaluée${unratedCount > 1 ? 's' : ''}`}
+                </p>
               </div>
               <ChevronDown size={18} className={`shrink-0 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
             </div>

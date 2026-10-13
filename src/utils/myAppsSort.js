@@ -84,6 +84,12 @@ export const sortMyApps = (apps, { sortBy, direction } = DEFAULT_MY_APPS_SORT, a
       }
       case 'trustiScore':
       default:
+        // Les apps « pas encore évaluées » (sans note) restent toujours en bas,
+        // quel que soit le sens du tri.
+        if (a.isLocal || b.isLocal) {
+          if (a.isLocal && b.isLocal) return compareName(a, b);
+          return a.isLocal ? 1 : -1;
+        }
         cmp = (GRADE_RANK[a.grade] || 0) - (GRADE_RANK[b.grade] || 0);
         break;
     }

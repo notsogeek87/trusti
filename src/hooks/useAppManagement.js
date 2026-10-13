@@ -4,6 +4,29 @@ import { API_URL } from '../utils/apiConfig';
 import { cachedFetchJSON } from '../utils/fetchCache';
 import { pickBestAlternative, isStrictlyBetterGrade } from '../utils/alternatives';
 import { hasCompletedOnboarding } from '../utils/onboardingStorage';
+import { extractPackageId } from '../utils/androidPackage';
+import { setNote, moveNote } from '../utils/notesStorage';
+import {
+  isLocalAppId,
+  makeLocalId,
+  cleanAppName,
+  normalizeAppName,
+  isValidPackageName,
+  parseLocalApps,
+  findCatalogMatch,
+} from '../utils/localApps';
+
+// Représentation d'une app « pas encore évaluée » (sans note A–E) dans les
+// listes : mêmes champs de base qu'une app du catalogue, marquée isLocal.
+const toLocalApp = (local) => ({
+  id: local.id,
+  name: local.name,
+  packageName: local.packageName,
+  category: 'Pas encore évaluée',
+  icon: '📱',
+  color: 'bg-slate-400',
+  isLocal: true,
+});
 
 const GOOD_GRADES = ['A', 'B', 'C'];
 
@@ -73,6 +96,10 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
   // app peut y figurer sans être installée — typiquement après un import sur
   // un nouveau téléphone, en attente de réinstallation).
   const [dailyApps, setDailyApps] = useState(new Set());
+  // Apps ajoutées à la main car inconnues de Trusti (« pas encore évaluées »).
+  // Leur id est dans `myApps` comme les autres, mais elles ne sont jamais
+  // demandées à l'API.
+  const [localApps, setLocalApps] = useState([]);
   // Données des apps quotidiennes absentes de « Mes Apps » (à réinstaller).
   const [uninstalledDailyData, setUninstalledDailyData] = useState([]);
   const [selectedApp, setSelectedApp] = useState(null);
@@ -120,6 +147,7 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
       setMigratedApps(new Set(userData.migratedApps || []));
       setCustomMigrations(new Map(userData.customMigrations || []));
       setDailyApps(new Set((userData.dailyApps || []).map(String)));
+      setLocalApps(parseLocalApps(userData.localApps));
     } else {
       // Rien de sauvegardé encore : état vide
       setMyApps(new Set());
@@ -127,6 +155,7 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
       setMigratedApps(new Set());
       setCustomMigrations(new Map());
       setDailyApps(new Set());
+      setLocalApps([]);
     }
 
     // Petite temporisation pour s'assurer que les states sont bien définis
@@ -141,10 +170,11 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
         favoriteApps: Array.from(favoriteApps),
         migratedApps: Array.from(migratedApps),
         customMigrations: Array.from(customMigrations.entries()),
-        dailyApps: Array.from(dailyApps)
+        dailyApps: Array.from(dailyApps),
+        localApps
       });
     }
-  }, [myApps, favoriteApps, migratedApps, customMigrations, dailyApps]);
+  }, [myApps, favoriteApps, migratedApps, customMigrations, dailyApps, localApps]);
   // Note: On ne met pas saveUserData dans les dépendances pour éviter la boucle
 
   // Charger toutes les applications au montage
@@ -270,13 +300,21 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
       if (isLoadingMyApps) {
         return;
       }
-      
+
+      // Les apps « pas encore évaluées » n'existent pas côté serveur : on ne
+      // demande à l'API que les vrais ids. Sans aucun id, ne surtout pas
+      // appeler `?ids=` vide (l'API renverrait alors tout le catalogue).
+      const idsArray = Array.from(myApps).filter(id => !isLocalAppId(id));
+      if (idsArray.length === 0) {
+        setMyAppsData([]);
+        setMyAppsLoaded(true);
+        return;
+      }
+
       setIsLoadingMyApps(true);
       
       try {
         
-        // Convertir le Set en tableau d'IDs
-        const idsArray = Array.from(myApps);
         const idsParam = idsArray.join(',');
 
         const url = `${API_URL}/apps?ids=${encodeURIComponent(idsParam)}`;
@@ -306,11 +344,36 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
     loadMyApps();
   }, [activeTab, myApps, needsMyAppsData]); // Recharger quand l'onglet, myApps, ou ce besoin externe change
   
+  // Fusion automatique : dès que le catalogue (chargé en entier) contient
+  // l'équivalent d'une app « pas encore évaluée », on la remplace par l'app du
+  // catalogue dans Mes Apps et dans le quotidien, et sa note suit.
+  useEffect(() => {
+    // Attendre la fin de l'initialisation : sinon le changement d'état serait
+    // ignoré par la sauvegarde (voir l'effet de persistance plus haut).
+    if (!isInitialized || !allAppsLoaded || localApps.length === 0 || apps.length === 0) return;
+    const mapping = new Map();
+    localApps.forEach(local => {
+      const match = findCatalogMatch(local, apps, extractPackageId);
+      if (match) mapping.set(local.id, String(match.id));
+    });
+    if (mapping.size === 0) return;
+
+    const remap = (prev) => {
+      const next = new Set();
+      prev.forEach(id => next.add(mapping.get(id) ?? id));
+      return next;
+    };
+    mapping.forEach((catalogId, localId) => moveNote(localId, catalogId));
+    setMyApps(remap);
+    setDailyApps(remap);
+    setLocalApps(prev => prev.filter(local => !mapping.has(local.id)));
+  }, [isInitialized, allAppsLoaded, apps, localApps]);
+
   // Apps quotidiennes qui ne sont pas dans « Mes Apps » (pas installées, ou
   // pas encore rescannées) : on charge leurs données pour pouvoir les lister
   // dans la section « À réinstaller » de Mes Apps.
   const uninstalledDailyIds = useMemo(
-    () => Array.from(dailyApps).filter(id => !myApps.has(id)),
+    () => Array.from(dailyApps).filter(id => !myApps.has(id) && !isLocalAppId(id)),
     [dailyApps, myApps]
   );
   const uninstalledDailyKey = uninstalledDailyIds.join(',');
@@ -499,7 +562,11 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
       const loadedAppsMap = new Map(myAppsData.map(app => [String(app.id), app]));
       
       // Pour chaque app dans myApps, vérifier si elle est chargée ou créer un skeleton
+      const localById = new Map(localApps.map(local => [local.id, local]));
       const allMyApps = Array.from(myApps).map(id => {
+        const localApp = localById.get(String(id));
+        if (localApp) return toLocalApp(localApp);
+
         const loadedApp = loadedAppsMap.get(String(id));
         
         // Si l'app est chargée, la retourner
@@ -522,8 +589,8 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
       
       // Enrichir avec les alternatives (seulement pour les apps réelles, pas les skeletons)
       const list = allMyApps.map(app => {
-        // Si c'est un skeleton, le retourner tel quel
-        if (app.isLoadingSkeleton) {
+        // Skeleton ou app « pas encore évaluée » : rien à enrichir
+        if (app.isLoadingSkeleton || app.isLocal) {
           return app;
         }
         
@@ -605,6 +672,13 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
           const alternativeInfo = buildAlternativeInfo(app, apps, myApps);
           return alternativeInfo ? { ...app, ...alternativeInfo } : app;
         });
+
+      // Apps « pas encore évaluées » : absentes de la recherche API, on les
+      // filtre ici sur le nom.
+      const term = searchTerm.trim().toLowerCase();
+      localApps
+        .filter(local => myApps.has(local.id) && local.name.toLowerCase().includes(term))
+        .forEach(local => list.push(toLocalApp(local)));
       
       // Trier par grade (E > D > C > B > A - du plus mauvais au meilleur) puis par nom
       const gradeOrder = { 'E': 1, 'D': 2, 'C': 3, 'B': 4, 'A': 5 };
@@ -626,11 +700,17 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
     }
     
     return list;
-  }, [activeTab, myApps, searchTerm, searchResults, apps, awardsApps, myAppsData, isLoadingMyApps, selectedCategory]);
+  }, [activeTab, myApps, searchTerm, searchResults, apps, awardsApps, myAppsData, isLoadingMyApps, selectedCategory, localApps]);
 
   // Ajouter/retirer une app de "Mes Apps"
   const toggleMyApp = (e, id) => {
     e.stopPropagation();
+    // Une app « pas encore évaluée » n'a pas d'existence hors de Mes Apps :
+    // la retirer la supprime complètement.
+    if (isLocalAppId(String(id))) {
+      removeLocalApp(String(id));
+      return;
+    }
     setMyApps(prev => {
       const newList = new Set(prev);
       if (newList.has(id)) {
@@ -672,6 +752,58 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
     });
   };
 
+  // Ajouter à la main une app inconnue de Trusti (« pas encore évaluée »).
+  // Retourne son id, ou null si le nom est invalide. Une app locale déjà
+  // présente (même package ou même nom) est réutilisée plutôt que dupliquée.
+  const addLocalApp = (name, packageName) => {
+    const cleanName = cleanAppName(name);
+    if (!cleanName) return null;
+    const pkg = isValidPackageName(packageName) ? packageName : undefined;
+
+    const existing = localApps.find(local =>
+      (pkg && local.packageName === pkg) || normalizeAppName(local.name) === normalizeAppName(cleanName)
+    );
+    const id = existing ? existing.id : makeLocalId();
+
+    if (!existing) {
+      setLocalApps(prev => [...prev, pkg ? { id, name: cleanName, packageName: pkg } : { id, name: cleanName }]);
+    }
+    setMyApps(prev => new Set(prev).add(id));
+    return id;
+  };
+
+  // Supprimer complètement une app « pas encore évaluée » (liste, quotidien, note)
+  const removeLocalApp = (id) => {
+    setLocalApps(prev => prev.filter(local => local.id !== id));
+    setMyApps(prev => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+    setDailyApps(prev => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+    setNote(id, '');
+  };
+
+  // Recréer des apps « pas encore évaluées » depuis une sauvegarde importée
+  // (additif ; une app dont l'id existe déjà est ignorée).
+  const importLocalApps = (list = []) => {
+    const incoming = parseLocalApps(list);
+    if (!incoming.length) return;
+    setLocalApps(prev => {
+      const known = new Set(prev.map(local => local.id));
+      return [...prev, ...incoming.filter(local => !known.has(local.id))];
+    });
+    setMyApps(prev => {
+      const next = new Set(prev);
+      incoming.forEach(local => next.add(local.id));
+      return next;
+    });
+  };
+
   // Ajouter plusieurs apps quotidiennes (import d'une sauvegarde) — additif
   const addDailyApps = (ids = []) => {
     if (!ids.length) return;
@@ -708,6 +840,9 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
   const clearMyApps = () => {
     setMyApps(new Set());
     setFavoriteApps(new Set());
+    // Les apps « pas encore évaluées » ne vivent que dans Mes Apps
+    setLocalApps([]);
+    setDailyApps(prev => new Set(Array.from(prev).filter(id => !isLocalAppId(id))));
   };
 
   // Vider l'historique de migrations (statut migré + alternatives
@@ -815,6 +950,7 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
     migratedApps,
     customMigrations,
     dailyApps,
+    localApps,
     uninstalledDailyData,
     selectedApp,
     apps,
@@ -834,6 +970,9 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
     toggleFavorite,
     toggleDaily,
     addDailyApps,
+    addLocalApp,
+    removeLocalApp,
+    importLocalApps,
     addMyApps,
     removeMyApps,
     clearMyApps,

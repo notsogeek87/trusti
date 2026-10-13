@@ -9,6 +9,7 @@
  * exportés par les utilisateurs.
  */
 import { getAllNotes } from './notesStorage.js';
+import { parseLocalApps } from './localApps.js';
 
 const EXPORT_FORMAT = 'trusti-local-export';
 const EXPORT_VERSION = 1;
@@ -20,17 +21,21 @@ const MAX_DAILY_APPS = 2000;
 /**
  * Construit l'objet exporté (avant sérialisation JSON).
  *
- * @param {{ dailyApps?: Array<{id: string|number, name?: string}> }} [options]
+ * @param {{ dailyApps?: Array<{id: string|number, name?: string}>,
+ *           localApps?: Array<{id: string, name: string, packageName?: string}> }} [options]
  *   dailyApps : apps utilisées au quotidien (le nom est facultatif, purement
  *   informatif pour qui ouvre le fichier).
+ *   localApps : apps « pas encore évaluées » ajoutées à la main (nom et
+ *   package nécessaires pour les recréer sur un autre téléphone).
  */
-export const buildExportData = ({ dailyApps = [] } = {}) => ({
+export const buildExportData = ({ dailyApps = [], localApps = [] } = {}) => ({
   format: EXPORT_FORMAT,
   version: EXPORT_VERSION,
   exportedAt: new Date().toISOString(),
   data: {
     notes: getAllNotes(),
     dailyApps: dailyApps.map(({ id, name }) => (name ? { id: String(id), name } : { id: String(id) })),
+    localApps: parseLocalApps(localApps),
   },
 });
 
@@ -64,9 +69,10 @@ export const buildExportFilename = () => {
  * autres notes locales sont conservées.
  *
  * @param {unknown} parsed - Contenu JSON déjà parsé du fichier importé.
- * @returns {{ notesImported: number, dailyAppIds: string[] }} Résumé de ce qui
- *   a été importé. Les ids quotidiens ne sont pas écrits ici (ils vivent dans
- *   l'état de l'app) : à l'appelant de les appliquer.
+ * @returns {{ notesImported: number, dailyAppIds: string[], localApps: object[] }}
+ *   Résumé de ce qui a été importé. Les apps du quotidien et les apps locales
+ *   ne sont pas écrites ici (elles vivent dans l'état de l'app) : à
+ *   l'appelant de les appliquer.
  * @throws {Error} Si le fichier n'a pas le format attendu.
  */
 export const importExportData = (parsed) => {
@@ -74,9 +80,10 @@ export const importExportData = (parsed) => {
     throw new Error("Fichier invalide : ce n'est pas un export Trusti reconnu.");
   }
   const dailyAppIds = parseDailyAppIds(parsed);
+  const localApps = parseLocalApps(parsed.data?.localApps);
   const importedNotes = parsed.data?.notes;
   if (!importedNotes || typeof importedNotes !== 'object') {
-    return { notesImported: 0, dailyAppIds };
+    return { notesImported: 0, dailyAppIds, localApps };
   }
 
   const STORAGE_KEY = 'trusti_notes';
@@ -96,7 +103,7 @@ export const importExportData = (parsed) => {
   });
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-  return { notesImported: entries.length, dailyAppIds };
+  return { notesImported: entries.length, dailyAppIds, localApps };
 };
 
 export default { buildExportData, buildExportFilename, importExportData, parseDailyAppIds };
