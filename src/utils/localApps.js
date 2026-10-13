@@ -75,15 +75,18 @@ export const parseLocalApps = (list) => {
  * @param {Array} p.localApps          apps « pas encore évaluées » actuelles
  * @param {Array<{name: string, packageName: string}>} p.found  apps courantes trouvées installées
  * @param {string[]} p.notInstalledPackages  apps courantes confirmées absentes
+ * @param {Set<string>} [p.installedPackages]  scan complet : tous les packages installés ;
+ *   si fourni, une app `auto` est retirée dès qu'elle n'y figure plus
  * @param {Set<string>} p.dailyApps    ids marqués « quotidien »
  * @param {(id: string) => boolean} p.hasNote
  * @param {(index: number) => string} p.makeId  fabrique un id local unique
  * @returns {{ removedIds: string[], toAdd: Array }}
  */
-export const planCommonSync = ({ localApps, found, notInstalledPackages, dailyApps, hasNote, makeId }) => {
-  const gone = new Set(notInstalledPackages);
+export const planCommonSync = ({ localApps, found, notInstalledPackages, installedPackages, dailyApps, hasNote, makeId }) => {
+  const gone = new Set(notInstalledPackages || []);
+  const isGone = (pkg) => (installedPackages ? !installedPackages.has(pkg) : gone.has(pkg));
   const removedIds = localApps
-    .filter(local => local.auto && local.packageName && gone.has(local.packageName)
+    .filter(local => local.auto && local.packageName && isGone(local.packageName)
       && !dailyApps.has(local.id) && !hasNote(local.id))
     .map(local => local.id);
 

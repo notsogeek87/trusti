@@ -125,3 +125,43 @@ test('parseLocalApps conserve le drapeau auto', () => {
   assert.deepEqual(parseLocalApps([{ id: 'local-zz99', name: 'Z', packageName: 'a.b', auto: true }, { id: 'local-yy88', name: 'Y', auto: 'oui' }]),
     [{ id: 'local-zz99', name: 'Z', packageName: 'a.b', auto: true }, { id: 'local-yy88', name: 'Y' }]);
 });
+
+import { pickUnknownInstalledApps } from '../../src/utils/fullScan.js';
+
+test('scan complet : garde les apps utilisables non notées, écarte système, services, catalogue et Trusti', () => {
+  const installed = [
+    { packageName: 'com.discord', label: 'Discord', system: false, launchable: true },            // au catalogue
+    { packageName: 'org.exemple.nouvelle', label: 'Nouvelle App', system: false, launchable: true }, // à garder
+    { packageName: 'fr.gouv.franceidentite', label: 'France Identité (tel)', system: false, launchable: true }, // nom de la liste courante
+    { packageName: 'com.android.phone', label: 'Téléphone', system: true, launchable: true },      // app système d'origine
+    { packageName: 'org.exemple.service', label: 'Service', system: false, launchable: false },   // pas d'icône
+    { packageName: 'eu.trusti.app', label: 'Trusti', system: false, launchable: true },           // Trusti elle-même
+    { packageName: 'org.exemple.nouvelle', label: 'Doublon', system: false, launchable: true },
+    { packageName: 'pas un package', label: 'x', system: false, launchable: true },
+    { packageName: 'org.exemple.vide', label: '   ', system: false, launchable: true },
+    null,
+  ];
+  const out = pickUnknownInstalledApps(installed, new Set(['com.discord']), new Map([['fr.gouv.franceidentite', 'France Identité']]), 'eu.trusti.app');
+  assert.deepEqual(out, [
+    { name: 'Nouvelle App', packageName: 'org.exemple.nouvelle' },
+    { name: 'France Identité', packageName: 'fr.gouv.franceidentite' },
+  ]);
+  assert.deepEqual(pickUnknownInstalledApps('pas un tableau', new Set()), []);
+  const many = Array.from({ length: 900 }, (_, i) => ({ packageName: `a.b${i}`, label: `A${i}`, launchable: true }));
+  assert.equal(pickUnknownInstalledApps(many, new Set()).length, 500);
+});
+
+test('planCommonSync avec scan complet : retire les apps auto absentes de la liste complète', () => {
+  const plan = planCommonSync({
+    ...baseSync,
+    localApps: [
+      { id: 'local-a1', name: 'A', packageName: 'p.a', auto: true },   // plus installée
+      { id: 'local-b1', name: 'B', packageName: 'p.b', auto: true },   // toujours installée
+      { id: 'local-c1', name: 'C', packageName: 'p.c', auto: true },   // plus installée mais étoilée
+      { id: 'local-d1', name: 'D', packageName: 'p.d' },               // ajout manuel
+    ],
+    dailyApps: new Set(['local-c1']),
+    installedPackages: new Set(['p.b']),
+  });
+  assert.deepEqual(plan.removedIds, ['local-a1']);
+});

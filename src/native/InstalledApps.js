@@ -13,6 +13,9 @@ import { registerPlugin } from '@capacitor/core';
  * getAppSizes() renvoie { sizes: { [packageName]: bytes } } — taille (APK + données + cache) de
  * chaque app du catalogue installée ; liste vide si l'accès "Usage" n'est pas accordé ou sur une
  * version d'Android trop ancienne (< 8.0).
+ * hasFullScan() renvoie { available: boolean } : vrai uniquement dans les APK des releases GitHub (la
+ * permission QUERY_ALL_PACKAGES est retirée du build Google Play). getAllInstalledApps() renvoie alors
+ * { apps: [{ packageName, label, system, launchable }] } : toutes les apps installées, lues en local.
  * N'existe et ne répond que dans l'app Android native ; ne pas appeler en dehors (voir isNativeAndroid).
  */
 const InstalledApps = registerPlugin('InstalledApps');

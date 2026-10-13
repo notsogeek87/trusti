@@ -6,7 +6,11 @@ import OnboardingSummary from './OnboardingSummary';
 import { API_URL } from '../utils/apiConfig';
 import { getAndroidPackage } from '../utils/androidPackage';
 import commonApps from '../constants/commonApps.json';
+import { pickUnknownInstalledApps } from '../utils/fullScan';
 import AppIconImage from './ui/AppIconImage';
+
+// Identifiant de l'app Trusti (voir capacitor.config.json) : jamais listée parmi les apps à noter
+const TRUSTI_PACKAGE = 'eu.trusti.app';
 
 const rand = (min, max) => Math.random() * (max - min) + min;
 
@@ -146,6 +150,8 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
   // Apps courantes (hors catalogue, sans note) : trouvées installées, et celles
   // confirmées absentes (pour retirer d'anciennes détections au rescan).
   const [commonScan, setCommonScan] = useState({ found: [], notInstalledPackages: [] });
+  // Scan complet (APK GitHub) : toutes les apps du téléphone ont été lues, en local
+  const [fullScan, setFullScan] = useState(false);
 
   // Messages de réassurance pendant le temps mort du scan (avant que les
   // premières icônes n'apparaissent), pour éviter que l'utilisateur ne
@@ -198,7 +204,20 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
       if (!catalogRes.success) throw new Error('catalog fetch failed');
 
       const installedRes = await installedPromise;
-      const installedPackages = new Set(installedRes.packages || []);
+
+      // Scan complet si ce build l'autorise (APK GitHub) : on lit toutes les apps
+      // installées. Sinon (build Google Play), seulement la liste connue de Trusti.
+      let allInstalled = null;
+      try {
+        const { available } = await InstalledApps.hasFullScan();
+        if (available) allInstalled = (await InstalledApps.getAllInstalledApps()).apps || [];
+      } catch {
+        allInstalled = null; // méthode absente ou refusée : on garde le scan par liste
+      }
+      setFullScan(!!allInstalled);
+      const installedPackages = new Set(
+        allInstalled ? allInstalled.map(a => a.packageName) : (installedRes.packages || [])
+      );
       const found = catalogRes.apps.filter(app => {
         const pkg = getAndroidPackage(app);
         return pkg && installedPackages.has(pkg);
@@ -208,10 +227,23 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
       // écarte celles que le catalogue couvre désormais (déjà dans `found`).
       const catalogPackages = new Set(catalogRes.apps.map(getAndroidPackage).filter(Boolean));
       const commonCandidates = commonApps.filter(c => !catalogPackages.has(c.packageName));
-      setCommonScan({
-        found: commonCandidates.filter(c => installedPackages.has(c.packageName)),
-        notInstalledPackages: commonCandidates.filter(c => !installedPackages.has(c.packageName)).map(c => c.packageName),
-      });
+      if (allInstalled) {
+        // Toutes les apps lisibles : les apps non notées sont celles du téléphone que le
+        // catalogue ne connaît pas (avec leur vrai nom). `installedPackages` permet de
+        // retirer, au rescan, celles qui ont été désinstallées.
+        setCommonScan({
+          found: pickUnknownInstalledApps(
+            allInstalled, catalogPackages, new Map(commonApps.map(c => [c.packageName, c.name])), TRUSTI_PACKAGE
+          ),
+          notInstalledPackages: [],
+          installedPackages,
+        });
+      } else {
+        setCommonScan({
+          found: commonCandidates.filter(c => installedPackages.has(c.packageName)),
+          notInstalledPackages: commonCandidates.filter(c => !installedPackages.has(c.packageName)).map(c => c.packageName),
+        });
+      }
 
       // Apps qu'on est capable de vérifier (package identifiable) mais qui ne
       // sont pas ressorties de ce scan : elles ont été désinstallées depuis un
@@ -489,8 +521,9 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
 
         {commonScan.found.length > 0 && (
           <p className="text-xs text-slate-500 text-center mb-4">
-            + {commonScan.found.length} app{commonScan.found.length !== 1 ? 's' : ''} courante{commonScan.found.length !== 1 ? 's' : ''} pas
-            encore évaluée{commonScan.found.length !== 1 ? 's' : ''} (ajoutée{commonScan.found.length !== 1 ? 's' : ''} sans note)
+            + {commonScan.found.length} app{commonScan.found.length !== 1 ? 's' : ''} pas encore
+            évaluée{commonScan.found.length !== 1 ? 's' : ''} (ajoutée{commonScan.found.length !== 1 ? 's' : ''} sans note)
+            {fullScan && <span className="block text-[10px] text-slate-400 mt-0.5">Scan complet : lu sur ton téléphone, rien n'est envoyé</span>}
           </p>
         )}
 

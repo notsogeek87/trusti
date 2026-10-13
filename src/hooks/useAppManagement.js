@@ -793,12 +793,13 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
   // → ajoutées « pas encore évaluées » (marquées `auto`) ; apps `auto` qui ne
   // sont plus installées → retirées, sauf si l'utilisateur s'en est servi
   // (étoile du quotidien ou commentaire), pour ne jamais perdre ses données.
-  const syncCommonApps = ({ found = [], notInstalledPackages = [] } = {}) => {
+  const syncCommonApps = ({ found = [], notInstalledPackages = [], installedPackages } = {}) => {
     const stamp = makeLocalId();
     const { removedIds, toAdd } = planCommonSync({
       localApps,
       found,
       notInstalledPackages,
+      installedPackages,
       dailyApps,
       hasNote: (id) => !!getNote(id),
       makeId: (index) => `${stamp}${index.toString(36)}`,

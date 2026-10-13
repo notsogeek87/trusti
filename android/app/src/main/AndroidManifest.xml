@@ -77,6 +77,17 @@
         tools:ignore="ScopedStorage" />
 
     <!--
+      Scan complet des apps installées (voir InstalledAppsPlugin.hasFullScan/getAllInstalledApps) :
+      permet de repérer toutes les apps du téléphone, pas seulement celles de la liste <queries>
+      ci-dessous. Google Play restreint cette permission (liste d'apps installées jugée sensible) :
+      elle est donc retirée du build Play Store (src/release/AndroidManifest.xml), qui garde le
+      scan par liste. Présente dans les APK des releases GitHub. La liste reste lue en local,
+      jamais envoyée au serveur.
+    -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
+    <!--
       Visibilité des paquets pour le scan d'apps installées (onboarding natif Android).
       On liste explicitement chaque app connue du catalogue Trusti plutôt que de demander
       la permission QUERY_ALL_PACKAGES (très restreinte par Google Play depuis 2021 et
