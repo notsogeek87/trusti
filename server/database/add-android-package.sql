@@ -5,6 +5,11 @@
 -- Appliquée en production le 2026-10-13 (projet Neon « trusti-db »).
 -- Retour arrière : ALTER TABLE applications DROP COLUMN android_package;
 
+-- Rattrapage : `f_droid_url` était attendue par le code (création/modification
+-- d'une app) mais n'existait pas en production, car initDatabase() n'est jamais
+-- appelée automatiquement. Ajoutée le 2026-10-13, facultative.
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS f_droid_url TEXT;
+
 ALTER TABLE applications ADD COLUMN IF NOT EXISTS android_package TEXT;
 
 -- Valeurs initiales (28 apps). La jointure exige id ET nom identiques, et ne
