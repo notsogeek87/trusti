@@ -160,9 +160,9 @@ const StoragePage = ({
         parts.push(`${importedLocalApps.length} app${importedLocalApps.length > 1 ? 's' : ''} non évaluée${importedLocalApps.length > 1 ? 's' : ''}`);
       }
       if (notesImported > 0 || parts.length === 0) {
-        parts.push(`${notesImported} note${notesImported > 1 ? 's' : ''}`);
+        parts.push(`${notesImported} commentaire${notesImported > 1 ? 's' : ''}`);
       }
-      setImportFeedback({ type: 'success', message: `${parts.join(', ')} importé${dailyAppIds.length + notesImported + importedLocalApps.length > 1 ? 's' : ''} ✓` });
+      setImportFeedback({ type: 'success', message: `Importé : ${parts.join(', ')} ✓` });
     } catch (error) {
       setImportFeedback({ type: 'error', message: error.message || "Échec de l'import." });
     }
