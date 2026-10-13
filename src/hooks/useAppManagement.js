@@ -285,7 +285,22 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
         
         setMyAppsData(normalizedApps);
         setMyAppsLoaded(true);
-        
+
+        // Apps supprimées du catalogue : l'API ne les renvoie plus, on les
+        // retire de la liste de l'utilisateur au lieu de laisser un
+        // "Chargement..." éternel. Seulement si l'appel a réussi.
+        if (data.success) {
+          const knownIds = new Set(normalizedApps.map(app => app.id));
+          const staleIds = idsArray.map(String).filter(id => !knownIds.has(id));
+          if (staleIds.length > 0) {
+            const stale = new Set(staleIds);
+            const keep = (set) => new Set(Array.from(set).filter(id => !stale.has(String(id))));
+            setMyApps(keep);
+            setFavoriteApps(keep);
+            setMigratedApps(keep);
+          }
+        }
+
       } catch (error) {
         console.error('❌ Erreur lors du chargement de Mes Apps:', error);
         setMyAppsData([]);
