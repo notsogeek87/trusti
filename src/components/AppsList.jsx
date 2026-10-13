@@ -29,6 +29,9 @@ const AppsList = ({
   onSelectApp,
   onSelectMigration,
   onStartMigration,
+  dailyApps = new Set(),
+  onToggleDaily,
+  notInstalled = false,
   selectedCategory = 'Toutes',
   searchTerm = '',
   pagination = { hasMore: false, isLoadingMore: false, total: 0 },
@@ -175,6 +178,9 @@ const AppsList = ({
           onSelectApp={onSelectApp}
           onSelectMigration={onSelectMigration}
           onStartMigration={onStartMigration}
+          isDaily={dailyApps.has(String(app.id))}
+          onToggleDaily={onToggleDaily}
+          notInstalled={notInstalled}
           isLoadingMyApps={isLoadingMyApps}
         />
       ))}

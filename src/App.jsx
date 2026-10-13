@@ -185,6 +185,8 @@ const App = () => {
   // Par défaut on masque les apps sans alternative connue (rien à proposer
   // à l'utilisateur pour elles), pour que la liste reste actionnable.
   const [alternativeFilter, setAlternativeFilter] = useState(DEFAULT_ALTERNATIVE_FILTER);
+  // Sélecteur de Mes Apps : toutes les apps, ou seulement celles du quotidien
+  const [dailyOnly, setDailyOnly] = useState(false);
 
   // Réglage de tri de l'onglet "Mes Apps" (discret, persisté en local) :
   // TrustiScore décroissant par défaut, comme historiquement.
@@ -206,6 +208,8 @@ const App = () => {
     favoriteApps,
     migratedApps,
     customMigrations,
+    dailyApps,
+    uninstalledDailyData,
     selectedApp,
     filteredApps,
     apps,
@@ -220,6 +224,8 @@ const App = () => {
     setSearchTerm,
     toggleMyApp,
     toggleFavorite,
+    toggleDaily,
+    addDailyApps,
     addMyApps,
     removeMyApps,
     clearMyApps,
@@ -270,15 +276,33 @@ const App = () => {
   // l'utilisateur voit).
   const myAppsSorted = useMemo(() => {
     const relevant = filteredApps.filter(app => myApps.has(app.id));
-    return sortMyApps(relevant, mySort, myAppsOrder);
-  }, [filteredApps, myApps, mySort, myAppsOrder]);
+    const sorted = sortMyApps(relevant, mySort, myAppsOrder);
+    // Les apps du quotidien passent en tête (partition stable : l'ordre choisi
+    // est conservé dans chaque groupe). Une seule liste, donc aucun doublon.
+    if (dailyApps.size === 0) return sorted;
+    return [
+      ...sorted.filter(app => dailyApps.has(String(app.id))),
+      ...sorted.filter(app => !dailyApps.has(String(app.id))),
+    ];
+  }, [filteredApps, myApps, mySort, myAppsOrder, dailyApps]);
+
+  // Apps du quotidien absentes de Mes Apps (« À réinstaller »), triées par nom.
+  // Filtrées par la recherche en cours pour rester cohérent avec la liste.
+  const uninstalledDaily = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    return uninstalledDailyData
+      .filter(app => dailyApps.has(String(app.id)) && !myApps.has(String(app.id)))
+      .filter(app => !term || (app.name || '').toLowerCase().includes(term))
+      .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'fr'));
+  }, [uninstalledDailyData, dailyApps, myApps, searchTerm]);
 
   // Liste effectivement affichée dans "Mes Apps" : version triée ci-dessus,
   // avec en plus les filtres migrée / à migrer et avec / sans alternative.
   const myAppsDisplayed = useMemo(() => {
     if (activeTab !== TABS.MY_APPS) return filteredApps;
-    if (migrationFilter === 'all' && alternativeFilter === 'all') return myAppsSorted;
-    return myAppsSorted.filter(app => {
+    const base = dailyOnly ? myAppsSorted.filter(app => dailyApps.has(String(app.id))) : myAppsSorted;
+    if (migrationFilter === 'all' && alternativeFilter === 'all') return base;
+    return base.filter(app => {
       if (app.isLoadingSkeleton) return false;
       if (migrationFilter !== 'all' && (migrationFilter === 'migrated') !== isAppMigrated(app)) {
         return false;
@@ -288,7 +312,7 @@ const App = () => {
       }
       return true;
     });
-  }, [activeTab, filteredApps, myAppsSorted, migrationFilter, alternativeFilter, customMigrations]);
+  }, [activeTab, filteredApps, myAppsSorted, migrationFilter, alternativeFilter, customMigrations, dailyOnly, dailyApps]);
 
   // Import via lien de partage (?apps=... et/ou ?mig=...)
   const [pendingImport, setPendingImport] = useState(null);
@@ -502,6 +526,8 @@ const App = () => {
         app={selectedApp}
         isInMyApps={myApps.has(selectedApp.id)}
         onToggleMyApp={toggleMyApp}
+        isDaily={dailyApps.has(String(selectedApp.id))}
+        onToggleDaily={toggleDaily}
         onClose={closeAppDetail}
         onSelectApp={openAppDetail}
         onCompleteMigration={(from, to) => importMigrations([{ id: from.id, customAlt: to?.name }])}
@@ -523,6 +549,10 @@ const App = () => {
         onClearMyApps={clearMyApps}
         onClearMigrations={clearMigrations}
         onSelectApp={openAppDetail}
+        dailyApps={dailyApps}
+        myApps={myApps}
+        dailyAppsInfo={[...myAppsData, ...uninstalledDailyData]}
+        onImportDailyApps={addDailyApps}
       />
     );
   }
@@ -715,6 +745,32 @@ const App = () => {
         </div>
       )}
 
+      {/* Sélecteur Toutes / Au quotidien (affiché dès qu'il y a une app du quotidien) */}
+      {activeTab === TABS.MY_APPS && (dailyApps.size > 0 || dailyOnly) && (
+        <div className="flex items-center gap-2 mb-3" role="group" aria-label="Afficher">
+          <button
+            type="button"
+            onClick={() => setDailyOnly(false)}
+            aria-pressed={!dailyOnly}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${!dailyOnly ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+          >
+            Toutes
+          </button>
+          <button
+            type="button"
+            onClick={() => setDailyOnly(true)}
+            aria-pressed={dailyOnly}
+            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${dailyOnly ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+          >
+            <Star size={12} className={dailyOnly ? 'fill-current' : ''} />
+            Au quotidien ({dailyApps.size})
+            {uninstalledDaily.length > 0 && (
+              <span className="opacity-80 font-semibold">· {uninstalledDaily.length} à réinstaller</span>
+            )}
+          </button>
+        </div>
+      )}
+
       {/* Les filtres étant repliés, on rappelle discrètement ce qui est masqué */}
       {activeTab === TABS.MY_APPS && myApps.size > 0 && myAppsDisplayed.length < myAppsSorted.length && (
         <p className="text-[11px] text-slate-400 -mt-1 mb-3 px-1">
@@ -762,6 +818,8 @@ const App = () => {
         onSelectApp={openAppDetail}
         onSelectMigration={setShowMigrationSelector}
         onStartMigration={setMigrationGuideApp}
+        dailyApps={dailyApps}
+        onToggleDaily={toggleDaily}
         selectedCategory={selectedCategory}
         searchTerm={searchTerm}
         pagination={pagination}
@@ -769,6 +827,35 @@ const App = () => {
         isLoadingAwards={isLoadingAwards}
         isLoadingMyApps={isLoadingMyApps}
       />
+
+      {/* Apps du quotidien pas (encore) sur ce téléphone, p. ex. après import */}
+      {activeTab === TABS.MY_APPS && dailyOnly && uninstalledDaily.length > 0 && (
+        <section className="mt-6">
+          <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-400 mb-1">
+            À réinstaller ({uninstalledDaily.length})
+          </h3>
+          <p className="text-[11px] text-slate-400 mb-3">
+            Dans ta liste du quotidien mais pas détectées sur ce téléphone.
+          </p>
+          <AppsList
+            apps={uninstalledDaily}
+            activeTab={activeTab}
+            myApps={myApps}
+            favoriteApps={favoriteApps}
+            migratedApps={migratedApps}
+            customMigrations={customMigrations}
+            onToggleMyApp={toggleMyApp}
+            onToggleFavorite={toggleFavorite}
+            onToggleMigrate={toggleMigrate}
+            onSelectApp={openAppDetail}
+            onSelectMigration={setShowMigrationSelector}
+            dailyApps={dailyApps}
+            onToggleDaily={toggleDaily}
+            notInstalled
+            searchTerm={searchTerm}
+          />
+        </section>
+      )}
       </div>
     </main>
     </div>

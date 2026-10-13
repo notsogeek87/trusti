@@ -97,6 +97,10 @@ const StoragePage = ({
   onClearMyApps,
   onClearMigrations,
   onSelectApp,
+  dailyApps = new Set(),
+  myApps = new Set(),
+  dailyAppsInfo = [],
+  onImportDailyApps,
 }) => {
   // null = scan pas encore terminé, [] = scan fait, rien trouvé.
   const [installedPackages, setInstalledPackages] = useState(null);
@@ -116,7 +120,10 @@ const StoragePage = ({
 
   const handleExportData = async () => {
     try {
-      await exportJSONFile(buildExportData(), buildExportFilename());
+      // Noms joints à titre informatif quand on les connaît (apps chargées)
+      const namesById = new Map(dailyAppsInfo.map(app => [String(app.id), app.name]));
+      const dailyList = Array.from(dailyApps).map(id => ({ id, name: namesById.get(id) }));
+      await exportJSONFile(buildExportData({ dailyApps: dailyList }), buildExportFilename());
       setImportFeedback(null);
     } catch (error) {
       // Enregistrement annulé par l'utilisateur : pas une erreur à afficher.
@@ -132,11 +139,22 @@ const StoragePage = ({
     try {
       const text = await file.text();
       const parsed = JSON.parse(text);
-      const { notesImported } = importExportData(parsed);
-      setImportFeedback({
-        type: 'success',
-        message: `${notesImported} note${notesImported > 1 ? 's' : ''} importée${notesImported > 1 ? 's' : ''} ✓`,
-      });
+      const { notesImported, dailyAppIds } = importExportData(parsed);
+      if (dailyAppIds.length > 0) onImportDailyApps?.(dailyAppIds);
+      // Apps du quotidien absentes de ce téléphone : elles seront listées dans
+      // Mes Apps > Au quotidien > « À réinstaller ».
+      const toReinstall = dailyAppIds.filter(id => !myApps.has(id)).length;
+      const parts = [];
+      if (dailyAppIds.length > 0) {
+        parts.push(
+          `${dailyAppIds.length} app${dailyAppIds.length > 1 ? 's' : ''} du quotidien`
+          + (toReinstall > 0 ? ` (dont ${toReinstall} à réinstaller)` : '')
+        );
+      }
+      if (notesImported > 0 || parts.length === 0) {
+        parts.push(`${notesImported} note${notesImported > 1 ? 's' : ''}`);
+      }
+      setImportFeedback({ type: 'success', message: `${parts.join(' et ')} importée${dailyAppIds.length + notesImported > 1 ? 's' : ''} ✓` });
     } catch (error) {
       setImportFeedback({ type: 'error', message: error.message || "Échec de l'import." });
     }
@@ -325,9 +343,11 @@ const StoragePage = ({
             Exporter / importer mes données
           </h2>
           <p className="text-xs text-slate-500 mb-3">
-            Pour l'instant, seules vos notes par app ({getNotesCount()}) sont
-            concernées. Utile avant une réinstallation, ou en complément de la
-            sauvegarde Android classique.
+            Sont sauvegardées vos apps utilisées au quotidien ({dailyApps.size})
+            et vos notes par app ({getNotesCount()}). Utile pour changer de
+            téléphone : après un nouveau scan, importez ce fichier et retrouvez
+            votre sélection (les apps pas encore installées sont listées « À
+            réinstaller »).
           </p>
           <div className="grid grid-cols-2 gap-2">
             <button

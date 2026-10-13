@@ -69,6 +69,12 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
   const [favoriteApps, setFavoriteApps] = useState(new Set());
   const [migratedApps, setMigratedApps] = useState(new Set());
   const [customMigrations, setCustomMigrations] = useState(new Map());
+  // Apps « utilisées au quotidien » : liste d'ids indépendante du scan (une
+  // app peut y figurer sans être installée — typiquement après un import sur
+  // un nouveau téléphone, en attente de réinstallation).
+  const [dailyApps, setDailyApps] = useState(new Set());
+  // Données des apps quotidiennes absentes de « Mes Apps » (à réinstaller).
+  const [uninstalledDailyData, setUninstalledDailyData] = useState([]);
   const [selectedApp, setSelectedApp] = useState(null);
   
   // Liste unifiée de toutes les applications
@@ -113,12 +119,14 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
       setFavoriteApps(new Set(userData.favoriteApps || []));
       setMigratedApps(new Set(userData.migratedApps || []));
       setCustomMigrations(new Map(userData.customMigrations || []));
+      setDailyApps(new Set((userData.dailyApps || []).map(String)));
     } else {
       // Rien de sauvegardé encore : état vide
       setMyApps(new Set());
       setFavoriteApps(new Set());
       setMigratedApps(new Set());
       setCustomMigrations(new Map());
+      setDailyApps(new Set());
     }
 
     // Petite temporisation pour s'assurer que les states sont bien définis
@@ -132,10 +140,11 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
         myApps: Array.from(myApps),
         favoriteApps: Array.from(favoriteApps),
         migratedApps: Array.from(migratedApps),
-        customMigrations: Array.from(customMigrations.entries())
+        customMigrations: Array.from(customMigrations.entries()),
+        dailyApps: Array.from(dailyApps)
       });
     }
-  }, [myApps, favoriteApps, migratedApps, customMigrations]);
+  }, [myApps, favoriteApps, migratedApps, customMigrations, dailyApps]);
   // Note: On ne met pas saveUserData dans les dépendances pour éviter la boucle
 
   // Charger toutes les applications au montage
@@ -297,6 +306,34 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
     loadMyApps();
   }, [activeTab, myApps, needsMyAppsData]); // Recharger quand l'onglet, myApps, ou ce besoin externe change
   
+  // Apps quotidiennes qui ne sont pas dans « Mes Apps » (pas installées, ou
+  // pas encore rescannées) : on charge leurs données pour pouvoir les lister
+  // dans la section « À réinstaller » de Mes Apps.
+  const uninstalledDailyIds = useMemo(
+    () => Array.from(dailyApps).filter(id => !myApps.has(id)),
+    [dailyApps, myApps]
+  );
+  const uninstalledDailyKey = uninstalledDailyIds.join(',');
+  useEffect(() => {
+    if (activeTab !== TABS.MY_APPS || uninstalledDailyIds.length === 0) {
+      setUninstalledDailyData([]);
+      return undefined;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await cachedFetchJSON(`${API_URL}/apps?ids=${encodeURIComponent(uninstalledDailyKey)}`);
+        if (cancelled) return;
+        const appsArray = data.success ? data.apps : [];
+        setUninstalledDailyData(appsArray.map(app => ({ ...app, id: String(app.id) })));
+      } catch (error) {
+        if (!cancelled) setUninstalledDailyData([]);
+        console.error('Erreur lors du chargement des apps quotidiennes à réinstaller:', error);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [activeTab, uninstalledDailyKey]);
+
   // Charger toutes les apps quand nécessaire :
   // - Une catégorie est sélectionnée (sauf "Toutes")
   // - L'onglet MY_APPS est actif
@@ -620,6 +657,31 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
     });
   };
 
+  // Marquer/démarquer une app comme « utilisée au quotidien »
+  const toggleDaily = (e, id) => {
+    e?.stopPropagation?.();
+    const key = String(id);
+    setDailyApps(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
+
+  // Ajouter plusieurs apps quotidiennes (import d'une sauvegarde) — additif
+  const addDailyApps = (ids = []) => {
+    if (!ids.length) return;
+    setDailyApps(prev => {
+      const next = new Set(prev);
+      ids.forEach(id => next.add(String(id)));
+      return next;
+    });
+  };
+
   // Ajouter plusieurs apps sans risque de toggle (toujours additive)
   const addMyApps = (ids) => {
     setMyApps(prev => {
@@ -752,6 +814,8 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
     favoriteApps,
     migratedApps,
     customMigrations,
+    dailyApps,
+    uninstalledDailyData,
     selectedApp,
     apps,
     isLoadingApps,
@@ -768,6 +832,8 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
     setSearchTerm,
     toggleMyApp,
     toggleFavorite,
+    toggleDaily,
+    addDailyApps,
     addMyApps,
     removeMyApps,
     clearMyApps,

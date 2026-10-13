@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, CheckCircle, Route, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink, Trash2, StickyNote } from 'lucide-react';
+import { ChevronLeft, CheckCircle, Route, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink, Trash2, StickyNote, Star } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { GRADE_INFO } from '../../constants/grades';
 import { useIsMobile } from '../../contexts/ViewModeContext';
@@ -46,7 +46,7 @@ const sectionAnim = (delay = 0) => ({
 /**
  * Modal des détails d'une application
  */
-const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, onCompleteMigration, allApps = [] }) => {
+const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, isDaily = false, onToggleDaily, onClose, onSelectApp, onCompleteMigration, allApps = [] }) => {
   const [isExiting, setIsExiting] = useState(false);
   const [showMigrationGuide, setShowMigrationGuide] = useState(false);
   // State pour stocker les apps chargées dynamiquement
@@ -284,12 +284,25 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
             <ChevronLeft size={24} />
           </button>
           <div className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Détails</div>
-          <button
-            onClick={(e) => onToggleMyApp(e, app.id)}
-            className={`p-2 rounded-full transition-colors ${isInMyApps ? 'text-indigo-600 bg-indigo-50' : 'text-slate-200 hover:text-indigo-400'}`}
-          >
-            {isInMyApps ? <CheckCircle size={24} /> : <PlusCircle size={24} />}
-          </button>
+          <div className="flex items-center gap-1">
+            {onToggleDaily && (
+              <button
+                onClick={(e) => onToggleDaily(e, app.id)}
+                aria-pressed={isDaily}
+                aria-label={isDaily ? 'Retirer des apps du quotidien' : 'Marquer comme utilisée au quotidien'}
+                title={isDaily ? 'Utilisée au quotidien' : 'Marquer comme utilisée au quotidien'}
+                className={`p-2 rounded-full transition-colors ${isDaily ? 'text-amber-500 bg-amber-50' : 'text-slate-200 hover:text-amber-400'}`}
+              >
+                <Star size={24} className={isDaily ? 'fill-current' : ''} />
+              </button>
+            )}
+            <button
+              onClick={(e) => onToggleMyApp(e, app.id)}
+              className={`p-2 rounded-full transition-colors ${isInMyApps ? 'text-indigo-600 bg-indigo-50' : 'text-slate-200 hover:text-indigo-400'}`}
+            >
+              {isInMyApps ? <CheckCircle size={24} /> : <PlusCircle size={24} />}
+            </button>
+          </div>
         </div>
       </header>
 

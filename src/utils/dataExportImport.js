@@ -1,24 +1,56 @@
 /**
  * Export / import des données locales Trusti (Réglages > Espace de stockage).
- * Pour l'instant, seules les notes par app sont concernées — le format est
+ * Sont concernées : les notes par app et la liste des apps « utilisées au
+ * quotidien » (pour retrouver sa sélection en changeant de téléphone : les
+ * apps installées se re-détectent par scan, pas la sélection du quotidien).
+ * Le format est
  * volontairement extensible (clé "data" en objet) pour accueillir d'autres
  * données locales plus tard sans casser la compatibilité des fichiers déjà
  * exportés par les utilisateurs.
  */
-import { getAllNotes } from './notesStorage';
+import { getAllNotes } from './notesStorage.js';
 
 const EXPORT_FORMAT = 'trusti-local-export';
 const EXPORT_VERSION = 1;
 
-/** Construit l'objet exporté (avant sérialisation JSON). */
-export const buildExportData = () => ({
+// Plafond défensif sur la liste importée : un fichier trafiqué ne doit pas
+// pouvoir gonfler le stockage local ni l'URL de la requête de chargement.
+const MAX_DAILY_APPS = 2000;
+
+/**
+ * Construit l'objet exporté (avant sérialisation JSON).
+ *
+ * @param {{ dailyApps?: Array<{id: string|number, name?: string}> }} [options]
+ *   dailyApps : apps utilisées au quotidien (le nom est facultatif, purement
+ *   informatif pour qui ouvre le fichier).
+ */
+export const buildExportData = ({ dailyApps = [] } = {}) => ({
   format: EXPORT_FORMAT,
   version: EXPORT_VERSION,
   exportedAt: new Date().toISOString(),
   data: {
     notes: getAllNotes(),
+    dailyApps: dailyApps.map(({ id, name }) => (name ? { id: String(id), name } : { id: String(id) })),
   },
 });
+
+/**
+ * Extrait les ids d'apps quotidiennes d'un export parsé (entrées invalides
+ * ignorées, doublons retirés, ids toujours en chaînes).
+ */
+export const parseDailyAppIds = (parsed) => {
+  const list = parsed?.data?.dailyApps;
+  if (!Array.isArray(list)) return [];
+  const ids = new Set();
+  for (const entry of list) {
+    const raw = entry && typeof entry === 'object' ? entry.id : entry;
+    if (typeof raw !== 'string' && typeof raw !== 'number') continue;
+    const id = String(raw).trim();
+    if (/^[A-Za-z0-9_-]{1,64}$/.test(id)) ids.add(id);
+    if (ids.size >= MAX_DAILY_APPS) break;
+  }
+  return Array.from(ids);
+};
 
 /** Nom de fichier suggéré pour l'export, horodaté. */
 export const buildExportFilename = () => {
@@ -32,16 +64,19 @@ export const buildExportFilename = () => {
  * autres notes locales sont conservées.
  *
  * @param {unknown} parsed - Contenu JSON déjà parsé du fichier importé.
- * @returns {{ notesImported: number }} Résumé de ce qui a été importé.
+ * @returns {{ notesImported: number, dailyAppIds: string[] }} Résumé de ce qui
+ *   a été importé. Les ids quotidiens ne sont pas écrits ici (ils vivent dans
+ *   l'état de l'app) : à l'appelant de les appliquer.
  * @throws {Error} Si le fichier n'a pas le format attendu.
  */
 export const importExportData = (parsed) => {
   if (!parsed || typeof parsed !== 'object' || parsed.format !== EXPORT_FORMAT) {
     throw new Error("Fichier invalide : ce n'est pas un export Trusti reconnu.");
   }
+  const dailyAppIds = parseDailyAppIds(parsed);
   const importedNotes = parsed.data?.notes;
   if (!importedNotes || typeof importedNotes !== 'object') {
-    return { notesImported: 0 };
+    return { notesImported: 0, dailyAppIds };
   }
 
   const STORAGE_KEY = 'trusti_notes';
@@ -61,7 +96,7 @@ export const importExportData = (parsed) => {
   });
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-  return { notesImported: entries.length };
+  return { notesImported: entries.length, dailyAppIds };
 };
 
-export default { buildExportData, buildExportFilename, importExportData };
+export default { buildExportData, buildExportFilename, importExportData, parseDailyAppIds };

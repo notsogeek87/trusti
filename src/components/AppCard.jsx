@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { PlusCircle, CheckCircle, Trash2, ShieldCheck, ChevronRight, ArrowUpRight, CornerDownRight, Route } from 'lucide-react';
+import { PlusCircle, CheckCircle, Trash2, ShieldCheck, ChevronRight, ArrowUpRight, CornerDownRight, Route, Star } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
 import { TABS } from '../constants/tabs';
 import AppIconImage from './ui/AppIconImage';
@@ -18,9 +18,15 @@ const AppCard = React.memo(({
   onSelectApp,
   onSelectMigration,
   onStartMigration,
+  isDaily = false,
+  onToggleDaily,
+  notInstalled = false,
   isLoadingMyApps = false
 }) => {
   const isLoadingSkeleton = app.isLoadingSkeleton === true;
+  // Une app « à réinstaller » n'est pas dans Mes Apps : pas de balayage
+  // « Retirer » (qui toucherait Mes Apps), ni de blocs migration/alternative.
+  const showMyAppsExtras = !notInstalled;
 
   const [swipeX, setSwipeX] = useState(0);
   const [swiping, setSwiping] = useState(false);
@@ -29,7 +35,7 @@ const AppCard = React.memo(({
   const didSwipe = useRef(false);
 
   const handleTouchStart = (e) => {
-    if (activeTab !== TABS.MY_APPS || isLoadingSkeleton) return;
+    if (activeTab !== TABS.MY_APPS || isLoadingSkeleton || notInstalled) return;
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
     didSwipe.current = false;
@@ -64,7 +70,7 @@ const AppCard = React.memo(({
   return (
     <div className="relative overflow-hidden rounded-2xl">
       {/* Zone rouge révélée au slide */}
-      {activeTab === TABS.MY_APPS && !isLoadingSkeleton && swipeX < 0 && (
+      {activeTab === TABS.MY_APPS && !isLoadingSkeleton && !notInstalled && swipeX < 0 && (
         <div
           className="absolute inset-y-0 right-0 bg-rose-500 flex flex-col items-center justify-center gap-1 px-5"
           aria-hidden="true"
@@ -84,7 +90,7 @@ const AppCard = React.memo(({
           transform: `translateX(${swipeX}px)`,
           transition: swiping ? 'none' : 'transform 0.3s cubic-bezier(0.25,1,0.5,1)',
         }}
-        className={`bg-white border border-slate-100 p-4 flex flex-col gap-2 rounded-2xl ${
+        className={`bg-white border border-slate-100 p-4 flex flex-col gap-2 rounded-2xl ${notInstalled ? 'opacity-70' : ''} ${
           isLoadingSkeleton ? 'cursor-default' : 'cursor-pointer hover:shadow-md hover:border-indigo-100'
         } transition-shadow group`}
       >
@@ -103,11 +109,30 @@ const AppCard = React.memo(({
             <h3 className={`font-bold text-[15px] truncate ${isLoadingSkeleton ? 'text-slate-400' : 'text-slate-900'}`}>{app.name}</h3>
             <p className="text-xs font-medium text-slate-400">
               {isLoadingSkeleton ? 'Chargement...' : app.category}
+              {notInstalled && !isLoadingSkeleton && (
+                <span className="ml-1.5 text-[10px] font-bold text-amber-700 bg-amber-100 rounded-full px-1.5 py-0.5">
+                  Non installée
+                </span>
+              )}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <ScoreIndicator grade={app.grade} />
+
+            {activeTab === TABS.MY_APPS && onToggleDaily && !isLoadingSkeleton && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onToggleDaily(e, app.id); }}
+                aria-label={isDaily ? 'Retirer des apps du quotidien' : 'Marquer comme utilisée au quotidien'}
+                aria-pressed={isDaily}
+                title={isDaily ? 'Utilisée au quotidien' : 'Marquer comme utilisée au quotidien'}
+                className={`p-2 rounded-full transition-all ${
+                  isDaily ? 'text-amber-500 bg-amber-50' : 'text-slate-200 hover:text-amber-400'
+                }`}
+              >
+                <Star size={18} className={isDaily ? 'fill-current' : ''} />
+              </button>
+            )}
 
             {activeTab !== TABS.MY_APPS && (
               <button
@@ -143,7 +168,7 @@ const AppCard = React.memo(({
         )}
 
         {/* Grade A — tout va bien */}
-        {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade === 'A' && (
+        {showMyAppsExtras && activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade === 'A' && (
           <div className="flex items-center gap-1.5 pl-0.5">
             <ShieldCheck size={14} className="text-emerald-500 shrink-0" />
             <p className="text-xs font-semibold text-emerald-600">TrustiScore au max, tout va bien</p>
@@ -151,7 +176,7 @@ const AppCard = React.memo(({
         )}
 
         {/* Pas d'alternative connue */}
-        {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade !== 'A' && !app.alternative && !customMigration && (
+        {showMyAppsExtras && activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade !== 'A' && !app.alternative && !customMigration && (
           <div className="flex items-center gap-1.5 pl-0.5">
             {app.isLoadingAlternative ? (
               <>
@@ -168,7 +193,7 @@ const AppCard = React.memo(({
         )}
 
         {/* Alternative disponible */}
-        {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade !== 'A' && (app.alternative || customMigration) && (
+        {showMyAppsExtras && activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade !== 'A' && (app.alternative || customMigration) && (
           <div className="space-y-1">
             <button
               onClick={(e) => { e.stopPropagation(); onSelectMigration(app.id); }}
