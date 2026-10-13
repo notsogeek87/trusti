@@ -5,11 +5,11 @@ import {
   RECOMMENDED_MANAGERS,
   HYGIENE_CHECKS,
 } from '../constants/dataHygiene.js';
-import { extractPackageId } from './androidPackage.js';
+import { getAndroidPackage } from './androidPackage.js';
 
 const isManagerApp = (app) =>
   app?.category === PASSWORD_MANAGER_CATEGORY ||
-  KNOWN_MANAGER_PACKAGES.includes(extractPackageId(app?.playStoreUrl));
+  KNOWN_MANAGER_PACKAGES.includes(getAndroidPackage(app));
 
 /**
  * Cherche dans une liste d'apps (celles de "Mes Apps") un gestionnaire de mots

@@ -4,7 +4,8 @@ import InstalledApps from '../native/InstalledApps';
 import { AppTile, ANIM_CSS, computeReplacementMap } from './OnboardingApps';
 import OnboardingSummary from './OnboardingSummary';
 import { API_URL } from '../utils/apiConfig';
-import { extractPackageId } from '../utils/androidPackage';
+import { getAndroidPackage } from '../utils/androidPackage';
+import commonApps from '../constants/commonApps.json';
 import AppIconImage from './ui/AppIconImage';
 
 const rand = (min, max) => Math.random() * (max - min) + min;
@@ -142,6 +143,9 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
   // Apps du catalogue qu'on sait détecter (playStoreUrl exploitable) mais qui
   // ne sont PAS ressorties de ce scan : confirmées désinstallées du téléphone.
   const [notInstalledIds, setNotInstalledIds] = useState([]);
+  // Apps courantes (hors catalogue, sans note) : trouvées installées, et celles
+  // confirmées absentes (pour retirer d'anciennes détections au rescan).
+  const [commonScan, setCommonScan] = useState({ found: [], notInstalledPackages: [] });
 
   // Messages de réassurance pendant le temps mort du scan (avant que les
   // premières icônes n'apparaissent), pour éviter que l'utilisateur ne
@@ -176,7 +180,7 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
   // validation et le récapitulatif, plutôt qu'un cut brutal vers la liste d'apps.
   const handleFinish = async () => {
     if (selected.size === 0) {
-      onComplete(selected, notInstalledIds);
+      onComplete(selected, notInstalledIds, commonScan);
       return;
     }
     setPhase('finalizing');
@@ -196,8 +200,17 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
       const installedRes = await installedPromise;
       const installedPackages = new Set(installedRes.packages || []);
       const found = catalogRes.apps.filter(app => {
-        const pkg = extractPackageId(app.playStoreUrl);
+        const pkg = getAndroidPackage(app);
         return pkg && installedPackages.has(pkg);
+      });
+
+      // Apps courantes pas (encore) au catalogue : détectées sans note. On
+      // écarte celles que le catalogue couvre désormais (déjà dans `found`).
+      const catalogPackages = new Set(catalogRes.apps.map(getAndroidPackage).filter(Boolean));
+      const commonCandidates = commonApps.filter(c => !catalogPackages.has(c.packageName));
+      setCommonScan({
+        found: commonCandidates.filter(c => installedPackages.has(c.packageName)),
+        notInstalledPackages: commonCandidates.filter(c => !installedPackages.has(c.packageName)).map(c => c.packageName),
       });
 
       // Apps qu'on est capable de vérifier (package identifiable) mais qui ne
@@ -206,7 +219,7 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
       // laisser traîner indéfiniment.
       const foundIds = new Set(found.map(a => String(a.id)));
       const notFound = catalogRes.apps
-        .filter(app => extractPackageId(app.playStoreUrl) && !foundIds.has(String(app.id)))
+        .filter(app => getAndroidPackage(app) && !foundIds.has(String(app.id)))
         .map(app => String(app.id));
       setNotInstalledIds(notFound);
 
@@ -438,7 +451,7 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
     return (
       <OnboardingSummary
         apps={matches.filter(app => selected.has(app.id))}
-        onDetails={() => onComplete(selected, notInstalledIds)}
+        onDetails={() => onComplete(selected, notInstalledIds, commonScan)}
       />
     );
   }
@@ -473,6 +486,13 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
             </>
           )}
         </div>
+
+        {commonScan.found.length > 0 && (
+          <p className="text-xs text-slate-500 text-center mb-4">
+            + {commonScan.found.length} app{commonScan.found.length !== 1 ? 's' : ''} courante{commonScan.found.length !== 1 ? 's' : ''} pas
+            encore évaluée{commonScan.found.length !== 1 ? 's' : ''} (ajoutée{commonScan.found.length !== 1 ? 's' : ''} sans note)
+          </p>
+        )}
 
         {matches.length > 0 && (
           <div className="grid grid-cols-3 gap-3">

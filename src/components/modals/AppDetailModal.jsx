@@ -5,7 +5,7 @@ import { GRADE_INFO } from '../../constants/grades';
 import { useIsMobile } from '../../contexts/ViewModeContext';
 import { API_URL } from '../../utils/apiConfig';
 import { isNativeAndroid } from '../../utils/platform';
-import { extractPackageId } from '../../utils/androidPackage';
+import { getAndroidPackage } from '../../utils/androidPackage';
 import InstalledApps from '../../native/InstalledApps';
 import TechnicalAnalysisSection from '../technical/TechnicalAnalysisSection';
 import useTechnicalAnalysis from '../../hooks/useTechnicalAnalysis';
@@ -54,7 +54,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, isDaily = false, onTog
   const [isLoadingRelations, setIsLoadingRelations] = useState(false);
   // Détection app installée sur l'appareil (Android natif uniquement)
   const [isInstalledOnDevice, setIsInstalledOnDevice] = useState(false);
-  const packageName = extractPackageId(app.playStoreUrl);
+  const packageName = getAndroidPackage(app);
 
   // Note personnelle sur l'app : stockée uniquement en local (voir
   // notesStorage.js), jamais envoyée au serveur. Rechargée à chaque

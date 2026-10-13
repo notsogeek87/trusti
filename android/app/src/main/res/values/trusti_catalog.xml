@@ -1,115 +1,509 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Fichier généré automatiquement par `npm run android:generate-catalog`.
-  Ne pas éditer à la main : liste des package names Android du catalogue Trusti,
-  utilisée par InstalledAppsPlugin pour savoir quelles apps tester sur l'appareil.
+  Ne pas éditer à la main : liste des package names Android du catalogue Trusti
+  et des apps courantes (src/constants/commonApps.json), utilisée par
+  InstalledAppsPlugin pour savoir quelles apps tester sur l'appareil.
 -->
 <resources>
     <string-array name="trusti_catalog_packages">
+        <item>ahaflix.tv</item>
+        <item>ai.character.app</item>
+        <item>ai.mistral.chat</item>
+        <item>ai.perplexity.app.android</item>
+        <item>ai.perplexity.comet</item>
+        <item>ai.socialapps.speakmaster</item>
+        <item>ai.x.grok</item>
+        <item>app.gamenative</item>
+        <item>app.hoarder.hoardermobile</item>
         <item>app.organicmaps</item>
+        <item>at.bitfire.davdroid</item>
+        <item>au.com.shiftyjelly.pocketcasts</item>
+        <item>br.com.foxbit.foxbitandroid</item>
+        <item>cc.forestapp</item>
         <item>ch.protonmail.android</item>
         <item>ch.protonvpn.android</item>
         <item>ch.threema.app.work</item>
+        <item>cn.wps.moffice_eng</item>
         <item>co.hinge.app</item>
+        <item>co.tapcart.app.npQt0DXZpj</item>
+        <item>co.windyapp.android</item>
+        <item>com.Beauchamp.Messenger.external</item>
+        <item>com.IndexEducation.Pronote</item>
+        <item>com.PanikArcade.CloverPit</item>
+        <item>com.Slack</item>
+        <item>com.abercrombie.hollister</item>
+        <item>com.accuweather.android</item>
+        <item>com.activision.callofduty.shooter</item>
+        <item>com.adidas.app</item>
+        <item>com.adobe.lrmobile</item>
+        <item>com.adobe.psmobile</item>
+        <item>com.adobe.reader</item>
+        <item>com.adobe.scan.android</item>
         <item>com.airbnb.android</item>
+        <item>com.airfrance.android.dinamoprd</item>
         <item>com.alanmobile</item>
+        <item>com.alibaba.aliexpresshd</item>
+        <item>com.alibaba.intl.android.apps.poseidon</item>
+        <item>com.allformats.video.player.videoplayer</item>
+        <item>com.allovoisins.android</item>
+        <item>com.alltrails.alltrails</item>
+        <item>com.amazon.avod.thirdpartyclient</item>
+        <item>com.amazon.dee.app</item>
+        <item>com.amazon.kindle</item>
+        <item>com.amazon.luna.mobile</item>
         <item>com.amazon.mShop.android.shopping</item>
+        <item>com.amazon.mp3</item>
+        <item>com.android.chrome</item>
+        <item>com.anthropic.claude</item>
+        <item>com.anydesk.anydeskandroid</item>
         <item>com.app.tgtg</item>
         <item>com.appcollection.isync_contacts</item>
+        <item>com.apple.android.music</item>
+        <item>com.atlassian.jira.server</item>
+        <item>com.audible.application</item>
+        <item>com.audiomack</item>
+        <item>com.authy.authy</item>
         <item>com.automattic.simplenote</item>
+        <item>com.azure.authenticator</item>
+        <item>com.babbel.mobile.android.en</item>
+        <item>com.backdrops.wallpapers</item>
+        <item>com.backmarket</item>
+        <item>com.badoo.mobile</item>
+        <item>com.bambuna.podcastaddict</item>
+        <item>com.bathandbody.bbw</item>
+        <item>com.beemdevelopment.aegis</item>
+        <item>com.bereal.ft</item>
+        <item>com.bigwinepot.nwdn.international</item>
+        <item>com.bilingify.readest</item>
         <item>com.booking</item>
+        <item>com.boostedproductivity.app</item>
+        <item>com.boursorama.android.clients</item>
+        <item>com.bouyguestelecom.ecbt</item>
         <item>com.brave.browser</item>
+        <item>com.brokenscreen.watchface</item>
+        <item>com.bt.bms</item>
         <item>com.bumble.app</item>
+        <item>com.bydeluxe.d3.android.program.starz</item>
+        <item>com.ca.els</item>
+        <item>com.ca.mabanque</item>
+        <item>com.caisseepargne.android.mobilebanking</item>
         <item>com.calm.android</item>
+        <item>com.canal.android.canal</item>
+        <item>com.canva.editor</item>
+        <item>com.carrefour.fid</item>
+        <item>com.carrefour.fid.android</item>
+        <item>com.cbs.app</item>
+        <item>com.chess</item>
+        <item>com.cic_prod.bad</item>
+        <item>com.citymapper.app.release</item>
+        <item>com.cm_prod.bad</item>
+        <item>com.coinbase.android</item>
         <item>com.collabora.libreoffice</item>
+        <item>com.commsource.beautyplus</item>
         <item>com.comuto</item>
+        <item>com.contextlogic.wish</item>
+        <item>com.crunchyroll.crunchyroid</item>
+        <item>com.cultura.jerevends</item>
+        <item>com.cyberce.mobile</item>
+        <item>com.cyberlink.youcammakeup</item>
+        <item>com.cyberlink.youperfect</item>
+        <item>com.darty.mobile</item>
+        <item>com.dashlane</item>
         <item>com.dd.doordash</item>
+        <item>com.deepl.mobiletranslator</item>
+        <item>com.deepseek.chat</item>
         <item>com.deliveroo.orderapp</item>
+        <item>com.destroy.game</item>
         <item>com.devhd.feedly</item>
         <item>com.discord</item>
+        <item>com.disney.disneyplus</item>
+        <item>com.dollargeneral.android</item>
+        <item>com.donnnno.arcticons</item>
+        <item>com.donnnno.arcticons.you</item>
+        <item>com.dreamgames.royalmatch</item>
         <item>com.dropbox.android</item>
+        <item>com.dts.freefireth</item>
         <item>com.duckduckgo.mobile.android</item>
         <item>com.duolingo</item>
+        <item>com.ebay.mobile</item>
         <item>com.ecosia.android</item>
+        <item>com.editor.text</item>
+        <item>com.einnovation.temu</item>
+        <item>com.enflick.android.TextNow</item>
+        <item>com.engie.elecgaz</item>
+        <item>com.epicgames.ega</item>
         <item>com.epicgames.fortnite</item>
+        <item>com.etsy.android</item>
+        <item>com.eufylife.smarthome</item>
+        <item>com.evernote</item>
+        <item>com.expensya</item>
+        <item>com.exported.iconpack</item>
+        <item>com.expressvpn.vpn</item>
         <item>com.facebook.katana</item>
+        <item>com.facebook.lite</item>
+        <item>com.facebook.orca</item>
+        <item>com.facebook.talk</item>
+        <item>com.fetchrewards.fetchrewards.hop</item>
         <item>com.fitbit.FitbitMobile</item>
+        <item>com.flipkart.android</item>
+        <item>com.ftw_and_co.happn</item>
+        <item>com.fullsix.android.labanquepostale.accountaccess</item>
+        <item>com.garmin.android.apps.connectmobile</item>
         <item>com.getsomeheadspace.android</item>
+        <item>com.github.android</item>
         <item>com.github.libretube</item>
+        <item>com.glovo</item>
+        <item>com.google.android.apps.adm</item>
+        <item>com.google.android.apps.authenticator2</item>
+        <item>com.google.android.apps.bard</item>
+        <item>com.google.android.apps.chromecast.app</item>
+        <item>com.google.android.apps.cloudconsole</item>
+        <item>com.google.android.apps.docs</item>
+        <item>com.google.android.apps.docs.editors.docs</item>
+        <item>com.google.android.apps.docs.editors.sheets</item>
+        <item>com.google.android.apps.docs.editors.slides</item>
+        <item>com.google.android.apps.dynamite</item>
+        <item>com.google.android.apps.fitness</item>
+        <item>com.google.android.apps.kids.familylink</item>
+        <item>com.google.android.apps.kids.familylinkhelper</item>
+        <item>com.google.android.apps.maps</item>
+        <item>com.google.android.apps.messaging</item>
+        <item>com.google.android.apps.nbu.files</item>
+        <item>com.google.android.apps.photos</item>
+        <item>com.google.android.apps.photosgo</item>
+        <item>com.google.android.apps.pixelmigrate</item>
+        <item>com.google.android.apps.playconsole</item>
+        <item>com.google.android.apps.subscriptions.red</item>
+        <item>com.google.android.apps.tachyon</item>
+        <item>com.google.android.apps.tasks</item>
+        <item>com.google.android.apps.translate</item>
+        <item>com.google.android.apps.walletnfcrel</item>
+        <item>com.google.android.apps.wear.companion</item>
+        <item>com.google.android.apps.wellbeing</item>
+        <item>com.google.android.apps.youtube.kids</item>
+        <item>com.google.android.apps.youtube.music</item>
+        <item>com.google.android.calculator</item>
+        <item>com.google.android.calendar</item>
+        <item>com.google.android.contacts</item>
+        <item>com.google.android.deskclock</item>
+        <item>com.google.android.dialer</item>
+        <item>com.google.android.gm</item>
+        <item>com.google.android.googlequicksearchbox</item>
+        <item>com.google.android.inputmethod.latin</item>
+        <item>com.google.android.keep</item>
+        <item>com.google.android.play.games</item>
+        <item>com.google.android.projection.gearhead</item>
+        <item>com.google.android.videos</item>
+        <item>com.google.android.youtube</item>
+        <item>com.google.ar.core</item>
+        <item>com.google.earth</item>
+        <item>com.groupme.android</item>
         <item>com.grubhub.android</item>
+        <item>com.hm.goe</item>
+        <item>com.hulu.plus</item>
+        <item>com.iledefrance.navigo.tickets</item>
         <item>com.imaginecurve.curve.prd</item>
+        <item>com.inditex.zara</item>
         <item>com.infomaniak.drive</item>
+        <item>com.infomaniak.euria</item>
+        <item>com.infomaniak.ksync</item>
         <item>com.infomaniak.mail</item>
+        <item>com.infomaniak.meet</item>
+        <item>com.infomil.leclercdrive</item>
         <item>com.innersloth.spacemafia</item>
         <item>com.innologica.inoreader</item>
         <item>com.instagram.android</item>
+        <item>com.instagram.barcelona</item>
+        <item>com.intratone.myintratone</item>
+        <item>com.intsig.camscanner</item>
+        <item>com.irobot.home</item>
         <item>com.izettle.android</item>
+        <item>com.jbl.one</item>
+        <item>com.justalk.kids.android</item>
+        <item>com.kiloo.subwaysurf</item>
         <item>com.king.candycrushsaga</item>
+        <item>com.klaxoon.app</item>
+        <item>com.kmplayer</item>
+        <item>com.kohls.mcommerce.opal</item>
         <item>com.kunzisoft.keepass.free</item>
+        <item>com.kwai.video</item>
+        <item>com.laposte.identitenuemerique</item>
+        <item>com.lastpass.lpandroid</item>
+        <item>com.lazada.android</item>
+        <item>com.leclerc.drive</item>
+        <item>com.leclerc.moneleclerc</item>
+        <item>com.lego.buildinginstructions</item>
+        <item>com.lemon.lvoverseas</item>
+        <item>com.lemonde.courrier</item>
+        <item>com.leroymerlin.app</item>
+        <item>com.lidl.eci.lidlplus</item>
+        <item>com.ligue1.pass</item>
+        <item>com.limebike</item>
+        <item>com.linecorp.b612.android</item>
         <item>com.linkedin.android</item>
+        <item>com.ludo.king</item>
+        <item>com.lunii.app</item>
+        <item>com.lydia</item>
         <item>com.lydia.app</item>
+        <item>com.meesho.supply</item>
+        <item>com.meetup</item>
+        <item>com.mercadolibre</item>
+        <item>com.miHoYo.GenshinImpact</item>
+        <item>com.microsoft.appmanager</item>
+        <item>com.microsoft.bing</item>
+        <item>com.microsoft.copilot</item>
+        <item>com.microsoft.emmx</item>
+        <item>com.microsoft.office.excel</item>
+        <item>com.microsoft.office.onenote</item>
         <item>com.microsoft.office.outlook</item>
+        <item>com.microsoft.office.powerpoint</item>
+        <item>com.microsoft.office.word</item>
         <item>com.microsoft.skydrive</item>
         <item>com.microsoft.teams</item>
+        <item>com.microsoft.xboxone.smartglass</item>
+        <item>com.miniclip.eightballpool</item>
+        <item>com.mojang.minecraftpe</item>
         <item>com.mojang.minecrafttrialpe</item>
+        <item>com.moonactive.coinmaster</item>
+        <item>com.mt.mtxx.mtxx</item>
         <item>com.myfitnesspal.android</item>
+        <item>com.myntra.android</item>
+        <item>com.naver.linewebtoon</item>
+        <item>com.navigo.vianavigo</item>
+        <item>com.netflix.NGP.TMNTShreddersRevenge</item>
         <item>com.netflix.mediaclient</item>
+        <item>com.newsclapper.video</item>
         <item>com.nextcloud.client</item>
+        <item>com.nextdns.manager</item>
         <item>com.nianticlabs.pokemongo</item>
         <item>com.nike.plusgps</item>
+        <item>com.niksoftware.snapseed</item>
+        <item>com.nintendo.store</item>
+        <item>com.noon.buyerapp</item>
+        <item>com.nordvpn.android</item>
+        <item>com.offerup</item>
         <item>com.okcupid.okcupid</item>
+        <item>com.olimsoft.android.oplayer</item>
+        <item>com.omkar.voiceflow</item>
+        <item>com.onepassword.android</item>
         <item>com.onepeloton.callisto</item>
         <item>com.openai.chatgpt</item>
+        <item>com.openai.sora</item>
+        <item>com.opera.browser</item>
+        <item>com.orange.mysosh</item>
+        <item>com.orange.orangeetmoi</item>
+        <item>com.oumi.utility.media.hub</item>
+        <item>com.passport.photo</item>
         <item>com.patfit.android</item>
         <item>com.paypal.android.p2pmobile</item>
         <item>com.pcloud.pcloud</item>
+        <item>com.peacocktv.peacockandroid</item>
+        <item>com.pepper.dealabs</item>
+        <item>com.philo.philo.google</item>
+        <item>com.photoroom.app</item>
+        <item>com.picsart.studio</item>
+        <item>com.pinger.textfree</item>
         <item>com.pinterest</item>
         <item>com.pixelfed</item>
+        <item>com.planity.client</item>
+        <item>com.playrix.gardenscapes</item>
+        <item>com.playrix.homescapes</item>
+        <item>com.playstack.balatro</item>
+        <item>com.plexapp.android</item>
+        <item>com.polarsteps</item>
+        <item>com.polygone.montpellier</item>
+        <item>com.printklub.cheerz</item>
+        <item>com.qu.phomemo</item>
+        <item>com.quora.android</item>
+        <item>com.qwant.liberty</item>
         <item>com.reddit.frontpage</item>
+        <item>com.retroarch</item>
+        <item>com.rev.app</item>
         <item>com.revolut.revolut</item>
         <item>com.roblox.client</item>
+        <item>com.rocks.music.videoplayer</item>
+        <item>com.roku.remote</item>
         <item>com.roole.roolemap</item>
+        <item>com.ryanair.cheapflights</item>
+        <item>com.samsung.android.app.notes</item>
+        <item>com.samsung.android.app.share</item>
+        <item>com.samsung.android.app.watchmanager</item>
+        <item>com.samsung.android.goodlock</item>
+        <item>com.samsung.android.oneconnect</item>
+        <item>com.samsung.android.sidegesturepad</item>
+        <item>com.samsung.android.spay</item>
+        <item>com.samsung.android.tvplus</item>
+        <item>com.samsung.android.voc</item>
+        <item>com.samsung.eCommerce</item>
+        <item>com.sec.android.app.popupcalculator</item>
+        <item>com.sec.android.app.sbrowser</item>
+        <item>com.sec.android.app.shealth</item>
+        <item>com.sec.android.app.voicenote</item>
+        <item>com.sec.android.easyMover</item>
         <item>com.shazam.android</item>
+        <item>com.shop.orchestra.app</item>
         <item>com.snapchat.android</item>
+        <item>com.snapwood.smugfolio</item>
+        <item>com.sncf.digitalfactory.AppliGares</item>
+        <item>com.sncf.tgvpro</item>
+        <item>com.sony.songpal</item>
+        <item>com.sonyliv</item>
+        <item>com.soundcloud.android</item>
         <item>com.spotify.music</item>
         <item>com.standardnotes</item>
+        <item>com.starbucks.fr</item>
+        <item>com.startpage.app</item>
+        <item>com.storage.androidcleaner</item>
         <item>com.strava</item>
+        <item>com.suno.app</item>
+        <item>com.supercell.brawlstars</item>
         <item>com.supercell.clashofclans</item>
+        <item>com.supercell.clashroyale</item>
+        <item>com.superelement.pomodoro</item>
+        <item>com.surfshark.vpnclient.android</item>
+        <item>com.tam.mticket</item>
+        <item>com.target.ui</item>
+        <item>com.teamviewer.teamviewer.market.mobile</item>
         <item>com.tencent.ig</item>
+        <item>com.tencent.mm</item>
         <item>com.termux</item>
+        <item>com.teslamotors.tesla</item>
+        <item>com.thetrainline</item>
         <item>com.tinder</item>
+        <item>com.todoist</item>
+        <item>com.touchtype.swiftkey</item>
+        <item>com.tplink.deco</item>
+        <item>com.transferwise.android</item>
+        <item>com.tranzmate</item>
+        <item>com.trello</item>
         <item>com.tripadvisor.tripadvisor</item>
+        <item>com.truecaller</item>
+        <item>com.tubitv</item>
+        <item>com.tumblr</item>
         <item>com.twitter.android</item>
         <item>com.ubercab</item>
         <item>com.ubercab.eats</item>
+        <item>com.unscripted.posing.app</item>
+        <item>com.uptimerobot</item>
+        <item>com.valvesoftware.android.steam.community</item>
         <item>com.venmo</item>
+        <item>com.viber.voip</item>
+        <item>com.vivaldi.browser</item>
+        <item>com.vkontakte.android</item>
+        <item>com.vsc.mobile.horaires.fr</item>
+        <item>com.vsco.cam</item>
+        <item>com.vsct.vsc.mobile.horaireetresa.android</item>
+        <item>com.walmart.android</item>
+        <item>com.wayfair.wayfair</item>
         <item>com.waze</item>
+        <item>com.wbd.stream</item>
+        <item>com.weather.Weather</item>
+        <item>com.weaver.app.prod</item>
+        <item>com.whatsapp</item>
+        <item>com.whatsapp.w4b</item>
         <item>com.x8bit.bitwarden</item>
+        <item>com.xiaoji.vworld</item>
+        <item>com.xt.retouchoversea</item>
+        <item>com.yablio.sendfilestotv</item>
         <item>com.zhiliaoapp.musically</item>
+        <item>com.zoho.notebook</item>
+        <item>com.zzkko</item>
+        <item>company.thebrowser.arc</item>
         <item>de.danoeh.antennapod</item>
+        <item>de.komoot.android</item>
+        <item>de.momox</item>
         <item>de.number26.android</item>
+        <item>de.traderepublic.app</item>
         <item>de.tutao.tutanota</item>
         <item>de.yalwa.hashtagdating</item>
+        <item>de.zalando.mobile</item>
         <item>deezer.android.app</item>
+        <item>ee.mtakso.client</item>
+        <item>eu.darken.sdmse</item>
+        <item>eu.faircode.email</item>
+        <item>eu.faircode.netguard</item>
         <item>eu.qonto.qonto</item>
+        <item>fr.airweb.izneo</item>
+        <item>fr.assurance.maladie.cartevitale</item>
+        <item>fr.assurancemaladie.monespacesante</item>
+        <item>fr.banquepopulaire.cyberplus</item>
+        <item>fr.creditagricole.androidapp</item>
+        <item>fr.creditagricole.camasante</item>
         <item>fr.doctolib.www</item>
+        <item>fr.francetv.pluzz</item>
+        <item>fr.gouv.finances.amendesgouv</item>
+        <item>fr.gouv.finances.dgfip.mobile.impots</item>
+        <item>fr.gouv.finances.smartphone.android</item>
+        <item>fr.gouv.franceidentite</item>
+        <item>fr.laposte.lapostemobile</item>
+        <item>fr.lcl.android.customerarea</item>
         <item>fr.leboncoin</item>
+        <item>fr.m6.m6replay</item>
+        <item>fr.matmut.mamatmut</item>
+        <item>fr.msa.mamsamoi</item>
+        <item>fr.paylib.paylib</item>
+        <item>fr.tf1.mytf1</item>
         <item>fr.vinted</item>
+        <item>ginlemon.iconpackstudio</item>
+        <item>gouv.fr.franceidentite</item>
         <item>im.vector.app</item>
+        <item>io.element.android.x</item>
         <item>io.ente.photos</item>
+        <item>io.faceapp</item>
+        <item>io.mangas.app</item>
+        <item>io.nuki</item>
+        <item>io.olvid.messenger</item>
+        <item>io.vikunja.app</item>
         <item>io.yuka.android</item>
+        <item>jp.co.mixi.mitene</item>
+        <item>jp.naver.line.android</item>
+        <item>jp.naver.linecamera.android</item>
+        <item>keepass2android.keepass2android</item>
         <item>me.lyft.android</item>
+        <item>me.proton.android.drive</item>
         <item>me.proton.android.lumo</item>
+        <item>me.proton.drive</item>
+        <item>me.proton.pass</item>
+        <item>me.zepeto.main</item>
+        <item>mobi.societegenerale.mobile.lappli</item>
         <item>net.axcrypt.axcrypt2x</item>
+        <item>net.bnpparibas.mescomptes</item>
+        <item>net.cozic.joplin</item>
+        <item>net.oqee.androidmobile</item>
         <item>net.osmand</item>
+        <item>net.skyscanner.android.main</item>
+        <item>net.thunderbird.android</item>
+        <item>notion.id</item>
+        <item>org.adblockplus.adblockplussamsung</item>
+        <item>org.courville.nova</item>
+        <item>org.de_studio.diary</item>
         <item>org.documentfoundation.libreoffice</item>
+        <item>org.dolphinemu.dolphinemu</item>
+        <item>org.jellyfin.mobile</item>
         <item>org.jitsi.meet</item>
         <item>org.joinmastodon.android</item>
+        <item>org.kustom.widget</item>
+        <item>org.kustom.widget.pro</item>
         <item>org.mozilla.firefox</item>
+        <item>org.schabi.newpipe</item>
         <item>org.tasks</item>
         <item>org.telegram.messenger</item>
         <item>org.thoughtcrime.securesms</item>
+        <item>org.torproject.torbrowser</item>
         <item>org.videolan.vlc</item>
+        <item>org.xbmc.kodi</item>
+        <item>photoeditor.layout.collagemaker</item>
+        <item>proton.android.pass</item>
+        <item>ru.ok.android</item>
+        <item>ru.ozon.app.android</item>
+        <item>trendyol.com</item>
+        <item>tv.arte.plus7</item>
+        <item>tv.molotov.app</item>
+        <item>tv.pluto.android</item>
+        <item>tv.twitch.android.app</item>
         <item>us.zoom.videomeetings</item>
+        <item>video.player.videoplayer</item>
+        <item>xyz.blueskyweb.app</item>
     </string-array>
 </resources>

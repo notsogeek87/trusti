@@ -4,8 +4,8 @@ import { API_URL } from '../utils/apiConfig';
 import { cachedFetchJSON } from '../utils/fetchCache';
 import { pickBestAlternative, isStrictlyBetterGrade } from '../utils/alternatives';
 import { hasCompletedOnboarding } from '../utils/onboardingStorage';
-import { extractPackageId } from '../utils/androidPackage';
-import { setNote, moveNote } from '../utils/notesStorage';
+import { getAndroidPackage } from '../utils/androidPackage';
+import { setNote, getNote, moveNote } from '../utils/notesStorage';
 import {
   isLocalAppId,
   makeLocalId,
@@ -14,6 +14,7 @@ import {
   isValidPackageName,
   parseLocalApps,
   findCatalogMatch,
+  planCommonSync,
 } from '../utils/localApps';
 
 // Représentation d'une app « pas encore évaluée » (sans note A–E) dans les
@@ -353,7 +354,7 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
     if (!isInitialized || !allAppsLoaded || localApps.length === 0 || apps.length === 0) return;
     const mapping = new Map();
     localApps.forEach(local => {
-      const match = findCatalogMatch(local, apps, extractPackageId);
+      const match = findCatalogMatch(local, apps, getAndroidPackage);
       if (match) mapping.set(local.id, String(match.id));
     });
     if (mapping.size === 0) return;
@@ -788,6 +789,31 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
     setNote(id, '');
   };
 
+  // Résultat d'un scan : apps courantes (hors catalogue) trouvées installées
+  // → ajoutées « pas encore évaluées » (marquées `auto`) ; apps `auto` qui ne
+  // sont plus installées → retirées, sauf si l'utilisateur s'en est servi
+  // (étoile du quotidien ou commentaire), pour ne jamais perdre ses données.
+  const syncCommonApps = ({ found = [], notInstalledPackages = [] } = {}) => {
+    const stamp = makeLocalId();
+    const { removedIds, toAdd } = planCommonSync({
+      localApps,
+      found,
+      notInstalledPackages,
+      dailyApps,
+      hasNote: (id) => !!getNote(id),
+      makeId: (index) => `${stamp}${index.toString(36)}`,
+    });
+    if (removedIds.length === 0 && toAdd.length === 0) return;
+
+    setLocalApps(prev => [...prev.filter(local => !removedIds.includes(local.id)), ...toAdd]);
+    setMyApps(prev => {
+      const next = new Set(prev);
+      removedIds.forEach(id => next.delete(id));
+      toAdd.forEach(local => next.add(local.id));
+      return next;
+    });
+  };
+
   // Recréer des apps « pas encore évaluées » depuis une sauvegarde importée
   // (additif ; une app dont l'id existe déjà est ignorée).
   const importLocalApps = (list = []) => {
@@ -973,6 +999,7 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
     addLocalApp,
     removeLocalApp,
     importLocalApps,
+    syncCommonApps,
     addMyApps,
     removeMyApps,
     clearMyApps,

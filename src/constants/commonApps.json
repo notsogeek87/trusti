@@ -1,0 +1,486 @@
+[
+ {
+  "name": "1Password",
+  "packageName": "com.onepassword.android"
+ },
+ {
+  "name": "6play",
+  "packageName": "fr.m6.m6replay"
+ },
+ {
+  "name": "8 Ball Pool",
+  "packageName": "com.miniclip.eightballpool"
+ },
+ {
+  "name": "AccuWeather",
+  "packageName": "com.accuweather.android"
+ },
+ {
+  "name": "Adobe Scan",
+  "packageName": "com.adobe.scan.android"
+ },
+ {
+  "name": "Aegis Authenticator",
+  "packageName": "com.beemdevelopment.aegis"
+ },
+ {
+  "name": "Air France",
+  "packageName": "com.airfrance.android.dinamoprd"
+ },
+ {
+  "name": "AllTrails",
+  "packageName": "com.alltrails.alltrails"
+ },
+ {
+  "name": "Amazon Alexa",
+  "packageName": "com.amazon.dee.app"
+ },
+ {
+  "name": "Amazon Music",
+  "packageName": "com.amazon.mp3"
+ },
+ {
+  "name": "Amendes.gouv",
+  "packageName": "fr.gouv.finances.amendesgouv"
+ },
+ {
+  "name": "Android Auto",
+  "packageName": "com.google.android.projection.gearhead"
+ },
+ {
+  "name": "AntennaPod",
+  "packageName": "de.danoeh.antennapod"
+ },
+ {
+  "name": "AnyDesk",
+  "packageName": "com.anydesk.anydeskandroid"
+ },
+ {
+  "name": "Arte",
+  "packageName": "tv.arte.plus7"
+ },
+ {
+  "name": "Audible",
+  "packageName": "com.audible.application"
+ },
+ {
+  "name": "Authy",
+  "packageName": "com.authy.authy"
+ },
+ {
+  "name": "Babbel",
+  "packageName": "com.babbel.mobile.android.en"
+ },
+ {
+  "name": "Badoo",
+  "packageName": "com.badoo.mobile"
+ },
+ {
+  "name": "Banque Populaire",
+  "packageName": "fr.banquepopulaire.cyberplus"
+ },
+ {
+  "name": "Brawl Stars",
+  "packageName": "com.supercell.brawlstars"
+ },
+ {
+  "name": "Call of Duty Mobile",
+  "packageName": "com.activision.callofduty.shooter"
+ },
+ {
+  "name": "CapCut",
+  "packageName": "com.lemon.lvoverseas"
+ },
+ {
+  "name": "Carrefour",
+  "packageName": "com.carrefour.fid.android"
+ },
+ {
+  "name": "CIC",
+  "packageName": "com.cic_prod.bad"
+ },
+ {
+  "name": "Citymapper",
+  "packageName": "com.citymapper.app.release"
+ },
+ {
+  "name": "Clash Royale",
+  "packageName": "com.supercell.clashroyale"
+ },
+ {
+  "name": "Coin Master",
+  "packageName": "com.moonactive.coinmaster"
+ },
+ {
+  "name": "Coinbase",
+  "packageName": "com.coinbase.android"
+ },
+ {
+  "name": "Crédit Mutuel",
+  "packageName": "com.cm_prod.bad"
+ },
+ {
+  "name": "Dashlane",
+  "packageName": "com.dashlane"
+ },
+ {
+  "name": "DeepL",
+  "packageName": "com.deepl.mobiletranslator"
+ },
+ {
+  "name": "DeepSeek",
+  "packageName": "com.deepseek.chat"
+ },
+ {
+  "name": "Evernote",
+  "packageName": "com.evernote"
+ },
+ {
+  "name": "ExpressVPN",
+  "packageName": "com.expressvpn.vpn"
+ },
+ {
+  "name": "Facebook Lite",
+  "packageName": "com.facebook.lite"
+ },
+ {
+  "name": "FairEmail",
+  "packageName": "eu.faircode.email"
+ },
+ {
+  "name": "France Identité",
+  "packageName": "fr.gouv.franceidentite"
+ },
+ {
+  "name": "France.tv",
+  "packageName": "fr.francetv.pluzz"
+ },
+ {
+  "name": "Free Fire",
+  "packageName": "com.dts.freefireth"
+ },
+ {
+  "name": "Free TV",
+  "packageName": "net.oqee.androidmobile"
+ },
+ {
+  "name": "Gardenscapes",
+  "packageName": "com.playrix.gardenscapes"
+ },
+ {
+  "name": "Garmin Connect",
+  "packageName": "com.garmin.android.apps.connectmobile"
+ },
+ {
+  "name": "Gboard",
+  "packageName": "com.google.android.inputmethod.latin"
+ },
+ {
+  "name": "Genshin Impact",
+  "packageName": "com.miHoYo.GenshinImpact"
+ },
+ {
+  "name": "Glovo",
+  "packageName": "com.glovo"
+ },
+ {
+  "name": "Google Agenda",
+  "packageName": "com.google.android.calendar"
+ },
+ {
+  "name": "Google Authenticator",
+  "packageName": "com.google.android.apps.authenticator2"
+ },
+ {
+  "name": "Google Calculatrice",
+  "packageName": "com.google.android.calculator"
+ },
+ {
+  "name": "Google Chat",
+  "packageName": "com.google.android.apps.dynamite"
+ },
+ {
+  "name": "Google Docs",
+  "packageName": "com.google.android.apps.docs.editors.docs"
+ },
+ {
+  "name": "Google Earth",
+  "packageName": "com.google.earth"
+ },
+ {
+  "name": "Google Fit",
+  "packageName": "com.google.android.apps.fitness"
+ },
+ {
+  "name": "Google One",
+  "packageName": "com.google.android.apps.subscriptions.red"
+ },
+ {
+  "name": "Google Play Jeux",
+  "packageName": "com.google.android.play.games"
+ },
+ {
+  "name": "Google Slides",
+  "packageName": "com.google.android.apps.docs.editors.slides"
+ },
+ {
+  "name": "Google Traduction",
+  "packageName": "com.google.android.apps.translate"
+ },
+ {
+  "name": "H&M",
+  "packageName": "com.hm.goe"
+ },
+ {
+  "name": "Happn",
+  "packageName": "com.ftw_and_co.happn"
+ },
+ {
+  "name": "Homescapes",
+  "packageName": "com.playrix.homescapes"
+ },
+ {
+  "name": "impots.gouv",
+  "packageName": "fr.gouv.finances.smartphone.android"
+ },
+ {
+  "name": "Keepass2Android",
+  "packageName": "keepass2android.keepass2android"
+ },
+ {
+  "name": "Kodi",
+  "packageName": "org.xbmc.kodi"
+ },
+ {
+  "name": "Komoot",
+  "packageName": "de.komoot.android"
+ },
+ {
+  "name": "La Banque Postale",
+  "packageName": "com.fullsix.android.labanquepostale.accountaccess"
+ },
+ {
+  "name": "LastPass",
+  "packageName": "com.lastpass.lpandroid"
+ },
+ {
+  "name": "Leclerc Drive",
+  "packageName": "com.infomil.leclercdrive"
+ },
+ {
+  "name": "Lidl Plus",
+  "packageName": "com.lidl.eci.lidlplus"
+ },
+ {
+  "name": "Lime",
+  "packageName": "com.limebike"
+ },
+ {
+  "name": "Ludo King",
+  "packageName": "com.ludo.king"
+ },
+ {
+  "name": "Ma Banque (Crédit Agricole)",
+  "packageName": "fr.creditagricole.androidapp"
+ },
+ {
+  "name": "Mes Comptes BNP Paribas",
+  "packageName": "net.bnpparibas.mescomptes"
+ },
+ {
+  "name": "Mes Comptes LCL",
+  "packageName": "fr.lcl.android.customerarea"
+ },
+ {
+  "name": "Microsoft Authenticator",
+  "packageName": "com.azure.authenticator"
+ },
+ {
+  "name": "Microsoft Bing",
+  "packageName": "com.microsoft.bing"
+ },
+ {
+  "name": "Microsoft Edge",
+  "packageName": "com.microsoft.emmx"
+ },
+ {
+  "name": "Microsoft Excel",
+  "packageName": "com.microsoft.office.excel"
+ },
+ {
+  "name": "Microsoft PowerPoint",
+  "packageName": "com.microsoft.office.powerpoint"
+ },
+ {
+  "name": "Microsoft SwiftKey",
+  "packageName": "com.touchtype.swiftkey"
+ },
+ {
+  "name": "Minecraft",
+  "packageName": "com.mojang.minecraftpe"
+ },
+ {
+  "name": "Molotov",
+  "packageName": "tv.molotov.app"
+ },
+ {
+  "name": "Mon espace santé",
+  "packageName": "fr.assurancemaladie.monespacesante"
+ },
+ {
+  "name": "Moovit",
+  "packageName": "com.tranzmate"
+ },
+ {
+  "name": "NewPipe",
+  "packageName": "org.schabi.newpipe"
+ },
+ {
+  "name": "NordVPN",
+  "packageName": "com.nordvpn.android"
+ },
+ {
+  "name": "OneNote",
+  "packageName": "com.microsoft.office.onenote"
+ },
+ {
+  "name": "Plex",
+  "packageName": "com.plexapp.android"
+ },
+ {
+  "name": "Pocket Casts",
+  "packageName": "au.com.shiftyjelly.pocketcasts"
+ },
+ {
+  "name": "Podcast Addict",
+  "packageName": "com.bambuna.podcastaddict"
+ },
+ {
+  "name": "PRONOTE",
+  "packageName": "com.IndexEducation.Pronote"
+ },
+ {
+  "name": "Proton Drive",
+  "packageName": "me.proton.android.drive"
+ },
+ {
+  "name": "Proton Pass",
+  "packageName": "proton.android.pass"
+ },
+ {
+  "name": "Quora",
+  "packageName": "com.quora.android"
+ },
+ {
+  "name": "Royal Match",
+  "packageName": "com.dreamgames.royalmatch"
+ },
+ {
+  "name": "Ryanair",
+  "packageName": "com.ryanair.cheapflights"
+ },
+ {
+  "name": "Samsung Members",
+  "packageName": "com.samsung.android.voc"
+ },
+ {
+  "name": "Skyscanner",
+  "packageName": "net.skyscanner.android.main"
+ },
+ {
+  "name": "Slack",
+  "packageName": "com.Slack"
+ },
+ {
+  "name": "SNCF Connect",
+  "packageName": "com.vsct.vsc.mobile.horaireetresa.android"
+ },
+ {
+  "name": "Société Générale",
+  "packageName": "mobi.societegenerale.mobile.lappli"
+ },
+ {
+  "name": "SoundCloud",
+  "packageName": "com.soundcloud.android"
+ },
+ {
+  "name": "Subway Surfers",
+  "packageName": "com.kiloo.subwaysurf"
+ },
+ {
+  "name": "Sumeria (Lydia)",
+  "packageName": "com.lydia"
+ },
+ {
+  "name": "Surfshark",
+  "packageName": "com.surfshark.vpnclient.android"
+ },
+ {
+  "name": "TeamViewer",
+  "packageName": "com.teamviewer.teamviewer.market.mobile"
+ },
+ {
+  "name": "Tesla",
+  "packageName": "com.teslamotors.tesla"
+ },
+ {
+  "name": "TF1+",
+  "packageName": "fr.tf1.mytf1"
+ },
+ {
+  "name": "The Weather Channel",
+  "packageName": "com.weather.Weather"
+ },
+ {
+  "name": "Thunderbird",
+  "packageName": "net.thunderbird.android"
+ },
+ {
+  "name": "Todoist",
+  "packageName": "com.todoist"
+ },
+ {
+  "name": "Tor Browser",
+  "packageName": "org.torproject.torbrowser"
+ },
+ {
+  "name": "Trainline",
+  "packageName": "com.thetrainline"
+ },
+ {
+  "name": "Trello",
+  "packageName": "com.trello"
+ },
+ {
+  "name": "WeChat",
+  "packageName": "com.tencent.mm"
+ },
+ {
+  "name": "WhatsApp Business",
+  "packageName": "com.whatsapp.w4b"
+ },
+ {
+  "name": "Windy",
+  "packageName": "co.windyapp.android"
+ },
+ {
+  "name": "Wise",
+  "packageName": "com.transferwise.android"
+ },
+ {
+  "name": "WPS Office",
+  "packageName": "cn.wps.moffice_eng"
+ },
+ {
+  "name": "YouTube Kids",
+  "packageName": "com.google.android.apps.youtube.kids"
+ },
+ {
+  "name": "Zalando",
+  "packageName": "de.zalando.mobile"
+ },
+ {
+  "name": "Zara",
+  "packageName": "com.inditex.zara"
+ }
+]

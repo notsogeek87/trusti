@@ -131,18 +131,20 @@ const App = () => {
   };
 
   // Handler pour la fin de l'onboarding
-  const handleOnboardingComplete = (selectedAppIds) => {
+  const handleOnboardingComplete = (selectedAppIds, _notInstalledIds, commonScan) => {
     // Ajouter toutes les apps sélectionnées à "Mes Apps"
     const fakeEvent = { stopPropagation: () => {} };
     selectedAppIds.forEach(appId => {
       toggleMyApp(fakeEvent, appId);
     });
+    // Apps courantes détectées (sans note)
+    syncCommonApps(commonScan);
     
     // Fermer l'onboarding
     setShowOnboarding(false);
     
     // Rediriger vers "Mes Apps" si des apps sélectionnées, sinon vers "Applications"
-    if (selectedAppIds && selectedAppIds.size > 0) {
+    if ((selectedAppIds && selectedAppIds.size > 0) || commonScan?.found?.length > 0) {
       setActiveTab(TABS.MY_APPS);
     } else {
       setActiveTab(TABS.APPLICATIONS);
@@ -164,10 +166,12 @@ const App = () => {
   const [showRescan, setShowRescan] = useState(false);
   const [forceManualRescan, setForceManualRescan] = useState(false);
 
-  const handleRescanComplete = (selectedAppIds, notInstalledIds) => {
+  const handleRescanComplete = (selectedAppIds, notInstalledIds, commonScan) => {
     if (notInstalledIds && notInstalledIds.length > 0) {
       removeMyApps(notInstalledIds);
     }
+    // Apps courantes (sans note) : ajoute les nouvelles, retire celles disparues
+    syncCommonApps(commonScan);
     if (selectedAppIds && selectedAppIds.size > 0) {
       addMyApps([...selectedAppIds].map(String));
     }
@@ -232,6 +236,7 @@ const App = () => {
     addLocalApp,
     removeLocalApp,
     importLocalApps,
+    syncCommonApps,
     addMyApps,
     removeMyApps,
     clearMyApps,

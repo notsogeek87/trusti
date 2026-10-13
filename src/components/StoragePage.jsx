@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { formatBytes, clearAllTrustiStorage } from '../utils/storageStats';
 import { isNativeAndroid } from '../utils/platform';
-import { extractPackageId } from '../utils/androidPackage';
+import { getAndroidPackage } from '../utils/androidPackage';
 import InstalledApps from '../native/InstalledApps';
 import AppUpdate from '../native/AppUpdate';
 import { sortMyApps } from '../utils/myAppsSort';
@@ -223,7 +223,7 @@ const StoragePage = ({
   const installedAppsList = useMemo(() => {
     if (!isNativeAndroid || !installedPackages) return [];
     const withPackage = myAppsData
-      .map((app) => ({ app, packageName: extractPackageId(app.playStoreUrl) }))
+      .map((app) => ({ app, packageName: getAndroidPackage(app) }))
       .filter(({ packageName }) => packageName && installedPackages.includes(packageName));
     const enriched = withPackage.map(({ app, packageName }) => ({
       ...app,

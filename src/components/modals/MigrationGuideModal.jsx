@@ -4,7 +4,7 @@ import ScoreIndicator from '../ui/ScoreIndicator';
 import { MIGRATION_STEPS, CLEANUP_TIPS } from '../../constants/migrationGuide';
 import { getDataTips, getMigrationCandidates, computeProgress } from '../../utils/migrationGuide';
 import { getMigrationGuideState, saveMigrationGuideState } from '../../utils/migrationGuideStorage';
-import { extractPackageId } from '../../utils/androidPackage';
+import { getAndroidPackage } from '../../utils/androidPackage';
 import { isNativeAndroid } from '../../utils/platform';
 import InstalledApps from '../../native/InstalledApps';
 
@@ -55,8 +55,8 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
   const step = MIGRATION_STEPS[stepIndex];
   const done = state.done;
   const tips = getDataTips(app.category);
-  const oldPackage = extractPackageId(app.playStoreUrl);
-  const altPackage = extractPackageId(alt?.playStoreUrl);
+  const oldPackage = getAndroidPackage(app);
+  const altPackage = getAndroidPackage(alt);
   const oldInstalled = oldPackage && installed.includes(oldPackage);
   const altInstalled = altPackage && installed.includes(altPackage);
 

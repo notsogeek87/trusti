@@ -26,6 +26,15 @@ const playStoreCache = {};
  * Helper: Extraire le package ID depuis une URL Play Store, ou accepter
  * directement un package name saisi à la main (ex: "com.example.app")
  */
+// Nom de package Android explicite (apps hors Play Store : F-Droid, GitHub,
+// apps système). Toute valeur qui n'a pas la forme d'un package est ignorée.
+const ANDROID_PACKAGE_REGEX = /^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$/;
+function normalizeAndroidPackage(value) {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed.length <= 150 && ANDROID_PACKAGE_REGEX.test(trimmed) ? trimmed : null;
+}
+
 function extractPackageId(playStoreUrl) {
   if (!playStoreUrl) return null;
   const trimmed = playStoreUrl.trim();
@@ -256,6 +265,14 @@ export async function initDatabase() {
     await sql`
       ALTER TABLE applications
       ADD COLUMN IF NOT EXISTS f_droid_url TEXT
+    `;
+
+    // Migration: colonne android_package (package Android explicite, pour les
+    // apps sans lien Play Store : F-Droid, GitHub, apps système). Utilisée par
+    // le scan d'apps installées (scripts/generate-android-catalog.js).
+    await sql`
+      ALTER TABLE applications
+      ADD COLUMN IF NOT EXISTS android_package TEXT
     `;
 
     console.log('✅ Database initialized successfully');
@@ -724,7 +741,7 @@ export async function createApp(appData) {
     const apps = await sql`
       INSERT INTO applications (
         id, name, trusti_score, grade, category, icon, color, reason,
-        play_store_url, apple_store_url, f_droid_url, github_url, other_store_url,
+        play_store_url, apple_store_url, f_droid_url, github_url, other_store_url, android_package,
         website, description, developer, license,
         is_open_source, is_european, jurisdiction, app_type, show_in_awards, show_in_onboarding, popularity, privacy_features, permissions
       )
@@ -733,7 +750,7 @@ export async function createApp(appData) {
         ${appData.category || 'Application'}, ${appData.icon || null},
         ${appData.color || 'bg-slate-600'}, ${appData.reason || ''},
         ${appData.playStoreUrl || null}, ${appData.appleStoreUrl || null}, ${appData.fDroidUrl || null},
-        ${appData.githubUrl || null}, ${appData.otherStoreUrl || null},
+        ${appData.githubUrl || null}, ${appData.otherStoreUrl || null}, ${normalizeAndroidPackage(appData.androidPackage)},
         ${appData.website || null}, ${appData.description || null},
         ${appData.developer || null}, ${appData.license || null},
         ${appData.isOpenSource || false}, ${appData.isEuropean || false},
@@ -786,6 +803,7 @@ export async function updateApp(id, appData) {
         f_droid_url = COALESCE(${appData.fDroidUrl}, f_droid_url),
         github_url = COALESCE(${appData.githubUrl}, github_url),
         other_store_url = COALESCE(${appData.otherStoreUrl}, other_store_url),
+        android_package = COALESCE(${normalizeAndroidPackage(appData.androidPackage)}, android_package),
         website = COALESCE(${appData.website}, website),
         description = COALESCE(${appData.description}, description),
         developer = COALESCE(${appData.developer}, developer),
@@ -1257,6 +1275,7 @@ function formatAppFromDB(app, relations = { alternativeAppIds: [], replacesAppId
     fDroidUrl: app.f_droid_url, // URL F-Droid (résolue à l'écriture, TrustiApps A/B/C)
     githubUrl: app.github_url,
     otherStoreUrl: app.other_store_url,
+    androidPackage: app.android_package || null, // package Android explicite (sinon déduit de playStoreUrl)
     website: app.website,
     description: app.description,
     developer: app.developer,

@@ -4,7 +4,7 @@
  * serveur), sans note A–E, et sont fusionnées avec l'app du catalogue dès que
  * celle-ci existe (par nom de package, ou à défaut par nom identique).
  *
- * Forme : { id: "local-xxxx", name: string, packageName?: string }
+ * Forme : { id: "local-xxxx", name: string, packageName?: string, auto?: true }
  */
 export const LOCAL_ID_PREFIX = 'local-';
 
@@ -57,10 +57,48 @@ export const parseLocalApps = (list) => {
     seen.add(id);
     const app = { id, name };
     if (isValidPackageName(entry.packageName)) app.packageName = entry.packageName;
+    // `auto` : ajoutée par un scan (apps courantes), non par l'utilisateur
+    if (entry.auto === true) app.auto = true;
     out.push(app);
     if (out.length >= MAX_LOCAL_APPS) break;
   }
   return out;
+};
+
+/**
+ * Plan de synchronisation après un scan : quelles apps courantes (hors
+ * catalogue, sans note) ajouter, et quelles apps `auto` retirer parce qu'elles
+ * ne sont plus installées. Une app `auto` dont l'utilisateur s'est servi
+ * (étoile du quotidien ou commentaire) n'est jamais retirée.
+ *
+ * @param {object} p
+ * @param {Array} p.localApps          apps « pas encore évaluées » actuelles
+ * @param {Array<{name: string, packageName: string}>} p.found  apps courantes trouvées installées
+ * @param {string[]} p.notInstalledPackages  apps courantes confirmées absentes
+ * @param {Set<string>} p.dailyApps    ids marqués « quotidien »
+ * @param {(id: string) => boolean} p.hasNote
+ * @param {(index: number) => string} p.makeId  fabrique un id local unique
+ * @returns {{ removedIds: string[], toAdd: Array }}
+ */
+export const planCommonSync = ({ localApps, found, notInstalledPackages, dailyApps, hasNote, makeId }) => {
+  const gone = new Set(notInstalledPackages);
+  const removedIds = localApps
+    .filter(local => local.auto && local.packageName && gone.has(local.packageName)
+      && !dailyApps.has(local.id) && !hasNote(local.id))
+    .map(local => local.id);
+
+  const knownPackages = new Set(localApps.map(local => local.packageName).filter(Boolean));
+  const knownNames = new Set(localApps.map(local => normalizeAppName(local.name)));
+  const toAdd = [];
+  found.forEach((common, index) => {
+    const name = cleanAppName(common?.name);
+    if (!name || !isValidPackageName(common.packageName)) return;
+    if (knownPackages.has(common.packageName) || knownNames.has(normalizeAppName(name))) return;
+    knownPackages.add(common.packageName);
+    knownNames.add(normalizeAppName(name));
+    toAdd.push({ id: makeId(index), name, packageName: common.packageName, auto: true });
+  });
+  return { removedIds, toAdd };
 };
 
 /**
@@ -70,13 +108,13 @@ export const parseLocalApps = (list) => {
  *
  * @param {{ name: string, packageName?: string }} local
  * @param {Array<{ id: string|number, name: string, playStoreUrl?: string }>} catalogApps
- * @param {(url?: string) => string|null} extractPackageId
+ * @param {(app: object) => string|null} getPackage  Package Android d'une app du catalogue
  */
-export const findCatalogMatch = (local, catalogApps, extractPackageId) => {
+export const findCatalogMatch = (local, catalogApps, getPackage) => {
   if (!local || !Array.isArray(catalogApps)) return null;
 
   if (local.packageName) {
-    const byPackage = catalogApps.find(app => extractPackageId(app.playStoreUrl) === local.packageName);
+    const byPackage = catalogApps.find(app => getPackage(app) === local.packageName);
     if (byPackage) return byPackage;
   }
 
