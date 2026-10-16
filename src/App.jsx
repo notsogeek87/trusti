@@ -369,7 +369,13 @@ const App = () => {
         return;
       }
       
-      // Si le modal de migration est ouvert
+      // Si un modal de migration / alternative est ouvert
+      if (migrationGuideApp) {
+        event.preventDefault();
+        setMigrationGuideApp(null);
+        return;
+      }
+
       if (showMigrationSelector) {
         event.preventDefault();
         setShowMigrationSelector(null);
@@ -396,14 +402,14 @@ const App = () => {
     return () => {
       window.removeEventListener('popstate', handleBackButton);
     };
-  }, [selectedApp, showMigrationSelector, activeTab, setSelectedApp, setShowMigrationSelector, setActiveTab]);
+  }, [selectedApp, migrationGuideApp, showMigrationSelector, activeTab, setSelectedApp, setShowMigrationSelector, setActiveTab]);
 
   // Ajouter un état dans l'historique quand on ouvre un modal ou change d'onglet
   useEffect(() => {
-    if (selectedApp || showMigrationSelector || activeTab === TABS.MY_APPS) {
+    if (selectedApp || migrationGuideApp || showMigrationSelector || activeTab === TABS.MY_APPS) {
       window.history.pushState({ page: 'trusti' }, '');
     }
-  }, [selectedApp, showMigrationSelector, activeTab]);
+  }, [selectedApp, migrationGuideApp, showMigrationSelector, activeTab]);
 
   // Gérer le bouton retour matériel Android (app native Capacitor).
   // Dans le WebView natif, ce bouton ne déclenche PAS l'événement navigateur
@@ -428,8 +434,33 @@ const App = () => {
         return;
       }
 
+      if (migrationGuideApp) {
+        setMigrationGuideApp(null);
+        return;
+      }
+
       if (showMigrationSelector) {
         setShowMigrationSelector(null);
+        return;
+      }
+
+      if (showShareModal) {
+        setShowShareModal(false);
+        return;
+      }
+
+      if (showTrustiShareModal) {
+        setShowTrustiShareModal(false);
+        return;
+      }
+
+      if (pendingImport) {
+        setPendingImport(null);
+        return;
+      }
+
+      if (showExplainer) {
+        setShowExplainer(false);
         return;
       }
 
@@ -451,7 +482,7 @@ const App = () => {
       cancelled = true;
       listenerHandle?.remove();
     };
-  }, [selectedApp, showStorageManager, showMigrationSelector, activeTab, setSelectedApp, setShowMigrationSelector, setActiveTab]);
+  }, [selectedApp, showStorageManager, migrationGuideApp, showMigrationSelector, showShareModal, showTrustiShareModal, pendingImport, showExplainer, activeTab, setSelectedApp, setShowMigrationSelector, setShowShareModal, setShowTrustiShareModal, setShowExplainer, setActiveTab]);
 
   const isMobile = useIsSmallViewport();
 
