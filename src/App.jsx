@@ -36,7 +36,6 @@ import ShareModal from './components/modals/ShareModal';
 import TrustiShareModal from './components/modals/TrustiShareModal';
 import ImportAppsModal from './components/modals/ImportAppsModal';
 import MigrationSelectorModal from './components/modals/MigrationSelectorModal';
-import MigrationGuideModal from './components/modals/MigrationGuideModal';
 import WelcomeModal from './components/modals/WelcomeModal';
 import StoragePage from './components/StoragePage';
 
@@ -178,8 +177,6 @@ const App = () => {
 
   // État pour le filtre migrée / à migrer dans l'onglet Mes Apps
   const [migrationFilter, setMigrationFilter] = useState(DEFAULT_MIGRATION_FILTER);
-  // App dont le parcours « Migration guidée » est ouvert depuis « Mes Apps »
-  const [migrationGuideApp, setMigrationGuideApp] = useState(null);
 
   // État pour le filtre avec/sans alternative connue dans l'onglet Mes Apps.
   // Par défaut on masque les apps sans alternative connue (rien à proposer
@@ -369,13 +366,7 @@ const App = () => {
         return;
       }
       
-      // Si un modal de migration / alternative est ouvert
-      if (migrationGuideApp) {
-        event.preventDefault();
-        setMigrationGuideApp(null);
-        return;
-      }
-
+      // Si le modal de migration est ouvert
       if (showMigrationSelector) {
         event.preventDefault();
         setShowMigrationSelector(null);
@@ -402,14 +393,14 @@ const App = () => {
     return () => {
       window.removeEventListener('popstate', handleBackButton);
     };
-  }, [selectedApp, migrationGuideApp, showMigrationSelector, activeTab, setSelectedApp, setShowMigrationSelector, setActiveTab]);
+  }, [selectedApp, showMigrationSelector, activeTab, setSelectedApp, setShowMigrationSelector, setActiveTab]);
 
   // Ajouter un état dans l'historique quand on ouvre un modal ou change d'onglet
   useEffect(() => {
-    if (selectedApp || migrationGuideApp || showMigrationSelector || activeTab === TABS.MY_APPS) {
+    if (selectedApp || showMigrationSelector || activeTab === TABS.MY_APPS) {
       window.history.pushState({ page: 'trusti' }, '');
     }
-  }, [selectedApp, migrationGuideApp, showMigrationSelector, activeTab]);
+  }, [selectedApp, showMigrationSelector, activeTab]);
 
   // Gérer le bouton retour matériel Android (app native Capacitor).
   // Dans le WebView natif, ce bouton ne déclenche PAS l'événement navigateur
@@ -431,11 +422,6 @@ const App = () => {
 
       if (showStorageManager) {
         setShowStorageManager(false);
-        return;
-      }
-
-      if (migrationGuideApp) {
-        setMigrationGuideApp(null);
         return;
       }
 
@@ -482,7 +468,7 @@ const App = () => {
       cancelled = true;
       listenerHandle?.remove();
     };
-  }, [selectedApp, showStorageManager, migrationGuideApp, showMigrationSelector, showShareModal, showTrustiShareModal, pendingImport, showExplainer, activeTab, setSelectedApp, setShowMigrationSelector, setShowShareModal, setShowTrustiShareModal, setShowExplainer, setActiveTab]);
+  }, [selectedApp, showStorageManager, showMigrationSelector, showShareModal, showTrustiShareModal, pendingImport, showExplainer, activeTab, setSelectedApp, setShowMigrationSelector, setShowShareModal, setShowTrustiShareModal, setShowExplainer, setActiveTab]);
 
   const isMobile = useIsSmallViewport();
 
@@ -792,7 +778,6 @@ const App = () => {
         onToggleMigrate={toggleMigrate}
         onSelectApp={openAppDetail}
         onSelectMigration={setShowMigrationSelector}
-        onStartMigration={setMigrationGuideApp}
         selectedCategory={selectedCategory}
         searchTerm={searchTerm}
         pagination={pagination}
@@ -832,20 +817,6 @@ const App = () => {
         migrations={pendingImport.migrations}
         onConfirm={handleImportShared}
         onClose={() => setPendingImport(null)}
-      />
-    )}
-
-    {/* Parcours de migration guidée (depuis « Mes Apps ») */}
-    {migrationGuideApp && !selectedApp && (
-      <MigrationGuideModal
-        app={migrationGuideApp}
-        alternatives={apps.filter(a =>
-          migrationGuideApp.alternativeAppIds?.includes(String(a.id)) ||
-          a.replacesAppIds?.includes(migrationGuideApp.id) ||
-          a.replacesAppId === migrationGuideApp.id
-        )}
-        onComplete={(from, to) => importMigrations([{ id: from.id, customAlt: to?.name }])}
-        onClose={() => setMigrationGuideApp(null)}
       />
     )}
 
