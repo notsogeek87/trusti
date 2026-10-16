@@ -1,11 +1,8 @@
-import React, { useState, useRef } from 'react';
-import { PlusCircle, CheckCircle, Trash2, ShieldCheck, ChevronRight, ArrowUpRight, CornerDownRight } from 'lucide-react';
+import React from 'react';
+import { PlusCircle, CheckCircle, ShieldCheck, ChevronRight, ArrowUpRight, CornerDownRight } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
 import { TABS } from '../constants/tabs';
 import AppIconImage from './ui/AppIconImage';
-
-const SWIPE_THRESHOLD = 72;
-const SWIPE_MAX = 88;
 
 const AppCard = React.memo(({
   app,
@@ -16,73 +13,19 @@ const AppCard = React.memo(({
   onToggleMyApp,
   onToggleMigrate,
   onSelectApp,
-  onSelectMigration,
   isLoadingMyApps = false
 }) => {
   const isLoadingSkeleton = app.isLoadingSkeleton === true;
 
-  const [swipeX, setSwipeX] = useState(0);
-  const [swiping, setSwiping] = useState(false);
-  const touchStartX = useRef(null);
-  const touchStartY = useRef(null);
-  const didSwipe = useRef(false);
-
-  const handleTouchStart = (e) => {
-    if (activeTab !== TABS.MY_APPS || isLoadingSkeleton) return;
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-    didSwipe.current = false;
-  };
-
-  const handleTouchMove = (e) => {
-    if (touchStartX.current === null) return;
-    const dx = e.touches[0].clientX - touchStartX.current;
-    const dy = e.touches[0].clientY - touchStartY.current;
-    if (Math.abs(dx) > Math.abs(dy) && dx < 0) {
-      didSwipe.current = true;
-      setSwiping(true);
-      setSwipeX(Math.max(dx, -SWIPE_MAX));
-    }
-  };
-
-  const handleTouchEnd = () => {
-    if (swipeX < -SWIPE_THRESHOLD) {
-      onToggleMyApp({ stopPropagation: () => {} }, app.id);
-    }
-    setSwipeX(0);
-    setSwiping(false);
-    touchStartX.current = null;
-  };
-
   const handleCardClick = () => {
-    if (didSwipe.current) { didSwipe.current = false; return; }
-    if (swipeX !== 0) { setSwipeX(0); return; }
     if (!isLoadingSkeleton) onSelectApp(app);
   };
 
   return (
     <div className="relative overflow-hidden rounded-2xl">
-      {/* Zone rouge révélée au slide */}
-      {activeTab === TABS.MY_APPS && !isLoadingSkeleton && swipeX < 0 && (
-        <div
-          className="absolute inset-y-0 right-0 bg-rose-500 flex flex-col items-center justify-center gap-1 px-5"
-          aria-hidden="true"
-        >
-          <Trash2 size={18} className="text-white" />
-          <span className="text-white text-[10px] font-bold">Retirer</span>
-        </div>
-      )}
-
-      {/* Carte coulissante */}
+      {/* Carte : un seul geste, toucher ouvre le détail */}
       <div
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
         onClick={handleCardClick}
-        style={{
-          transform: `translateX(${swipeX}px)`,
-          transition: swiping ? 'none' : 'transform 0.3s cubic-bezier(0.25,1,0.5,1)',
-        }}
         className={`bg-white border border-slate-100 p-4 flex flex-col gap-2 rounded-2xl ${
           isLoadingSkeleton ? 'cursor-default' : 'cursor-pointer hover:shadow-md hover:border-indigo-100'
         } transition-shadow group`}
@@ -112,7 +55,7 @@ const AppCard = React.memo(({
               <button
                 onClick={(e) => { e.stopPropagation(); !isLoadingSkeleton && onToggleMyApp(e, app.id); }}
                 disabled={isLoadingSkeleton}
-                className={`p-2 rounded-full transition-all ${
+                className={`w-12 h-12 -m-1 flex items-center justify-center rounded-full transition-all ${
                   isLoadingSkeleton
                     ? 'text-slate-200 cursor-not-allowed'
                     : isInMyApps
@@ -169,36 +112,30 @@ const AppCard = React.memo(({
         {/* Alternative disponible */}
         {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade !== 'A' && (app.alternative || customMigration) && (
           <div className="space-y-1">
-            <button
-              onClick={(e) => { e.stopPropagation(); onSelectMigration(app.id); }}
-              className="w-full flex items-center gap-1.5 pl-0.5 text-left"
-            >
+            <div className="w-full flex items-center gap-1.5 pl-0.5 text-left">
               <CornerDownRight size={14} className="text-emerald-500 shrink-0" />
-              <span className="text-[11px] font-semibold text-emerald-700 shrink-0">Alternative :</span>
-              <span className="text-xs font-bold text-emerald-600 hover:underline truncate">
+              <span className="text-xs font-semibold text-emerald-700 shrink-0">Alternative :</span>
+              <span className="text-sm font-bold text-emerald-600 truncate">
                 {app.alternative || customMigration}
               </span>
               {app.alternativeAdopted && (
-                <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-700 bg-emerald-100 rounded-full px-1.5 py-0.5 shrink-0">
+                <span className="inline-flex items-center gap-0.5 text-xs font-bold text-emerald-700 bg-emerald-100 rounded-full px-1.5 py-0.5 shrink-0">
                   <CheckCircle size={11} /> Déjà installée
                 </span>
               )}
-            </button>
+            </div>
 
             {/* Une alternative encore mieux notée existe, mais n'est pas (encore) utilisée */}
             {app.betterAlternative && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onSelectMigration(app.id); }}
-                className="w-full flex items-center gap-1.5 pl-0.5 text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 transition-colors"
-              >
+              <div className="w-full flex items-center gap-1.5 pl-0.5 text-xs font-semibold text-emerald-700">
                 <ArrowUpRight size={12} className="shrink-0 text-emerald-500" />
                 <span className="flex-grow text-left truncate">
                   <span className="font-black">{app.betterAlternative.name}</span> (grade {app.betterAlternative.grade})
                 </span>
-                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 rounded-full px-1.5 py-0.5 shrink-0">
+                <span className="text-xs font-bold text-emerald-700 bg-emerald-100 rounded-full px-1.5 py-0.5 shrink-0">
                   Encore mieux notée
                 </span>
-              </button>
+              </div>
             )}
           </div>
         )}

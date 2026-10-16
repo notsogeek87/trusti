@@ -46,7 +46,7 @@ const sectionAnim = (delay = 0) => ({
 /**
  * Modal des détails d'une application
  */
-const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, onCompleteMigration, allApps = [] }) => {
+const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, onCompleteMigration, onChangeAlternative, allApps = [] }) => {
   const [isExiting, setIsExiting] = useState(false);
   const [showMigrationGuide, setShowMigrationGuide] = useState(false);
   // State pour stocker les apps chargées dynamiquement
@@ -280,13 +280,13 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
       {/* ── Header ── */}
       <header className="bg-white border-b border-slate-100 sticky top-0 z-50 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-          <button onClick={handleClose} className="p-2 -ml-2 text-slate-400 hover:text-slate-700 transition-colors active:scale-90">
+          <button onClick={handleClose} className="w-12 h-12 -ml-3 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors active:scale-90">
             <ChevronLeft size={24} />
           </button>
           <div className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Détails</div>
           <button
             onClick={(e) => onToggleMyApp(e, app.id)}
-            className={`p-2 rounded-full transition-colors ${isInMyApps ? 'text-indigo-600 bg-indigo-50' : 'text-slate-200 hover:text-indigo-400'}`}
+            className={`w-12 h-12 -mr-2 flex items-center justify-center rounded-full transition-colors ${isInMyApps ? 'text-indigo-600 bg-indigo-50' : 'text-slate-200 hover:text-indigo-400'}`}
           >
             {isInMyApps ? <CheckCircle size={24} /> : <PlusCircle size={24} />}
           </button>
@@ -491,7 +491,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                   {!isLoadingRelations && canStartMigration(app, alternatives) && (
                     <button
                       onClick={() => setShowMigrationGuide(true)}
-                      className="w-full mt-3 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition-all active:scale-[0.98]"
+                      className="w-full mt-3 min-h-[48px] flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-3 px-3 rounded-xl transition-all active:scale-[0.98]"
                     >
                       <Route size={14} /> Migrer pas à pas
                     </button>
@@ -499,6 +499,16 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Choisir une autre alternative (popup de sélection) */}
+          {isInMyApps && onChangeAlternative && app.grade !== 'A' && (
+            <button
+              onClick={() => onChangeAlternative(app.id)}
+              className="w-full mb-4 min-h-[48px] flex items-center justify-center gap-2 bg-white border-2 border-indigo-200 text-indigo-700 font-bold text-sm py-3 px-4 rounded-xl transition-all active:scale-[0.98]"
+            >
+              <ArrowRight size={16} /> Changer d'alternative
+            </button>
           )}
 
           {/* Remplace */}

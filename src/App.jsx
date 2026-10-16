@@ -38,6 +38,7 @@ import ImportAppsModal from './components/modals/ImportAppsModal';
 import MigrationSelectorModal from './components/modals/MigrationSelectorModal';
 import WelcomeModal from './components/modals/WelcomeModal';
 import StoragePage from './components/StoragePage';
+import { useToast } from './contexts/ToastContext';
 
 const useIsSmallViewport = () => {
   const [isSmall, setIsSmall] = useState(() => window.innerWidth < 768);
@@ -173,6 +174,7 @@ const App = () => {
   };
 
   // État pour le filtre de catégorie dans l'onglet Applications
+  const toast = useToast();
   const [selectedCategory, setSelectedCategory] = useState('Toutes');
 
   // État pour le filtre migrée / à migrer dans l'onglet Mes Apps
@@ -358,18 +360,18 @@ const App = () => {
   // Gérer le bouton retour du smartphone/navigateur
   useEffect(() => {
     const handleBackButton = (event) => {
+      // Si le modal de migration est ouvert
+      if (showMigrationSelector) {
+        event.preventDefault();
+        setShowMigrationSelector(null);
+        return;
+      }
+      
       // Si un modal de détails est ouvert
       if (selectedApp) {
         event.preventDefault();
         shouldRestoreScroll.current = true;
         setSelectedApp(null);
-        return;
-      }
-      
-      // Si le modal de migration est ouvert
-      if (showMigrationSelector) {
-        event.preventDefault();
-        setShowMigrationSelector(null);
         return;
       }
       
@@ -414,6 +416,11 @@ const App = () => {
     let cancelled = false;
 
     CapacitorApp.addListener('backButton', () => {
+      if (showMigrationSelector) {
+        setShowMigrationSelector(null);
+        return;
+      }
+
       if (selectedApp) {
         shouldRestoreScroll.current = true;
         setSelectedApp(null);
@@ -422,11 +429,6 @@ const App = () => {
 
       if (showStorageManager) {
         setShowStorageManager(false);
-        return;
-      }
-
-      if (showMigrationSelector) {
-        setShowMigrationSelector(null);
         return;
       }
 
@@ -469,6 +471,18 @@ const App = () => {
       listenerHandle?.remove();
     };
   }, [selectedApp, showStorageManager, showMigrationSelector, showShareModal, showTrustiShareModal, pendingImport, showExplainer, activeTab, setSelectedApp, setShowMigrationSelector, setShowShareModal, setShowTrustiShareModal, setShowExplainer, setActiveTab]);
+
+  // Retrait d'une app de « Mes Apps » : toujours annulable (remplace le swipe)
+  const handleToggleMyApp = (e, id) => {
+    const wasInMyApps = myApps.has(id);
+    toggleMyApp(e, id);
+    if (wasInMyApps) {
+      toast.success('App retirée de Mes Apps', {
+        label: 'Annuler',
+        onClick: () => toggleMyApp({ stopPropagation: () => {} }, id),
+      });
+    }
+  };
 
   const isMobile = useIsSmallViewport();
 
@@ -518,12 +532,26 @@ const App = () => {
         key={selectedApp?.id}
         app={selectedApp}
         isInMyApps={myApps.has(selectedApp.id)}
-        onToggleMyApp={toggleMyApp}
+        onToggleMyApp={handleToggleMyApp}
+        onChangeAlternative={setShowMigrationSelector}
         onClose={closeAppDetail}
         onSelectApp={openAppDetail}
         onCompleteMigration={(from, to) => importMigrations([{ id: from.id, customAlt: to?.name }])}
         allApps={apps}
       />
+      {showMigrationSelector && (
+        <MigrationSelectorModal
+          currentAppId={showMigrationSelector}
+          currentSelection={customMigrations.get(showMigrationSelector)}
+          onSelect={(altName) => setCustomMigration(showMigrationSelector, altName)}
+          onClose={() => setShowMigrationSelector(null)}
+          onSelectApp={(app) => {
+            setShowMigrationSelector(null);
+            openAppDetail(app);
+          }}
+          allApps={apps}
+        />
+      )}
     </ViewModeContext.Provider>
     );
   }
@@ -773,11 +801,10 @@ const App = () => {
         favoriteApps={favoriteApps}
         migratedApps={migratedApps}
         customMigrations={customMigrations}
-        onToggleMyApp={toggleMyApp}
+        onToggleMyApp={handleToggleMyApp}
         onToggleFavorite={toggleFavorite}
         onToggleMigrate={toggleMigrate}
         onSelectApp={openAppDetail}
-        onSelectMigration={setShowMigrationSelector}
         selectedCategory={selectedCategory}
         searchTerm={searchTerm}
         pagination={pagination}

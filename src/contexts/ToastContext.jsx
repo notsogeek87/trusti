@@ -20,6 +20,14 @@ function ToastItem({ toast, onRemove }) {
       <div className={`absolute left-0 top-0 bottom-0 w-1 ${c.bar}`} />
       <Icon size={17} className={`flex-shrink-0 mt-0.5 ${c.icon_cls}`} />
       <p className="flex-1 text-sm font-medium leading-snug">{toast.message}</p>
+      {toast.action && (
+        <button
+          onClick={() => { toast.action.onClick(); onRemove(toast.id); }}
+          className="flex-shrink-0 min-h-[48px] -my-3 px-3 text-sm font-black underline"
+        >
+          {toast.action.label}
+        </button>
+      )}
       <button
         onClick={() => onRemove(toast.id)}
         className="flex-shrink-0 opacity-50 hover:opacity-100 transition-opacity -mt-0.5"
@@ -37,14 +45,14 @@ export function ToastProvider({ children }) {
     setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
 
-  const add = useCallback((message, type = 'success') => {
+  const add = useCallback((message, type = 'success', action = null) => {
     const id = Date.now() + Math.random();
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => remove(id), CONFIG[type]?.ttl ?? 3000);
+    setToasts(prev => [...prev, { id, message, type, action }]);
+    setTimeout(() => remove(id), action ? 6000 : (CONFIG[type]?.ttl ?? 3000));
   }, [remove]);
 
   const toast = useMemo(() => ({
-    success: (msg) => add(msg, 'success'),
+    success: (msg, action) => add(msg, 'success', action),
     error:   (msg) => add(msg, 'error'),
     info:    (msg) => add(msg, 'info'),
   }), [add]);
