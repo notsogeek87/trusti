@@ -7,6 +7,7 @@ import { API_URL } from '../../utils/apiConfig';
 import { isNativeAndroid } from '../../utils/platform';
 import { extractPackageId } from '../../utils/androidPackage';
 import InstalledApps from '../../native/InstalledApps';
+import { requestUninstall } from '../../utils/uninstallWatcher';
 import TechnicalAnalysisSection from '../technical/TechnicalAnalysisSection';
 import useTechnicalAnalysis from '../../hooks/useTechnicalAnalysis';
 import useAssessment from '../../hooks/useAssessment';
@@ -100,7 +101,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
 
   const handleUninstall = () => {
     if (!packageName) return;
-    InstalledApps.uninstallPackage({ packageName }).catch((error) => {
+    requestUninstall(packageName).catch((error) => {
       console.error('Désinstallation impossible:', error);
       window.alert("Impossible d'ouvrir la désinstallation. Réessayez depuis les paramètres du téléphone.");
     });

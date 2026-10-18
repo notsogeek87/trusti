@@ -8,6 +8,7 @@ import { formatBytes, clearAllTrustiStorage } from '../utils/storageStats';
 import { isNativeAndroid } from '../utils/platform';
 import { extractPackageId } from '../utils/androidPackage';
 import InstalledApps from '../native/InstalledApps';
+import { requestUninstall } from '../utils/uninstallWatcher';
 import AppUpdate from '../native/AppUpdate';
 import { sortMyApps } from '../utils/myAppsSort';
 import { GRADES } from '../constants/grades';
@@ -232,7 +233,7 @@ const StoragePage = ({
 
   const handleUninstall = (app) => {
     if (!app.packageName) return;
-    InstalledApps.uninstallPackage({ packageName: app.packageName }).catch((error) => {
+    requestUninstall(app.packageName).catch((error) => {
       console.error('Désinstallation impossible:', error);
       window.alert("Impossible d'ouvrir la désinstallation. Réessayez depuis les paramètres du téléphone.");
     });

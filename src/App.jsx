@@ -39,6 +39,7 @@ import MigrationSelectorModal from './components/modals/MigrationSelectorModal';
 import WelcomeModal from './components/modals/WelcomeModal';
 import StoragePage from './components/StoragePage';
 import { useToast } from './contexts/ToastContext';
+import { APP_UNINSTALLED_EVENT } from './utils/uninstallWatcher';
 
 const useIsSmallViewport = () => {
   const [isSmall, setIsSmall] = useState(() => window.innerWidth < 768);
@@ -483,6 +484,23 @@ const App = () => {
       });
     }
   };
+
+  // Après une désinstallation confirmée depuis Trusti : propose de relancer
+  // un scan pour que « Mes Apps » reflète la réalité du téléphone.
+  useEffect(() => {
+    const onUninstalled = () => {
+      toast.info('App désinstallée. Relancer un scan pour mettre à jour Mes Apps ?', {
+        label: 'Scanner',
+        onClick: () => {
+          setSelectedApp(null);
+          setShowStorageManager(false);
+          setShowRescan(true);
+        },
+      });
+    };
+    window.addEventListener(APP_UNINSTALLED_EVENT, onUninstalled);
+    return () => window.removeEventListener(APP_UNINSTALLED_EVENT, onUninstalled);
+  }, [toast, setSelectedApp]);
 
   const isMobile = useIsSmallViewport();
 

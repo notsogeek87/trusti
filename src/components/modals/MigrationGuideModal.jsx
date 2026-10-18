@@ -7,6 +7,7 @@ import { getMigrationGuideState, saveMigrationGuideState } from '../../utils/mig
 import { extractPackageId } from '../../utils/androidPackage';
 import { isNativeAndroid } from '../../utils/platform';
 import InstalledApps from '../../native/InstalledApps';
+import { requestUninstall } from '../../utils/uninstallWatcher';
 
 const TipList = ({ title, tips }) => (
   <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
@@ -90,7 +91,7 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
   }, [altInstalled]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleUninstall = () => {
-    InstalledApps.uninstallPackage({ packageName: oldPackage }).catch(() => {
+    requestUninstall(oldPackage).catch(() => {
       window.alert("Impossible d'ouvrir la désinstallation. Réessayez depuis les paramètres du téléphone.");
     });
   };
