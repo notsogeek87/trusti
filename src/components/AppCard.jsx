@@ -1,5 +1,5 @@
 import React from 'react';
-import { PlusCircle, CheckCircle, ShieldCheck, ChevronRight, ArrowUpRight, CornerDownRight, ThumbsUp } from 'lucide-react';
+import { PlusCircle, CheckCircle, ShieldCheck, ChevronRight, CornerDownRight, ThumbsUp } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
 import { TABS } from '../constants/tabs';
 import AppIconImage from './ui/AppIconImage';
@@ -134,19 +134,6 @@ const AppCard = React.memo(({
                 </span>
               )}
             </div>
-
-            {/* Une alternative encore mieux notée existe, mais n'est pas (encore) utilisée */}
-            {app.betterAlternative && (
-              <div className="w-full flex items-center gap-1.5 pl-0.5 text-xs font-semibold text-emerald-700">
-                <ArrowUpRight size={12} className="shrink-0 text-emerald-500" />
-                <span className="flex-grow text-left truncate">
-                  <span className="font-black">{app.betterAlternative.name}</span> (grade {app.betterAlternative.grade})
-                </span>
-                <span className="text-xs font-bold text-emerald-700 bg-emerald-100 rounded-full px-1.5 py-0.5 shrink-0">
-                  Encore mieux notée
-                </span>
-              </div>
-            )}
           </div>
         )}
       </div>
