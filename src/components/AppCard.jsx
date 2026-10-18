@@ -110,7 +110,9 @@ const AppCard = React.memo(({
               <>
                 <ThumbsUp size={14} className="text-emerald-500 shrink-0" />
                 <p className="text-xs font-semibold text-emerald-600">
-                  {BEST_AVAILABLE_MESSAGES[(app.name?.length || 0) % BEST_AVAILABLE_MESSAGES.length]}
+                  {app.grade === 'B'
+                    ? BEST_AVAILABLE_MESSAGES[(app.name?.length || 0) % BEST_AVAILABLE_MESSAGES.length]
+                    : BEST_AVAILABLE_MESSAGES[1]}
                 </p>
               </>
             )}
