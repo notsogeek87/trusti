@@ -4,7 +4,7 @@ import ScoreIndicator from './ui/ScoreIndicator';
 import { TABS } from '../constants/tabs';
 import AppIconImage from './ui/AppIconImage';
 
-// Grade B sans alternative connue : c'est ce qui se fait de mieux aujourd'hui
+// Aucune alternative connue : c'est ce qui se fait de mieux aujourd'hui
 const BEST_AVAILABLE_MESSAGES = [
   'Vous êtes pas mal !',
   "On ne fait pas mieux aujourd'hui",
@@ -106,17 +106,12 @@ const AppCard = React.memo(({
                 <div className="w-3.5 h-3.5 rounded-full border-2 border-slate-300 border-t-indigo-600 animate-spin shrink-0" />
                 <p className="text-xs font-semibold text-slate-500">Recherche d'alternatives...</p>
               </>
-            ) : app.grade === 'B' ? (
+            ) : (
               <>
                 <ThumbsUp size={14} className="text-emerald-500 shrink-0" />
                 <p className="text-xs font-semibold text-emerald-600">
                   {BEST_AVAILABLE_MESSAGES[(app.name?.length || 0) % BEST_AVAILABLE_MESSAGES.length]}
                 </p>
-              </>
-            ) : (
-              <>
-                <CornerDownRight size={14} className="text-orange-400 shrink-0" />
-                <p className="text-xs font-semibold text-orange-500">Aucune alternative connue</p>
               </>
             )}
           </div>
