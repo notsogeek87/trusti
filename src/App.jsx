@@ -32,6 +32,7 @@ import { isNativeAndroid } from './utils/platform';
 
 // Modals
 import AppDetailModal from './components/modals/AppDetailModal';
+import RescanPrompt from './components/ui/RescanPrompt';
 import ShareModal from './components/modals/ShareModal';
 import TrustiShareModal from './components/modals/TrustiShareModal';
 import ImportAppsModal from './components/modals/ImportAppsModal';
@@ -161,6 +162,7 @@ const App = () => {
   // La sélection manuelle (PWA/web, sans lecture réelle du téléphone) reste
   // purement additive, faute de moyen de vérifier ce qui est désinstallé.
   const [showRescan, setShowRescan] = useState(false);
+  const [showRescanPrompt, setShowRescanPrompt] = useState(false);
   const [forceManualRescan, setForceManualRescan] = useState(false);
 
   const handleRescanComplete = (selectedAppIds, notInstalledIds) => {
@@ -488,19 +490,21 @@ const App = () => {
   // Après une désinstallation confirmée depuis Trusti : propose de relancer
   // un scan pour que « Mes Apps » reflète la réalité du téléphone.
   useEffect(() => {
-    const onUninstalled = () => {
-      toast.info('App désinstallée. Relancer un scan pour mettre à jour Mes Apps ?', {
-        label: 'Scanner',
-        onClick: () => {
-          setSelectedApp(null);
-          setShowStorageManager(false);
-          setShowRescan(true);
-        },
-      });
-    };
+    const onUninstalled = () => setShowRescanPrompt(true);
     window.addEventListener(APP_UNINSTALLED_EVENT, onUninstalled);
     return () => window.removeEventListener(APP_UNINSTALLED_EVENT, onUninstalled);
-  }, [toast, setSelectedApp]);
+  }, []);
+
+  const startRescanFromPrompt = () => {
+    setShowRescanPrompt(false);
+    setSelectedApp(null);
+    setShowStorageManager(false);
+    setShowRescan(true);
+  };
+
+  const rescanPrompt = showRescanPrompt && !showRescan && (
+    <RescanPrompt onScan={startRescanFromPrompt} onDismiss={() => setShowRescanPrompt(false)} />
+  );
 
   const isMobile = useIsSmallViewport();
 
@@ -557,6 +561,7 @@ const App = () => {
         onCompleteMigration={(from, to) => importMigrations([{ id: from.id, customAlt: to?.name }])}
         allApps={apps}
       />
+      {rescanPrompt}
       {showMigrationSelector && (
         <MigrationSelectorModal
           currentAppId={showMigrationSelector}
@@ -888,6 +893,7 @@ const App = () => {
       />
     )}
 
+    {rescanPrompt}
     </>
 
     {/* Widget de chat Trusti (visible partout sauf pendant la vérification du token, la page de bienvenue, l'onboarding, le chargement initial) */}
