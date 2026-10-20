@@ -17,6 +17,8 @@
     "icons:fetch": "node server/database/fetch-icons-playstore.js",
     "test": "node --test 'tests/technical/**/*.test.js' 'tests/cleaner/**/*.test.js' 'tests/server/**/*.test.js'",
     "build": "vite build",
+    "vibe:analyze": "node scripts/vibe-analyze.js",
+    "vibe:check": "node scripts/vibe-check.js",
     "preview": "vite preview",
     "vercel-build": "vite build"
   },

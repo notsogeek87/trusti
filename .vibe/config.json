@@ -1,0 +1,282 @@
+{
+  "project": {
+    "name": "trusti",
+    "description": "Comparateur d'applications privacy-first (notes A-E) pour évaluer la souveraineté numérique",
+    "version": "1.0.0",
+    "license": "GPL-3.0-or-later",
+    "primaryLanguage": "javascript",
+    "framework": "react",
+    "architecture": "React + Vite frontend, Express/Vercel backend, PostgreSQL (Neon) database, Capacitor Android",
+    "deployment": "Vercel (web), GitHub Actions (APK)"
+  },
+  "workflow": {
+    "preferredBranchStrategy": "feature-branch",
+    "requirePRForMain": true,
+    "requirePRForStaging": true,
+    "autoRunTests": true,
+    "checkBuildBeforeCommit": true,
+    "checkAndroidBuild": "if-frontend-changed",
+    "defaultBranch": "main",
+    "stagingBranch": "staging"
+  },
+  "conventions": {
+    "componentNaming": "PascalCase",
+    "hookNaming": "usePascalCase",
+    "constantNaming": "UPPER_SNAKE_CASE",
+    "variableNaming": "camelCase",
+    "functionNaming": "camelCase",
+    "fileNaming": "kebab-case",
+    "folderOrganization": "by-feature",
+    "css": "tailwind-only",
+    "stateManagement": "react-hooks-localStorage",
+    "routing": "state-based (no router)",
+    "memoization": "React.memo for list items",
+    "typing": "JSDoc (no TypeScript)"
+  },
+  "restrictions": {
+    "forbiddenPaths": [
+      {
+        "path": "android/app/debug.keystore",
+        "reason": "Clé de signature debug Android - ne pas modifier",
+        "severity": "critical"
+      },
+      {
+        "path": "capacitor.config.json",
+        "reason": "Configuration Capacitor - ne pas modifier sans validation",
+        "severity": "critical"
+      },
+      {
+        "path": ".github/workflows/*.yml",
+        "reason": "CI/CD GitHub Actions - ne pas modifier sans validation",
+        "severity": "critical"
+      },
+      {
+        "path": "android/gradle.properties",
+        "reason": "Versioning Android - ne pas modifier",
+        "severity": "high"
+      },
+      {
+        "path": "android/app/src/main/AndroidManifest.xml",
+        "reason": "Manifest Android - modifications sensibles",
+        "severity": "high"
+      }
+    ],
+    "forbiddenActions": [
+      {
+        "action": "git push --force",
+        "reason": "Perte d'histoire Git",
+        "severity": "critical",
+        "alternative": "git push --force-with-lease"
+      },
+      {
+        "action": "git push to main",
+        "reason": "Branche protégée",
+        "severity": "critical",
+        "alternative": "Créer une PR"
+      },
+      {
+        "action": "commit secrets (API_KEY, DATABASE_URL, etc.)",
+        "reason": "Sécurité - fuite de credentials",
+        "severity": "critical",
+        "alternative": "Utiliser .env"
+      },
+      {
+        "action": "delete .github/workflows/*.yml",
+        "reason": "Brise la CI/CD",
+        "severity": "critical"
+      },
+      {
+        "action": "modify appId in capacitor.config.json",
+        "reason": "Brise l'identité de l'application Android",
+        "severity": "critical"
+      }
+    ],
+    "forbiddenPatterns": [
+      {
+        "pattern": "API_KEY.*=",
+        "reason": "Ne pas hardcoder les API keys",
+        "severity": "critical"
+      },
+      {
+        "pattern": "DATABASE_URL.*=",
+        "reason": "Ne pas hardcoder les URLs de base de données",
+        "severity": "critical"
+      },
+      {
+        "pattern": "password.*:",
+        "reason": "Ne pas hardcoder les mots de passe",
+        "severity": "critical"
+      },
+      {
+        "pattern": "http://localhost:.*api",
+        "reason": "Utiliser apiConfig.js pour les URLs API",
+        "severity": "high",
+        "alternative": "import { API_URL } from '@/utils/apiConfig'"
+      }
+    ]
+  },
+  "criticalFiles": {
+    "highPriority": [
+      {
+        "path": "src/App.jsx",
+        "lines": 631,
+        "description": "Composant root - état global, routing tabs",
+        "action": "À découper en hooks/composants plus petits",
+        "risk": "Trop complexe, difficile à maintenir"
+      },
+      {
+        "path": "server/index.js",
+        "lines": 740,
+        "description": "Backend Express - toutes les routes dev",
+        "action": "À découper en modules par domaine",
+        "risk": "Trop complexe, difficile à maintenir"
+      },
+      {
+        "path": "src/utils/apiConfig.js",
+        "description": "Configuration centrale de l'URL API",
+        "action": "TOUJOURS utiliser ce fichier, ne JAMAIS dupliquer l'URL",
+        "risk": "Duplication = maintenance difficile"
+      },
+      {
+        "path": "src/constants/appsData.js",
+        "description": "Base de données des applications",
+        "action": "À migrer vers PostgreSQL (déjà en cours)",
+        "risk": "Données en dur = difficile à maintenir"
+      }
+    ],
+    "mediumPriority": [
+      {
+        "path": "api/*.js",
+        "description": "Routes serverless Vercel (production)",
+        "action": "Valider avant modification"
+      },
+      {
+        "path": "src/hooks/*.js",
+        "description": "Hooks personnalisés",
+        "action": "Respecter la convention usePascalCase"
+      },
+      {
+        "path": "src/constants/*.js",
+        "description": "Constantes du projet",
+        "action": "Respecter UPPER_SNAKE_CASE"
+      }
+    ]
+  },
+  "testCommands": {
+    "unit": "npm test",
+    "unitDescription": "Exécute les tests unitaires (tests/technical/**/*.test.js, tests/cleaner/**/*.test.js, tests/server/**/*.test.js)",
+    "build": "npm run build",
+    "buildDescription": "Build Vite pour la production (génère /dist)",
+    "dev": "npm run dev",
+    "devDescription": "Lance le serveur de développement Vite (port 5173)",
+    "server": "npm run server",
+    "serverDescription": "Lance le backend Express (port 3001)",
+    "devAll": "npm run dev:all",
+    "devAllDescription": "Lance frontend + backend simultanément",
+    "androidSync": "npm run cap:sync",
+    "androidSyncDescription": "Build Vite + cap sync android (OBLIGATOIRE avant build Gradle)",
+    "androidBuild": "cd android && ./gradlew assembleDebug",
+    "androidBuildDescription": "Build l'APK Android (nécessite SDK Android)"
+  },
+  "dependencies": {
+    "packageManager": "npm",
+    "lockFile": "package-lock.json",
+    "mainDependencies": [
+      "react",
+      "react-dom",
+      "vite",
+      "express",
+      "@capacitor/core",
+      "@capacitor/android",
+      "@neondatabase/serverless",
+      "tailwindcss",
+      "lucide-react"
+    ],
+    "devDependencies": [
+      "@vitejs/plugin-react",
+      "@capacitor/cli",
+      "@capacitor/assets",
+      "concurrently",
+      "autoprefixer",
+      "postcss",
+      "tailwindcss"
+    ]
+  },
+  "environment": {
+    "nodeVersion": "22",
+    "npmVersion": "10+",
+    "requiredEnvVars": [
+      "DATABASE_URL",
+      "BREVO_API_KEY",
+      "BREVO_FROM_EMAIL",
+      "FRONTEND_URL",
+      "API_KEY",
+      "NODE_ENV"
+    ],
+    "optionalEnvVars": [
+      "RESEND_API_KEY"
+    ]
+  },
+  "documentation": {
+    "primary": [
+      "README.md",
+      "docs/README.md",
+      ".vibe/instructions.md",
+      "AGENTS.md",
+      ".claude/context.md"
+    ],
+    "architecture": [
+      "docs/architecture/technical-analysis.md",
+      "docs/architecture/android-native-app-scan.md",
+      "docs/architecture/2026-10-11-audit-securite.md",
+      "docs/architecture/2026-10-11-suppression-connexion-et-administration.md"
+    ],
+    "api": [
+      "docs/api/README.md"
+    ],
+    "guides": [
+      "docs/guides/deployment.md",
+      "docs/guides/postgres-migration.md",
+      "docs/guides/icons-management.md",
+      "docs/guides/play-store-publishing.md",
+      "docs/guides/android-auto-update.md",
+      "docs/guides/hygiene-numerique.md",
+      "docs/guides/migration-guidee.md",
+      "docs/guides/nettoyeur-stockage.md"
+    ],
+    "backlog": [
+      "docs/BACKLOG.md"
+    ]
+  },
+  "git": {
+    "branchNaming": {
+      "feature": "feature/xxx",
+      "bugfix": "fix/xxx",
+      "refactor": "refactor/xxx",
+      "docs": "docs/xxx",
+      "chore": "chore/xxx",
+      "security": "security/xxx"
+    },
+    "commitMessageFormat": "[type] description",
+    "commitTypes": ["feat", "fix", "refactor", "docs", "chore", "style", "test", "security"],
+    "protectedBranches": ["main", "staging"],
+    "requireApprovals": {
+      "main": 1,
+      "staging": 1
+    }
+  },
+  "quality": {
+    "codeReviewRequired": true,
+    "testsRequired": true,
+    "buildCheckRequired": true,
+    "documentationRequired": "if-architecture-change",
+    "maxFileLength": {
+      "warning": 300,
+      "error": 500
+    },
+    "maxFunctionLength": {
+      "warning": 50,
+      "error": 100
+    }
+  }
+}
