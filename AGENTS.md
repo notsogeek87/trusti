@@ -1,5 +1,15 @@
 # AGENTS.md - Guide pour les agents IA sur Trusti
 
+## ⚠️ RÈGLE FONDAMENTALE POUR TOUS LES AGENTS IA
+**L'agent code SEUL, de A à Z.**
+- Il **ne demande JAMAIS** à l'utilisateur de coder.
+- Il **vérifie systématiquement** que :
+  - Le code compile (`npm run build`, etc.).
+  - **TOUS les tests passent** (`npm test`) avant tout push.
+- Si un choix d'architecture bloque, il pose **une seule question courte** pour trancher.
+
+---
+
 Ce fichier standardise l'interaction avec tous les agents IA (Vibe Code, Claude Code, etc.) travaillant sur le projet Trusti.
 
 ---
