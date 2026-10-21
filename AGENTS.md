@@ -23,10 +23,10 @@ Ce fichier standardise l'interaction avec tous les agents IA (Vibe Code, Claude 
 - **Objectif** : Implémenter des features, corriger des bugs, améliorer la qualité du code
 
 ### Claude Code (Anthropic)
-- **Rôle principal** : Analyse de code, review, suggestions d'amélioration
-- **Accès** : Lecture seule (d'après la configuration existante dans `.claude/context.md`)
-- **Capacités** : Analyse statique, compréhension du codebase, suggestions
-- **Objectif** : Review de PR, analyse de sécurité, optimisation d'architecture
+- **Rôle principal** : Développement (features, bugfix, refactor), review de PR, analyse de sécurité
+- **Accès** : Lecture/écriture sur une branche dédiée, exécution de commandes, git ; pas de push direct sur `main` sans demande explicite
+- **Capacités** : Implémentation, tests, build, analyse du codebase, PR
+- **Objectif** : Livrer des changements vérifiés (build + tests) et relire le code des autres agents
 
 ### Autres agents
 - **GitHub Copilot** : Autocomplétion et suggestions inline
@@ -180,8 +180,8 @@ server/                 # Backend Express (dev)
 **Comportement attendu** :
 - Lire `.claude/context.md` en premier
 - Respecter les restrictions listées
-- Se concentrer sur l'analyse et la review
-- Ne pas modifier de code sans validation
+- Travailler sur une branche dédiée et vérifier build + tests avant tout push
+- Ne pas pousser sur `main` sans demande explicite du mainteneur
 
 **Fichiers de référence** :
 1. `.claude/context.md` - Contexte principal
@@ -222,7 +222,7 @@ server/                 # Backend Express (dev)
 Si plusieurs agents travaillent sur le même projet :
 
 1. **Vibe Code** peut implémenter du code
-2. **Claude Code** peut reviewer le code de Vibe Code
+2. **Claude Code** peut implémenter du code et reviewer celui de Vibe Code
 3. **Toujours documenter** les changements dans les PR
 4. **Éviter les conflits** en communiquant via les commits/PR
 

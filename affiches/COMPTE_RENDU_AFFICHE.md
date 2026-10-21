@@ -8,7 +8,7 @@
 
 - `affiche-trusti-score.html` : source de l'affiche (1080×1350 px, HTML/CSS seul, aucune dépendance externe).
 - `affiche-trusti-score.png` : rendu 1080×1350 px, généré depuis le HTML.
-- `affiche-trusti-score.svg` : ancienne version vectorielle, **obsolète et défectueuse** (texte minuscule, accents cassés). À supprimer.
+- (L'ancienne version SVG, défectueuse, a été supprimée.)
 
 ## Régénérer le PNG
 
