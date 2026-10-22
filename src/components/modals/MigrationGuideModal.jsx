@@ -157,7 +157,12 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
                   >
                     <div className="flex-grow min-w-0">
                       <p className="font-black text-sm text-slate-900">{c.name}</p>
-                      <p className="text-xs text-slate-500">{i === 0 ? 'Recommandée · ' : ''}{c.category}</p>
+                      <p className="text-xs text-slate-500">
+                        {c.isTeamPick
+                          ? <span className="font-bold text-amber-700">⭐ Le chouchou de l'équipe · </span>
+                          : i === 0 ? 'Recommandée · ' : ''}
+                        {c.category}
+                      </p>
                     </div>
                     <ScoreIndicator grade={c.grade} />
                   </button>

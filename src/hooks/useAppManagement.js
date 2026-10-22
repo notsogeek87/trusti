@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { TABS } from '../constants/tabs';
 import { API_URL } from '../utils/apiConfig';
 import { cachedFetchJSON } from '../utils/fetchCache';
-import { pickBestAlternative, isStrictlyBetterGrade } from '../utils/alternatives';
+import { pickRecommendedAlternative, isStrictlyBetterGrade } from '../utils/alternatives';
 import { hasCompletedOnboarding } from '../utils/onboardingStorage';
 
 const GOOD_GRADES = ['A', 'B', 'C'];
@@ -23,8 +23,9 @@ const buildAlternativeInfo = (app, candidatePool, myAppsSet) => {
   });
   if (candidates.length === 0) return null;
 
-  const usedAlternative = pickBestAlternative(candidates.filter(c => myAppsSet.has(c.id)));
-  const bestOverall = pickBestAlternative(candidates);
+  const usedAlternative = pickRecommendedAlternative(candidates.filter(c => myAppsSet.has(c.id)));
+  // Le « choix de l'équipe » passe avant la mieux notée (voir alternatives.js)
+  const bestOverall = pickRecommendedAlternative(candidates);
 
   if (usedAlternative) {
     const betterAlternative =
