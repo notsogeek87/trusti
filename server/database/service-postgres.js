@@ -5,6 +5,7 @@ import { neon } from '@neondatabase/serverless';
 import gplay from 'google-play-scraper';
 import { fetchWithTimeout } from '../fetchWithTimeout.js';
 import { formatAssessmentFromDB } from '../assessment.js';
+import { formatTeamPick } from './team-pick.js';
 
 // Charger .env en développement local
 if (process.env.NODE_ENV !== 'production') {
@@ -256,6 +257,20 @@ export async function initDatabase() {
     await sql`
       ALTER TABLE applications
       ADD COLUMN IF NOT EXISTS f_droid_url TEXT
+    `;
+
+    // Migration: « choix de l'équipe » (une seule app par catégorie)
+    await sql`
+      ALTER TABLE applications
+      ADD COLUMN IF NOT EXISTS is_team_pick BOOLEAN DEFAULT FALSE
+    `;
+    await sql`
+      ALTER TABLE applications
+      ADD COLUMN IF NOT EXISTS team_pick_reason TEXT
+    `;
+    await sql`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_team_pick_per_category
+      ON applications(category) WHERE is_team_pick
     `;
 
     console.log('✅ Database initialized successfully');
@@ -1267,6 +1282,7 @@ function formatAppFromDB(app, relations = { alternativeAppIds: [], replacesAppId
     appType: appType,
     showInAwards: app.show_in_awards !== 0,
     showInOnboarding: app.show_in_onboarding !== 0,
+    ...formatTeamPick(app),
     popularity: app.popularity ?? 9999,
     privacyFeatures: typeof app.privacy_features === 'string' 
       ? JSON.parse(app.privacy_features) 

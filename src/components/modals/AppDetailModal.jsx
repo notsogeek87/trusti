@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, CheckCircle, Route, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink, Trash2, StickyNote } from 'lucide-react';
+import { ChevronLeft, CheckCircle, Route, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink, Trash2, StickyNote, Star } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { GRADE_INFO } from '../../constants/grades';
 import { useIsMobile } from '../../contexts/ViewModeContext';
@@ -233,11 +233,16 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
     setTimeout(onClose, 240);
   };
 
-  // Bloc réutilisable pour une app liée (alternative ou remplacée)
-  const RelatedAppRow = ({ app: relatedApp }) => (
+  // Bloc réutilisable pour une app liée (alternative ou remplacée).
+  // showTeamPick : entoure le « choix de l'équipe » (liste des alternatives uniquement)
+  const RelatedAppRow = ({ app: relatedApp, showTeamPick = false }) => {
+    const isTeamPick = showTeamPick && relatedApp.isTeamPick;
+    return (
     <div
       onClick={(e) => handleAlternativeClick(e, relatedApp)}
-      className="bg-white rounded-xl p-3 flex items-center gap-2.5 shadow-sm hover:shadow-md transition-all hover:scale-[1.02] cursor-pointer"
+      className={`rounded-xl p-3 flex items-center gap-2.5 shadow-sm hover:shadow-md transition-all hover:scale-[1.02] cursor-pointer ${
+        isTeamPick ? 'bg-indigo-50 ring-2 ring-indigo-500' : 'bg-white'
+      }`}
     >
       <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
         {relatedApp.icon && relatedApp.icon.startsWith('http') ? (
@@ -249,12 +254,21 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
         )}
       </div>
       <div className="flex-grow min-w-0">
+        {isTeamPick && (
+          <span className="inline-flex items-center gap-1 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-tight px-2 py-0.5 rounded-full mb-1">
+            <Star size={10} fill="currentColor" /> Choix de l'équipe
+          </span>
+        )}
         <h4 className="font-black text-sm text-slate-900">{relatedApp.name}</h4>
         <p className="text-[11px] text-slate-500 line-clamp-1">{relatedApp.reason}</p>
+        {isTeamPick && relatedApp.teamPickReason && (
+          <p className="text-[11px] text-indigo-700 font-semibold mt-0.5">Pourquoi : {relatedApp.teamPickReason}</p>
+        )}
       </div>
       <div className="shrink-0"><ScoreIndicator grade={relatedApp.grade} /></div>
     </div>
-  );
+    );
+  };
 
   const SkeletonRow = () => (
     <div className="bg-white rounded-xl p-3 flex items-center gap-2.5 shadow-sm animate-pulse">
@@ -486,7 +500,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                   <div className="space-y-2">
                     {isLoadingRelations
                       ? [1, 2].map(i => <SkeletonRow key={i} />)
-                      : alternatives.map(alt => <RelatedAppRow key={alt.id} app={alt} />)
+                      : alternatives.map(alt => <RelatedAppRow key={alt.id} app={alt} showTeamPick />)
                     }
                   </div>
                   {!isLoadingRelations && canStartMigration(app, alternatives) && (

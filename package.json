@@ -14,6 +14,7 @@
     "db:migrate-to-postgres": "node server/database/migrate-to-postgres.js",
     "db:add-otp-attempts": "node server/database/add-otp-attempts-table.js",
     "db:add-popularity": "node server/database/add-popularity-column.js",
+    "db:add-team-pick": "node server/database/add-team-pick-columns.js",
     "icons:fetch": "node server/database/fetch-icons-playstore.js",
     "test": "node --test 'tests/technical/**/*.test.js' 'tests/cleaner/**/*.test.js' 'tests/server/**/*.test.js'",
     "build": "vite build",
