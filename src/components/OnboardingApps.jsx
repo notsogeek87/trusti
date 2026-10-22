@@ -43,7 +43,7 @@ const STEPS = [
     id: 'messagerie',
     emoji: '💬',
     question: 'Pour communiquer avec tes proches ?',
-    categories: ['Messagerie', 'Email', 'Visioconférence', 'Communication'],
+    categories: ['Messagerie', 'Email', 'Visioconférence', 'Communication', 'Téléphone & SMS'],
   },
   {
     id: 'social',

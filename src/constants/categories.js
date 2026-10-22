@@ -36,6 +36,7 @@ export const ADMIN_CATEGORIES = [
     'Email',
     'Visioconférence',
     'Communication',
+    'Téléphone & SMS',
     'Rencontres',
     'Navigateurs Web',
     'Moteurs de Recherche',
@@ -80,6 +81,7 @@ export const CATEGORY_MAPPING = {
   'Messagerie': 'Messagerie',
   'Visioconférence': 'Messagerie',
   'Communication': 'Messagerie',
+  'Téléphone & SMS': 'Messagerie',
   
   // Réseaux sociaux
   'Réseaux sociaux': 'Réseaux sociaux',
