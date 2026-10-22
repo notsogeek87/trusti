@@ -1,7 +1,37 @@
-import React from 'react';
-import { AlertTriangle, ExternalLink, Info } from 'lucide-react';
+import React, { useState } from 'react';
+import { AlertTriangle, HelpCircle, ExternalLink, Eye, Hourglass, Info, Landmark, MapPin, ShieldCheck, Wrench } from 'lucide-react';
 
 const CONFIDENCE_LABEL = { high: 'Confiance élevée', medium: 'Confiance moyenne', low: 'Confiance faible' };
+
+// Icône et explication pédagogique par critère (clés de rubric.json).
+const CRITERION_META = {
+  controle: { Icon: Wrench, help: "Peut-on garder la main sur l'app et ses données ? On regarde l'open source, la possibilité de partir et l'indépendance vis-à-vis des GAFAM." },
+  conformite: { Icon: ShieldCheck, help: "L'éditeur respecte-t-il le RGPD, et peut-on le prouver ? On cherche un DPO et des certifications (SecNumCloud, ISO 27001...)." },
+  gouvernance: { Icon: Landmark, help: "Qui possède l'éditeur et quelles lois s'imposent à lui ? Une société américaine ou chinoise peut être forcée de livrer des données (Cloud Act)." },
+  localisation: { Icon: MapPin, help: "Où sont stockées les données, physiquement ? En Europe, elles restent sous les normes européennes." },
+  transparence: { Icon: Eye, help: "L'éditeur explique-t-il clairement ce qu'il fait de vos données ? On lit les CGU, les rapports annuels et la procédure de droit à l'oubli." },
+};
+const FALLBACK_META = { Icon: HelpCircle, help: null };
+
+// Couleur de la pastille selon le niveau (le texte du niveau reste affiché à côté).
+const tileTone = points => {
+  if (points === null || points === undefined) return 'bg-slate-100 text-slate-400';
+  if (points <= 1) return 'bg-rose-50 text-rose-600';
+  if (points === 2) return 'bg-amber-50 text-amber-600';
+  return 'bg-emerald-50 text-emerald-600';
+};
+
+// Confiance : 1 à 3 barres de signal.
+const ConfidenceSignal = ({ confidence }) => {
+  const level = { low: 1, medium: 2, high: 3 }[confidence] || 0;
+  return (
+    <span className="inline-flex items-end gap-px h-2.5 mr-1" aria-hidden="true">
+      {[1, 2, 3].map(i => (
+        <span key={i} className={`w-[3px] rounded-sm ${i <= level ? 'bg-slate-400' : 'bg-slate-200'}`} style={{ height: 3 + i * 3 }} />
+      ))}
+    </span>
+  );
+};
 
 // Barre de niveau : 0 à 4 segments remplis (0 = niveau le plus faible).
 const LevelBar = ({ points }) => (
@@ -30,6 +60,54 @@ const SourceLink = ({ source }) => {
         </span>
       )}
       {source.quote && <q className="block mt-0.5 text-slate-400 italic">{source.quote}</q>}
+    </li>
+  );
+};
+
+const CriterionItem = ({ c }) => {
+  const [open, setOpen] = useState(false);
+  const { Icon, help } = CRITERION_META[c.key] || FALLBACK_META;
+  const tile = `shrink-0 w-8 h-8 rounded-xl flex items-center justify-center ${tileTone(c.points)}`;
+  return (
+    <li className="py-2.5 first:pt-0 last:pb-0">
+      <div className="flex gap-2.5">
+        {help ? (
+          <button type="button" onClick={() => setOpen(o => !o)} aria-expanded={open}
+            aria-label={`Que mesure « ${c.name} » ?`} className={`${tile} focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400`}>
+            <Icon size={16} />
+          </button>
+        ) : (
+          <span className={tile} aria-hidden="true"><Icon size={16} /></span>
+        )}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-black text-slate-800">{c.name}</span>
+            <LevelBar points={c.points} />
+          </div>
+          {c.levelTitle && <p className="text-[11px] font-semibold text-indigo-700 mt-0.5">{c.levelTitle}</p>}
+          {c.rationale && <p className="text-xs text-slate-600 leading-relaxed mt-0.5">{c.rationale}</p>}
+          <p className="text-[11px] text-slate-400 mt-0.5 flex flex-wrap items-center">
+            <ConfidenceSignal confidence={c.confidence} />
+            <span>{CONFIDENCE_LABEL[c.confidence]}</span>
+            {c.provisional && (
+              <span className="ml-1.5 inline-flex items-center gap-1 text-amber-700 font-semibold">
+                · <Hourglass size={10} /> Note provisoire
+              </span>
+            )}
+          </p>
+          {c.sources.length > 0 && (
+            <ul className="mt-1 space-y-0.5">
+              {c.sources.map((s, i) => <SourceLink key={i} source={s} />)}
+            </ul>
+          )}
+          {open && help && (
+            <p className="mt-1.5 text-xs text-slate-700 leading-snug bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5">
+              <span className="block text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-0.5">Ce que ça mesure</span>
+              {help}
+            </p>
+          )}
+        </div>
+      </div>
     </li>
   );
 };
@@ -88,26 +166,12 @@ const AssessmentDetail = ({ status, assessment }) => {
       )}
 
       {hasCriteria && (
+        <p className="text-[11px] text-slate-400 mb-2">Appuyer sur une icône pour comprendre le critère.</p>
+      )}
+
+      {hasCriteria && (
         <ul className="divide-y divide-slate-100">
-          {criteria.map(c => (
-            <li key={c.key} className="py-2.5 first:pt-0 last:pb-0">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-black text-slate-800">{c.name}</span>
-                <LevelBar points={c.points} />
-              </div>
-              {c.levelTitle && <p className="text-[11px] font-semibold text-indigo-700 mt-0.5">{c.levelTitle}</p>}
-              {c.rationale && <p className="text-xs text-slate-600 leading-relaxed mt-0.5">{c.rationale}</p>}
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                {CONFIDENCE_LABEL[c.confidence]}
-                {c.provisional && <span className="text-amber-700 font-semibold"> · Note provisoire</span>}
-              </p>
-              {c.sources.length > 0 && (
-                <ul className="mt-1 space-y-0.5">
-                  {c.sources.map((s, i) => <SourceLink key={i} source={s} />)}
-                </ul>
-              )}
-            </li>
-          ))}
+          {criteria.map(c => <CriterionItem key={c.key} c={c} />)}
         </ul>
       )}
     </div>
