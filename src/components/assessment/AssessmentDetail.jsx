@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { AlertTriangle, HelpCircle, ExternalLink, Eye, Hourglass, Info, Landmark, MapPin, ShieldCheck, Wrench } from 'lucide-react';
 
 const CONFIDENCE_LABEL = { high: 'Confiance élevée', medium: 'Confiance moyenne', low: 'Confiance faible' };
@@ -65,20 +65,12 @@ const SourceLink = ({ source }) => {
 };
 
 const CriterionItem = ({ c }) => {
-  const [open, setOpen] = useState(false);
   const { Icon, help } = CRITERION_META[c.key] || FALLBACK_META;
   const tile = `shrink-0 w-8 h-8 rounded-xl flex items-center justify-center ${tileTone(c.points)}`;
   return (
     <li className="py-2.5 first:pt-0 last:pb-0">
       <div className="flex gap-2.5">
-        {help ? (
-          <button type="button" onClick={() => setOpen(o => !o)} aria-expanded={open}
-            aria-label={`Que mesure « ${c.name} » ?`} className={`${tile} focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400`}>
-            <Icon size={16} />
-          </button>
-        ) : (
-          <span className={tile} aria-hidden="true"><Icon size={16} /></span>
-        )}
+        <span className={tile} aria-hidden="true"><Icon size={16} /></span>
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-black text-slate-800">{c.name}</span>
@@ -100,7 +92,7 @@ const CriterionItem = ({ c }) => {
               {c.sources.map((s, i) => <SourceLink key={i} source={s} />)}
             </ul>
           )}
-          {open && help && (
+          {help && (
             <p className="mt-1.5 text-xs text-slate-700 leading-snug bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5">
               <span className="block text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-0.5">Ce que ça mesure</span>
               {help}
@@ -163,10 +155,6 @@ const AssessmentDetail = ({ status, assessment }) => {
             affichées ici.
           </span>
         </p>
-      )}
-
-      {hasCriteria && (
-        <p className="text-[11px] text-slate-400 mb-2">Appuyer sur une icône pour comprendre le critère.</p>
       )}
 
       {hasCriteria && (
