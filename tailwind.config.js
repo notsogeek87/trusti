@@ -22,6 +22,16 @@ export default {
         sm: '0 2px 12px rgba(31, 58, 95, 0.08)',
         DEFAULT: '0 2px 12px rgba(31, 58, 95, 0.10)',
       },
+      // Étoile du « choix de l'équipe » (fiche détail)
+      keyframes: {
+        sparkle: {
+          '0%, 100%': { transform: 'scale(1) rotate(0deg)' },
+          '50%': { transform: 'scale(1.25) rotate(15deg)' },
+        },
+      },
+      animation: {
+        sparkle: 'sparkle 1.6s ease-in-out infinite',
+      },
       colors: {
         white: '#FFFFFF',
         indigo: { 50: '#EEF3F9', 100: '#DCE7F3', 200: '#B9CFE6', 300: '#8EAED2', 400: '#5E86B5', 500: '#3B6498', 600: '#1F3A5F', 700: '#162B47', 800: '#0F1F35', 900: '#0A1526', 950: '#060D18' },
