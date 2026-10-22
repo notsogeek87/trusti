@@ -22,6 +22,22 @@ test('les candidats sont de meilleur grade, la meilleure en premier', () => {
   assert.deepEqual(getMigrationCandidates(null, alts), []);
 });
 
+test('le choix de l\'équipe passe en premier (présélectionné), même moins bien noté', () => {
+  const app = { id: 1, grade: 'D' };
+  const alts = [
+    { id: 2, grade: 'A', popularity: 5 },
+    { id: 3, grade: 'B', popularity: 9, isTeamPick: true },
+    { id: 4, grade: 'B', popularity: 1 },
+  ];
+  assert.deepEqual(getMigrationCandidates(app, alts).map(a => a.id), [3, 2, 4]);
+});
+
+test('un choix de l\'équipe qui n\'est pas mieux noté que l\'app est ignoré', () => {
+  const app = { id: 1, grade: 'C' };
+  const alts = [{ id: 2, grade: 'C', isTeamPick: true }, { id: 3, grade: 'B' }];
+  assert.deepEqual(getMigrationCandidates(app, alts).map(a => a.id), [3]);
+});
+
 test('le parcours n\'est proposé que pour une app C/D/E avec une meilleure alternative', () => {
   const alts = [{ id: 2, grade: 'A' }];
   assert.equal(canStartMigration({ id: 1, grade: 'D' }, alts), true);

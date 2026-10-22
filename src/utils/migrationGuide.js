@@ -1,5 +1,5 @@
 import { MIGRATION_STEPS, DATA_TIPS, DEFAULT_DATA_TIPS } from '../constants/migrationGuide.js';
-import { pickBestAlternative, isStrictlyBetterGrade } from './alternatives.js';
+import { pickRecommendedAlternative, isStrictlyBetterGrade } from './alternatives.js';
 
 /**
  * Logique pure du parcours « Migration guidée » (sans React ni stockage).
@@ -13,13 +13,14 @@ export function getDataTips(category) {
 }
 
 /**
- * Alternatives proposables pour `app` : celles de meilleur grade, la plus
- * recommandée en premier (même règle que « Mes Apps », voir alternatives.js).
+ * Alternatives proposables pour `app` : celles de meilleur grade. En premier
+ * (et donc présélectionné) : le « choix de l'équipe » s'il en fait partie,
+ * sinon la plus recommandée (même règle que « Mes Apps », voir alternatives.js).
  */
 export function getMigrationCandidates(app, alternatives = []) {
   if (!app) return [];
   const better = alternatives.filter(a => isStrictlyBetterGrade(a.grade, app.grade));
-  const best = pickBestAlternative(better);
+  const best = pickRecommendedAlternative(better);
   return best ? [best, ...better.filter(a => a !== best)] : [];
 }
 
