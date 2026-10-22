@@ -241,9 +241,16 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
     <div
       onClick={(e) => handleAlternativeClick(e, relatedApp)}
       className={`rounded-xl p-3 flex items-center gap-2.5 shadow-sm hover:shadow-md transition-all hover:scale-[1.02] cursor-pointer ${
-        isTeamPick ? 'bg-indigo-50 ring-2 ring-indigo-500' : 'bg-white'
+        isTeamPick
+          ? 'relative pt-4 bg-gradient-to-br from-amber-50 to-yellow-50 ring-2 ring-amber-400 shadow-[0_4px_18px_rgba(251,191,36,0.45)]'
+          : 'bg-white'
       }`}
     >
+      {isTeamPick && (
+        <span className="absolute -top-3 left-3 inline-flex items-center gap-1 bg-gradient-to-r from-yellow-300 to-amber-400 text-amber-950 text-[10px] font-black uppercase tracking-tight px-2.5 py-1 rounded-full shadow-md">
+          <Star size={11} fill="currentColor" className="motion-safe:animate-sparkle" /> Le chouchou de l'équipe ✨
+        </span>
+      )}
       <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
         {relatedApp.icon && relatedApp.icon.startsWith('http') ? (
           <AppIconImage src={relatedApp.icon} name={relatedApp.name} />
@@ -254,15 +261,10 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
         )}
       </div>
       <div className="flex-grow min-w-0">
-        {isTeamPick && (
-          <span className="inline-flex items-center gap-1 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-tight px-2 py-0.5 rounded-full mb-1">
-            <Star size={10} fill="currentColor" /> Choix de l'équipe
-          </span>
-        )}
         <h4 className="font-black text-sm text-slate-900">{relatedApp.name}</h4>
         <p className="text-[11px] text-slate-500 line-clamp-1">{relatedApp.reason}</p>
         {isTeamPick && relatedApp.teamPickReason && (
-          <p className="text-[11px] text-indigo-700 font-semibold mt-0.5">Pourquoi : {relatedApp.teamPickReason}</p>
+          <p className="text-[11px] text-slate-700 mt-1.5 bg-white/70 rounded-lg px-2 py-1">🙌 <b>On l'adore :</b> {relatedApp.teamPickReason}</p>
         )}
       </div>
       <div className="shrink-0"><ScoreIndicator grade={relatedApp.grade} /></div>
@@ -497,7 +499,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                       </div>
                     )}
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {isLoadingRelations
                       ? [1, 2].map(i => <SkeletonRow key={i} />)
                       : alternatives.map(alt => <RelatedAppRow key={alt.id} app={alt} showTeamPick />)
