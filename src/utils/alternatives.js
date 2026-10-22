@@ -19,6 +19,14 @@ export function pickBestAlternative(candidates) {
   })[0];
 }
 
+// Alternative mise en avant par défaut : le « choix de l'équipe » s'il fait
+// partie des candidates (toutes mieux notées que l'app à remplacer), sinon la
+// règle ci-dessus. Utilisée par « Mes Apps » et la migration guidée.
+export function pickRecommendedAlternative(candidates) {
+  if (!candidates || candidates.length === 0) return undefined;
+  return candidates.find(c => c.isTeamPick) || pickBestAlternative(candidates);
+}
+
 // true si `a` a un grade strictement meilleur que `b` (A < B < ... au sens priorité)
 export function isStrictlyBetterGrade(a, b) {
   return (GRADE_PRIORITY[a] || 999) < (GRADE_PRIORITY[b] || 999);
