@@ -48,30 +48,22 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
     downloadJSON(exportTechnicalAnalysisJSON(analysis), `${analysis.packageName}-analyse-technique.json`);
   };
 
-  // Badge visible même quand l'accordéon est replié : "montrer de suite" s'il
-  // y a des points à surveiller, sans obliger l'utilisateur à ouvrir la
-  // section pour le savoir.
   const { alert, watch } = countSignalsByLevel(analysis);
   const attentionCount = alert + watch;
+  // Volontairement discret (gris) : section réservée aux curieux, on ne veut
+  // pas alarmer l'utilisateur lambda avant même qu'il l'ouvre.
   const headerBadge = attentionCount > 0 ? (
-    <span
-      className={`inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full ${
-        alert > 0 ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'
-      }`}
-    >
-      {alert > 0 ? '🚨' : '⚠️'} {attentionCount} point{attentionCount > 1 ? 's' : ''} à vérifier
+    <span className="text-[10px] text-slate-400">
+      {attentionCount} point{attentionCount > 1 ? 's' : ''}
     </span>
-  ) : (
-    <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
-      ✅ Rien à signaler
-    </span>
-  );
+  ) : null;
 
   return (
     <Accordion
       icon={Search}
-      title="Analyse technique"
-      subtitle="Ce que l'application contient réellement — détecté sur votre téléphone"
+      title="Détails techniques (pour les curieux)"
+      subtitle={null}
+      subtle
       badge={headerBadge}
     >
       {/* Ce qu'il faut retenir, en langage clair, avant même le détail. */}

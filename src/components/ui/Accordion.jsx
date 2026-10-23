@@ -6,19 +6,24 @@ import { ChevronDown } from 'lucide-react';
  * pour les blocs volumineux qui ne doivent pas prendre toute la place au
  * premier coup d'œil (ex. l'analyse technique dans AppDetailModal).
  */
-const Accordion = ({ icon: Icon, title, subtitle, badge, defaultOpen = false, children }) => {
+const Accordion = ({ icon: Icon, title, subtitle, badge, defaultOpen = false, subtle = false, children }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm mb-4 overflow-hidden">
+    <div className={subtle
+      ? 'rounded-2xl border border-dashed border-slate-200 mb-4 overflow-hidden'
+      : 'bg-white rounded-2xl border border-slate-100 shadow-sm mb-4 overflow-hidden'}
+    >
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        className="w-full flex items-center justify-between gap-3 p-4 text-left"
+        className={`w-full flex items-center justify-between gap-3 text-left ${subtle ? 'px-4 py-2.5' : 'p-4'}`}
       >
         <span className="flex items-center gap-2 min-w-0">
-          {Icon && <Icon size={18} className="text-indigo-600 shrink-0" />}
+          {Icon && <Icon size={subtle ? 14 : 18} className={`${subtle ? 'text-slate-400' : 'text-indigo-600'} shrink-0`} />}
           <span className="min-w-0">
-            <span className="block font-black text-sm uppercase tracking-tight text-slate-800">{title}</span>
+            <span className={subtle
+              ? 'block font-semibold text-xs text-slate-500'
+              : 'block font-black text-sm uppercase tracking-tight text-slate-800'}>{title}</span>
             {subtitle && <span className="block text-[11px] text-slate-400 font-normal normal-case mt-0.5">{subtitle}</span>}
           </span>
         </span>
