@@ -889,7 +889,8 @@ const App = () => {
     {showWelcomeModal && (
       <WelcomeModal
         onFirstTimeYes={handleFirstTimeYes}
-        onFirstTimeNo={handleFirstTimeNo}
+        // Sur l'APK, le scan est obligatoire : pas de bouton pour l'esquiver
+        onFirstTimeNo={isNativeAndroid ? undefined : handleFirstTimeNo}
       />
     )}
 

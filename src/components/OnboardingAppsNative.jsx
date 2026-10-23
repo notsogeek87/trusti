@@ -281,14 +281,6 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
             Scanner mon téléphone
           </button>
           <p className="text-xs text-slate-400 mt-3">On repère tes apps installées automatiquement, rien à saisir</p>
-          {onManualSelection && (
-            <button
-              onClick={onManualSelection}
-              className="mt-4 text-xs text-slate-400 hover:text-slate-600 transition-colors"
-            >
-              Sélection manuelle
-            </button>
-          )}
         </div>
       </div>
     );
@@ -343,12 +335,6 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
                 Sélection manuelle
               </button>
             )}
-            <button
-              onClick={() => onComplete(new Set())}
-              className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
-            >
-              Passer cette étape
-            </button>
           </div>
         </div>
       </div>

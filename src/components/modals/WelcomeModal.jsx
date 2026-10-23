@@ -47,15 +47,17 @@ const WelcomeModal = ({ onFirstTimeYes, onFirstTimeNo }) => {
               </span>
             </button>
 
-            <button
-              onClick={onFirstTimeNo}
-              className="w-full text-slate-300 active:text-white font-medium py-2 px-4 rounded-xl transition-all duration-200 active:scale-[0.98] text-xs"
-            >
-              <span className="flex items-center justify-center gap-1.5">
-                <span>👍</span>
-                <span>Non, je connais déjà Trusti</span>
-              </span>
-            </button>
+            {onFirstTimeNo && (
+              <button
+                onClick={onFirstTimeNo}
+                className="w-full text-slate-300 active:text-white font-medium py-2 px-4 rounded-xl transition-all duration-200 active:scale-[0.98] text-xs"
+              >
+                <span className="flex items-center justify-center gap-1.5">
+                  <span>👍</span>
+                  <span>Non, je connais déjà Trusti</span>
+                </span>
+              </button>
+            )}
           </div>
         </div>
 
