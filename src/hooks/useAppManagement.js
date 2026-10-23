@@ -772,6 +772,7 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
     apps,
     isLoadingApps,
     isInitialLoading,
+    isInitialized,
     isSearching,
     isLoadingAwards,
     isLoadingMyApps,

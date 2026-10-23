@@ -154,6 +154,17 @@ const App = () => {
     }, 100);
   };
 
+  // Web (hors APK) : si aucune app n'est sélectionnée à l'ouverture, on
+  // propose directement l'écran de sélection. Une seule fois par session, et
+  // jamais par-dessus le welcome ou un lien de partage.
+  const autoSelectionShown = useRef(false);
+  useEffect(() => {
+    if (autoSelectionShown.current || !isInitialized || isNativeAndroid) return;
+    if (arrivedViaShare || showWelcomeModal || showOnboarding) return;
+    autoSelectionShown.current = true;
+    if (myApps.size === 0) setShowOnboarding(true);
+  }, [isInitialized, myApps, arrivedViaShare, showWelcomeModal, showOnboarding]);
+
   // Re-scan manuel depuis "Mes Apps" : relance le scan (Android natif) ou la
   // sélection manuelle (PWA/web) pour repérer de nouvelles apps installées
   // sans repasser par tout l'onboarding. Le scan natif remonte aussi les apps
@@ -213,6 +224,7 @@ const App = () => {
     apps,
     isLoadingApps,
     isInitialLoading,
+    isInitialized,
     isSearching,
     isLoadingAwards,
     isLoadingMyApps,
