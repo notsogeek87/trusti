@@ -54,3 +54,6 @@ coverage/
 .cache/
 .eslintcache
 .DS_Store
+
+# Icônes embarquées (générées par npm run android:bundle-icons)
+/public/app-icons/
