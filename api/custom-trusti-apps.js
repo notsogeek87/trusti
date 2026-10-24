@@ -8,6 +8,12 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key, Authorization');
 
+  // Cache CDN Vercel : les installs/lancements simultanés sont servis par l'edge
+  // au lieu de relancer une fonction + une requête Neon à chaque fois.
+  if (req.method === 'GET') {
+    res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600');
+  }
+
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
