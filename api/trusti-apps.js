@@ -189,6 +189,12 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 
+  // Cache CDN Vercel : les installs/lancements simultanés sont servis par l'edge
+  // au lieu de relancer une fonction + une requête Neon à chaque fois.
+  if (req.method === 'GET') {
+    res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+  }
+
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
