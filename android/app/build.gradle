@@ -106,6 +106,8 @@ dependencies {
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
     implementation "com.lielu:lielugit-updater:1.0.0"
+    // Tâche périodique des suggestions d'alternatives (AlternativeNudgeWorker), même Trusti fermé.
+    implementation "androidx.work:work-runtime:2.10.5"
     // Fenêtre de mise à jour en Compose (par-dessus la WebView Capacitor).
     implementation platform("androidx.compose:compose-bom:2025.10.01")
     implementation "androidx.compose.material3:material3"

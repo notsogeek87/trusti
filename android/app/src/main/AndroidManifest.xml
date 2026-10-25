@@ -30,11 +30,22 @@
             android:grantUriPermissions="true">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
         </provider>
+
+        <!-- Action « Ne plus proposer » des notifications de suggestion d'alternative -->
+        <receiver
+            android:name=".AlternativeNudgeDismissReceiver"
+            android:exported="false" />
     </application>
 
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+      Android 13+ : suggestions d'alternatives par notification (AlternativeNudgeWorker).
+      Demandée une seule fois, quand une suggestion est possible ; désactivable dans Trusti.
+    -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!--
       Requise depuis Android 11 (API 30) pour lancer la boîte de dialogue système

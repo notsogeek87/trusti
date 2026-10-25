@@ -19,6 +19,7 @@ import MyAppsSortMenu from './MyAppsSortMenu';
 import ScoreIndicator from './ui/ScoreIndicator';
 import GradeStorageDonut from './ui/GradeStorageDonut';
 import SystemCleanerSection from './SystemCleanerSection';
+import AlternativeNudgesSection from './AlternativeNudgesSection';
 import AppIconImage from './ui/AppIconImage';
 
 const StatTile = ({ value, label }) => (
@@ -98,6 +99,8 @@ const StoragePage = ({
   onClearMyApps,
   onClearMigrations,
   onSelectApp,
+  nudgesEnabled = true,
+  onToggleNudges,
 }) => {
   // null = scan pas encore terminé, [] = scan fait, rien trouvé.
   const [installedPackages, setInstalledPackages] = useState(null);
@@ -318,6 +321,11 @@ const StoragePage = ({
               </p>
             )}
           </section>
+        )}
+
+        {/* Suggestions d'alternatives par notification — app Android native uniquement. */}
+        {isNativeAndroid && onToggleNudges && (
+          <AlternativeNudgesSection enabled={nudgesEnabled} onToggle={onToggleNudges} />
         )}
 
         {/* Export / import des données locales — en tête de page pour rester visible immédiatement. */}

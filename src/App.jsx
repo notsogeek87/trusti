@@ -10,6 +10,8 @@ import { ViewModeContext } from './contexts/ViewModeContext';
 import { parseShareParams, clearShareParams, hasShareParams } from './utils/shareUtils';
 import { hasCompletedOnboarding, markOnboardingComplete } from './utils/onboardingStorage';
 import { getMyAppsSortPref, setMyAppsSortPref, sortMyApps } from './utils/myAppsSort';
+import { areNudgesEnabled, setNudgesEnabled } from './utils/alternativeNudges';
+import { useAlternativeNudges } from './hooks/useAlternativeNudges';
 
 // Layout
 import Header from './components/layout/Header';
@@ -329,6 +331,20 @@ const App = () => {
     });
   }, [activeTab, filteredApps, myAppsSorted, migrationFilter, alternativeFilter, customMigrations]);
 
+  // Suggestions d'alternatives par notification (Android natif, voir useAlternativeNudges)
+  const [nudgesEnabled, setNudgesEnabledState] = useState(() => areNudgesEnabled());
+  const toggleNudges = (enabled) => {
+    setNudgesEnabled(enabled);
+    setNudgesEnabledState(enabled);
+  };
+  const { openRequestId: nudgeOpenId, clearOpenRequest: clearNudgeOpen } = useAlternativeNudges({
+    myAppsList: filteredApps,
+    isMyAppsTab: activeTab === TABS.MY_APPS && !searchTerm.trim(),
+    migratedApps,
+    customMigrations,
+    enabled: nudgesEnabled,
+  });
+
   // Import via lien de partage (?apps=... et/ou ?mig=...)
   const [pendingImport, setPendingImport] = useState(null);
 
@@ -344,6 +360,26 @@ const App = () => {
     shouldRestoreScroll.current = true;
     setSelectedApp(null);
   }, [setSelectedApp]);
+
+  // Ouverture depuis une notification de suggestion : on passe sur « Mes Apps »
+  // (qui charge les données de l'app et son alternative), puis on ouvre sa fiche.
+  useEffect(() => {
+    if (!nudgeOpenId) return;
+    if (activeTab !== TABS.MY_APPS || searchTerm) {
+      setSearchTerm('');
+      setActiveTab(TABS.MY_APPS);
+      return;
+    }
+    setShowStorageManager(false);
+    const target = filteredApps.find(app => String(app.id) === nudgeOpenId);
+    if (target && !target.isLoadingSkeleton) {
+      clearNudgeOpen();
+      openAppDetail(target);
+    } else if (!myApps.has(nudgeOpenId)) {
+      // Retirée de « Mes Apps » depuis la notification : rien à ouvrir
+      clearNudgeOpen();
+    }
+  }, [nudgeOpenId, activeTab, searchTerm, filteredApps, myApps]);
 
   // Gestion des modales
   const {
@@ -667,6 +703,8 @@ const App = () => {
         onClearMyApps={clearMyApps}
         onClearMigrations={clearMigrations}
         onSelectApp={openAppDetail}
+        nudgesEnabled={nudgesEnabled}
+        onToggleNudges={toggleNudges}
       />
     );
   }

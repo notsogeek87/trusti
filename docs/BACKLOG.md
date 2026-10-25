@@ -24,6 +24,12 @@ lien de téléchargement, guide d'export des données, désinstallation (permiss
 Prolonge le scan Android, la carte bilan et les alternatives existantes.
 
 ### 2. Alertes et suivi dans le temps
+**Premier volet livré (Android)** : suggestions d'alternatives par notification locale. Une tâche
+WorkManager (`AlternativeNudgeWorker`, toutes les ~8 h, même Trusti fermé) propose au plus une app
+C/D/E par semaine (10 h–20 h, 3 jours après la première synchro, même app jamais deux fois en 30 jours)
+dont l'alternative est mieux notée ; candidates calculées sur le téléphone
+(`src/utils/alternativeNudges.js`), action « Ne plus proposer », réglage dans « Espace de stockage ».
+Reste à faire : alertes de changement de note et d'incident.
 Notification quand la note d'une app installée change ou en cas d'incident (fuite,
 changement de politique, rachat). Historique des notes par app. Canal : push Android
 (plus d'e-mail : la connexion a été supprimée). Donne une raison de revenir dans l'app après l'onboarding.
