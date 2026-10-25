@@ -206,13 +206,15 @@ const ImportScreenshotCard = ({ onClick }) => (
   </button>
 );
 
-const OnboardingApps = ({ onComplete }) => {
+// `startWithImport` : ouvre directement l'import par capture (rescan accepté
+// depuis un navigateur mobile).
+const OnboardingApps = ({ onComplete, startWithImport = false }) => {
   const [step, setStep] = useState(-1); // -1 = intro
   const [direction, setDirection] = useState('forward');
   const [selected, setSelected] = useState(new Set());
   const [stepApps, setStepApps] = useState([]);
   const [isLoadingStep, setIsLoadingStep] = useState(false);
-  const [importing, setImporting] = useState(false);
+  const [importing, setImporting] = useState(startWithImport && CAN_IMPORT_SCREENSHOT);
   const [query, setQuery] = useState('');
   const [catalog, setCatalog] = useState(null); // catalogue complet, chargé à la première recherche
   const [catalogError, setCatalogError] = useState(false);

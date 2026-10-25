@@ -131,9 +131,11 @@ const FloatingApps = ({ apps, count }) => {
 // Onboarding Android natif : scanne les apps installées sur l'appareil au lieu
 // de demander une sélection manuelle. Ne s'affiche que dans l'app Android
 // packagée (voir src/utils/platform.js) — le web garde OnboardingApps.jsx.
-const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
+// `autoStart` : l'utilisateur a déjà accepté le scan (proposition de rescan),
+// on saute l'écran d'intro.
+const OnboardingAppsNative = ({ onComplete, onManualSelection, autoStart = false }) => {
   // 'intro' | 'scanning' | 'results' | 'finalizing' | 'summary' | 'error'
-  const [phase, setPhase] = useState('intro');
+  const [phase, setPhase] = useState(autoStart ? 'scanning' : 'intro');
   const [matches, setMatches] = useState([]); // apps du catalogue trouvées installées
   const [selected, setSelected] = useState(new Set());
   const [foundApps, setFoundApps] = useState([]); // sous-ensemble de `matches` révélé pendant l'animation de scan
@@ -236,6 +238,10 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection }) => {
       setPhase('error');
     }
   };
+
+  useEffect(() => {
+    if (autoStart) runScan();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── INTRO : explique l'app avant de pousser à lancer le scan ─────────
   if (phase === 'intro') {

@@ -28,7 +28,7 @@ import MyAppsFilterMenu, { DEFAULT_MIGRATION_FILTER, DEFAULT_ALTERNATIVE_FILTER 
 import LandingPage from './components/LandingPage';
 import OnboardingApps from './components/OnboardingApps';
 import OnboardingAppsNative from './components/OnboardingAppsNative';
-import { isNativeAndroid } from './utils/platform';
+import { isNativeAndroid, isMobileWeb } from './utils/platform';
 
 // Modals
 import AppDetailModal from './components/modals/AppDetailModal';
@@ -164,6 +164,11 @@ const App = () => {
   const [showRescan, setShowRescan] = useState(false);
   const [showRescanPrompt, setShowRescanPrompt] = useState(false);
   const [forceManualRescan, setForceManualRescan] = useState(false);
+  // Rescan accepté depuis une proposition : on démarre directement le bon mode
+  // (scan natif sur l'APK, import par capture sur navigateur mobile).
+  const [rescanFromPrompt, setRescanFromPrompt] = useState(false);
+  // Proposition de rescan à la réouverture de l'app (web et APK)
+  const [showReopenPrompt, setShowReopenPrompt] = useState(false);
 
   const handleRescanComplete = (selectedAppIds, notInstalledIds) => {
     if (notInstalledIds && notInstalledIds.length > 0) {
@@ -174,6 +179,7 @@ const App = () => {
     }
     setShowRescan(false);
     setForceManualRescan(false);
+    setRescanFromPrompt(false);
   };
 
   // État pour le filtre de catégorie dans l'onglet Applications
@@ -244,6 +250,19 @@ const App = () => {
     autoSelectionShown.current = true;
     if (myApps.size === 0) setShowOnboarding(true);
   }, [isInitialized, myApps, arrivedViaShare, showWelcomeModal, showOnboarding]);
+
+  // Réouverture de l'app (web et APK) : on propose de relancer un scan pour
+  // garder « Mes Apps » à jour. Décidé une seule fois, au chargement : pas
+  // pour une première visite (welcome/onboarding), un lien de partage, ni sur
+  // le web sans app (la sélection s'ouvre déjà toute seule, voir ci-dessus).
+  const reopenPromptDecided = useRef(false);
+  useEffect(() => {
+    if (reopenPromptDecided.current || !isInitialized) return;
+    reopenPromptDecided.current = true;
+    if (arrivedViaShare || showWelcomeModal || showOnboarding || showLandingPage || showRescan) return;
+    if (!isNativeAndroid && myApps.size === 0) return;
+    setShowReopenPrompt(true);
+  }, [isInitialized, myApps, arrivedViaShare, showWelcomeModal, showOnboarding, showLandingPage, showRescan]);
 
   // Une app "Mes Apps" est considérée migrée si elle est déjà au top (grade A)
   // ou si l'alternative recommandée est déjà utilisée.
@@ -509,13 +528,34 @@ const App = () => {
 
   const startRescanFromPrompt = () => {
     setShowRescanPrompt(false);
+    setShowReopenPrompt(false);
     setSelectedApp(null);
     setShowStorageManager(false);
+    setActiveTab(TABS.MY_APPS);
+    setRescanFromPrompt(true);
     setShowRescan(true);
   };
 
-  const rescanPrompt = showRescanPrompt && !showRescan && (
-    <RescanPrompt onScan={startRescanFromPrompt} onDismiss={() => setShowRescanPrompt(false)} />
+  // Refus à la réouverture : on atterrit sur « Mes Apps »
+  const dismissReopenPrompt = () => {
+    setShowReopenPrompt(false);
+    setActiveTab(TABS.MY_APPS);
+  };
+
+  const rescanPrompt = !showRescan && (
+    showRescanPrompt ? (
+      <RescanPrompt onScan={startRescanFromPrompt} onDismiss={() => setShowRescanPrompt(false)} />
+    ) : showReopenPrompt ? (
+      <RescanPrompt
+        Icon={RefreshCw}
+        title="Tes apps ont changé ?"
+        message="Relance un scan pour garder ton TrustiScore à jour."
+        scanLabel="Oui, relancer le scan"
+        dismissLabel="Non, voir Mes Apps"
+        onScan={startRescanFromPrompt}
+        onDismiss={dismissReopenPrompt}
+      />
+    ) : null
   );
 
   const isMobile = useIsSmallViewport();
@@ -550,11 +590,12 @@ const App = () => {
         <OnboardingAppsNative
           onComplete={handleRescanComplete}
           onManualSelection={() => setForceManualRescan(true)}
+          autoStart={rescanFromPrompt}
         />
       );
     }
     return (
-      <OnboardingApps onComplete={handleRescanComplete} />
+      <OnboardingApps onComplete={handleRescanComplete} startWithImport={rescanFromPrompt && isMobileWeb} />
     );
   }
 
