@@ -9,20 +9,19 @@ import { useBackHandler } from '../hooks/useBackHandler';
 // Onboarding web uniquement : sur iPhone, aucune API ne liste les apps
 // installées. On fait importer une capture de Réglages → Apps, dont le texte
 // est lu dans le navigateur puis comparé au catalogue.
-const HOWTO_STEPS = isIOSWeb
-  ? [
-    <>
-      Ouvre <strong>Réglages</strong>, descends tout en bas et touche <strong>Apps</strong>.
-      <span className="block text-xs text-slate-400 mt-0.5">iOS 17 ou avant : Réglages → Général → Stockage iPhone</span>
-    </>,
-    <>Fais une capture d'écran (bouton latéral + volume haut). Fais défiler et recommence jusqu'en bas de la liste.</>,
-    <>Reviens ici et choisis tes captures.</>,
-  ]
-  : [
-    <>Ouvre les <strong>réglages</strong> de ton téléphone, puis la liste de tes <strong>applications</strong>.</>,
-    <>Fais une capture d'écran. Fais défiler et recommence jusqu'en bas de la liste.</>,
-    <>Reviens ici et choisis tes captures.</>,
-  ];
+// Même texte sur iPhone et Android : la capture doit venir des réglages du
+// téléphone (pas de l'écran d'accueil, où les noms d'apps sont tronqués ou
+// rangés dans des dossiers).
+const HOWTO_PATH_CLASS = 'block text-xs text-slate-500 mt-1';
+const HOWTO_STEPS = [
+  <>
+    Ouvre les <strong>réglages</strong> de ton téléphone, puis la liste de tes <strong>applications</strong>.
+    <span className={HOWTO_PATH_CLASS}><strong>iPhone :</strong> Réglages → Apps (tout en bas). iOS 17 ou avant : Réglages → Général → Stockage iPhone</span>
+    <span className={HOWTO_PATH_CLASS}><strong>Android :</strong> Paramètres → Applications (ou Applis → Voir toutes les applis)</span>
+  </>,
+  <>Fais une capture d'écran de <strong>cette liste</strong>. Fais défiler et recommence jusqu'en bas de la liste.</>,
+  <>Reviens ici et choisis tes captures.</>,
+];
 
 // iCloud n'apparaît pas dans Réglages → Apps (il est dans le compte Apple),
 // mais presque tout iPhone l'utilise : on l'ajoute coché, décochable.
@@ -140,8 +139,12 @@ const OnboardingScreenshotImport = ({ onConfirm, onManual, onBack, initialApps =
             <ImagePlus size={30} className="text-white" />
           </div>
           <h1 className="text-xl font-black text-slate-900 mb-2 text-center">Importe ta liste d'apps</h1>
-          <p className="text-slate-500 text-sm leading-relaxed mb-6 text-center">
+          <p className="text-slate-500 text-sm leading-relaxed mb-4 text-center">
             Une capture d'écran suffit, Trusti reconnaît tes apps tout seul.
+          </p>
+
+          <p className="text-xs font-bold text-amber-800 bg-amber-50 rounded-2xl px-3 py-2.5 mb-6 text-center leading-snug">
+            La capture doit être prise dans les <strong>réglages</strong> du téléphone, pas sur l'écran d'accueil.
           </p>
 
           <ol className="space-y-3 mb-6">
