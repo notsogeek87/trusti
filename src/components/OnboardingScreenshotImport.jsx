@@ -10,7 +10,10 @@ import { isIOSWeb } from '../utils/platform';
 // est lu dans le navigateur puis comparé au catalogue.
 const HOWTO_STEPS = isIOSWeb
   ? [
-    <>Ouvre <strong>Réglages</strong>, descends tout en bas et touche <strong>Apps</strong>.</>,
+    <>
+      Ouvre <strong>Réglages</strong>, descends tout en bas et touche <strong>Apps</strong>.
+      <span className="block text-xs text-slate-400 mt-0.5">iOS 17 ou avant : Réglages → Général → Stockage iPhone</span>
+    </>,
     <>Fais une capture d'écran (bouton latéral + volume haut). Fais défiler et recommence jusqu'en bas de la liste.</>,
     <>Reviens ici et choisis tes captures.</>,
   ]
