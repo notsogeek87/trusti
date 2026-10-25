@@ -8,3 +8,8 @@ export const isIOSWeb = !Capacitor.isNativePlatform() && typeof navigator !== 'u
   /iPhone|iPad|iPod/.test(navigator.userAgent)
   || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
 );
+
+// Navigateur de téléphone ou tablette (là où une capture de la liste des apps a du sens).
+export const isMobileWeb = !Capacitor.isNativePlatform() && typeof navigator !== 'undefined' && (
+  isIOSWeb || /Android|Mobi/.test(navigator.userAgent)
+);

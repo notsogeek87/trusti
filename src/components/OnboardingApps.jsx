@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Check, ChevronRight, ChevronLeft, Sparkles, ShieldCheck, ArrowRight, ImagePlus, Search, X } from 'lucide-react';
 import { API_URL } from '../utils/apiConfig';
 import { pickBestAlternative } from '../utils/alternatives';
-import { isNativeAndroid, isIOSWeb } from '../utils/platform';
+import { isNativeAndroid, isIOSWeb, isMobileWeb } from '../utils/platform';
 import { loadOnboardingCatalog } from '../utils/onboardingCatalog';
 import { normalizeAppName } from '../utils/screenshotAppMatcher';
 import OnboardingSummary from './OnboardingSummary';
@@ -168,6 +168,41 @@ export const AppTile = ({ app, selected, onToggle, replacedBy, isChosenAlternati
         <span>Déjà migré</span>
       </span>
     )}
+  </button>
+);
+
+// Carte d'appel à l'import par capture d'écran (web) : c'est le chemin le
+// plus rapide, on le montre avec un aperçu de ce qu'il fait.
+const IMPORT_PREVIEW = ['WhatsApp', 'Spotify', 'Waze'];
+
+const ImportScreenshotCard = ({ onClick }) => (
+  <button
+    onClick={onClick}
+    className="relative w-full text-left bg-white border-2 border-indigo-500 rounded-3xl p-4 pt-5 shadow-xl shadow-indigo-100 transition-all active:scale-[0.98] hover:shadow-indigo-200"
+  >
+    <span className="absolute -top-3 left-4 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wide px-2.5 py-1 rounded-full shadow">
+      Le plus rapide
+    </span>
+    <div className="flex items-center gap-3">
+      <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shrink-0">
+        <ImagePlus size={24} className="text-white" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-black text-slate-900 text-base leading-tight">Importer une capture d'écran</p>
+        <p className="text-xs text-slate-500 mt-0.5">
+          {isIOSWeb ? 'Réglages → Apps' : 'Ta liste d\'apps dans les réglages'}, on reconnaît tes apps tout seul
+        </p>
+      </div>
+      <ChevronRight size={20} className="text-indigo-500 shrink-0" />
+    </div>
+    <div className="mt-3 flex gap-1.5" aria-hidden="true">
+      {IMPORT_PREVIEW.map(name => (
+        <span key={name} className="flex items-center gap-1 bg-indigo-50 text-indigo-700 text-[11px] font-bold px-2 py-1 rounded-lg">
+          <Check size={11} strokeWidth={3} /> {name}
+        </span>
+      ))}
+      <span className="text-[11px] font-bold text-indigo-400 px-1 py-1">…</span>
+    </div>
   </button>
 );
 
@@ -354,25 +389,18 @@ const OnboardingApps = ({ onComplete }) => {
             En <strong className="text-slate-700">30 secondes</strong>, dis-nous quelles apps tu utilises.
             On te montrera leur score de confidentialité.
           </p>
-          {/* Sur iPhone, l'import par capture est le chemin le plus rapide : on le met en avant */}
-          {CAN_IMPORT_SCREENSHOT && isIOSWeb ? (
+          {CAN_IMPORT_SCREENSHOT && isMobileWeb ? (
             <div className="w-full max-w-xs mx-auto">
-              <button
-                onClick={() => setImporting(true)}
-                className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-indigo-200 transition-all active:scale-95"
-              >
-                <ImagePlus size={18} /> Importer une capture
-              </button>
-              <p className="text-xs text-slate-400 mt-2">De Réglages → Apps, on reconnaît tes apps tout seul</p>
+              <ImportScreenshotCard onClick={() => setImporting(true)} />
               <button
                 onClick={goNext}
-                className="w-full mt-5 py-3 rounded-2xl border-2 border-indigo-100 text-indigo-700 font-bold text-sm hover:bg-indigo-50 transition-colors"
+                className="w-full mt-4 py-3 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors"
               >
-                Choisir mes apps à la main
+                Je préfère choisir à la main
               </button>
             </div>
           ) : (
-            <>
+            <div className="w-full max-w-xs mx-auto">
               <button
                 onClick={goNext}
                 className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-indigo-200 transition-all active:scale-95 mx-auto"
@@ -380,14 +408,11 @@ const OnboardingApps = ({ onComplete }) => {
                 C'est parti <ChevronRight size={18} />
               </button>
               {CAN_IMPORT_SCREENSHOT && (
-                <button
-                  onClick={() => setImporting(true)}
-                  className="mt-4 flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 transition-colors mx-auto"
-                >
-                  <ImagePlus size={14} /> Importer une capture de ma liste d'apps
-                </button>
+                <div className="mt-6">
+                  <ImportScreenshotCard onClick={() => setImporting(true)} />
+                </div>
               )}
-            </>
+            </div>
           )}
           <button
             onClick={() => onComplete(new Set())}
@@ -506,6 +531,22 @@ const OnboardingApps = ({ onComplete }) => {
           </h2>
           <p className="text-xs text-slate-400 mt-1">Sélectionne tout ce que tu utilises</p>
         </div>
+
+        {/* Rappel de l'import : évite de parcourir les 6 catégories à la main */}
+        {CAN_IMPORT_SCREENSHOT && (
+          <button
+            onClick={() => setImporting(true)}
+            className="w-full mb-3 flex items-center gap-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-2xl px-3 py-2.5 text-left transition-colors"
+          >
+            <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0">
+              <ImagePlus size={16} className="text-white" />
+            </div>
+            <p className="flex-1 text-xs text-indigo-900 leading-snug">
+              <strong>Plus rapide :</strong> importe une capture{isIOSWeb ? ' de Réglages → Apps' : ' de ta liste d\'apps'}
+            </p>
+            <ChevronRight size={16} className="text-indigo-500 shrink-0" />
+          </button>
+        )}
 
         {/* Recherche dans tout le catalogue : plus rapide que parcourir les grilles */}
         <div className="relative mb-4">
