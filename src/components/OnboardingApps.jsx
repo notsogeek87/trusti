@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Check, ChevronRight, ChevronLeft, Sparkles, ShieldCheck, ArrowRight, ImagePlus, Search, X } from 'lucide-react';
+import { Check, ChevronRight, ChevronLeft, Sparkles, ShieldCheck, ArrowRight, ImagePlus, Search, X, Hand } from 'lucide-react';
 import { API_URL } from '../utils/apiConfig';
 import { pickBestAlternative } from '../utils/alternatives';
 import { isNativeAndroid, isIOSWeb, isMobileWeb } from '../utils/platform';
@@ -206,6 +206,33 @@ const ImportScreenshotCard = ({ onClick }) => (
   </button>
 );
 
+// Carte du choix à la main : même poids visuel que l'import, pour que
+// l'utilisateur voie qu'il a deux options et ne se sente pas piégé.
+const MANUAL_PREVIEW = ['💬', '📱', '🎵', '💼', '🗺️', '💳'];
+
+const ManualChoiceCard = ({ onClick }) => (
+  <button
+    onClick={onClick}
+    className="w-full text-left bg-white border-2 border-slate-200 rounded-3xl p-4 shadow-sm transition-all active:scale-[0.98] hover:border-indigo-300"
+  >
+    <div className="flex items-center gap-3">
+      <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center shrink-0">
+        <Hand size={24} className="text-slate-600" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-black text-slate-900 text-base leading-tight">Choisir mes apps à la main</p>
+        <p className="text-xs text-slate-500 mt-0.5">6 thèmes, tu touches les apps que tu utilises</p>
+      </div>
+      <ChevronRight size={20} className="text-slate-400 shrink-0" />
+    </div>
+    <div className="mt-3 flex gap-1.5" aria-hidden="true">
+      {MANUAL_PREVIEW.map(emoji => (
+        <span key={emoji} className="w-7 h-7 flex items-center justify-center bg-slate-50 rounded-lg text-sm">{emoji}</span>
+      ))}
+    </div>
+  </button>
+);
+
 // `startWithImport` : ouvre directement l'import par capture (rescan accepté
 // depuis un navigateur mobile).
 const OnboardingApps = ({ onComplete, startWithImport = false }) => {
@@ -391,30 +418,23 @@ const OnboardingApps = ({ onComplete, startWithImport = false }) => {
             En <strong className="text-slate-700">30 secondes</strong>, dis-nous quelles apps tu utilises.
             On te montrera leur score de confidentialité.
           </p>
-          {CAN_IMPORT_SCREENSHOT && isMobileWeb ? (
-            <div className="w-full max-w-xs mx-auto">
-              <ImportScreenshotCard onClick={() => setImporting(true)} />
-              <button
-                onClick={goNext}
-                className="w-full mt-4 py-3 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors"
-              >
-                Je préfère choisir à la main
-              </button>
+          {CAN_IMPORT_SCREENSHOT ? (
+            // Web : deux choix présentés à égalité (l'import d'abord sur téléphone)
+            <div className="w-full max-w-xs mx-auto text-left">
+              <p className="text-center text-sm font-black text-slate-700 mb-4">Deux façons de faire, au choix :</p>
+              <div className={`flex gap-5 ${isMobileWeb ? 'flex-col' : 'flex-col-reverse'}`}>
+                <ImportScreenshotCard onClick={() => setImporting(true)} />
+                <ManualChoiceCard onClick={goNext} />
+              </div>
+              <p className="text-center text-xs text-slate-400 mt-4">Tu pourras ajouter ou retirer des apps à tout moment.</p>
             </div>
           ) : (
-            <div className="w-full max-w-xs mx-auto">
-              <button
-                onClick={goNext}
-                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-indigo-200 transition-all active:scale-95 mx-auto"
-              >
-                C'est parti <ChevronRight size={18} />
-              </button>
-              {CAN_IMPORT_SCREENSHOT && (
-                <div className="mt-6">
-                  <ImportScreenshotCard onClick={() => setImporting(true)} />
-                </div>
-              )}
-            </div>
+            <button
+              onClick={goNext}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-indigo-200 transition-all active:scale-95 mx-auto"
+            >
+              C'est parti <ChevronRight size={18} />
+            </button>
           )}
           <button
             onClick={() => onComplete(new Set())}
