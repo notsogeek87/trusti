@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Check, ChevronRight, ChevronLeft, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Check, ChevronRight, ChevronLeft, Sparkles, ShieldCheck, ArrowRight, ImagePlus, Search, X } from 'lucide-react';
 import { API_URL } from '../utils/apiConfig';
 import { pickBestAlternative } from '../utils/alternatives';
+import { isNativeAndroid, isIOSWeb } from '../utils/platform';
+import { loadOnboardingCatalog } from '../utils/onboardingCatalog';
+import { normalizeAppName } from '../utils/screenshotAppMatcher';
 import OnboardingSummary from './OnboardingSummary';
+import OnboardingScreenshotImport from './OnboardingScreenshotImport';
 import AppIconImage from './ui/AppIconImage';
 
 const GOOD_GRADES = ['A', 'B', 'C'];
@@ -83,6 +87,11 @@ const STEPS = [
 // step N+1 = récapitulatif (combien d'apps par TrustiScore, note du téléphone)
 const SUCCESS_STEP = STEPS.length;
 const SUMMARY_STEP = STEPS.length + 1;
+
+// Import par capture d'écran : web uniquement (l'APK Android a son propre scan).
+const CAN_IMPORT_SCREENSHOT = !isNativeAndroid;
+const SEARCH_MIN_LENGTH = 2;
+const SEARCH_MAX_RESULTS = 30;
 
 export const GRADE_DOT = {
   A: 'bg-emerald-500',
@@ -168,7 +177,14 @@ const OnboardingApps = ({ onComplete }) => {
   const [selected, setSelected] = useState(new Set());
   const [stepApps, setStepApps] = useState([]);
   const [isLoadingStep, setIsLoadingStep] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [query, setQuery] = useState('');
+  const [catalog, setCatalog] = useState(null); // catalogue complet, chargé à la première recherche
+  const [catalogError, setCatalogError] = useState(false);
   const cache = useRef({});
+  // Apps sélectionnées hors des grilles par catégorie (capture d'écran,
+  // recherche) : gardées ici pour le récapitulatif.
+  const extraApps = useRef(new Map());
   const stepRef = useRef(step); // ref pour lire le step courant dans les callbacks async
   useEffect(() => { stepRef.current = step; }, [step]);
 
@@ -180,8 +196,48 @@ const OnboardingApps = ({ onComplete }) => {
     });
   };
 
-  const goNext = () => { setDirection('forward'); setStep(s => s + 1); };
-  const goBack = () => { setDirection('back'); setStep(s => s - 1); };
+  const goNext = () => { setDirection('forward'); setQuery(''); setStep(s => s + 1); };
+  const goBack = () => { setDirection('back'); setQuery(''); setStep(s => s - 1); };
+
+  const rememberApps = (apps) => {
+    apps.forEach(app => extraApps.current.set(app.id, app));
+  };
+
+  // Apps reconnues sur la capture → directement le récapitulatif.
+  const handleImportConfirm = (apps) => {
+    rememberApps(apps);
+    const ids = new Set([...selected, ...apps.map(a => a.id)]);
+    setSelected(ids);
+    setImporting(false);
+    if (ids.size === 0) {
+      onComplete(ids);
+      return;
+    }
+    setDirection('forward');
+    setStep(SUMMARY_STEP);
+  };
+
+  // "Il en manque ?" → les grilles par catégorie, avec les apps reconnues déjà cochées.
+  const handleImportManual = (apps) => {
+    rememberApps(apps);
+    setSelected(prev => new Set([...prev, ...apps.map(a => a.id)]));
+    setImporting(false);
+    setDirection('forward');
+    setStep(0);
+  };
+
+  const handleSearchChange = (value) => {
+    setQuery(value);
+    if (!catalog && value.trim().length >= SEARCH_MIN_LENGTH) {
+      setCatalogError(false);
+      loadOnboardingCatalog().then(setCatalog).catch(() => setCatalogError(true));
+    }
+  };
+
+  const toggleSearchedApp = (app) => {
+    rememberApps([app]);
+    toggleApp(app.id);
+  };
 
   const handleSeeScore = () => {
     if (selected.size === 0) {
@@ -243,7 +299,7 @@ const OnboardingApps = ({ onComplete }) => {
   // l'utilisateur a lui-même cochée peut être considérée comme "déjà
   // utilisée".
   const selectedAppsData = useMemo(() => {
-    const loaded = new Map();
+    const loaded = new Map(extraApps.current);
     Object.values(cache.current).forEach(list => {
       list.forEach(app => { if (!loaded.has(app.id)) loaded.set(app.id, app); });
     });
@@ -263,6 +319,27 @@ const OnboardingApps = ({ onComplete }) => {
     [replacementMap]
   );
 
+  // Recherche dans tout le catalogue, toutes catégories confondues.
+  const searchKey = normalizeAppName(query);
+  const searchResults = useMemo(() => {
+    if (searchKey.length < SEARCH_MIN_LENGTH || !catalog) return [];
+    return catalog
+      .filter(app => normalizeAppName(app.name).includes(searchKey))
+      .slice(0, SEARCH_MAX_RESULTS);
+  }, [searchKey, catalog]);
+  const isSearching = searchKey.length >= SEARCH_MIN_LENGTH;
+
+  // ── IMPORT PAR CAPTURE D'ÉCRAN (web) ───────────────────────────────────
+  if (importing) {
+    return (
+      <OnboardingScreenshotImport
+        onConfirm={handleImportConfirm}
+        onManual={handleImportManual}
+        onBack={() => setImporting(false)}
+      />
+    );
+  }
+
   // ── INTRO ─────────────────────────────────────────────────────────────
   if (step === -1) {
     return (
@@ -277,12 +354,41 @@ const OnboardingApps = ({ onComplete }) => {
             En <strong className="text-slate-700">30 secondes</strong>, dis-nous quelles apps tu utilises.
             On te montrera leur score de confidentialité.
           </p>
-          <button
-            onClick={goNext}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-indigo-200 transition-all active:scale-95 mx-auto"
-          >
-            C'est parti <ChevronRight size={18} />
-          </button>
+          {/* Sur iPhone, l'import par capture est le chemin le plus rapide : on le met en avant */}
+          {CAN_IMPORT_SCREENSHOT && isIOSWeb ? (
+            <div className="w-full max-w-xs mx-auto">
+              <button
+                onClick={() => setImporting(true)}
+                className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-indigo-200 transition-all active:scale-95"
+              >
+                <ImagePlus size={18} /> Importer une capture
+              </button>
+              <p className="text-xs text-slate-400 mt-2">De Réglages → Apps, on reconnaît tes apps tout seul</p>
+              <button
+                onClick={goNext}
+                className="w-full mt-5 py-3 rounded-2xl border-2 border-indigo-100 text-indigo-700 font-bold text-sm hover:bg-indigo-50 transition-colors"
+              >
+                Choisir mes apps à la main
+              </button>
+            </div>
+          ) : (
+            <>
+              <button
+                onClick={goNext}
+                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-indigo-200 transition-all active:scale-95 mx-auto"
+              >
+                C'est parti <ChevronRight size={18} />
+              </button>
+              {CAN_IMPORT_SCREENSHOT && (
+                <button
+                  onClick={() => setImporting(true)}
+                  className="mt-4 flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 transition-colors mx-auto"
+                >
+                  <ImagePlus size={14} /> Importer une capture de ma liste d'apps
+                </button>
+              )}
+            </>
+          )}
           <button
             onClick={() => onComplete(new Set())}
             className="mt-4 text-xs text-slate-400 hover:text-slate-600 transition-colors"
@@ -401,8 +507,56 @@ const OnboardingApps = ({ onComplete }) => {
           <p className="text-xs text-slate-400 mt-1">Sélectionne tout ce que tu utilises</p>
         </div>
 
+        {/* Recherche dans tout le catalogue : plus rapide que parcourir les grilles */}
+        <div className="relative mb-4">
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder="Chercher une app (ex : WhatsApp)"
+            className="w-full pl-10 pr-10 py-3 rounded-2xl bg-white border border-slate-200 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-indigo-400 shadow-sm"
+          />
+          {query && (
+            <button
+              onClick={() => setQuery('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600"
+              aria-label="Effacer la recherche"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
+
         {/* Grille d'apps */}
-        {isLoadingStep ? (
+        {isSearching ? (
+          catalogError ? (
+            <p className="text-center text-sm text-slate-400 py-12">
+              Recherche indisponible, vérifie ta connexion
+            </p>
+          ) : !catalog ? (
+            <div className="flex justify-center py-12">
+              <div className="w-7 h-7 rounded-full border-2 border-indigo-400 border-t-transparent animate-spin" />
+            </div>
+          ) : searchResults.length > 0 ? (
+            <div className="grid grid-cols-3 gap-3">
+              {searchResults.map(app => (
+                <AppTile
+                  key={app.id}
+                  app={app}
+                  selected={selected.has(app.id)}
+                  onToggle={() => toggleSearchedApp(app)}
+                  replacedBy={replacementMap.get(String(app.id))}
+                  isChosenAlternative={alternativeIds.has(String(app.id))}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-sm text-slate-400 py-12">
+              Aucune app trouvée pour « {query.trim()} »
+            </p>
+          )
+        ) : isLoadingStep ? (
           <div className="flex justify-center py-12">
             <div className="w-7 h-7 rounded-full border-2 border-indigo-400 border-t-transparent animate-spin" />
           </div>
