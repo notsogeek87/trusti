@@ -25,6 +25,8 @@ const CATALOG = [
   { id: 18, name: 'Signal Private Messenger' },
   { id: 19, name: 'Booking.com: Hotels & Travel' },
   { id: 20, name: 'X' },
+  { id: 'apple-safari', name: 'Safari' },
+  { id: 'apple-mail', name: 'Mail' },
 ];
 
 const names = (apps) => apps.map(a => a.name);
@@ -50,11 +52,16 @@ test('reconnaît le nom court affiché par l\'iPhone', () => {
 });
 
 test('ignore les apps intégrées d\'iOS homonymes d\'apps système Android', () => {
-  assert.deepEqual(matchAppsFromText('Messages\nContacts\nSafari\nRéglages', CATALOG), []);
+  assert.deepEqual(matchAppsFromText('Messages\nContacts\nRéglages', CATALOG), []);
 });
 
 test('relie les apps intégrées d\'iOS à l\'app Apple du catalogue', () => {
-  assert.deepEqual(names(matchAppsFromText('Musique\nWallet', CATALOG)), ['Apple Music', 'Apple Pay']);
+  assert.deepEqual(names(matchAppsFromText('Musique\nWallet\nSafari\nMail', CATALOG)), ['Apple Music', 'Apple Pay', 'Safari', 'Mail']);
+});
+
+test('une app intégrée d\'iOS absente du catalogue reste ignorée', () => {
+  const withoutApple = CATALOG.filter(app => !String(app.id).startsWith('apple-'));
+  assert.deepEqual(matchAppsFromText('Safari\nMail', withoutApple), []);
 });
 
 test('tolère une erreur de lecture sur un nom long, pas sur un nom court', () => {

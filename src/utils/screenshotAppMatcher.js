@@ -36,6 +36,8 @@ const IOS_BUILTIN_NAMES = [
 
 // App intégrée d'iOS → nom exact de l'app Apple correspondante dans le catalogue.
 const IOS_BUILTIN_ALIASES = {
+  safari: 'Safari',
+  mail: 'Mail',
   musique: 'Apple Music',
   music: 'Apple Music',
   wallet: 'Apple Pay',

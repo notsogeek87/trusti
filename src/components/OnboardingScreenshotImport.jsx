@@ -23,6 +23,10 @@ const HOWTO_STEPS = isIOSWeb
     <>Reviens ici et choisis tes captures.</>,
   ];
 
+// iCloud n'apparaît pas dans Réglages → Apps (il est dans le compte Apple),
+// mais presque tout iPhone l'utilise : on l'ajoute coché, décochable.
+const IPHONE_ALWAYS_PRESENT_IDS = ['apple-icloud'];
+
 const PickScreenshotsButton = ({ onFiles, primary, children }) => {
   const inputRef = useRef(null);
   return (
@@ -86,7 +90,13 @@ const OnboardingScreenshotImport = ({ onConfirm, onManual, onBack }) => {
       const catalogPromise = loadOnboardingCatalog();
       const { readScreenshotsText } = await import('../utils/screenshotOcr');
       const text = await readScreenshotsText(files, setProgress);
-      const found = matchAppsFromText(text, buildAppIndex(await catalogPromise));
+      const catalog = await catalogPromise;
+      const found = matchAppsFromText(text, buildAppIndex(catalog));
+      if (isIOSWeb) {
+        catalog
+          .filter(app => IPHONE_ALWAYS_PRESENT_IDS.includes(String(app.id)))
+          .forEach(app => { if (!found.some(f => f.id === app.id)) found.push(app); });
+      }
 
       const knownIds = new Set(matches.map(a => a.id));
       const added = found.filter(app => !knownIds.has(app.id));
