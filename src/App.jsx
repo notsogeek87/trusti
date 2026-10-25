@@ -28,7 +28,7 @@ import MyAppsFilterMenu, { DEFAULT_MIGRATION_FILTER, DEFAULT_ALTERNATIVE_FILTER 
 import LandingPage from './components/LandingPage';
 import OnboardingApps from './components/OnboardingApps';
 import OnboardingAppsNative from './components/OnboardingAppsNative';
-import { isNativeAndroid, isMobileWeb } from './utils/platform';
+import { isNativeAndroid } from './utils/platform';
 
 // Modals
 import AppDetailModal from './components/modals/AppDetailModal';
@@ -164,8 +164,8 @@ const App = () => {
   const [showRescan, setShowRescan] = useState(false);
   const [showRescanPrompt, setShowRescanPrompt] = useState(false);
   const [forceManualRescan, setForceManualRescan] = useState(false);
-  // Rescan accepté depuis une proposition : on démarre directement le bon mode
-  // (scan natif sur l'APK, import par capture sur navigateur mobile).
+  // Rescan accepté depuis une proposition : sur l'APK, le scan natif démarre
+  // directement ; sur le web, l'écran des deux choix s'affiche.
   const [rescanFromPrompt, setRescanFromPrompt] = useState(false);
   // Proposition de rescan à la réouverture de l'app (web et APK)
   const [showReopenPrompt, setShowReopenPrompt] = useState(false);
@@ -594,8 +594,9 @@ const App = () => {
         />
       );
     }
+    // Web : le rescan reste un choix (capture ou à la main), on montre les deux options
     return (
-      <OnboardingApps onComplete={handleRescanComplete} startWithImport={rescanFromPrompt && isMobileWeb} />
+      <OnboardingApps onComplete={handleRescanComplete} />
     );
   }
 
