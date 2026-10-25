@@ -234,7 +234,8 @@ const ManualChoiceCard = ({ onClick }) => (
   </button>
 );
 
-// `onExit` : retour depuis l'intro (sinon le retour quitte l'onboarding sans app).
+// `onExit` : retour depuis l'intro (sinon le retour quitte l'onboarding en
+// gardant les apps déjà choisies).
 const OnboardingApps = ({ onComplete, onExit }) => {
   const [step, setStep] = useState(-1); // -1 = intro
   const [direction, setDirection] = useState('forward');
@@ -279,7 +280,8 @@ const OnboardingApps = ({ onComplete, onExit }) => {
   const handleBack = () => {
     if (step === -1) {
       if (onExit) onExit();
-      else onComplete(new Set());
+      // Les apps déjà importées ou cochées sont gardées (direction Mes Apps)
+      else onComplete(selected);
       return;
     }
     if (query) {
@@ -485,7 +487,7 @@ const OnboardingApps = ({ onComplete, onExit }) => {
             </button>
           )}
           <button
-            onClick={() => onComplete(new Set())}
+            onClick={() => onComplete(selected)}
             className="mt-4 text-xs text-slate-400 hover:text-slate-600 transition-colors"
           >
             Passer cette étape

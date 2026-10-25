@@ -135,21 +135,19 @@ const App = () => {
   const handleOnboardingComplete = (selectedAppIds) => {
     // Sélection faite, passée ou quittée : ne pas la rouvrir d'office (web, aucune app)
     autoSelectionShown.current = true;
-    // Ajouter toutes les apps sélectionnées à "Mes Apps"
-    const fakeEvent = { stopPropagation: () => {} };
-    selectedAppIds.forEach(appId => {
-      toggleMyApp(fakeEvent, appId);
-    });
+    // Ajouter toutes les apps sélectionnées à "Mes Apps" (ajout simple : une
+    // app déjà suivie ne doit pas être retirée)
+    if (selectedAppIds && selectedAppIds.size > 0) {
+      addMyApps([...selectedAppIds].map(String));
+    }
     
     // Fermer l'onboarding
     setShowOnboarding(false);
     
-    // Rediriger vers "Mes Apps" si des apps sélectionnées, sinon vers "Applications"
-    if (selectedAppIds && selectedAppIds.size > 0) {
-      setActiveTab(TABS.MY_APPS);
-    } else {
-      setActiveTab(TABS.APPLICATIONS);
-    }
+    // "Mes Apps" dès qu'il y a une app (choisie maintenant ou déjà suivie),
+    // sinon le catalogue
+    const hasApps = (selectedAppIds && selectedAppIds.size > 0) || myApps.size > 0;
+    setActiveTab(hasApps ? TABS.MY_APPS : TABS.APPLICATIONS);
     
     // Scroller en haut de la page
     setTimeout(() => {
@@ -183,6 +181,11 @@ const App = () => {
     setShowRescan(false);
     setForceManualRescan(false);
     setRescanFromPrompt(false);
+    // Même règle qu'à la fin de l'onboarding : "Mes Apps" s'il reste une app, sinon le catalogue
+    const remaining = new Set([...myApps].map(String));
+    (notInstalledIds || []).forEach(id => remaining.delete(String(id)));
+    (selectedAppIds ? [...selectedAppIds] : []).forEach(id => remaining.add(String(id)));
+    setActiveTab(remaining.size > 0 ? TABS.MY_APPS : TABS.APPLICATIONS);
   };
 
   // État pour le filtre de catégorie dans l'onglet Applications
