@@ -29,6 +29,7 @@ import LandingPage from './components/LandingPage';
 import OnboardingApps from './components/OnboardingApps';
 import OnboardingAppsNative from './components/OnboardingAppsNative';
 import { isNativeAndroid } from './utils/platform';
+import { runBackHandler } from './utils/backHandlers';
 
 // Modals
 import AppDetailModal from './components/modals/AppDetailModal';
@@ -132,6 +133,8 @@ const App = () => {
 
   // Handler pour la fin de l'onboarding
   const handleOnboardingComplete = (selectedAppIds) => {
+    // Sélection faite, passée ou quittée : ne pas la rouvrir d'office (web, aucune app)
+    autoSelectionShown.current = true;
     // Ajouter toutes les apps sélectionnées à "Mes Apps"
     const fakeEvent = { stopPropagation: () => {} };
     selectedAppIds.forEach(appId => {
@@ -394,6 +397,14 @@ const App = () => {
   // Gérer le bouton retour du smartphone/navigateur
   useEffect(() => {
     const handleBackButton = (event) => {
+      // Un écran plein (onboarding, import, proposition de rescan) gère son
+      // propre retour : on lui laisse la main et on réarme l'historique pour
+      // que le retour suivant reste dans l'app.
+      if (runBackHandler()) {
+        window.history.pushState({ page: 'trusti' }, '');
+        return;
+      }
+
       // Si le modal de migration est ouvert
       if (showMigrationSelector) {
         event.preventDefault();
@@ -450,6 +461,8 @@ const App = () => {
     let cancelled = false;
 
     CapacitorApp.addListener('backButton', () => {
+      if (runBackHandler()) return;
+
       if (showMigrationSelector) {
         setShowMigrationSelector(null);
         return;
@@ -578,7 +591,10 @@ const App = () => {
       );
     }
     return (
-      <OnboardingApps onComplete={handleOnboardingComplete} />
+      <OnboardingApps
+        onComplete={handleOnboardingComplete}
+        onExit={isNativeAndroid ? () => setForceManualOnboarding(false) : undefined}
+      />
     );
   }
 
@@ -596,7 +612,10 @@ const App = () => {
     }
     // Web : le rescan reste un choix (capture ou à la main), on montre les deux options
     return (
-      <OnboardingApps onComplete={handleRescanComplete} />
+      <OnboardingApps
+        onComplete={handleRescanComplete}
+        onExit={isNativeAndroid ? () => setForceManualRescan(false) : undefined}
+      />
     );
   }
 

@@ -5,6 +5,7 @@ import { pickBestAlternative } from '../utils/alternatives';
 import { isNativeAndroid, isIOSWeb, isMobileWeb } from '../utils/platform';
 import { loadOnboardingCatalog } from '../utils/onboardingCatalog';
 import { normalizeAppName } from '../utils/screenshotAppMatcher';
+import { useBackHandler } from '../hooks/useBackHandler';
 import OnboardingSummary from './OnboardingSummary';
 import OnboardingScreenshotImport from './OnboardingScreenshotImport';
 import AppIconImage from './ui/AppIconImage';
@@ -233,7 +234,8 @@ const ManualChoiceCard = ({ onClick }) => (
   </button>
 );
 
-const OnboardingApps = ({ onComplete }) => {
+// `onExit` : retour depuis l'intro (sinon le retour quitte l'onboarding sans app).
+const OnboardingApps = ({ onComplete, onExit }) => {
   const [step, setStep] = useState(-1); // -1 = intro
   const [direction, setDirection] = useState('forward');
   const [selected, setSelected] = useState(new Set());
@@ -247,6 +249,10 @@ const OnboardingApps = ({ onComplete }) => {
   // Apps sélectionnées hors des grilles par catégorie (capture d'écran,
   // recherche) : gardées ici pour le récapitulatif.
   const extraApps = useRef(new Map());
+  // Où ramène le retour depuis l'écran succès / le récapitulatif
+  const successBackStep = useRef(STEPS.length - 1);
+  const summaryBackTo = useRef('success'); // 'success' | 'import'
+  const importedApps = useRef([]); // dernières apps confirmées depuis la capture
   const stepRef = useRef(step); // ref pour lire le step courant dans les callbacks async
   useEffect(() => { stepRef.current = step; }, [step]);
 
@@ -261,20 +267,62 @@ const OnboardingApps = ({ onComplete }) => {
   const goNext = () => { setDirection('forward'); setQuery(''); setStep(s => s + 1); };
   const goBack = () => { setDirection('back'); setQuery(''); setStep(s => s - 1); };
 
+  const goToSuccess = () => {
+    successBackStep.current = step;
+    setDirection('forward');
+    setStep(SUCCESS_STEP);
+  };
+
+  // Bouton retour (geste/bouton Android, navigateur, flèche de l'en-tête) :
+  // revient à l'écran précédent ; depuis l'intro, quitte l'onboarding.
+  // L'import par capture gère son propre retour pendant qu'il est affiché.
+  const handleBack = () => {
+    if (step === -1) {
+      if (onExit) onExit();
+      else onComplete(new Set());
+      return;
+    }
+    if (query) {
+      setQuery('');
+      return;
+    }
+    if (step === SUMMARY_STEP) {
+      setDirection('back');
+      if (summaryBackTo.current === 'import') {
+        setStep(-1);
+        setImporting(true);
+      } else {
+        setStep(SUCCESS_STEP);
+      }
+      return;
+    }
+    if (step === SUCCESS_STEP) {
+      setDirection('back');
+      setStep(successBackStep.current);
+      return;
+    }
+    goBack();
+  };
+  useBackHandler(handleBack, !importing);
+
   const rememberApps = (apps) => {
     apps.forEach(app => extraApps.current.set(app.id, app));
   };
 
-  // Apps reconnues sur la capture → directement le récapitulatif.
+  // Apps reconnues sur la capture → directement le récapitulatif. Une app
+  // décochée lors d'un nouvel import (après un retour) est bien retirée.
   const handleImportConfirm = (apps) => {
     rememberApps(apps);
-    const ids = new Set([...selected, ...apps.map(a => a.id)]);
+    const previouslyImported = new Set(importedApps.current.map(a => a.id));
+    const ids = new Set([...[...selected].filter(id => !previouslyImported.has(id)), ...apps.map(a => a.id)]);
+    importedApps.current = apps;
     setSelected(ids);
     setImporting(false);
     if (ids.size === 0) {
       onComplete(ids);
       return;
     }
+    summaryBackTo.current = 'import';
     setDirection('forward');
     setStep(SUMMARY_STEP);
   };
@@ -306,6 +354,7 @@ const OnboardingApps = ({ onComplete }) => {
       onComplete(selected);
       return;
     }
+    summaryBackTo.current = 'success';
     setDirection('forward');
     setStep(SUMMARY_STEP);
   };
@@ -398,6 +447,7 @@ const OnboardingApps = ({ onComplete }) => {
         onConfirm={handleImportConfirm}
         onManual={handleImportManual}
         onBack={() => setImporting(false)}
+        initialApps={importedApps.current}
       />
     );
   }
@@ -520,7 +570,7 @@ const OnboardingApps = ({ onComplete }) => {
       <div className="sticky top-0 z-10 bg-white border-b border-slate-100 shadow-sm px-4 py-3">
         <div className="max-w-md mx-auto flex items-center gap-3">
           <button
-            onClick={goBack}
+            onClick={handleBack}
             className="p-1 text-slate-400 hover:text-slate-700 transition-colors"
           >
             <ChevronLeft size={20} />
@@ -654,7 +704,7 @@ const OnboardingApps = ({ onComplete }) => {
             <ChevronRight size={16} />
           </button>
           <button
-            onClick={() => { setDirection('forward'); setStep(SUCCESS_STEP); }}
+            onClick={goToSuccess}
             className="w-full py-2 text-xs text-slate-400 hover:text-slate-600 transition-colors"
           >
             Terminer maintenant

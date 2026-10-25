@@ -4,6 +4,7 @@ import { AppTile, ANIM_CSS, computeReplacementMap } from './OnboardingApps';
 import { loadOnboardingCatalog } from '../utils/onboardingCatalog';
 import { buildAppIndex, matchAppsFromText } from '../utils/screenshotAppMatcher';
 import { isIOSWeb } from '../utils/platform';
+import { useBackHandler } from '../hooks/useBackHandler';
 
 // Onboarding web uniquement : sur iPhone, aucune API ne liste les apps
 // installées. On fait importer une capture de Réglages → Apps, dont le texte
@@ -56,11 +57,13 @@ const PickScreenshotsButton = ({ onFiles, primary, children }) => {
   );
 };
 
-const OnboardingScreenshotImport = ({ onConfirm, onManual, onBack }) => {
+// `initialApps` : apps déjà reconnues (retour depuis le récapitulatif), on
+// rouvre directement sur les résultats.
+const OnboardingScreenshotImport = ({ onConfirm, onManual, onBack, initialApps = [] }) => {
   // 'howto' | 'reading' | 'results' | 'error'
-  const [phase, setPhase] = useState('howto');
-  const [matches, setMatches] = useState([]);
-  const [selected, setSelected] = useState(new Set());
+  const [phase, setPhase] = useState(initialApps.length > 0 ? 'results' : 'howto');
+  const [matches, setMatches] = useState(initialApps);
+  const [selected, setSelected] = useState(() => new Set(initialApps.map(a => a.id)));
   const [progress, setProgress] = useState({ index: 0, total: 1, ratio: 0, preparing: true });
   const [lastFiles, setLastFiles] = useState([]);
 
@@ -71,6 +74,17 @@ const OnboardingScreenshotImport = ({ onConfirm, onManual, onBack }) => {
   );
 
   const selectedApps = () => matches.filter(app => selected.has(app.id));
+
+  // Retour : résultats ou erreur → explications ; explications → écran
+  // précédent ; pendant la lecture, rien (elle se termine d'elle-même).
+  useBackHandler(() => {
+    if (phase === 'reading') return;
+    if (phase === 'results' || phase === 'error') {
+      setPhase('howto');
+      return;
+    }
+    onBack();
+  });
 
   const toggleApp = (id) => {
     setSelected(prev => {
@@ -151,6 +165,14 @@ const OnboardingScreenshotImport = ({ onConfirm, onManual, onBack }) => {
           <PickScreenshotsButton onFiles={readScreenshots} primary>
             Choisir mes captures
           </PickScreenshotsButton>
+          {matches.length > 0 && (
+            <button
+              onClick={() => setPhase('results')}
+              className="w-full mt-3 py-2 text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
+            >
+              Revoir mes {matches.length} app{matches.length !== 1 ? 's' : ''} reconnue{matches.length !== 1 ? 's' : ''}
+            </button>
+          )}
           <button
             onClick={() => onManual([])}
             className="w-full mt-3 text-xs text-slate-400 hover:text-slate-600 transition-colors"

@@ -6,6 +6,7 @@ import OnboardingSummary from './OnboardingSummary';
 import { API_URL } from '../utils/apiConfig';
 import { extractPackageId } from '../utils/androidPackage';
 import AppIconImage from './ui/AppIconImage';
+import { useBackHandler } from '../hooks/useBackHandler';
 
 const rand = (min, max) => Math.random() * (max - min) + min;
 
@@ -242,6 +243,23 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection, autoStart = false
   useEffect(() => {
     if (autoStart) runScan();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Bouton retour Android : écran précédent. Depuis l'intro (ou depuis les
+  // résultats d'un rescan lancé directement), on quitte sans rien changer.
+  // Pendant le scan et l'animation finale, rien.
+  const leave = () => onComplete(new Set(), []);
+  useBackHandler(() => {
+    if (phase === 'scanning' || phase === 'finalizing') return;
+    if (phase === 'summary') {
+      setPhase('results');
+      return;
+    }
+    if ((phase === 'results' || phase === 'error') && !autoStart) {
+      setPhase('intro');
+      return;
+    }
+    leave();
+  });
 
   // ── INTRO : explique l'app avant de pousser à lancer le scan ─────────
   if (phase === 'intro') {
