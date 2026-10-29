@@ -38,12 +38,6 @@ def main():
     p.add_argument("--track", required=True)
     p.add_argument("--status", default="completed")
     p.add_argument(
-        "--fraction",
-        type=float,
-        default=0.2,
-        help="Part des utilisateurs (0-1 exclu), production uniquement : déploiement progressif",
-    )
-    p.add_argument(
         "--countries",
         default="FR",
         help="Pays de diffusion (codes ISO séparés par des virgules), production uniquement",
@@ -82,12 +76,8 @@ def main():
     release = {"versionCodes": [version_code], "status": args.status}
     # countryTargeting : obligatoire en production (« Release in track
     # targeting no countries » sinon), mais invalide hors production quel que
-    # soit le status (confirmé par l'API elle-même en le testant). En
-    # production l'API ne l'accepte que pour un déploiement progressif
-    # (« Country targeting is only supported for staged releases »).
+    # soit le status (confirmé par l'API elle-même en le testant).
     if args.track == "production":
-        release["status"] = "inProgress"
-        release["userFraction"] = args.fraction
         countries = [c.strip().upper() for c in args.countries.split(",") if c.strip()]
         release["countryTargeting"] = {"countries": countries, "includeRestOfWorld": False}
     edits.tracks().update(
