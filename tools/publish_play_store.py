@@ -37,6 +37,11 @@ def main():
     p.add_argument("--aab", required=True)
     p.add_argument("--track", required=True)
     p.add_argument("--status", default="completed")
+    p.add_argument(
+        "--countries",
+        default="FR",
+        help="Pays de diffusion (codes ISO séparés par des virgules), production uniquement",
+    )
     args = p.parse_args()
 
     creds_json = os.environ.get("PLAY_STORE_SERVICE_ACCOUNT_JSON")
@@ -68,13 +73,18 @@ def main():
     version_code = str(bundle["versionCode"])
     print(f"Bundle uploadé : versionCode {version_code}")
 
-    # PAS de countryTargeting : invalide hors production quel que soit le
-    # status (confirmé par l'API elle-même en le testant).
+    release = {"versionCodes": [version_code], "status": args.status}
+    # countryTargeting : obligatoire en production (« Release in track
+    # targeting no countries » sinon), mais invalide hors production quel que
+    # soit le status (confirmé par l'API elle-même en le testant).
+    if args.track == "production":
+        countries = [c.strip().upper() for c in args.countries.split(",") if c.strip()]
+        release["countryTargeting"] = {"countries": countries, "includeRestOfWorld": False}
     edits.tracks().update(
         editId=edit_id,
         packageName=args.package,
         track=args.track,
-        body={"releases": [{"versionCodes": [version_code], "status": args.status}]},
+        body={"releases": [release]},
     ).execute()
 
     edits.commit(editId=edit_id, packageName=args.package).execute()
