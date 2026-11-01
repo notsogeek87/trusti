@@ -4,6 +4,7 @@
 
 import { Share } from '@capacitor/share';
 import { isNativeAndroid } from './platform';
+import { getShareBaseUrl, parseSharedAppId, SHARED_APP_PARAM } from './appShareLink';
 
 /**
  * Partage du texte (et éventuellement un lien) via le vrai menu de partage
@@ -54,7 +55,8 @@ export const shareText = async (title, text, url) => {
  * @returns {string} URL absolue partageable
  */
 export const buildShareUrl = ({ apps = [], migrations = [] } = {}) => {
-  const base = `${window.location.origin}${window.location.pathname}`;
+  // Dans l'APK, l'origine est https://localhost : on partage le site public.
+  const base = getShareBaseUrl({ isNative: isNativeAndroid, location: window.location });
   const query = new URLSearchParams();
 
   if (apps.length > 0) {
@@ -79,8 +81,8 @@ export const buildShareUrl = ({ apps = [], migrations = [] } = {}) => {
  * @returns {{ appIds: string[], migrations: Array<{id: string, customAlt?: string}> }}
  *   Structure vide si aucun paramètre de partage n'est présent.
  */
-export const parseShareParams = () => {
-  const params = new URLSearchParams(window.location.search);
+export const parseShareParams = (search = window.location.search) => {
+  const params = new URLSearchParams(search);
   const result = { appIds: [], migrations: [] };
 
   const appsParam = params.get('apps');
@@ -117,8 +119,15 @@ export const parseShareParams = () => {
  */
 export const hasShareParams = () => {
   const { appIds, migrations } = parseShareParams();
-  return appIds.length > 0 || migrations.length > 0;
+  return appIds.length > 0 || migrations.length > 0 || Boolean(getSharedAppIdFromUrl());
 };
+
+/**
+ * ID de la fiche app partagée (?app=<id>) présente dans l'URL courante.
+ *
+ * @returns {string|null}
+ */
+export const getSharedAppIdFromUrl = () => parseSharedAppId(window.location.search);
 
 /**
  * Retire les paramètres de partage de l'URL sans recharger la page.
@@ -127,5 +136,6 @@ export const clearShareParams = () => {
   const url = new URL(window.location.href);
   url.searchParams.delete('apps');
   url.searchParams.delete('mig');
+  url.searchParams.delete(SHARED_APP_PARAM);
   window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
 };

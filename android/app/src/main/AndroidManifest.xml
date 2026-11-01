@@ -21,6 +21,23 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!--
+              App Links : les liens de partage https://trusti.lielu.eu/?app=<id>
+              (fiche d'une app) et ?apps=/?mig= (sélection) ouvrent directement
+              Trusti s'il est installé (lus côté JS via le plugin @capacitor/app,
+              voir App.jsx). Vérification par public/.well-known/assetlinks.json :
+              y ajouter l'empreinte SHA-256 de chaque clé de signature utilisée.
+              Seule la racine "/" est revendiquée (pas privacy-policy.html, etc.).
+            -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="trusti.lielu.eu" />
+                <data android:path="/" />
+            </intent-filter>
         </activity>
 
         <provider

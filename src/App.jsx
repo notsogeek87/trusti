@@ -7,7 +7,9 @@ import { TABS } from './constants/tabs';
 import { CATEGORIES, FAVORITES_FILTER } from './constants/categories';
 import { Sparkles, Share2, RefreshCw, Star } from 'lucide-react';
 import { ViewModeContext } from './contexts/ViewModeContext';
-import { parseShareParams, clearShareParams, hasShareParams } from './utils/shareUtils';
+import { parseShareParams, clearShareParams, hasShareParams, getSharedAppIdFromUrl } from './utils/shareUtils';
+import { parseSharedAppId, PUBLIC_SITE_URL } from './utils/appShareLink';
+import { API_URL } from './utils/apiConfig';
 import { hasCompletedOnboarding, markOnboardingComplete } from './utils/onboardingStorage';
 import { getMyAppsSortPref, setMyAppsSortPref, sortMyApps } from './utils/myAppsSort';
 import { areNudgesEnabled, setNudgesEnabled } from './utils/alternativeNudges';
@@ -407,15 +409,81 @@ const App = () => {
     }
   }, [selectedApp]);
 
-  // Détecter un lien de partage au chargement (?apps=... et/ou ?mig=...)
-  // et ouvrir la modal d'import, puis nettoyer l'URL.
+  // Ouverture de la fiche d'une app partagée (?app=<id>) : on la charge par
+  // son ID (elle n'est pas forcément dans la page de liste déjà chargée).
+  const openSharedApp = useCallback(async (appId) => {
+    try {
+      const response = await fetch(`${API_URL}/apps?ids=${encodeURIComponent(appId)}`);
+      const data = await response.json();
+      const found = data.success && Array.isArray(data.apps) ? data.apps[0] : null;
+      if (!found) {
+        toast.error("Cette app n'existe plus dans Trusti.");
+        return;
+      }
+      setShowStorageManager(false);
+      openAppDetail({
+        ...found,
+        id: String(found.id),
+        replacesAppId: found.replacesAppId ? String(found.replacesAppId) : undefined,
+        replacesAppIds: found.replacesAppIds ? found.replacesAppIds.map(String) : undefined,
+      });
+    } catch (error) {
+      console.error("Erreur lors de l'ouverture de l'app partagée:", error);
+      toast.error("Impossible d'ouvrir l'app partagée. Vérifie ta connexion.");
+    }
+  }, [openAppDetail, toast]);
+
+  // Détecter un lien de partage au chargement (?app=..., ?apps=... et/ou
+  // ?mig=...) : ouvrir la fiche ou la modal d'import, puis nettoyer l'URL.
   useEffect(() => {
+    const sharedAppId = getSharedAppIdFromUrl();
     const { appIds, migrations } = parseShareParams();
-    if (appIds.length > 0 || migrations.length > 0) {
+    if (sharedAppId) {
+      openSharedApp(sharedAppId);
+    } else if (appIds.length > 0 || migrations.length > 0) {
       setPendingImport({ appIds, migrations });
+    }
+    if (sharedAppId || appIds.length > 0 || migrations.length > 0) {
       clearShareParams();
     }
   }, []);
+
+  // APK : un lien https://trusti.lielu.eu/... ouvert depuis une autre app
+  // (App Links, voir AndroidManifest.xml) lance Trusti. Le WebView, lui,
+  // reste sur https://localhost : on lit l'URL reçue via le plugin App.
+  const handledDeepLink = useRef(null);
+  useEffect(() => {
+    if (!isNativeAndroid) return;
+
+    const handleUrl = (rawUrl) => {
+      if (!rawUrl || !rawUrl.startsWith(PUBLIC_SITE_URL) || handledDeepLink.current === rawUrl) return;
+      handledDeepLink.current = rawUrl;
+      const sharedAppId = parseSharedAppId(rawUrl);
+      if (sharedAppId) {
+        openSharedApp(sharedAppId);
+        return;
+      }
+      const { appIds, migrations } = parseShareParams(new URL(rawUrl).search);
+      if (appIds.length > 0 || migrations.length > 0) {
+        setPendingImport({ appIds, migrations });
+      }
+    };
+
+    CapacitorApp.getLaunchUrl()
+      .then((result) => handleUrl(result?.url))
+      .catch(() => {});
+
+    let listenerHandle;
+    let cancelled = false;
+    CapacitorApp.addListener('appUrlOpen', ({ url }) => handleUrl(url)).then((handle) => {
+      if (cancelled) handle.remove();
+      else listenerHandle = handle;
+    });
+    return () => {
+      cancelled = true;
+      listenerHandle?.remove();
+    };
+  }, [openSharedApp]);
 
   // Confirmer l'import depuis la modal de partage.
   // On applique directement la sélection sur cet appareil.

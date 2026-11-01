@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, CheckCircle, Route, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink, Trash2, StickyNote, Star } from 'lucide-react';
+import { ChevronLeft, CheckCircle, Route, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink, Trash2, StickyNote, Star, Share2 } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { GRADE_INFO } from '../../constants/grades';
 import { useIsMobile } from '../../contexts/ViewModeContext';
@@ -16,6 +16,8 @@ import { getNote, setNote as saveNote } from '../../utils/notesStorage';
 import { canStartMigration } from '../../utils/migrationGuide';
 import MigrationGuideModal from './MigrationGuideModal';
 import AppIconImage from '../ui/AppIconImage';
+import { shareText } from '../../utils/shareUtils';
+import { buildAppShareUrl, buildAppShareText } from '../../utils/appShareLink';
 
 const ANIM_STYLES = `
   @keyframes detailSlideUp {
@@ -233,6 +235,17 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
     setTimeout(onClose, 240);
   };
 
+  // Partage de la fiche : lien public https://trusti.lielu.eu/?app=<id>,
+  // qui ouvre cette fiche sur le web ou dans l'APK (menu de partage natif).
+  const handleShare = () => {
+    const url = buildAppShareUrl(app.id, {
+      isNative: isNativeAndroid,
+      location: typeof window !== 'undefined' ? window.location : undefined,
+    });
+    const { title, text } = buildAppShareText(app);
+    shareText(title, text, url);
+  };
+
   // Bloc réutilisable pour une app liée (alternative ou remplacée).
   // showTeamPick : entoure le « choix de l'équipe » (liste des alternatives uniquement)
   const RelatedAppRow = ({ app: relatedApp, showTeamPick = false }) => {
@@ -301,12 +314,23 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
             <ChevronLeft size={24} />
           </button>
           <div className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Détails</div>
-          <button
-            onClick={(e) => onToggleMyApp(e, app.id)}
-            className={`w-12 h-12 -mr-2 flex items-center justify-center rounded-full transition-colors ${isInMyApps ? 'text-indigo-600 bg-indigo-50' : 'text-slate-200 hover:text-indigo-400'}`}
-          >
-            {isInMyApps ? <CheckCircle size={24} /> : <PlusCircle size={24} />}
-          </button>
+          <div className="flex items-center gap-1 -mr-2">
+            <button
+              onClick={handleShare}
+              aria-label={`Partager la fiche de ${app.name}`}
+              title="Partager"
+              className="w-12 h-12 flex items-center justify-center rounded-full text-slate-400 hover:text-indigo-600 transition-colors active:scale-90"
+            >
+              <Share2 size={22} />
+            </button>
+            <button
+              onClick={(e) => onToggleMyApp(e, app.id)}
+              aria-label={isInMyApps ? 'Retirer de Mes Apps' : 'Ajouter à Mes Apps'}
+              className={`w-12 h-12 flex items-center justify-center rounded-full transition-colors ${isInMyApps ? 'text-indigo-600 bg-indigo-50' : 'text-slate-200 hover:text-indigo-400'}`}
+            >
+              {isInMyApps ? <CheckCircle size={24} /> : <PlusCircle size={24} />}
+            </button>
+          </div>
         </div>
       </header>
 
