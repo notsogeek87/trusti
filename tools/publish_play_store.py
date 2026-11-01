@@ -85,11 +85,29 @@ def main():
     # soit le status (confirmé par l'API elle-même en le testant). En
     # production l'API ne l'accepte que pour un déploiement progressif
     # (« Country targeting is only supported for staged releases »).
+    # Si les pays demandés couvrent déjà tous les pays du canal (configurés dans
+    # la Play Console), l'API exige au contraire d'omettre countryTargeting
+    # (« To target all countries in staged rollout omit country targeting »).
     if args.track == "production":
         release["status"] = "inProgress"
         release["userFraction"] = args.fraction
         countries = [c.strip().upper() for c in args.countries.split(",") if c.strip()]
-        release["countryTargeting"] = {"countries": countries, "includeRestOfWorld": False}
+        availability = edits.countryavailability().get(
+            packageName=args.package, editId=edit_id, track=args.track
+        ).execute()
+        available = {c["countryCode"].upper() for c in availability.get("countries", [])}
+        rest_of_world = bool(availability.get("restOfWorld"))
+        if not available and not rest_of_world:
+            sys.exit(
+                "Aucun pays configuré pour la production dans la Play Console "
+                "(Production > Pays/régions) : en ajouter au moins un."
+            )
+        if rest_of_world or not available.issubset(countries):
+            release["countryTargeting"] = {"countries": countries, "includeRestOfWorld": False}
+        print(
+            f"Pays du canal : {sorted(available)}{' + reste du monde' if rest_of_world else ''} ; "
+            f"ciblage : {'tous' if 'countryTargeting' not in release else countries}"
+        )
     edits.tracks().update(
         editId=edit_id,
         packageName=args.package,
