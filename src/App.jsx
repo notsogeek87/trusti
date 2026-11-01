@@ -8,7 +8,6 @@ import { CATEGORIES, FAVORITES_FILTER } from './constants/categories';
 import { Sparkles, Share2, RefreshCw, Star } from 'lucide-react';
 import { ViewModeContext } from './contexts/ViewModeContext';
 import { parseShareParams, clearShareParams, hasShareParams, getSharedAppIdFromUrl } from './utils/shareUtils';
-import { parseSharedAppId, PUBLIC_SITE_URL } from './utils/appShareLink';
 import { API_URL } from './utils/apiConfig';
 import { hasCompletedOnboarding, markOnboardingComplete } from './utils/onboardingStorage';
 import { getMyAppsSortPref, setMyAppsSortPref, sortMyApps } from './utils/myAppsSort';
@@ -448,42 +447,6 @@ const App = () => {
     }
   }, []);
 
-  // APK : un lien https://trusti.lielu.eu/... ouvert depuis une autre app
-  // (App Links, voir AndroidManifest.xml) lance Trusti. Le WebView, lui,
-  // reste sur https://localhost : on lit l'URL reçue via le plugin App.
-  const handledDeepLink = useRef(null);
-  useEffect(() => {
-    if (!isNativeAndroid) return;
-
-    const handleUrl = (rawUrl) => {
-      if (!rawUrl || !rawUrl.startsWith(PUBLIC_SITE_URL) || handledDeepLink.current === rawUrl) return;
-      handledDeepLink.current = rawUrl;
-      const sharedAppId = parseSharedAppId(rawUrl);
-      if (sharedAppId) {
-        openSharedApp(sharedAppId);
-        return;
-      }
-      const { appIds, migrations } = parseShareParams(new URL(rawUrl).search);
-      if (appIds.length > 0 || migrations.length > 0) {
-        setPendingImport({ appIds, migrations });
-      }
-    };
-
-    CapacitorApp.getLaunchUrl()
-      .then((result) => handleUrl(result?.url))
-      .catch(() => {});
-
-    let listenerHandle;
-    let cancelled = false;
-    CapacitorApp.addListener('appUrlOpen', ({ url }) => handleUrl(url)).then((handle) => {
-      if (cancelled) handle.remove();
-      else listenerHandle = handle;
-    });
-    return () => {
-      cancelled = true;
-      listenerHandle?.remove();
-    };
-  }, [openSharedApp]);
 
   // Confirmer l'import depuis la modal de partage.
   // On applique directement la sélection sur cet appareil.
