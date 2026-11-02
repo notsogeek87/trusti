@@ -33,6 +33,8 @@
     "dotenv": "^17.2.4",
     "express": "^5.2.1",
     "google-play-scraper": "^10.1.2",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.9",
     "lucide-react": "^0.344.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

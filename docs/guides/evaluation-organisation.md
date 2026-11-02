@@ -59,12 +59,17 @@ plan d'action, sans compte et sans rien envoyer au serveur.
   « usage pro » ; un id absent du catalogue est ignoré (test dans
   `tests/technical/organisationAssessment.test.js`).
 
-## Rapport imprimable
+## Rapport PDF
 
-- Bouton « Rapport à imprimer ou en PDF » (`window.print()`, masqué dans l'APK où l'impression
-  n'est pas disponible). `OrganisationReport.jsx` n'est visible qu'à l'impression (`print:`) :
-  nom de l'organisation (champ facultatif), profil, date, note, indicateurs, plan d'action,
-  annexe des outils et rappel de méthode. Format A4, fond blanc forcé.
+- Bouton « Télécharger le rapport (PDF) » : fichier généré dans le navigateur
+  (`src/utils/organisationPdf.js`, bibliothèques `jspdf` et `jspdf-autotable` chargées seulement
+  au clic, dans un fichier à part) puis téléchargé directement, sans passer par l'impression.
+- Contenu A4 : nom de l'organisation (champ facultatif), profil, date, note, indicateurs, plan
+  d'action, annexe des outils, rappel de méthode, pied de page « Page x / n ». Les tableaux
+  continuent sur les pages suivantes avec leur en-tête répété.
+- Polices standard du PDF : `pdfText` retire les caractères invisibles et remplace ceux hors
+  Latin-1. Tests : `tests/technical/organisationPdf.test.js` (rapport de 90 outils sur plusieurs pages).
+- Masqué dans l'APK : le téléchargement de fichiers générés n'y est pas encore géré.
 
 ## « Il manque un outil »
 

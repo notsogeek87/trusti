@@ -5,12 +5,12 @@ import LoadingSpinner from '../ui/LoadingSpinner';
 import FamilyPicker from './FamilyPicker';
 import OrganisationResult from './OrganisationResult';
 import AppDetailModal from '../modals/AppDetailModal';
-import OrganisationReport from './OrganisationReport';
 import SuggestToolDialog from './SuggestToolDialog';
 import { ORG_PROFILES, profileApps } from '../../constants/orgProfiles';
 import { isNativeAndroid } from '../../utils/platform';
 import { ViewModeContext } from '../../contexts/ViewModeContext';
 import downloadJSON from '../../utils/downloadJSON';
+import { downloadOrganisationPdf } from '../../utils/organisationPdf';
 import { GRADE_COLORS } from '../../constants/grades';
 import { loadOrganisationState, saveOrganisationState, clearOrganisationState } from '../../utils/organisationStorage';
 import {
@@ -65,6 +65,7 @@ const OrganisationPage = () => {
   const [profile, setProfile] = useState(null);
   const [orgName, setOrgName] = useState('');
   const [suggesting, setSuggesting] = useState(false);
+  const [pdfStatus, setPdfStatus] = useState('idle');
   const restored = useRef(false);
   const fileInput = useRef(null);
   // Même seuil que l'app principale pour la mise en page mobile de la fiche
@@ -160,6 +161,16 @@ const OrganisationPage = () => {
   const exportCsv = () => downloadCsv(toCsv(selectedApps, criticality, plan), `trusti-organisation-${today}.csv`);
   const exportJson = () => downloadJSON(buildOrganisationExport(selectedIds, criticality, summary), `trusti-organisation-${today}.json`);
 
+  const downloadPdf = () => {
+    setPdfStatus('working');
+    downloadOrganisationPdf({ orgName, profileLabel, selectedApps, criticality, summary, plan })
+      .then(() => setPdfStatus('idle'))
+      .catch(err => {
+        console.error('PDF', err);
+        setPdfStatus('error');
+      });
+  };
+
   const importFile = event => {
     const file = event.target.files?.[0];
     event.target.value = '';
@@ -176,8 +187,7 @@ const OrganisationPage = () => {
   };
 
   return (
-    <>
-    <div className="min-h-[100dvh] print:hidden">
+    <div className="min-h-[100dvh]">
       <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-white/60">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
           <a href="/" className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-indigo-600">
@@ -299,7 +309,8 @@ const OrganisationPage = () => {
                 onExportCsv={exportCsv}
                 onExportJson={exportJson}
                 onOpenApp={openApp}
-                onPrint={isNativeAndroid ? undefined : () => window.print()}
+                onDownloadPdf={isNativeAndroid ? undefined : downloadPdf}
+                pdfStatus={pdfStatus}
                 compact={isWide}
               />
             </aside>
@@ -338,16 +349,6 @@ const OrganisationPage = () => {
 
       {suggesting && <SuggestToolDialog initialName={search.trim()} onClose={() => setSuggesting(false)} />}
     </div>
-
-    <OrganisationReport
-      orgName={orgName}
-      profileLabel={profileLabel}
-      selectedApps={selectedApps}
-      criticality={criticality}
-      summary={summary}
-      plan={plan}
-    />
-    </>
   );
 };
 
