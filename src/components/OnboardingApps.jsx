@@ -66,7 +66,17 @@ const STEPS = [
     id: 'work',
     emoji: '💼',
     question: 'Pour travailler et t\'organiser ?',
-    categories: ['Productivité/Organisation', 'Stockage Cloud', 'Bureautique', 'Prise de Notes', 'IA'],
+    categories: [
+      'Bureautique', 'Productivité / Documents', 'Productivité / Tableur', 'Productivité / Tout-en-un',
+      'Productivité / Notes', 'Prise de Notes', 'Productivité / Tâches', 'Productivité / Calendrier',
+      'Productivité / Collaboration', 'Stockage Cloud',
+    ],
+  },
+  {
+    id: 'ia',
+    emoji: '🤖',
+    question: 'Quelles intelligences artificielles utilises-tu ?',
+    categories: ['IA'],
   },
   {
     id: 'navigation',

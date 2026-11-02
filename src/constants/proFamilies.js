@@ -14,7 +14,7 @@ export const PRO_FAMILIES = [
     categories: ['Bureautique', 'Productivité / Tableur', 'Productivité / Documents', 'Productivité / Tout-en-un', 'Wiki & Documentation', 'Gestion documentaire (GED)'],
   },
   { id: 'stockage', label: 'Stockage et partage de fichiers', categories: ['Stockage Cloud', 'Productivité / Collaboration'] },
-  { id: 'organisation', label: 'Notes, tâches et agenda', categories: ['Productivité / Notes', 'Productivité / Tâches', 'Productivité / Calendrier'] },
+  { id: 'organisation', label: 'Notes, tâches et agenda', categories: ['Productivité / Notes', 'Prise de Notes', 'Productivité / Tâches', 'Productivité / Calendrier'] },
   { id: 'projet', label: 'Gestion de projet', categories: ['Gestion de projet'] },
   { id: 'ia', label: 'Intelligence artificielle', categories: ['IA'] },
   {
