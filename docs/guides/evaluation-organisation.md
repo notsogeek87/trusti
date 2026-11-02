@@ -7,12 +7,13 @@ plan d'action, sans compte et sans rien envoyer au serveur.
 
 ## Accès
 
-- Adresse : `https://<domaine>/?organisation` (web uniquement, pas d'onglet dans l'APK).
-- Point d'entrée : bouton « Évaluer mon organisation » en bas de la page d'accueil
-  (`LandingPage`, ouverte par le bouton d'aide de l'en-tête), masqué dans l'APK.
+- Adresse : `https://<domaine>/?organisation`.
+- Points d'entrée : bouton « Évaluer mon organisation » dans l'en-tête (`Header`, libellé dès
+  768 px, icône seule sur téléphone) et en bas de la page d'accueil (`LandingPage`). Aussi dans
+  l'APK : la page y appelle l'API de production (`API_URL` absolue en natif).
 - Page autonome chargée à part (`React.lazy` dans `src/main.jsx`) : sans le paramètre
-  `organisation`, l'app s'affiche comme avant. Seul ajout dans l'app principale : le bouton de
-  la page d'accueil ; aucun onglet ni hook modifié.
+  `organisation`, l'app s'affiche comme avant. Seuls ajouts dans l'app principale : les deux
+  boutons d'accès ; aucun onglet ni hook modifié.
 
 ## Données
 

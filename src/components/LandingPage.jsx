@@ -1,7 +1,6 @@
 import React from 'react';
 import { ShieldCheck, ArrowRight, Lock, Globe, Eye, CheckCircle, BookOpen, X, Building2 } from 'lucide-react';
 import { GRADE_INFO } from '../constants/grades';
-import { isNativeAndroid } from '../utils/platform';
 
 /**
  * Landing Page affichée uniquement lors de la première visite
@@ -141,17 +140,15 @@ const LandingPage = ({ onClose }) => {
               <ArrowRight size={18} className="text-indigo-400 group-hover:text-indigo-300 group-hover:translate-x-1 transition-transform" />
             </a>
 
-            {/* Évaluation d'organisation : page web autonome (?organisation), pas dans l'APK */}
-            {!isNativeAndroid && (
-              <a
-                href="/?organisation"
-                className="w-full mt-4 bg-slate-800 hover:bg-slate-700 border-2 border-emerald-500/30 hover:border-emerald-500 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 group"
-              >
-                <Building2 size={20} className="text-emerald-400 group-hover:text-emerald-300" />
-                Évaluer mon organisation
-                <ArrowRight size={18} className="text-emerald-400 group-hover:text-emerald-300 group-hover:translate-x-1 transition-transform" />
-              </a>
-            )}
+            {/* Évaluation d'organisation : page autonome (?organisation) */}
+            <a
+              href="/?organisation"
+              className="w-full mt-4 bg-slate-800 hover:bg-slate-700 border-2 border-emerald-500/30 hover:border-emerald-500 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 group"
+            >
+              <Building2 size={20} className="text-emerald-400 group-hover:text-emerald-300" />
+              Évaluer mon organisation
+              <ArrowRight size={18} className="text-emerald-400 group-hover:text-emerald-300 group-hover:translate-x-1 transition-transform" />
+            </a>
 
             <p className="text-[11px] text-slate-500 mt-6 italic">
               Basé sur 12 critères : RGPD, Cloud Act, Open Source, Localisation des données, et plus encore.
