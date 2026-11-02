@@ -550,6 +550,45 @@ export async function getOnboardingApps(options = {}) {
 }
 
 /**
+ * Apps marquées « usage pro » (colonne usage_pro), pour l'évaluation du parc
+ * applicatif d'une organisation (page « ?organisation »). Lecture seule.
+ * Même format que les autres listes (formatAppFromDB) ; la colonne usage_pro
+ * n'est pas ajoutée au format commun pour ne rien changer aux autres réponses.
+ * @returns {Promise<{apps: Array, total: number}>}
+ */
+export async function getProApps() {
+  try {
+    const relationsPromise = buildRelationsMap();
+    relationsPromise.catch(() => {});
+    const [apps, curated] = await Promise.all([
+      sql`
+        SELECT * FROM applications
+        WHERE usage_pro = TRUE
+        ORDER BY category ASC, popularity ASC, name ASC
+      `,
+      // Alternatives choisies une par une (table app_relations), proposées en
+      // priorité dans le plan d'action ; propre à cette réponse.
+      sql`SELECT app_id, related_app_id FROM app_relations WHERE relation_type = 'alternative'`,
+    ]);
+    const curatedMap = new Map();
+    for (const row of curated) {
+      const key = String(row.app_id);
+      if (!curatedMap.has(key)) curatedMap.set(key, []);
+      curatedMap.get(key).push(String(row.related_app_id));
+    }
+    const relationsMap = await relationsPromise;
+    const formatted = apps.map(app => ({
+      ...formatAppFromDB(app, relationsMap.get(String(app.id)) || EMPTY_RELATIONS),
+      curatedAlternativeIds: curatedMap.get(String(app.id)) || [],
+    }));
+    return { apps: formatted, total: formatted.length };
+  } catch (error) {
+    console.error('Error getting pro apps:', error);
+    throw error;
+  }
+}
+
+/**
  * Obtenir les applications pour les Awards (show_in_awards = 1)
  * @param {Object} options - Options de pagination
  * @param {number} options.limit - Nombre d'apps à retourner (0 = toutes)
@@ -1302,6 +1341,7 @@ export default {
   getAppsByGrade,
   getAwardsApps,
   getOnboardingApps,
+  getProApps,
   getAppById,
   getAppsByIds,
   getAlternativesForApp,

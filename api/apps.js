@@ -27,7 +27,7 @@ export default async function handler(req, res) {
 
   try {
     // Extraire le type depuis l'URL ou le body
-    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, onboarding, categories, ids, grade, alternatives_for, assessment_for } = req.query;
+    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, onboarding, categories, ids, grade, alternatives_for, assessment_for, pro } = req.query;
     
     if (req.method === 'GET') {
       // GET /api/apps?type=trusti
@@ -61,6 +61,23 @@ export default async function handler(req, res) {
       if (assessment_for) {
         const assessment = await dbService.getAssessmentForApp(assessment_for);
         return res.status(200).json({ success: true, assessment });
+      }
+
+      // GET /api/apps?pro=true — apps « usage pro » (évaluation du parc d'une organisation)
+      if (pro === 'true' || pro === '1') {
+        const result = await dbService.getProApps();
+        return res.status(200).json({
+          success: true,
+          apps: result.apps,
+          pagination: {
+            total: result.total,
+            limit: 0,
+            offset: 0,
+            page: 1,
+            totalPages: 1,
+            hasMore: false
+          }
+        });
       }
 
       // GET /api/apps?alternatives_for=:id — alternatives pour une app

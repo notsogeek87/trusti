@@ -14,6 +14,7 @@ Statut : 💡 idée · 📝 à cadrer · 🚧 en cours · ✅ fait
 | 5 | Mode hors-ligne partiel | Moyenne | Moyen | 💡 |
 | 6 | Portage (extension navigateur, iOS, services web) | Basse | Élevé | 💡 |
 | 7 | Partage et gamification du bilan | Basse | Faible | 💡 |
+| 8 | Évaluer le parc applicatif d'une organisation | Haute | Moyen | 🚧 MVP fait (voir [guide](guides/evaluation-organisation.md)) |
 
 ### 1. Migration guidée
 **MVP livré** : parcours en 4 étapes depuis la fiche d'une app C/D/E. Point d'entrée « Mes Apps » ajouté. Reste à faire : guides d'export par app, suivi des migrations en cours.
@@ -56,6 +57,13 @@ Extension navigateur (note du site visité), version iOS, scanner de services we
 ### 7. Partage et gamification
 Carte de partage du bilan (« score B, 3 apps remplacées »), badges et progression.
 S'appuie sur `ShareButton` et `TrustiShareModal`.
+
+### 8. Évaluer le parc applicatif d'une organisation
+**MVP livré** (page `?organisation`, web) : sélection des outils par famille de besoins parmi les
+apps « usage pro », criticité par outil, note pondérée, indicateurs, plan d'action, exports CSV et
+JSON, tout en local. Reste à faire : point d'entrée visible depuis l'app, rapport PDF, comparaison
+dans le temps, profils d'organisation (association, mairie, PME…), alternatives choisies
+(`app_relations`) aussi dans l'app principale.
 
 ## Dette technique
 

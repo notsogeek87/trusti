@@ -26,6 +26,11 @@ Endpoint principal, backé par PostgreSQL (`service-postgres.js`).
 - **GET** `?type=trusti|star`, plus filtres optionnels : `limit`, `offset`,
   `page`, `search`/`q`, `sortBy`, `awards`, `showInAwards`, `onboarding`,
   `categories`, `ids`, `grade`, `alternatives_for`.
+- **GET** `?pro=true` : apps marquées « usage pro » (colonne `usage_pro`), pour la
+  page « Évaluer mon organisation » (voir
+  [le guide](../guides/evaluation-organisation.md)). Même format que les autres
+  listes, plus `curatedAlternativeIds` (alternatives choisies une par une dans
+  `app_relations`), propre à cette réponse. Pas de pagination.
 - **GET** `?assessment_for=:id` : détail de l'évaluation TrustiScore d'une app,
   lu dans la table `app_assessments` (alimentée depuis le dépôt `trustillm`,
   schéma dans `trustillm/migrations/001_app_assessments.sql`). Réponse :
