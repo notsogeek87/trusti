@@ -126,3 +126,14 @@ test('export puis import JSON : seuls les ids connus et niveaux valides sont rep
   assert.equal(parseOrganisationImport({ format: 'autre' }, ['word']), null);
   assert.equal(parseOrganisationImport(null, ['word']), null);
 });
+
+test('profils : ids uniques, outils du catalogue dans l\'ordre du profil, ids inconnus ignorés', async () => {
+  const { ORG_PROFILES, profileApps } = await import('../../src/constants/orgProfiles.js');
+  for (const p of ORG_PROFILES) {
+    assert.equal(new Set(p.appIds).size, p.appIds.length, `doublon dans ${p.id}`);
+  }
+  assert.equal(new Set(ORG_PROFILES.map(p => p.id)).size, ORG_PROFILES.length);
+  const byId = new Map([['zoom', { id: 'zoom' }], ['doodle', { id: 'doodle' }]]);
+  assert.deepEqual(profileApps('association', byId).map(a => a.id), ['doodle', 'zoom']);
+  assert.deepEqual(profileApps('inconnu', byId), []);
+});

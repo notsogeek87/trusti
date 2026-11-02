@@ -31,6 +31,7 @@ Endpoint principal, backé par PostgreSQL (`service-postgres.js`).
   [le guide](../guides/evaluation-organisation.md)). Même format que les autres
   listes, plus `curatedAlternativeIds` (alternatives choisies une par une dans
   `app_relations`), propre à cette réponse. Pas de pagination.
+- Voir aussi `POST /api/suggest-tool` ci-dessous (suggestion d'outil manquant).
 - **GET** `?assessment_for=:id` : détail de l'évaluation TrustiScore d'une app,
   lu dans la table `app_assessments` (alimentée depuis le dépôt `trustillm`,
   schéma dans `trustillm/migrations/001_app_assessments.sql`). Réponse :
@@ -94,3 +95,12 @@ configurée, elles répondent `401`. Les `GET` du catalogue restent publics.
 - En développement, un serveur Express équivalent existe dans
   `server/index.js` (`npm run server`) pour ne pas dépendre des fonctions
   serverless Vercel en local.
+
+## `POST /api/suggest-tool`
+
+Suggestion d'un outil absent du catalogue (page « Évaluer mon organisation »). Public, sans
+compte. Corps JSON : `name` (2 à 80 caractères, requis), `website` (facultatif, http(s)),
+`comment` (facultatif, 500 caractères max), `company` (champ piège : s'il est rempli, la réponse
+est `success: true` sans enregistrement). Réponses : `200 { success: true }`, `400` si invalide,
+`429` si le plafond de suggestions en attente est atteint. Écrit dans la table `tool_suggestions`
+(voir [le guide](../guides/evaluation-organisation.md)).

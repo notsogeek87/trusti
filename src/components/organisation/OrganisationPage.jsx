@@ -1,10 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Building2, Lock, Search, Upload } from 'lucide-react';
+import { ArrowLeft, Building2, Lock, MessageSquarePlus, Search, Upload } from 'lucide-react';
 import { useProCatalog } from '../../hooks/useProCatalog';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import FamilyPicker from './FamilyPicker';
 import OrganisationResult from './OrganisationResult';
 import AppDetailModal from '../modals/AppDetailModal';
+import OrganisationReport from './OrganisationReport';
+import SuggestToolDialog from './SuggestToolDialog';
+import { ORG_PROFILES, profileApps } from '../../constants/orgProfiles';
+import { isNativeAndroid } from '../../utils/platform';
 import { ViewModeContext } from '../../contexts/ViewModeContext';
 import downloadJSON from '../../utils/downloadJSON';
 import { GRADE_COLORS } from '../../constants/grades';
@@ -58,6 +62,9 @@ const OrganisationPage = () => {
   const [search, setSearch] = useState('');
   const [message, setMessage] = useState(null);
   const [detailApp, setDetailApp] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [orgName, setOrgName] = useState('');
+  const [suggesting, setSuggesting] = useState(false);
   const restored = useRef(false);
   const fileInput = useRef(null);
   // Même seuil que l'app principale pour la mise en page mobile de la fiche
@@ -104,11 +111,13 @@ const OrganisationPage = () => {
     if (!saved) return;
     setSelectedIds(saved.ids.filter(id => appsById.has(id)));
     setCriticality(saved.criticality);
+    if (ORG_PROFILES.some(p => p.id === saved.profile)) setProfile(saved.profile);
+    setOrgName(saved.orgName);
   }, [status, appsById]);
 
   useEffect(() => {
-    if (restored.current) saveOrganisationState(selectedIds, criticality);
-  }, [selectedIds, criticality]);
+    if (restored.current) saveOrganisationState(selectedIds, criticality, { profile, orgName });
+  }, [selectedIds, criticality, profile, orgName]);
 
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
   const selectedApps = useMemo(() => selectedIds.map(id => appsById.get(id)).filter(Boolean), [selectedIds, appsById]);
@@ -118,8 +127,14 @@ const OrganisationPage = () => {
     const filtered = q
       ? apps.filter(a => normalize(a.name).includes(q) || normalize(a.developer).includes(q) || normalize(a.category).includes(q))
       : apps;
-    return groupAppsByFamily(filtered);
-  }, [apps, search]);
+    const families = groupAppsByFamily(filtered);
+    // Profil choisi : ses outils fréquents en tête (hors recherche)
+    const suggested = !q && profile ? profileApps(profile, appsById) : [];
+    if (suggested.length === 0) return families;
+    const label = ORG_PROFILES.find(p => p.id === profile).label;
+    return [{ family: { id: 'profil', label: `Outils fréquents : ${label}` }, apps: suggested }, ...families];
+  }, [apps, search, profile, appsById]);
+  const profileLabel = ORG_PROFILES.find(p => p.id === profile)?.label || null;
 
   const summary = useMemo(() => computeOrganisationSummary(selectedApps, criticality), [selectedApps, criticality]);
   const plan = useMemo(() => buildActionPlan(selectedApps, apps, criticality), [selectedApps, apps, criticality]);
@@ -136,6 +151,8 @@ const OrganisationPage = () => {
     if (!window.confirm('Retirer tous les outils de l\'évaluation ?')) return;
     setSelectedIds([]);
     setCriticality({});
+    setProfile(null);
+    setOrgName('');
     clearOrganisationState();
   }, []);
 
@@ -159,7 +176,8 @@ const OrganisationPage = () => {
   };
 
   return (
-    <div className="min-h-[100dvh]">
+    <>
+    <div className="min-h-[100dvh] print:hidden">
       <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-white/60">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
           <a href="/" className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-indigo-600">
@@ -183,6 +201,40 @@ const OrganisationPage = () => {
             <Lock size={13} /> Votre sélection reste dans ce navigateur : elle n'est jamais envoyée à Trusti.
           </p>
         </div>
+
+        {status === 'ready' && (
+          <section className="mb-5 bg-white/80 rounded-2xl border border-white p-4 shadow-sm">
+            <p className="text-sm font-black text-slate-800 mb-2">Votre structure</p>
+            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Type de structure">
+              {ORG_PROFILES.map(p => (
+                <button
+                  key={p.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={profile === p.id}
+                  onClick={() => setProfile(prev => (prev === p.id ? null : p.id))}
+                  className={`px-3 py-1.5 rounded-full border text-sm font-bold transition-colors
+                    ${profile === p.id ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-300'}`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-slate-500">
+              {profile ? 'Les outils les plus courants pour ce type de structure sont proposés en tête de liste.' : 'Facultatif : met en avant les outils les plus courants pour votre type de structure.'}
+            </p>
+            <label className="mt-3 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-sm font-bold text-slate-700">
+              <span className="shrink-0">Nom de l'organisation <span className="font-normal text-slate-400">(pour le rapport, facultatif)</span></span>
+              <input
+                type="text"
+                value={orgName}
+                onChange={e => setOrgName(e.target.value.slice(0, 120))}
+                placeholder="Ex. : Mairie de Saint-Clément"
+                className="flex-1 min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-normal outline-none focus:border-indigo-400"
+              />
+            </label>
+          </section>
+        )}
 
         {status === 'loading' && <LoadingSpinner message="Chargement des outils professionnels…" />}
 
@@ -216,14 +268,22 @@ const OrganisationPage = () => {
                   <Upload size={15} /> Ouvrir une évaluation
                 </button>
                 <input ref={fileInput} type="file" accept="application/json,.json" className="hidden" onChange={importFile} />
+                <button
+                  type="button"
+                  onClick={() => setSuggesting(true)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 text-sm font-bold text-slate-600 hover:border-indigo-300"
+                >
+                  <MessageSquarePlus size={15} /> Il manque un outil
+                </button>
               </div>
               {message && (
                 <p className="mb-3 text-sm font-bold text-indigo-700 bg-indigo-50 rounded-xl px-3 py-2" role="status">{message}</p>
               )}
-              <FamilyPicker groups={groups} selectedIds={selectedSet} onToggle={toggle} />
+              <FamilyPicker groups={groups} selectedIds={selectedSet} onToggle={toggle} onSuggest={() => setSuggesting(true)} />
               <p className="mt-4 text-xs text-slate-500">
-                Un outil manque ? Les notes TrustiScore portent sur la souveraineté numérique (gouvernance, localisation des données,
-                conformité, contrôle technique, transparence) ; de nouveaux outils sont ajoutés régulièrement.
+                Les notes TrustiScore portent sur la souveraineté numérique (gouvernance, localisation des données, conformité,
+                contrôle technique, transparence). Un outil manque ?{' '}
+                <button type="button" onClick={() => setSuggesting(true)} className="font-bold text-purple-600 hover:underline">Proposez-le</button>.
               </p>
             </div>
 
@@ -239,6 +299,7 @@ const OrganisationPage = () => {
                 onExportCsv={exportCsv}
                 onExportJson={exportJson}
                 onOpenApp={openApp}
+                onPrint={isNativeAndroid ? undefined : () => window.print()}
                 compact={isWide}
               />
             </aside>
@@ -274,7 +335,19 @@ const OrganisationPage = () => {
           </ViewModeContext.Provider>
         </div>
       )}
+
+      {suggesting && <SuggestToolDialog initialName={search.trim()} onClose={() => setSuggesting(false)} />}
     </div>
+
+    <OrganisationReport
+      orgName={orgName}
+      profileLabel={profileLabel}
+      selectedApps={selectedApps}
+      criticality={criticality}
+      summary={summary}
+      plan={plan}
+    />
+    </>
   );
 };
 

@@ -51,6 +51,34 @@ plan d'action, sans compte et sans rien envoyer au serveur.
 - Dans ce contexte, la fiche n'a pas de bouton « Mes Apps » : `AppDetailModal` n'affiche ce bouton
   que si `onToggleMyApp` est fourni (toujours le cas dans l'app principale, inchangée).
 
+## Profils d'organisation
+
+- « Votre structure » : association, collectivité, entreprise, santé, enseignement
+  (`src/constants/orgProfiles.js`). Le profil choisi ajoute en tête un groupe « Outils fréquents »
+  (outils courants dans ce type de structure, pas des recommandations). Liste d'ids d'apps
+  « usage pro » ; un id absent du catalogue est ignoré (test dans
+  `tests/technical/organisationAssessment.test.js`).
+
+## Rapport imprimable
+
+- Bouton « Rapport à imprimer ou en PDF » (`window.print()`, masqué dans l'APK où l'impression
+  n'est pas disponible). `OrganisationReport.jsx` n'est visible qu'à l'impression (`print:`) :
+  nom de l'organisation (champ facultatif), profil, date, note, indicateurs, plan d'action,
+  annexe des outils et rappel de méthode. Format A4, fond blanc forcé.
+
+## « Il manque un outil »
+
+- Formulaire (nom, site et usage facultatifs, champ piège anti-robot) envoyé à
+  `POST /api/suggest-tool` (`api/suggest-tool.js`, validation pure dans `server/toolSuggestion.js`,
+  testée dans `tests/server/toolSuggestion.test.js`). Aucune donnée personnelle : ni e-mail ni IP.
+- Table `tool_suggestions` (créée le 2026-11-02 à la demande de David) : une ligne par outil
+  (`name_key` normalisé), `count` incrémenté à chaque nouvelle demande, `status` (`new` par
+  défaut, à passer à `added` ou `rejected` une fois traité). Plafond de 2 000 suggestions
+  distinctes en attente (réponse 429 au-delà) pour borner la table en cas de spam.
+- Relever les suggestions : `SELECT name, website, comment, count, last_at FROM tool_suggestions
+  WHERE status = 'new' ORDER BY count DESC, last_at DESC`. Pas encore d'alerte automatique (le
+  secret du webhook n8n n'est pas configuré sur Vercel).
+
 ## Stockage et exports
 
 - Sélection et criticités dans `localStorage` (`trusti_organisation_v1`, accès protégés : la page
@@ -62,4 +90,3 @@ plan d'action, sans compte et sans rien envoyer au serveur.
 
 - L'app principale n'utilise pas `app_relations` pour ses alternatives (règle de catégorie
   seulement) : les relations choisies pendant les lots `trustillm` ne servent qu'à cette page.
-- Pas encore de rapport PDF.

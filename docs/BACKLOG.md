@@ -61,8 +61,9 @@ S'appuie sur `ShareButton` et `TrustiShareModal`.
 ### 8. Évaluer le parc applicatif d'une organisation
 **MVP livré** (page `?organisation`, web) : sélection des outils par famille de besoins parmi les
 apps « usage pro », criticité par outil, note pondérée, indicateurs, plan d'action, exports CSV et
-JSON, tout en local, lien depuis la page d'accueil. Reste à faire : rapport PDF, comparaison
-dans le temps, profils d'organisation (association, mairie, PME…), alternatives choisies
+JSON, tout en local, lien depuis la page d'accueil, rapport imprimable, profils
+d'organisation, suggestions d'outils manquants. Reste à faire : comparaison
+dans le temps, alerte automatique sur les suggestions, alternatives choisies
 (`app_relations`) aussi dans l'app principale.
 
 ## Dette technique

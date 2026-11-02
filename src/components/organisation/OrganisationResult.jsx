@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, ChevronRight, Download, FileSpreadsheet, Trash2, X } from 'lucide-react';
+import { ArrowRight, ChevronRight, Download, FileSpreadsheet, Printer, Trash2, X } from 'lucide-react';
 import { GRADES, GRADE_COLORS } from '../../constants/grades';
 import { CRITICALITY_LEVELS, DEFAULT_CRITICALITY } from '../../constants/proFamilies';
 import ScoreIndicator from '../ui/ScoreIndicator';
@@ -77,7 +77,7 @@ const CriticalityPicker = ({ value, onChange, appName }) => (
 /**
  * Résultat de l'évaluation : note, indicateurs, criticités, plan d'action, exports.
  */
-const OrganisationResult = ({ selectedApps, criticality, summary, plan, onCriticalityChange, onRemove, onClear, onExportCsv, onExportJson, onOpenApp, compact = false }) => {
+const OrganisationResult = ({ selectedApps, criticality, summary, plan, onCriticalityChange, onRemove, onClear, onExportCsv, onExportJson, onOpenApp, onPrint, compact = false }) => {
   if (summary.total === 0) {
     return (
       <div className="bg-white/80 rounded-2xl p-5 text-sm text-slate-600 shadow-sm">
@@ -202,6 +202,11 @@ const OrganisationResult = ({ selectedApps, criticality, summary, plan, onCritic
       )}
 
       <section className="flex flex-wrap gap-2">
+        {onPrint && (
+          <button type="button" onClick={onPrint} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-black hover:bg-emerald-700">
+            <Printer size={16} /> Rapport à imprimer ou en PDF
+          </button>
+        )}
         <button type="button" onClick={onExportCsv} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-black hover:bg-indigo-700">
           <FileSpreadsheet size={16} /> Exporter en tableur (CSV)
         </button>

@@ -588,6 +588,32 @@ export async function getProApps() {
   }
 }
 
+// Plafond de suggestions distinctes en attente : borne la table si un robot
+// envoie des noms au hasard (une suggestion déjà connue est toujours acceptée).
+const MAX_PENDING_SUGGESTIONS = 2000;
+
+/**
+ * Enregistre une suggestion d'outil manquant (table tool_suggestions).
+ * Une suggestion déjà reçue incrémente son compteur au lieu de créer une ligne.
+ * @param {{nameKey: string, name: string, website: string|null, comment: string|null}} s valeurs validées
+ * @returns {Promise<boolean>} false si le plafond de nouvelles suggestions est atteint
+ */
+export async function saveToolSuggestion(s) {
+  const rows = await sql`
+    INSERT INTO tool_suggestions (name_key, name, website, comment)
+    SELECT ${s.nameKey}, ${s.name}, ${s.website}, ${s.comment}
+    WHERE EXISTS (SELECT 1 FROM tool_suggestions WHERE name_key = ${s.nameKey})
+       OR (SELECT COUNT(*) FROM tool_suggestions WHERE status = 'new') < ${MAX_PENDING_SUGGESTIONS}
+    ON CONFLICT (name_key) DO UPDATE SET
+      count = tool_suggestions.count + 1,
+      last_at = now(),
+      website = COALESCE(tool_suggestions.website, EXCLUDED.website),
+      comment = COALESCE(tool_suggestions.comment, EXCLUDED.comment)
+    RETURNING name_key
+  `;
+  return rows.length > 0;
+}
+
 /**
  * Obtenir les applications pour les Awards (show_in_awards = 1)
  * @param {Object} options - Options de pagination
@@ -1342,6 +1368,7 @@ export default {
   getAwardsApps,
   getOnboardingApps,
   getProApps,
+  saveToolSuggestion,
   getAppById,
   getAppsByIds,
   getAlternativesForApp,

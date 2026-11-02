@@ -46,9 +46,18 @@ const FamilySection = ({ group, selectedIds, onToggle }) => {
  * Sélection des outils, famille par famille (toutes les apps sont affichées).
  * @param {{groups: Array<{family: object, apps: object[]}>, selectedIds: Set<string>, onToggle: (id: string) => void}} props
  */
-const FamilyPicker = ({ groups, selectedIds, onToggle }) => {
+const FamilyPicker = ({ groups, selectedIds, onToggle, onSuggest }) => {
   if (groups.length === 0) {
-    return <p className="text-sm text-slate-500 bg-white/80 rounded-2xl p-4">Aucun outil ne correspond à cette recherche.</p>;
+    return (
+      <div className="text-sm text-slate-500 bg-white/80 rounded-2xl p-4">
+        <p>Aucun outil ne correspond à cette recherche.</p>
+        {onSuggest && (
+          <button type="button" onClick={onSuggest} className="mt-2 font-bold text-purple-600 hover:underline">
+            Proposer cet outil pour le catalogue
+          </button>
+        )}
+      </div>
+    );
   }
   return (
     <div className="flex flex-col gap-3">
