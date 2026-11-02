@@ -8,9 +8,11 @@ plan d'action, sans compte et sans rien envoyer au serveur.
 ## Accès
 
 - Adresse : `https://<domaine>/?organisation` (web uniquement, pas d'onglet dans l'APK).
+- Point d'entrée : bouton « Évaluer mon organisation » en bas de la page d'accueil
+  (`LandingPage`, ouverte par le bouton d'aide de l'en-tête), masqué dans l'APK.
 - Page autonome chargée à part (`React.lazy` dans `src/main.jsx`) : sans le paramètre
-  `organisation`, l'app s'affiche exactement comme avant. Aucun composant, onglet ni hook de
-  l'app principale n'est modifié.
+  `organisation`, l'app s'affiche comme avant. Seul ajout dans l'app principale : le bouton de
+  la page d'accueil ; aucun onglet ni hook modifié.
 
 ## Données
 
@@ -51,4 +53,4 @@ plan d'action, sans compte et sans rien envoyer au serveur.
 
 - L'app principale n'utilise pas `app_relations` pour ses alternatives (règle de catégorie
   seulement) : les relations choisies pendant les lots `trustillm` ne servent qu'à cette page.
-- Pas encore de point d'entrée visible depuis l'app (lien à décider) ni de rapport PDF.
+- Pas encore de rapport PDF.
