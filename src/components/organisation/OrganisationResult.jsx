@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Download, FileSpreadsheet, Trash2, X } from 'lucide-react';
+import { ArrowRight, ChevronRight, Download, FileSpreadsheet, Trash2, X } from 'lucide-react';
 import { GRADES, GRADE_COLORS } from '../../constants/grades';
 import { CRITICALITY_LEVELS, DEFAULT_CRITICALITY } from '../../constants/proFamilies';
 import ScoreIndicator from '../ui/ScoreIndicator';
@@ -40,8 +40,24 @@ const GradeBar = ({ counts, total }) => (
   </div>
 );
 
+/** Nom d'app cliquable : ouvre la fiche détail. */
+const AppLink = ({ app, onOpenApp, muted = false }) => (
+  <button
+    type="button"
+    onClick={() => onOpenApp(app)}
+    title={`Voir la fiche de ${app.name}`}
+    className="group flex items-center gap-2 min-w-0 text-left rounded-lg -mx-1 px-1 py-0.5 hover:bg-indigo-50"
+  >
+    <ProAppIcon app={app} size="w-7 h-7" />
+    <span className={`min-w-0 truncate text-sm ${muted ? 'text-slate-600' : 'font-bold text-slate-700'} group-hover:text-indigo-600`}>
+      {app.name}
+    </span>
+    <ChevronRight size={14} className="shrink-0 text-slate-300 group-hover:text-indigo-500" />
+  </button>
+);
+
 const CriticalityPicker = ({ value, onChange, appName }) => (
-  <div className="flex rounded-lg bg-slate-100 p-0.5" role="radiogroup" aria-label={`Criticité de ${appName}`}>
+  <div className="inline-flex rounded-lg bg-slate-100 p-0.5" role="radiogroup" aria-label={`Criticité de ${appName}`}>
     {CRITICALITY_LEVELS.map(level => (
       <button
         key={level.id}
@@ -61,7 +77,7 @@ const CriticalityPicker = ({ value, onChange, appName }) => (
 /**
  * Résultat de l'évaluation : note, indicateurs, criticités, plan d'action, exports.
  */
-const OrganisationResult = ({ selectedApps, criticality, summary, plan, onCriticalityChange, onRemove, onClear, onExportCsv, onExportJson }) => {
+const OrganisationResult = ({ selectedApps, criticality, summary, plan, onCriticalityChange, onRemove, onClear, onExportCsv, onExportJson, onOpenApp, compact = false }) => {
   if (summary.total === 0) {
     return (
       <div className="bg-white/80 rounded-2xl p-5 text-sm text-slate-600 shadow-sm">
@@ -117,20 +133,32 @@ const OrganisationResult = ({ selectedApps, criticality, summary, plan, onCritic
             <Trash2 size={14} /> Tout retirer
           </button>
         </div>
-        <ul className="flex flex-col gap-2">
+        <p className="text-xs text-slate-500 mb-3">Touchez un outil pour ouvrir sa fiche détaillée.</p>
+        <ul className="flex flex-col divide-y divide-slate-100">
           {selectedApps.map(app => (
-            <li key={app.id} className="flex flex-wrap items-center gap-2">
-              <ProAppIcon app={app} size="w-7 h-7" />
-              <span className="flex-1 min-w-[6rem] text-sm font-bold text-slate-700 truncate">{app.name}</span>
+            <li
+              key={app.id}
+              className={`py-2 first:pt-0 last:pb-0 grid items-center gap-x-3 gap-y-1.5
+                grid-cols-[minmax(0,1fr)_auto_auto]
+                ${compact ? '' : 'sm:grid-cols-[minmax(0,1fr)_auto_auto_auto]'}`}
+            >
+              <AppLink app={app} onOpenApp={onOpenApp} />
               <ScoreIndicator grade={app.grade} />
-              <CriticalityPicker
-                value={criticality[app.id] || DEFAULT_CRITICALITY}
-                onChange={level => onCriticalityChange(app.id, level)}
-                appName={app.name}
-              />
-              <button type="button" onClick={() => onRemove(app.id)} aria-label={`Retirer ${app.name}`} className="p-1 text-slate-300 hover:text-rose-600">
+              <button
+                type="button"
+                onClick={() => onRemove(app.id)}
+                aria-label={`Retirer ${app.name}`}
+                className={`p-1 text-slate-300 hover:text-rose-600 ${compact ? '' : 'sm:order-last'}`}
+              >
                 <X size={16} />
               </button>
+              <div className={`col-span-3 ${compact ? '' : 'sm:col-span-1'}`}>
+                <CriticalityPicker
+                  value={criticality[app.id] || DEFAULT_CRITICALITY}
+                  onChange={level => onCriticalityChange(app.id, level)}
+                  appName={app.name}
+                />
+              </div>
             </li>
           ))}
         </ul>
@@ -142,23 +170,31 @@ const OrganisationResult = ({ selectedApps, criticality, summary, plan, onCritic
           <p className="text-xs text-slate-500 mb-3">Outils notés C, D ou E, du plus prioritaire au moins prioritaire, avec l'alternative mieux notée du catalogue.</p>
           <ol className="flex flex-col divide-y divide-slate-100">
             {plan.map(({ app, alternative, criticality: level }) => (
-              <li key={app.id} className="py-2 first:pt-0 last:pb-0 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-slate-700 min-w-0 truncate">{app.name}</span>
-                  <ScoreIndicator grade={app.grade} />
+              <li
+                key={app.id}
+                className={`py-2.5 first:pt-0 last:pb-0 grid items-center gap-x-3 gap-y-1
+                  grid-cols-[minmax(0,1fr)_auto]
+                  ${compact ? '' : 'sm:grid-cols-[minmax(0,1fr)_2.75rem_1rem_minmax(0,1fr)_auto]'}`}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <AppLink app={app} onOpenApp={onOpenApp} />
                   {level === 'vitale' && <span className="text-[10px] font-black uppercase text-rose-600 bg-rose-50 rounded px-1.5 py-0.5 shrink-0">Vital</span>}
                 </div>
-                <div className="flex items-center gap-2 mt-1 pl-1">
-                  <ArrowRight size={14} className="text-slate-400 shrink-0" />
-                  {alternative ? (
-                    <>
-                      <span className="text-slate-600 min-w-0 truncate">{alternative.name}</span>
-                      <ScoreIndicator grade={alternative.grade} />
-                    </>
-                  ) : (
-                    <span className="text-slate-400 italic">pas encore d'alternative mieux notée au catalogue</span>
-                  )}
-                </div>
+                <div className="justify-self-end"><ScoreIndicator grade={app.grade} /></div>
+                <ArrowRight size={16} className={`text-slate-400 ${compact ? 'hidden' : 'hidden sm:block'}`} />
+                {alternative ? (
+                  <>
+                    <div className={`flex items-center gap-1.5 min-w-0 ${compact ? 'pl-3' : 'pl-3 sm:pl-0'}`}>
+                      <ArrowRight size={14} className={`shrink-0 text-slate-400 ${compact ? '' : 'sm:hidden'}`} />
+                      <AppLink app={alternative} onOpenApp={onOpenApp} muted />
+                    </div>
+                    <div className="justify-self-end"><ScoreIndicator grade={alternative.grade} /></div>
+                  </>
+                ) : (
+                  <p className={`col-span-2 text-slate-400 italic text-sm ${compact ? 'pl-3' : 'pl-3 sm:pl-0'}`}>
+                    pas encore d'alternative mieux notée au catalogue
+                  </p>
+                )}
               </li>
             ))}
           </ol>

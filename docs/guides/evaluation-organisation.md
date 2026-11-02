@@ -43,6 +43,14 @@ plan d'action, sans compte et sans rien envoyer au serveur.
   mieux notée : d'abord parmi les alternatives choisies (`app_relations`), sinon parmi les apps
   mieux notées de la même catégorie ; choix final par `pickRecommendedAlternative`.
 
+## Fiches détail
+
+- Chaque outil sélectionné et chaque alternative du plan d'action ouvre la fiche détail habituelle
+  (`AppDetailModal`), affichée par-dessus la page : la position dans la page est conservée et le
+  bouton retour du navigateur referme la fiche (entrée d'historique `trustiOrgDetail`).
+- Dans ce contexte, la fiche n'a pas de bouton « Mes Apps » : `AppDetailModal` n'affiche ce bouton
+  que si `onToggleMyApp` est fourni (toujours le cas dans l'app principale, inchangée).
+
 ## Stockage et exports
 
 - Sélection et criticités dans `localStorage` (`trusti_organisation_v1`, accès protégés : la page

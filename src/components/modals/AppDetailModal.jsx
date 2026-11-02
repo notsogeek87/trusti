@@ -323,13 +323,16 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
             >
               <Share2 size={22} />
             </button>
-            <button
-              onClick={(e) => onToggleMyApp(e, app.id)}
-              aria-label={isInMyApps ? 'Retirer de Mes Apps' : 'Ajouter à Mes Apps'}
-              className={`w-12 h-12 flex items-center justify-center rounded-full transition-colors ${isInMyApps ? 'text-indigo-600 bg-indigo-50' : 'text-slate-200 hover:text-indigo-400'}`}
-            >
-              {isInMyApps ? <CheckCircle size={24} /> : <PlusCircle size={24} />}
-            </button>
+            {/* Absent quand la fiche est ouverte hors de l'app principale (page ?organisation) */}
+            {onToggleMyApp && (
+              <button
+                onClick={(e) => onToggleMyApp(e, app.id)}
+                aria-label={isInMyApps ? 'Retirer de Mes Apps' : 'Ajouter à Mes Apps'}
+                className={`w-12 h-12 flex items-center justify-center rounded-full transition-colors ${isInMyApps ? 'text-indigo-600 bg-indigo-50' : 'text-slate-200 hover:text-indigo-400'}`}
+              >
+                {isInMyApps ? <CheckCircle size={24} /> : <PlusCircle size={24} />}
+              </button>
+            )}
           </div>
         </div>
       </header>

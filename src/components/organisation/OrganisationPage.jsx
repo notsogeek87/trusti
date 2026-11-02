@@ -4,6 +4,8 @@ import { useProCatalog } from '../../hooks/useProCatalog';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import FamilyPicker from './FamilyPicker';
 import OrganisationResult from './OrganisationResult';
+import AppDetailModal from '../modals/AppDetailModal';
+import { ViewModeContext } from '../../contexts/ViewModeContext';
 import downloadJSON from '../../utils/downloadJSON';
 import { GRADE_COLORS } from '../../constants/grades';
 import { loadOrganisationState, saveOrganisationState, clearOrganisationState } from '../../utils/organisationStorage';
@@ -33,6 +35,17 @@ function downloadCsv(content, filename) {
   URL.revokeObjectURL(url);
 }
 
+function useMediaQuery(query) {
+  const [matches, setMatches] = useState(() => window.matchMedia(query).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const handler = e => setMatches(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [query]);
+  return matches;
+}
+
 /**
  * Évaluation du parc applicatif d'une organisation (adresse « ?organisation »).
  * Page autonome : n'utilise ni l'état ni la navigation de l'app principale.
@@ -44,8 +57,38 @@ const OrganisationPage = () => {
   const [criticality, setCriticality] = useState({});
   const [search, setSearch] = useState('');
   const [message, setMessage] = useState(null);
+  const [detailApp, setDetailApp] = useState(null);
   const restored = useRef(false);
   const fileInput = useRef(null);
+  // Même seuil que l'app principale pour la mise en page mobile de la fiche
+  const isMobile = useMediaQuery('(max-width: 767px)');
+  // Au-delà de 1024 px, le résultat est dans la colonne de droite (étroite)
+  const isWide = useMediaQuery('(min-width: 1024px)');
+
+  // Fiche détail par-dessus la page : le bouton retour du navigateur la ferme.
+  const detailOpen = useRef(false);
+  const openApp = useCallback(app => {
+    if (!detailOpen.current) {
+      detailOpen.current = true;
+      window.history.pushState({ trustiOrgDetail: true }, '');
+    }
+    setDetailApp(app);
+  }, []);
+  const closeApp = useCallback(() => {
+    if (window.history.state?.trustiOrgDetail) window.history.back();
+    else { detailOpen.current = false; setDetailApp(null); }
+  }, []);
+  useEffect(() => {
+    const onPop = () => { detailOpen.current = false; setDetailApp(null); };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+  useEffect(() => {
+    if (!detailApp) return undefined;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previous; };
+  }, [detailApp]);
 
   useEffect(() => {
     document.title = 'Évaluer mon organisation · Trusti';
@@ -195,6 +238,8 @@ const OrganisationPage = () => {
                 onClear={clearAll}
                 onExportCsv={exportCsv}
                 onExportJson={exportJson}
+                onOpenApp={openApp}
+                compact={isWide}
               />
             </aside>
           </div>
@@ -213,6 +258,20 @@ const OrganisationPage = () => {
             </span>
             <a href="#resultat" className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-black shrink-0">Voir le résultat</a>
           </div>
+        </div>
+      )}
+
+      {detailApp && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-[#E9F0F6]" role="dialog" aria-modal="true" aria-label={`Fiche de ${detailApp.name}`}>
+          <ViewModeContext.Provider value={isMobile}>
+            <AppDetailModal
+              key={detailApp.id}
+              app={detailApp}
+              onClose={closeApp}
+              onSelectApp={openApp}
+              allApps={apps}
+            />
+          </ViewModeContext.Provider>
         </div>
       )}
     </div>
