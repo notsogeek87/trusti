@@ -40,8 +40,9 @@ def main():
     p.add_argument(
         "--fraction",
         type=float,
-        default=0.2,
-        help="Part des utilisateurs (0-1 exclu), production uniquement : déploiement progressif",
+        default=1.0,
+        help="Part des utilisateurs, production uniquement : 1 = 100 %% (release complète, "
+        "défaut), entre 0 et 1 exclu = déploiement progressif",
     )
     p.add_argument(
         "--countries",
@@ -89,8 +90,14 @@ def main():
     # la Play Console), l'API exige au contraire d'omettre countryTargeting
     # (« To target all countries in staged rollout omit country targeting »).
     if args.track == "production":
-        release["status"] = "inProgress"
-        release["userFraction"] = args.fraction
+        if not 0 < args.fraction <= 1:
+            sys.exit(f"--fraction doit être dans ]0, 1] (reçu {args.fraction}).")
+        staged = args.fraction < 1
+        if staged:
+            release["status"] = "inProgress"
+            release["userFraction"] = args.fraction
+        else:
+            release["status"] = "completed"
         countries = [c.strip().upper() for c in args.countries.split(",") if c.strip()]
         availability = edits.countryavailability().get(
             packageName=args.package, editId=edit_id, track=args.track
@@ -103,6 +110,14 @@ def main():
                 "(Production > Pays/régions) : en ajouter au moins un."
             )
         if rest_of_world or not available.issubset(countries):
+            # Ciblage de pays réservé aux déploiements progressifs : une release
+            # à 100 % touche forcément tous les pays du canal.
+            if not staged:
+                sys.exit(
+                    f"Release à 100 % impossible avec un ciblage {countries} : le canal couvre "
+                    f"{sorted(available)}{' + reste du monde' if rest_of_world else ''}. "
+                    "Ajuster les pays dans la Play Console ou passer --fraction < 1."
+                )
             release["countryTargeting"] = {"countries": countries, "includeRestOfWorld": False}
         print(
             f"Pays du canal : {sorted(available)}{' + reste du monde' if rest_of_world else ''} ; "
@@ -116,7 +131,8 @@ def main():
     ).execute()
 
     edits.commit(editId=edit_id, packageName=args.package).execute()
-    print(f"Publié sur le canal « {args.track} » : versionCode {version_code}")
+    rollout = f" ({release['userFraction']:.0%} des utilisateurs)" if "userFraction" in release else ""
+    print(f"Publié sur le canal « {args.track} » : versionCode {version_code}{rollout}")
 
 
 if __name__ == "__main__":
