@@ -615,7 +615,8 @@ export async function saveToolSuggestion(s) {
 }
 
 /**
- * Obtenir les applications pour les Awards (show_in_awards = 1)
+ * Obtenir les applications du Palmarès : show_in_awards = 1 ET TrustiScore A ou B
+ * (filet de sécurité : une app mal notée ne peut pas être recommandée)
  * @param {Object} options - Options de pagination
  * @param {number} options.limit - Nombre d'apps à retourner (0 = toutes)
  * @param {number} options.offset - Position de départ
@@ -634,7 +635,7 @@ export async function getAwardsApps(options = {}) {
     // Obtenir le total d'apps Awards
     const totalResult = await sql`
       SELECT COUNT(*) as count FROM applications
-      WHERE show_in_awards = 1
+      WHERE show_in_awards = 1 AND trusti_score IN ('A', 'B')
     `;
     const total = parseInt(totalResult[0].count);
     
@@ -647,7 +648,7 @@ export async function getAwardsApps(options = {}) {
       if (limit > 0) {
         apps = await sql`
           SELECT * FROM applications
-          WHERE show_in_awards = 1
+          WHERE show_in_awards = 1 AND trusti_score IN ('A', 'B')
           ORDER BY name ASC
           LIMIT ${limit}
           OFFSET ${offset}
@@ -655,7 +656,7 @@ export async function getAwardsApps(options = {}) {
       } else {
         apps = await sql`
           SELECT * FROM applications
-          WHERE show_in_awards = 1
+          WHERE show_in_awards = 1 AND trusti_score IN ('A', 'B')
           ORDER BY name ASC
         `;
       }
@@ -663,7 +664,7 @@ export async function getAwardsApps(options = {}) {
       if (limit > 0) {
         apps = await sql`
           SELECT * FROM applications
-          WHERE show_in_awards = 1
+          WHERE show_in_awards = 1 AND trusti_score IN ('A', 'B')
           ORDER BY trusti_score ASC, name ASC
           LIMIT ${limit}
           OFFSET ${offset}
@@ -671,7 +672,7 @@ export async function getAwardsApps(options = {}) {
       } else {
         apps = await sql`
           SELECT * FROM applications
-          WHERE show_in_awards = 1
+          WHERE show_in_awards = 1 AND trusti_score IN ('A', 'B')
           ORDER BY trusti_score ASC, name ASC
         `;
       }
@@ -680,7 +681,7 @@ export async function getAwardsApps(options = {}) {
       if (limit > 0) {
         apps = await sql`
           SELECT * FROM applications
-          WHERE show_in_awards = 1
+          WHERE show_in_awards = 1 AND trusti_score IN ('A', 'B')
           ORDER BY category ASC, name ASC
           LIMIT ${limit}
           OFFSET ${offset}
@@ -688,7 +689,7 @@ export async function getAwardsApps(options = {}) {
       } else {
         apps = await sql`
           SELECT * FROM applications
-          WHERE show_in_awards = 1
+          WHERE show_in_awards = 1 AND trusti_score IN ('A', 'B')
           ORDER BY category ASC, name ASC
         `;
       }
@@ -818,7 +819,7 @@ export async function createApp(appData) {
         ${appData.developer || null}, ${appData.license || null},
         ${appData.isOpenSource || false}, ${appData.isEuropean || false},
         ${appData.jurisdiction || null}, ${appData.appType || 'regular'},
-        ${appData.show_in_awards !== undefined ? Number(appData.show_in_awards) : (appData.showInAwards !== false ? 1 : 0)},
+        ${appData.show_in_awards !== undefined ? Number(appData.show_in_awards) : (appData.showInAwards === true ? 1 : 0)},
         ${appData.show_in_onboarding !== undefined ? Number(appData.show_in_onboarding) : (appData.showInOnboarding !== false ? 1 : 0)},
         ${appData.popularity !== undefined ? appData.popularity : 9999},
         ${JSON.stringify(appData.privacyFeatures || {})},

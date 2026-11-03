@@ -594,7 +594,7 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
       });
     } else if (activeTab === TABS.TOP_ALTERNATIVES) {
       // Si recherche active, filtrer les résultats de recherche par showInAwards
-      list = sourceApps.filter(app => app.showInAwards === true);
+      list = sourceApps.filter(app => app.showInAwards === true && ['A', 'B'].includes(app.trustiScore || app.grade));
       
       // Trier par catégorie puis par nom
       list.sort((a, b) => {

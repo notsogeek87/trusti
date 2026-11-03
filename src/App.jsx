@@ -951,7 +951,7 @@ const App = () => {
             )}
           </div>
           <p className="text-[11px] text-slate-400 px-2 leading-relaxed">
-            Nos conseils d'apps avec un TrustiScore respectueux (A, B ou C) par catégorie
+            Le podium des apps les plus respectueuses (TrustiScore A ou B), par catégorie
           </p>
         </div>
       )}

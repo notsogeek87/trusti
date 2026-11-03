@@ -158,5 +158,31 @@ export const CATEGORY_MAPPING = {
   'Agrégateurs RSS': 'News & Info',
   
   // Divers (catégories génériques non classées - normalement vide maintenant)
-  'Navigateur': 'Réseaux sociaux'
+  'Navigateur': 'Réseaux sociaux',
+
+  // Catégories ajoutées avec le catalogue « Évaluer mon organisation » :
+  // sans correspondance, elles tombaient toutes dans « Divers ».
+  'Productivité / Tableur': 'Productivité/Organisation',
+  'Productivité / Tâches': 'Productivité/Organisation',
+  'Productivité / Calendrier': 'Productivité/Organisation',
+  'Productivité / Notes': 'Productivité/Organisation',
+  'Productivité / Tout-en-un': 'Productivité/Organisation',
+  'Gestion de projet': 'Productivité/Organisation',
+  'Wiki & Documentation': 'Productivité/Organisation',
+  'Gestion documentaire (GED)': 'Productivité/Organisation',
+  'Signature électronique': 'Productivité/Organisation',
+  'CRM & Support': 'Productivité/Organisation',
+  'RH & Paie': 'Productivité/Organisation',
+  'Comptabilité & Gestion': 'Finance',
+  'Marketing / E-mailing': 'Messagerie',
+  'Sécurité / 2FA': 'Sécurité & VPN',
+  'Sécurité & Administration IT': 'Tech & Dev',
+  'Sauvegarde & Supervision': 'Tech & Dev',
+  'Outils / Développement': 'Tech & Dev',
+  'Sites web & E-commerce': 'Tech & Dev',
+  'Outils / Calculatrice': 'Utilitaires',
+  'Design & Prototypage': 'Créativité',
+  'Hôtellerie, Tourisme & Bien-être': 'Transport & Voyage',
+  'Immobilier': 'Divers',
+  'Juridique & Notariat': 'Divers'
 };

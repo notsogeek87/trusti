@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import AppCard from './AppCard';
 import LoadingSpinner from './ui/LoadingSpinner';
+import { buildAwardsPodiums } from '../utils/awards';
 import { TABS } from '../constants/tabs';
 import { CATEGORY_MAPPING, FAVORITES_FILTER } from '../constants/categories';
 import { useIsMobile } from '../contexts/ViewModeContext';
@@ -91,32 +92,24 @@ const AppsList = ({
       return <LoadingSpinner message="Chargement des Awards..." size="medium" />;
     }
     
-    // Grouper les apps par catégorie normalisée
-    const appsByCategory = apps.reduce((acc, app) => {
-      const category = normalizeCategory(app.category);
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push(app);
-      return acc;
-    }, {});
-
-    // Trier les catégories alphabétiquement
-    const sortedCategories = Object.keys(appsByCategory).sort();
+    // Un podium (3 apps A/B max) par catégorie principale
+    const podiums = buildAwardsPodiums(apps, normalizeCategory);
 
     return (
       <div className="space-y-6">
-        {sortedCategories.map((category) => (
+        {podiums.length === 0 && (
+          <p className="text-center text-slate-500 text-sm py-8 px-4">Aucune app au palmarès pour l'instant</p>
+        )}
+        {podiums.map(({ category, apps: podiumApps }) => (
           <div key={category}>
             {/* En-tête de catégorie */}
             <div className="sticky top-0 z-10 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-2 rounded-xl mb-3 shadow-lg">
               <h3 className="font-black text-sm uppercase tracking-wider">{category}</h3>
-              <p className="text-xs text-emerald-50 mt-0.5">{appsByCategory[category].length} app{appsByCategory[category].length > 1 ? 's' : ''}</p>
             </div>
             
             {/* Apps de cette catégorie */}
             <div className={isMobile ? 'space-y-3' : 'grid grid-cols-2 xl:grid-cols-3 gap-3'}>
-              {appsByCategory[category].map((app) => (
+              {podiumApps.map((app) => (
                 <AppCard
                   key={app.id}
                   app={app}
