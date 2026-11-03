@@ -159,7 +159,7 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
                       <p className="font-black text-sm text-slate-900">{c.name}</p>
                       <p className="text-xs text-slate-500">
                         {c.isTeamPick
-                          ? <span className="font-bold text-amber-700">⭐ Le chouchou de l'équipe · </span>
+                          ? <span className="font-bold text-amber-700">⭐ Migration facile · </span>
                           : i === 0 ? 'Recommandée · ' : ''}
                         {c.category}
                       </p>

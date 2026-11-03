@@ -261,7 +261,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
     >
       {isTeamPick && (
         <span className="absolute -top-3 left-3 inline-flex items-center gap-1 bg-gradient-to-r from-yellow-300 to-amber-400 text-amber-950 text-[10px] font-black uppercase tracking-tight px-2.5 py-1 rounded-full shadow-md">
-          <Star size={11} fill="currentColor" className="motion-safe:animate-sparkle" /> Le chouchou de l'équipe ✨
+          <Star size={11} fill="currentColor" className="motion-safe:animate-sparkle" /> Migration facile ✨
         </span>
       )}
       <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
