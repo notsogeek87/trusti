@@ -31,3 +31,15 @@ test('les catégories du catalogue pro ne tombent plus dans « Divers »', () =>
     assert.notEqual(normalize(c), 'Divers', c);
   }
 });
+
+test('par catégorie détaillée, la messagerie instantanée a son propre podium', () => {
+  const apps = [
+    { id: 'tuta', name: 'Tuta', category: 'Email', grade: 'A' },
+    { id: 'proton', name: 'Proton Mail', category: 'Email', grade: 'B' },
+    { id: 'infomaniak', name: 'Infomaniak Mail', category: 'Email', grade: 'B' },
+    { id: 'olvid', name: 'Olvid', category: 'Messagerie', grade: 'A' }
+  ];
+  const podiums = buildAwardsPodiums(apps, (c) => c || 'Divers');
+  assert.deepEqual(podiums.map(p => p.category), ['Email', 'Messagerie']);
+  assert.deepEqual(podiums[1].apps.map(a => a.id), ['olvid']);
+});

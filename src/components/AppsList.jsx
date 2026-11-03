@@ -92,8 +92,10 @@ const AppsList = ({
       return <LoadingSpinner message="Chargement des Awards..." size="medium" />;
     }
     
-    // Un podium (3 apps A/B max) par catégorie principale
-    const podiums = buildAwardsPodiums(apps, normalizeCategory);
+    // Un podium (3 apps A/B max) par catégorie détaillée : regrouper par
+    // catégorie principale mettait Email, Messagerie et Visio en concurrence
+    // sur un seul podium (la messagerie instantanée disparaissait).
+    const podiums = buildAwardsPodiums(apps, (category) => category || 'Divers');
 
     return (
       <div className="space-y-6">
