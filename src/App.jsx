@@ -45,6 +45,8 @@ import WelcomeModal from './components/modals/WelcomeModal';
 import StoragePage from './components/StoragePage';
 import { useToast } from './contexts/ToastContext';
 import { APP_UNINSTALLED_EVENT } from './utils/uninstallWatcher';
+import InstalledApps from './native/InstalledApps';
+import { loadPackagesSnapshot, savePackagesSnapshot, packagesChanged, markRescanPromptHandled, isWebPromptDue } from './utils/rescanPrompt';
 
 const useIsSmallViewport = () => {
   const [isSmall, setIsSmall] = useState(() => window.innerWidth < 768);
@@ -146,6 +148,7 @@ const App = () => {
     
     // Fermer l'onboarding
     setShowOnboarding(false);
+    rememberRescanState();
     
     // "Mes Apps" dès qu'il y a une app (choisie maintenant ou déjà suivie),
     // sinon le catalogue
@@ -174,7 +177,18 @@ const App = () => {
   // Proposition de rescan à la réouverture de l'app (web et APK)
   const [showReopenPrompt, setShowReopenPrompt] = useState(false);
 
+  // Mémorise l'état « vu » des apps : packages installés (APK) et date de la
+  // dernière proposition/scan, pour ne reproposer un scan que si nécessaire.
+  const rememberRescanState = () => {
+    markRescanPromptHandled();
+    if (!isNativeAndroid) return;
+    InstalledApps.getInstalledPackages()
+      .then(res => savePackagesSnapshot(res.packages || []))
+      .catch(() => {});
+  };
+
   const handleRescanComplete = (selectedAppIds, notInstalledIds) => {
+    rememberRescanState();
     if (notInstalledIds && notInstalledIds.length > 0) {
       removeMyApps(notInstalledIds);
     }
@@ -261,7 +275,9 @@ const App = () => {
   }, [isInitialized, myApps, arrivedViaShare, showWelcomeModal, showOnboarding]);
 
   // Réouverture de l'app (web et APK) : on propose de relancer un scan pour
-  // garder « Mes Apps » à jour. Décidé une seule fois, au chargement : pas
+  // garder « Mes Apps » à jour, seulement si utile (voir utils/rescanPrompt.js :
+  // APK = apps réellement changées, web = au plus tous les 14 jours).
+  // Décidé une seule fois, au chargement : pas
   // pour une première visite (welcome/onboarding), un lien de partage, ni sur
   // le web sans app (la sélection s'ouvre déjà toute seule, voir ci-dessus).
   const reopenPromptDecided = useRef(false);
@@ -270,7 +286,25 @@ const App = () => {
     reopenPromptDecided.current = true;
     if (arrivedViaShare || showWelcomeModal || showOnboarding || showLandingPage || showRescan) return;
     if (!isNativeAndroid && myApps.size === 0) return;
-    setShowReopenPrompt(true);
+    if (!isNativeAndroid) {
+      if (isWebPromptDue()) setShowReopenPrompt(true);
+      return;
+    }
+    // APK : on ne propose que si les apps du catalogue installées ont
+    // réellement changé depuis le dernier scan (ou le dernier refus).
+    InstalledApps.getInstalledPackages()
+      .then(res => {
+        const current = res.packages || [];
+        const previous = loadPackagesSnapshot();
+        if (previous === null) {
+          // Pas encore de référence (mise à jour de l'app) : on l'enregistre
+          // sans déranger l'utilisateur.
+          savePackagesSnapshot(current);
+          return;
+        }
+        if (packagesChanged(previous, current)) setShowReopenPrompt(true);
+      })
+      .catch(() => {});
   }, [isInitialized, myApps, arrivedViaShare, showWelcomeModal, showOnboarding, showLandingPage, showRescan]);
 
   // Une app "Mes Apps" est considérée migrée si elle est déjà au top (grade A)
@@ -622,6 +656,7 @@ const App = () => {
   // Refus à la réouverture : on atterrit sur « Mes Apps »
   const dismissReopenPrompt = () => {
     setShowReopenPrompt(false);
+    rememberRescanState();
     setActiveTab(TABS.MY_APPS);
   };
 
