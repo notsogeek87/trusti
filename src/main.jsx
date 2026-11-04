@@ -10,17 +10,26 @@ import { ToastProvider } from './contexts/ToastContext.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import './styles/index.css'
 
-// Page autonome « Évaluer mon organisation » (adresse ?organisation), chargée
-// à part : sans ce paramètre, l'app s'affiche exactement comme avant.
-const OrganisationPage = React.lazy(() => import('./components/organisation/OrganisationPage.jsx'))
-const isOrganisationPage = new URLSearchParams(window.location.search).has('organisation')
+import { resolveStandalonePage, STANDALONE_PAGES } from './utils/standalonePage.js'
+
+// Pages autonomes de la rubrique « Organisations », chargées à part : sans
+// leur paramètre d'adresse, l'app s'affiche exactement comme avant.
+// - ?organisation       : « Évaluer mon organisation » (page historique)
+// - ?organisations      : choix du parcours (évaluer / créer)
+// - ?creer-organisation : « Créer mon organisation » (en préparation)
+const STANDALONE_COMPONENTS = {
+  [STANDALONE_PAGES.EVALUATE_ORGANISATION]: React.lazy(() => import('./components/organisation/OrganisationPage.jsx')),
+  [STANDALONE_PAGES.ORGANISATIONS]: React.lazy(() => import('./components/organisation/OrganisationsPage.jsx')),
+  [STANDALONE_PAGES.CREATE_ORGANISATION]: React.lazy(() => import('./components/organisation/CreateOrganisationPage.jsx')),
+}
+const StandalonePage = STANDALONE_COMPONENTS[resolveStandalonePage(window.location.search)]
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
-      {isOrganisationPage ? (
+      {StandalonePage ? (
         <React.Suspense fallback={null}>
-          <OrganisationPage />
+          <StandalonePage />
         </React.Suspense>
       ) : (
         <ToastProvider>

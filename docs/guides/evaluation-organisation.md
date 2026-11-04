@@ -8,12 +8,27 @@ plan d'action, sans compte et sans rien envoyer au serveur.
 ## Accès
 
 - Adresse : `https://<domaine>/?organisation`.
-- Points d'entrée : bouton « Évaluer mon organisation » dans l'en-tête (`Header`, libellé dès
-  768 px, icône seule sur téléphone) et en bas de la page d'accueil (`LandingPage`). Aussi dans
-  l'APK : la page y appelle l'API de production (`API_URL` absolue en natif).
+- Points d'entrée : la page n'est plus liée directement depuis l'app. Le bouton « Organisations »
+  de l'en-tête (`Header`, libellé dès 768 px, icône seule sur téléphone) et du bas de la page
+  d'accueil (`LandingPage`) ouvre la rubrique « Organisations » (`?organisations`), dont la carte
+  « Évaluer mon organisation » mène à `?organisation`. Aussi dans l'APK : la page y appelle l'API
+  de production (`API_URL` absolue en natif).
 - Page autonome chargée à part (`React.lazy` dans `src/main.jsx`) : sans le paramètre
   `organisation`, l'app s'affiche comme avant. Seuls ajouts dans l'app principale : les deux
   boutons d'accès ; aucun onglet ni hook modifié.
+
+## Rubrique « Organisations »
+
+Pages autonomes, comme `?organisation`, choisies par `resolveStandalonePage`
+(`src/utils/standalonePage.js`, testé dans `tests/technical/standalonePage.test.js`) ;
+`?organisation` garde la priorité.
+
+| Adresse | Composant | Contenu |
+|---------|-----------|---------|
+| `?organisations` | `OrganisationsPage.jsx` | Deux cartes : « Évaluer mon organisation » (→ `?organisation`) et « Créer mon organisation » (→ `?creer-organisation`) |
+| `?creer-organisation` | `CreateOrganisationPage.jsx` | Page temporaire « Fonctionnalité en préparation », bouton « Retour aux organisations ». Ni formulaire ni collecte de données |
+
+L'évaluation (`OrganisationPage.jsx`, calculs, sauvegarde `localStorage`) n'est pas modifiée.
 
 ## Données
 

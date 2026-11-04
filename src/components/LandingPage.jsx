@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShieldCheck, ArrowRight, Lock, Globe, Eye, CheckCircle, BookOpen, X, Building2 } from 'lucide-react';
 import { GRADE_INFO } from '../constants/grades';
+import { STANDALONE_URLS } from '../utils/standalonePage';
 
 /**
  * Landing Page affichée uniquement lors de la première visite
@@ -140,13 +141,13 @@ const LandingPage = ({ onClose }) => {
               <ArrowRight size={18} className="text-indigo-400 group-hover:text-indigo-300 group-hover:translate-x-1 transition-transform" />
             </a>
 
-            {/* Évaluation d'organisation : page autonome (?organisation) */}
+            {/* Rubrique « Organisations » : page autonome (?organisations) */}
             <a
-              href="/?organisation"
+              href={STANDALONE_URLS.ORGANISATIONS}
               className="w-full mt-4 bg-slate-800 hover:bg-slate-700 border-2 border-emerald-500/30 hover:border-emerald-500 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 group"
             >
               <Building2 size={20} className="text-emerald-400 group-hover:text-emerald-300" />
-              Évaluer mon organisation
+              Organisations
               <ArrowRight size={18} className="text-emerald-400 group-hover:text-emerald-300 group-hover:translate-x-1 transition-transform" />
             </a>
 

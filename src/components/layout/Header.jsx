@@ -1,6 +1,7 @@
 import React from 'react';
 import { HelpCircle, PieChart, Building2 } from 'lucide-react';
 import { useIsMobile } from '../../contexts/ViewModeContext';
+import { STANDALONE_URLS } from '../../utils/standalonePage';
 
 const Header = ({
   onOpenStorageManager,
@@ -23,15 +24,15 @@ const Header = ({
         </div>
 
         <div className="flex items-center gap-1 md:gap-2 flex-shrink min-w-0">
-          {/* Évaluation du parc d'une organisation : page autonome ?organisation */}
+          {/* Rubrique « Organisations » : page autonome ?organisations (évaluer / créer) */}
           <a
-            href="/?organisation"
+            href={STANDALONE_URLS.ORGANISATIONS}
             className="flex items-center gap-1.5 p-1.5 md:px-3 md:py-2 rounded-full text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all"
-            aria-label="Évaluer mon organisation"
-            title="Évaluer le parc applicatif de mon organisation"
+            aria-label="Organisations"
+            title="Évaluer ou créer mon organisation"
           >
             <Building2 size={18} className="shrink-0" />
-            {!isMobile && <span className="text-xs font-black whitespace-nowrap">Évaluer mon organisation</span>}
+            {!isMobile && <span className="text-xs font-black whitespace-nowrap">Organisations</span>}
           </a>
 
           <button
