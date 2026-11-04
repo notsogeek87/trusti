@@ -49,6 +49,17 @@ L'évaluation (`OrganisationPage.jsx`, calculs, sauvegarde `localStorage`) n'est
   (`trusti_organisation_v1`) puis ouvre `?organisation`. Si une évaluation existe déjà, la
   personne choisit : ajouter (rien n'est perdu, criticités et nom conservés) ou remplacer.
 - Ni compte, ni formulaire, ni donnée envoyée. Pas de lien commercial avec les éditeurs.
+- Navigation : chaque étape est une entrée d'historique (`history.state.trustiCreateOrg`, avec
+  les réponses) : le retour revient à la question précédente et un rechargement garde le kit.
+- Coûts et descriptions relus aux sources le 2026-11-04 (pages des éditeurs et FAQ ; quelques
+  points sur sources secondes concordantes : Bitwarden, Doodle, Brevo, Yousign, Vikunja). À
+  relire à chaque révision des kits.
+
+### Bouton retour Android (APK)
+
+Dans le WebView natif, le bouton retour matériel n'émet pas `popstate` et ferme l'app par
+défaut. Pour les trois pages autonomes, `src/main.jsx` écoute l'événement Capacitor
+`backButton` : retour dans l'historique s'il existe, sinon retour à l'accueil.
 
 ## Données
 

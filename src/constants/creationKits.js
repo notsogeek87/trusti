@@ -11,6 +11,7 @@
  *
  * Coût : indication grossière, à vérifier chez l'éditeur (affiché comme tel).
  * - 'libre'    : logiciel libre, sans licence à payer
+ * - 'gratuit'  : service gratuit, sans offre payante nécessaire
  * - 'freemium' : offre gratuite limitée, options payantes
  * - 'payant'   : abonnement
  */
@@ -49,6 +50,7 @@ export const CREATION_APPROACHES = [
 
 export const COST_LABELS = {
   libre: 'Libre, sans licence',
+  gratuit: 'Gratuit',
   freemium: 'Offre gratuite limitée',
   payant: 'Abonnement',
 };
@@ -66,9 +68,9 @@ export const KIT_NEEDS = [
     step: 'Démarrer',
     minSize: 1,
     picks: {
-      simple: { appId: '1769804133553', cost: 'payant', why: 'Messagerie hébergée en Suisse, avec une adresse à votre nom de domaine.' },
-      confidentiel: { appId: 'tutanota', cost: 'freemium', why: 'Messagerie chiffrée de bout en bout, éditeur allemand.' },
-      libre: { appId: 'mailo', cost: 'freemium', why: 'L\'e-mail est délicat à héberger soi-même : confiez-le à un fournisseur français.' },
+      simple: { appId: '1769804133553', cost: 'freemium', why: 'Messagerie d\'un hébergeur suisse, données en Suisse. Une adresse à votre nom de domaine est incluse gratuitement (seul le domaine est payant) ; au-delà, abonnement.' },
+      confidentiel: { appId: 'tutanota', cost: 'payant', why: 'Messagerie chiffrée de bout en bout, hébergée en Allemagne. L\'adresse à votre nom de domaine demande une offre payante.' },
+      libre: { appId: 'mailo', cost: 'payant', why: 'L\'e-mail est délicat à héberger soi-même : confiez-le à un fournisseur français, données hébergées en France.' },
     },
   },
   {
@@ -77,8 +79,8 @@ export const KIT_NEEDS = [
     step: 'Démarrer',
     minSize: 1,
     picks: {
-      simple: { appId: '1769805814704', cost: 'freemium', why: 'Stockage et partage de fichiers hébergés en Suisse, chez le même fournisseur que l\'e-mail.' },
-      confidentiel: { appId: '7214caf9-78e9-4769-9fc7-f1ef5f3f2efb', cost: 'freemium', why: 'Stockage chiffré de bout en bout, éditeur suisse.' },
+      simple: { appId: '1769805814704', cost: 'freemium', why: 'Stockage et partage de fichiers hébergés en Suisse, chez le même fournisseur que l\'e-mail. 15 Go gratuits.' },
+      confidentiel: { appId: '7214caf9-78e9-4769-9fc7-f1ef5f3f2efb', cost: 'freemium', why: 'Stockage chiffré de bout en bout, éditeur suisse. 5 Go gratuits.' },
       libre: { appId: 'nextcloud', cost: 'libre', why: 'Fichiers, agenda et contacts sur votre serveur.' },
     },
   },
@@ -99,7 +101,7 @@ export const KIT_NEEDS = [
     step: 'Sécuriser',
     minSize: 1,
     picks: {
-      simple: { appId: '1769804898711', cost: 'freemium', why: 'Gestionnaire open source : chacun ses accès, et ceux de la structure partagés proprement.' },
+      simple: { appId: '1769804898711', cost: 'freemium', why: 'Gestionnaire open source. Partage des accès de la structure gratuit à 2 personnes, payant au-delà.' },
       confidentiel: { appId: 'keepassxc', cost: 'libre', why: 'Coffre-fort libre, stocké chez vous, sans service en ligne.' },
       libre: { appId: 'passbolt', cost: 'libre', why: 'Gestionnaire de mots de passe d\'équipe libre et auto-hébergeable, éditeur luxembourgeois.' },
     },
@@ -121,8 +123,8 @@ export const KIT_NEEDS = [
     step: 'Travailler ensemble',
     minSize: 2,
     picks: {
-      simple: { appId: 'ca417378-a0f2-42e4-8dac-19683938cd68', cost: 'freemium', why: 'Visio hébergée en Suisse, les invités rejoignent par un simple lien.' },
-      confidentiel: { appId: 'ca417378-a0f2-42e4-8dac-19683938cd68', cost: 'freemium', why: 'Visio hébergée en Suisse, les invités rejoignent par un simple lien.' },
+      simple: { appId: 'ca417378-a0f2-42e4-8dac-19683938cd68', cost: 'gratuit', why: 'Visio d\'Infomaniak, sans limite de durée. Les invités rejoignent par un simple lien, sans compte.' },
+      confidentiel: { appId: 'ca417378-a0f2-42e4-8dac-19683938cd68', cost: 'gratuit', why: 'Visio d\'Infomaniak, sans limite de durée. Les invités rejoignent par un simple lien, sans compte.' },
       libre: { appId: 'bigbluebutton', cost: 'libre', why: 'Visio libre auto-hébergeable, pensée pour les réunions et les formations.' },
     },
   },
@@ -132,8 +134,8 @@ export const KIT_NEEDS = [
     step: 'Travailler ensemble',
     minSize: 2,
     picks: {
-      simple: { appId: 'doodle', cost: 'freemium', why: 'Sondages de dates pour les réunions et les assemblées, éditeur suisse.' },
-      confidentiel: { appId: 'doodle', cost: 'freemium', why: 'Sondages de dates pour les réunions et les assemblées, éditeur suisse.' },
+      simple: { appId: 'doodle', cost: 'freemium', why: 'Sondages de dates pour les réunions et les assemblées, éditeur suisse. Version gratuite avec publicités.' },
+      confidentiel: { appId: 'doodle', cost: 'freemium', why: 'Sondages de dates pour les réunions et les assemblées, éditeur suisse. Version gratuite avec publicités.' },
       libre: { note: 'Inclus dans Nextcloud (agenda partagé).' },
     },
   },
@@ -144,7 +146,7 @@ export const KIT_NEEDS = [
     minSize: 1,
     types: ['association'],
     picks: {
-      simple: { appId: 'dolibarr', cost: 'libre', why: 'Logiciel de gestion libre : adhérents, cotisations, dons et comptabilité simple. Existe en version hébergée.' },
+      simple: { appId: 'dolibarr', cost: 'libre', why: 'Logiciel de gestion libre : adhérents, cotisations, dons et comptabilité simple. Existe en version hébergée payante chez des hébergeurs partenaires.' },
       confidentiel: { appId: 'dolibarr', cost: 'libre', why: 'Logiciel de gestion libre : adhérents, cotisations, dons et comptabilité simple.' },
       libre: { appId: 'dolibarr', cost: 'libre', why: 'Logiciel de gestion libre : adhérents, cotisations, dons et comptabilité simple.' },
     },
@@ -156,9 +158,9 @@ export const KIT_NEEDS = [
     minSize: 1,
     types: ['association'],
     picks: {
-      simple: { appId: 'brevo', cost: 'freemium', why: 'Envoi de lettres d\'information aux adhérents, éditeur français.' },
-      confidentiel: { appId: 'brevo', cost: 'freemium', why: 'Envoi de lettres d\'information aux adhérents, éditeur français.' },
-      libre: { appId: 'brevo', cost: 'freemium', why: 'Envoi de lettres d\'information aux adhérents, éditeur français.' },
+      simple: { appId: 'brevo', cost: 'freemium', why: 'Lettres d\'information aux adhérents, éditeur français. Gratuit jusqu\'à 300 e-mails par jour.' },
+      confidentiel: { appId: 'brevo', cost: 'freemium', why: 'Lettres d\'information aux adhérents, éditeur français. Gratuit jusqu\'à 300 e-mails par jour.' },
+      libre: { appId: 'brevo', cost: 'freemium', why: 'Lettres d\'information aux adhérents, éditeur français. Gratuit jusqu\'à 300 e-mails par jour.' },
     },
   },
   {
@@ -180,9 +182,9 @@ export const KIT_NEEDS = [
     minSize: 1,
     types: ['tpe'],
     picks: {
-      simple: { appId: 'yousign', cost: 'payant', why: 'Signature électronique de devis et contrats, éditeur français.' },
-      confidentiel: { appId: 'yousign', cost: 'payant', why: 'Signature électronique de devis et contrats, éditeur français.' },
-      libre: { appId: 'yousign', cost: 'payant', why: 'Signature électronique de devis et contrats, éditeur français.' },
+      simple: { appId: 'yousign', cost: 'freemium', why: 'Signature électronique de devis et contrats, éditeur français. Gratuit jusqu\'à 2 demandes de signature par mois.' },
+      confidentiel: { appId: 'yousign', cost: 'freemium', why: 'Signature électronique de devis et contrats, éditeur français. Gratuit jusqu\'à 2 demandes de signature par mois.' },
+      libre: { appId: 'yousign', cost: 'freemium', why: 'Signature électronique de devis et contrats, éditeur français. Gratuit jusqu\'à 2 demandes de signature par mois.' },
     },
   },
   {
@@ -192,8 +194,8 @@ export const KIT_NEEDS = [
     minSize: 2,
     types: ['tpe'],
     picks: {
-      simple: { appId: 'twenty', cost: 'freemium', why: 'CRM open source pour suivre clients et prospects.' },
-      confidentiel: { appId: 'twenty', cost: 'freemium', why: 'CRM open source pour suivre clients et prospects.' },
+      simple: { appId: 'twenty', cost: 'payant', why: 'CRM open source pour suivre clients et prospects. Version hébergée payante, gratuite si vous l\'hébergez.' },
+      confidentiel: { appId: 'twenty', cost: 'payant', why: 'CRM open source pour suivre clients et prospects. Version hébergée payante, gratuite si vous l\'hébergez.' },
       libre: { appId: 'dolibarr', cost: 'libre', why: 'Le module « Tiers » de Dolibarr suit clients et prospects.' },
     },
   },
@@ -203,7 +205,7 @@ export const KIT_NEEDS = [
     step: 'Organiser',
     minSize: 1,
     picks: {
-      simple: { appId: '4cc90381-be9a-483b-8d5c-59b471737e6f', cost: 'libre', why: 'Prise de notes libre, synchronisable avec votre stockage.' },
+      simple: { appId: '4cc90381-be9a-483b-8d5c-59b471737e6f', cost: 'libre', why: 'Prise de notes libre, avec synchronisation chiffrée de bout en bout possible.' },
       confidentiel: { appId: '4cc90381-be9a-483b-8d5c-59b471737e6f', cost: 'libre', why: 'Prise de notes libre, avec chiffrement de bout en bout de la synchronisation.' },
       libre: { appId: '4cc90381-be9a-483b-8d5c-59b471737e6f', cost: 'libre', why: 'Prise de notes libre, synchronisable avec Nextcloud.' },
     },
@@ -214,7 +216,7 @@ export const KIT_NEEDS = [
     step: 'Organiser',
     minSize: 3,
     picks: {
-      simple: { appId: 'e688f70b-cb20-4ff2-84bd-7e75ef2a0f66', cost: 'libre', why: 'Listes de tâches et tableaux partagés, libre.' },
+      simple: { appId: 'e688f70b-cb20-4ff2-84bd-7e75ef2a0f66', cost: 'payant', why: 'Listes de tâches et tableaux partagés, libre. Version hébergée payante, gratuite si vous l\'hébergez.' },
       confidentiel: { appId: 'e688f70b-cb20-4ff2-84bd-7e75ef2a0f66', cost: 'libre', why: 'Listes de tâches et tableaux partagés, libre et auto-hébergeable.' },
       libre: { appId: 'openproject', cost: 'libre', why: 'Gestion de projet libre, éditeur allemand.' },
     },
@@ -225,7 +227,7 @@ export const KIT_NEEDS = [
     step: 'Organiser',
     minSize: 3,
     picks: {
-      simple: { appId: 'xwiki', cost: 'freemium', why: 'Wiki libre pour les procédures et la mémoire de la structure, éditeur français.' },
+      simple: { appId: 'xwiki', cost: 'payant', why: 'Wiki libre pour les procédures et la mémoire de la structure, éditeur français. Version hébergée payante.' },
       confidentiel: { appId: 'cryptpad', cost: 'freemium', why: 'Le même outil que vos documents, chiffré de bout en bout.' },
       libre: { appId: 'bookstack', cost: 'libre', why: 'Wiki libre et simple à héberger.' },
     },

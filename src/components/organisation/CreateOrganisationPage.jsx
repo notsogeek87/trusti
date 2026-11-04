@@ -271,10 +271,35 @@ const KitResult = ({ answers, kit, onRestart }) => {
   );
 };
 
+const EMPTY_ANSWERS = { type: null, size: null, approach: null };
+
+/** État de l'assistant rangé dans l'historique : bouton retour et rechargement le retrouvent. */
+const readHistoryState = () => {
+  const state = window.history.state?.trustiCreateOrg;
+  if (!state || typeof state.step !== 'number') return { step: 0, answers: EMPTY_ANSWERS };
+  return { step: state.step, answers: { ...EMPTY_ANSWERS, ...state.answers } };
+};
+
 const CreateOrganisationPage = () => {
   const { status, apps, retry } = useProCatalog();
-  const [step, setStep] = useState(0); // 0 : intro ; 1..3 : questions ; 4 : résultat
-  const [answers, setAnswers] = useState({ type: null, size: null, approach: null });
+  const initial = useMemo(readHistoryState, []);
+  const [step, setStep] = useState(initial.step); // 0 : intro ; 1..3 : questions ; 4 : résultat
+  const [answers, setAnswers] = useState(initial.answers);
+
+  // Chaque étape est une entrée d'historique : le retour (navigateur ou Android)
+  // revient à la question précédente au lieu de quitter l'assistant.
+  useEffect(() => {
+    // Les réponses déjà données restent cochées quand on revient en arrière.
+    const onPop = () => setStep(readHistoryState().step);
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+  const goTo = (nextStep, nextAnswers = answers) => {
+    window.history.pushState({ trustiCreateOrg: { step: nextStep, answers: nextAnswers } }, '');
+    setAnswers(nextAnswers);
+    setStep(nextStep);
+  };
+  const goBack = () => window.history.back();
 
   useEffect(() => {
     document.title = 'Créer mon organisation · Trusti';
@@ -289,14 +314,11 @@ const CreateOrganisationPage = () => {
     [step, answers, appsById],
   );
 
-  const pick = (key, value) => {
-    setAnswers(prev => ({ ...prev, [key]: value }));
-    setStep(s => s + 1);
-  };
+  const pick = (key, value) => goTo(step + 1, { ...answers, [key]: value });
 
   let content;
   if (step === 0) {
-    content = <Intro onStart={() => setStep(1)} />;
+    content = <Intro onStart={() => goTo(1)} />;
   } else if (step <= QUESTIONS.length) {
     const question = QUESTIONS[step - 1];
     content = (
@@ -305,7 +327,7 @@ const CreateOrganisationPage = () => {
         question={question}
         value={answers[question.key]}
         onPick={value => pick(question.key, value)}
-        onBack={() => setStep(s => s - 1)}
+        onBack={goBack}
       />
     );
   } else if (status === 'loading') {
@@ -320,7 +342,7 @@ const CreateOrganisationPage = () => {
       </div>
     );
   } else {
-    content = <KitResult answers={answers} kit={kit} onRestart={() => setStep(1)} />;
+    content = <KitResult answers={answers} kit={kit} onRestart={() => window.history.go(1 - step)} />;
   }
 
   return (
