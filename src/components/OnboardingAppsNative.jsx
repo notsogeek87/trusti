@@ -5,6 +5,9 @@ import { AppTile, ANIM_CSS, computeReplacementMap } from './OnboardingApps';
 import OnboardingSummary from './OnboardingSummary';
 import { API_URL } from '../utils/apiConfig';
 import { extractPackageId } from '../utils/androidPackage';
+
+// Id de la fiche « Android » (système d'exploitation) dans la base Trusti.
+const ANDROID_OS_ID = 'android-os';
 import AppIconImage from './ui/AppIconImage';
 import { useBackHandler } from '../hooks/useBackHandler';
 
@@ -202,6 +205,13 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection, autoStart = false
         const pkg = extractPackageId(app.playStoreUrl);
         return pkg && installedPackages.has(pkg);
       });
+
+      // Le système d'exploitation d'un téléphone Android est forcément Android :
+      // pas de package à chercher, on l'ajoute toujours en tête des résultats.
+      const androidOs = catalogRes.apps.find(app => String(app.id) === ANDROID_OS_ID);
+      if (androidOs && !found.some(app => String(app.id) === ANDROID_OS_ID)) {
+        found.unshift(androidOs);
+      }
 
       // Apps qu'on est capable de vérifier (package identifiable) mais qui ne
       // sont pas ressorties de ce scan : elles ont été désinstallées depuis un

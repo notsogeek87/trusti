@@ -43,6 +43,11 @@ export const PRO_FAMILIES = [
     label: 'Développement, sauvegarde et supervision',
     categories: ['Outils / Développement', 'Sauvegarde & Supervision', 'Outils / Surveillance', 'Outils / Professionnel'],
   },
+  {
+    id: 'systemes',
+    label: "Systèmes d'exploitation",
+    categories: ["Système d'exploitation / PC", "Système d'exploitation / Smartphone"],
+  },
   { id: 'navigation', label: 'Navigateurs et moteurs de recherche', categories: ['Navigateurs Web', 'Moteurs de Recherche'] },
   { id: 'design', label: 'Design et création', categories: ['Design & Prototypage', 'Retouche Photo'] },
   {
