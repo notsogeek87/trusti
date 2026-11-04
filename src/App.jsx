@@ -276,7 +276,7 @@ const App = () => {
 
   // Réouverture de l'app (web et APK) : on propose de relancer un scan pour
   // garder « Mes Apps » à jour, seulement si utile (voir utils/rescanPrompt.js :
-  // APK = apps réellement changées, web = au plus tous les 14 jours).
+  // APK = apps réellement changées, web = au plus une fois par semaine).
   // Décidé une seule fois, au chargement : pas
   // pour une première visite (welcome/onboarding), un lien de partage, ni sur
   // le web sans app (la sélection s'ouvre déjà toute seule, voir ci-dessus).

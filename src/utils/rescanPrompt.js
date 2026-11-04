@@ -9,7 +9,7 @@
 const SNAPSHOT_KEY = 'trusti_installed_packages_snapshot';
 const LAST_PROMPT_KEY = 'trusti_rescan_prompt_last';
 
-export const WEB_PROMPT_INTERVAL_MS = 14 * 24 * 60 * 60 * 1000;
+export const WEB_PROMPT_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000;
 
 const read = (key) => {
   try {
