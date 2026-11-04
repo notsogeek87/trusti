@@ -26,9 +26,29 @@ Pages autonomes, comme `?organisation`, choisies par `resolveStandalonePage`
 | Adresse | Composant | Contenu |
 |---------|-----------|---------|
 | `?organisations` | `OrganisationsPage.jsx` | Deux cartes : « Évaluer mon organisation » (→ `?organisation`) et « Créer mon organisation » (→ `?creer-organisation`) |
-| `?creer-organisation` | `CreateOrganisationPage.jsx` | Page temporaire « Fonctionnalité en préparation », bouton « Retour aux organisations ». Ni formulaire ni collecte de données |
+| `?creer-organisation` | `CreateOrganisationPage.jsx` | Assistant « Créer mon organisation » (V1, voir ci-dessous) |
 
 L'évaluation (`OrganisationPage.jsx`, calculs, sauvegarde `localStorage`) n'est pas modifiée.
+
+### Assistant « Créer mon organisation » (V1)
+
+- Public : associations et petites entreprises (jusqu'à 50 personnes). Les autres structures
+  sont renvoyées vers l'évaluation.
+- Trois questions : type de structure, taille (seul·e, 2 à 10, 11 à 50), approche (« Simple et
+  européen », « Confidentialité maximale », « Libre et autonome »).
+- Kits choisis à la main dans `src/constants/creationKits.js` : un outil par besoin et par
+  approche, avec une phrase d'explication et un coût indicatif (`libre`, `freemium`, `payant`).
+  Un besoin apparaît selon la taille (`minSize`), le type (`types`) ou l'approche (`approaches`).
+  Les outils de La Suite numérique sont exclus (réservés aux agents publics). Relire les kits
+  et mettre à jour `KITS_REVIEWED_AT` quand les offres changent.
+- Logique pure dans `src/utils/creationKit.js` (`buildStarterKit`, `mergeKitIntoSelection`),
+  testée dans `tests/technical/creationKit.test.js`. Un id absent du catalogue est ignoré.
+- Résultat : outils regroupés par étape de mise en place, Trusti Score projeté du kit
+  (`computeOrganisationSummary`, sans pondération).
+- « Enregistrer ce kit » écrit la sélection dans la sauvegarde de l'évaluation
+  (`trusti_organisation_v1`) puis ouvre `?organisation`. Si une évaluation existe déjà, la
+  personne choisit : ajouter (rien n'est perdu, criticités et nom conservés) ou remplacer.
+- Ni compte, ni formulaire, ni donnée envoyée. Pas de lien commercial avec les éditeurs.
 
 ## Données
 

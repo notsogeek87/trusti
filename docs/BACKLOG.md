@@ -15,6 +15,7 @@ Statut : 💡 idée · 📝 à cadrer · 🚧 en cours · ✅ fait
 | 6 | Portage (extension navigateur, iOS, services web) | Basse | Élevé | 💡 |
 | 7 | Partage et gamification du bilan | Basse | Faible | 💡 |
 | 8 | Évaluer le parc applicatif d'une organisation | Haute | Moyen | 🚧 MVP fait (voir [guide](guides/evaluation-organisation.md)) |
+| 9 | Créer mon organisation : kit numérique de démarrage | Haute | Moyen | 🚧 V1 faite (voir [guide](guides/evaluation-organisation.md#assistant--créer-mon-organisation--v1)) |
 
 ### 1. Migration guidée
 **MVP livré** : parcours en 4 étapes depuis la fiche d'une app C/D/E. Point d'entrée « Mes Apps » ajouté. Reste à faire : guides d'export par app, suivi des migrations en cours.
@@ -73,3 +74,10 @@ dans le temps, alerte automatique sur les suggestions, alternatives choisies
 - [ ] Étendre les tests au-delà de `tests/technical`
 - [ ] Resynchroniser le README (scripts `db:init`, `db:backup` absents de `package.json`)
 - [ ] Vérifier la présence de `android/app/debug.keystore` dans le dépôt
+
+### 9. Créer mon organisation
+**V1 livrée** : assistant en 3 questions (associations et petites entreprises), kits choisis à la
+main, Trusti Score projeté, enregistrement dans « Évaluer mon organisation ». Reste à faire :
+questions sur les données sensibles (santé, mineurs) et les compétences techniques, variantes
+par besoin, plan de mise en place exportable en PDF, autres types de structure (collectivités,
+santé, enseignement), infos de coût et d'hébergement en base plutôt que dans les kits.
