@@ -26,6 +26,7 @@ export const CATEGORIES = [
   'Tech & Dev',
   'Créativité',
   'News & Info',
+  'Systèmes d\'exploitation',
   'Divers'
 ];
 
@@ -184,5 +185,10 @@ export const CATEGORY_MAPPING = {
   'Design & Prototypage': 'Créativité',
   'Hôtellerie, Tourisme & Bien-être': 'Transport & Voyage',
   'Immobilier': 'Divers',
-  'Juridique & Notariat': 'Divers'
+  'Juridique & Notariat': 'Divers',
+
+  // Systèmes d'exploitation (Android, iOS, Windows, Linux...), distincts des
+  // composants système (catégorie « Système »).
+  'Système d\'exploitation / Smartphone': 'Systèmes d\'exploitation',
+  'Système d\'exploitation / PC': 'Systèmes d\'exploitation'
 };
