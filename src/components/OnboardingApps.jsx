@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Check, ChevronRight, ChevronLeft, Sparkles, ShieldCheck, ArrowRight, ImagePlus, Search, X, Hand } from 'lucide-react';
 import { API_URL } from '../utils/apiConfig';
 import { pickBestAlternative } from '../utils/alternatives';
-import { isNativeAndroid, isIOSWeb, isMobileWeb } from '../utils/platform';
+import { isNativeAndroid, isIOSWeb } from '../utils/platform';
 import { loadOnboardingCatalog } from '../utils/onboardingCatalog';
 import { normalizeAppName } from '../utils/screenshotAppMatcher';
 import { useBackHandler } from '../hooks/useBackHandler';
@@ -182,63 +182,52 @@ export const AppTile = ({ app, selected, onToggle, replacedBy, isChosenAlternati
   </button>
 );
 
-// Carte d'appel à l'import par capture d'écran (web) : c'est le chemin le
-// plus rapide, on le montre avec un aperçu de ce qu'il fait.
-const IMPORT_PREVIEW = ['WhatsApp', 'Spotify', 'Waze'];
-
+// Option secondaire (web) : import par capture d'écran. Volontairement
+// discrète, la sélection à la main est le chemin mis en avant.
 const ImportScreenshotCard = ({ onClick }) => (
   <button
     onClick={onClick}
-    className="relative w-full text-left bg-white border-2 border-indigo-500 rounded-3xl p-4 pt-5 shadow-xl shadow-indigo-100 transition-all active:scale-[0.98] hover:shadow-indigo-200"
+    className="w-full text-left bg-white/70 border border-slate-200 rounded-2xl px-3 py-2.5 transition-all active:scale-[0.98] hover:border-indigo-300 hover:bg-white"
   >
-    <span className="absolute -top-3 left-4 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wide px-2.5 py-1 rounded-full shadow">
-      Le plus rapide
-    </span>
     <div className="flex items-center gap-3">
-      <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shrink-0">
-        <ImagePlus size={24} className="text-white" />
+      <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
+        <ImagePlus size={18} className="text-slate-500" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-black text-slate-900 text-base leading-tight">Importer une capture d'écran</p>
-        <p className="text-xs text-slate-500 mt-0.5">
-          {isIOSWeb ? 'Réglages → Apps' : 'Ta liste d\'apps dans les réglages'}, on reconnaît tes apps tout seul
+        <p className="font-bold text-slate-700 text-sm leading-tight">Ou importer une capture d'écran</p>
+        <p className="text-[11px] text-slate-400 mt-0.5">
+          {isIOSWeb ? 'Réglages → Apps' : 'Ta liste d\'apps dans les réglages'}
         </p>
       </div>
-      <ChevronRight size={20} className="text-indigo-500 shrink-0" />
-    </div>
-    <div className="mt-3 flex gap-1.5" aria-hidden="true">
-      {IMPORT_PREVIEW.map(name => (
-        <span key={name} className="flex items-center gap-1 bg-indigo-50 text-indigo-700 text-[11px] font-bold px-2 py-1 rounded-lg">
-          <Check size={11} strokeWidth={3} /> {name}
-        </span>
-      ))}
-      <span className="text-[11px] font-bold text-indigo-400 px-1 py-1">…</span>
+      <ChevronRight size={16} className="text-slate-400 shrink-0" />
     </div>
   </button>
 );
 
-// Carte du choix à la main : même poids visuel que l'import, pour que
-// l'utilisateur voie qu'il a deux options et ne se sente pas piégé.
+// Carte du choix à la main : chemin principal sur le web, mis en avant.
 const MANUAL_PREVIEW = ['💬', '📱', '🎵', '💼', '🗺️', '💳'];
 
 const ManualChoiceCard = ({ onClick }) => (
   <button
     onClick={onClick}
-    className="w-full text-left bg-white border-2 border-slate-200 rounded-3xl p-4 shadow-sm transition-all active:scale-[0.98] hover:border-indigo-300"
+    className="relative w-full text-left bg-white border-2 border-indigo-500 rounded-3xl p-4 pt-5 shadow-xl shadow-indigo-100 transition-all active:scale-[0.98] hover:shadow-indigo-200"
   >
+    <span className="absolute -top-3 left-4 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wide px-2.5 py-1 rounded-full shadow">
+      Recommandé
+    </span>
     <div className="flex items-center gap-3">
-      <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center shrink-0">
-        <Hand size={24} className="text-slate-600" />
+      <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shrink-0">
+        <Hand size={24} className="text-white" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-black text-slate-900 text-base leading-tight">Choisir mes apps à la main</p>
+        <p className="font-black text-slate-900 text-base leading-tight">Choisir mes apps</p>
         <p className="text-xs text-slate-500 mt-0.5">6 thèmes, tu touches les apps que tu utilises</p>
       </div>
-      <ChevronRight size={20} className="text-slate-400 shrink-0" />
+      <ChevronRight size={20} className="text-indigo-500 shrink-0" />
     </div>
     <div className="mt-3 flex gap-1.5" aria-hidden="true">
       {MANUAL_PREVIEW.map(emoji => (
-        <span key={emoji} className="w-7 h-7 flex items-center justify-center bg-slate-50 rounded-lg text-sm">{emoji}</span>
+        <span key={emoji} className="w-7 h-7 flex items-center justify-center bg-indigo-50 rounded-lg text-sm">{emoji}</span>
       ))}
     </div>
   </button>
@@ -479,12 +468,11 @@ const OnboardingApps = ({ onComplete, onExit }) => {
             On te montrera leur score de confidentialité.
           </p>
           {CAN_IMPORT_SCREENSHOT ? (
-            // Web : deux choix présentés à égalité (l'import d'abord sur téléphone)
+            // Web : la sélection à la main d'abord, la capture en option secondaire
             <div className="w-full max-w-xs mx-auto text-left">
-              <p className="text-center text-sm font-black text-slate-700 mb-4">Deux façons de faire, au choix :</p>
-              <div className={`flex gap-5 ${isMobileWeb ? 'flex-col' : 'flex-col-reverse'}`}>
-                <ImportScreenshotCard onClick={() => setImporting(true)} />
+              <div className="flex flex-col gap-3">
                 <ManualChoiceCard onClick={goNext} />
+                <ImportScreenshotCard onClick={() => setImporting(true)} />
               </div>
               <p className="text-center text-xs text-slate-400 mt-4">Tu pourras ajouter ou retirer des apps à tout moment.</p>
             </div>
@@ -613,22 +601,6 @@ const OnboardingApps = ({ onComplete, onExit }) => {
           </h2>
           <p className="text-xs text-slate-400 mt-1">Sélectionne tout ce que tu utilises</p>
         </div>
-
-        {/* Rappel de l'import : évite de parcourir les 6 catégories à la main */}
-        {CAN_IMPORT_SCREENSHOT && (
-          <button
-            onClick={() => setImporting(true)}
-            className="w-full mb-3 flex items-center gap-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-2xl px-3 py-2.5 text-left transition-colors"
-          >
-            <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0">
-              <ImagePlus size={16} className="text-white" />
-            </div>
-            <p className="flex-1 text-xs text-indigo-900 leading-snug">
-              <strong>Plus rapide :</strong> importe une capture{isIOSWeb ? ' de Réglages → Apps' : ' de ta liste d\'apps'}
-            </p>
-            <ChevronRight size={16} className="text-indigo-500 shrink-0" />
-          </button>
-        )}
 
         {/* Recherche dans tout le catalogue : plus rapide que parcourir les grilles */}
         <div className="relative mb-4">
