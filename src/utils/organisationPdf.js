@@ -80,17 +80,31 @@ export async function buildOrganisationPdf({ orgName, profileLabel, selectedApps
   doc.setDrawColor(...INK).setLineWidth(0.6).line(M, y, W - M, y);
   y += 7;
 
-  // Note du parc
+  // Note du parc. Lisible imprimé en noir et blanc : la lettre est toujours écrite,
+  // les pastilles ont un contour et la répartition porte lettre et nombre.
   const g = summary.overallGrade;
-  doc.setFillColor(...gradeRgb(g)).roundedRect(M, y, 20, 24, 3, 3, 'F');
+  doc.setFillColor(...gradeRgb(g)).setDrawColor(...INK).setLineWidth(0.5).roundedRect(M, y, 20, 24, 3, 3, 'FD');
   doc.setFont('helvetica', 'bold').setFontSize(30).setTextColor(...gradeTextRgb(g));
   doc.text(g, M + 10, y + 16, { align: 'center' });
-  doc.setFontSize(14).setTextColor(...INK).text(pdfText(ORG_GRADE_LABEL[g]), M + 26, y + 7);
-  doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(...MUTED);
+  const textX = M + 26;
+  doc.setFontSize(14).setTextColor(...INK).text(pdfText(`Note ${g} : ${ORG_GRADE_LABEL[g]}`), textX, y + 6);
+  doc.setFont('helvetica', 'normal').setFontSize(9.5).setTextColor(...MUTED);
   const subtitle = `Note du parc pondérée par la criticité de ${summary.total} outil${summary.total > 1 ? 's' : ''}`
     + (summary.rawGrade !== g ? ` (sans pondération : ${summary.rawGrade})` : '') + '.';
-  doc.text(pdfText(subtitle), M + 26, y + 13);
-  doc.text(pdfText(`Répartition : ${GRADES.map(x => `${x} ${summary.counts[x]}`).join('  ')}`), M + 26, y + 19);
+  doc.text(doc.splitTextToSize(pdfText(subtitle), W - M - textX)[0], textX, y + 12);
+  // Répartition : une pastille par note (lettre dedans), suivie du nombre d'outils
+  let x = textX;
+  const chipY = y + 16;
+  doc.setFont('helvetica', 'bold').setFontSize(7).setTextColor(...MUTED).text('RÉPARTITION', x, chipY + 4.2);
+  x += doc.getTextWidth('RÉPARTITION') + 3;
+  GRADES.forEach(grade => {
+    const count = summary.counts[grade] || 0;
+    doc.setFillColor(...gradeRgb(grade)).setDrawColor(...INK).setLineWidth(0.25).roundedRect(x, chipY, 6, 6, 1.2, 1.2, 'FD');
+    doc.setFont('helvetica', 'bold').setFontSize(8.5).setTextColor(...gradeTextRgb(grade)).text(grade, x + 3, chipY + 4.3, { align: 'center' });
+    const label = `${count} outil${count > 1 ? 's' : ''}`;
+    doc.setFont('helvetica', count > 0 ? 'bold' : 'normal').setFontSize(9).setTextColor(...(count > 0 ? INK : MUTED)).text(label, x + 7.5, chipY + 4.3);
+    x += 7.5 + doc.getTextWidth(label) + 4;
+  });
   y += 30;
 
   // Indicateurs

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Building2, Lock, MessageSquarePlus, Search, Upload } from 'lucide-react';
+import { ArrowLeft, Building2, CheckCircle2, Lock, MessageSquarePlus, Pencil, Search, Upload } from 'lucide-react';
 import { useProCatalog } from '../../hooks/useProCatalog';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import FamilyPicker from './FamilyPicker';
@@ -54,6 +54,11 @@ function useMediaQuery(query) {
  * Évaluation du parc applicatif d'une organisation (adresse « ?organisation »).
  * Page autonome : n'utilise ni l'état ni la navigation de l'app principale.
  * La sélection reste dans le navigateur (localStorage) et s'exporte en fichier.
+ *
+ * Deux vues, rangées dans l'historique (bouton retour) :
+ * - « synthese » : note, exports, criticités, plan d'action ; vue d'arrivée quand
+ *   une évaluation est déjà enregistrée ;
+ * - « saisie » : la liste des outils à cocher, avec le résultat à côté.
  */
 const OrganisationPage = () => {
   const { status, apps, retry } = useProCatalog();
@@ -66,6 +71,9 @@ const OrganisationPage = () => {
   const [orgName, setOrgName] = useState('');
   const [suggesting, setSuggesting] = useState(false);
   const [pdfStatus, setPdfStatus] = useState('idle');
+  const [view, setView] = useState('saisie');
+  const viewRef = useRef(view);
+  viewRef.current = view;
   const restored = useRef(false);
   const fileInput = useRef(null);
   // Même seuil que l'app principale pour la mise en page mobile de la fiche
@@ -78,7 +86,7 @@ const OrganisationPage = () => {
   const openApp = useCallback(app => {
     if (!detailOpen.current) {
       detailOpen.current = true;
-      window.history.pushState({ trustiOrgDetail: true }, '');
+      window.history.pushState({ trustiOrgDetail: true, trustiOrgView: viewRef.current }, '');
     }
     setDetailApp(app);
   }, []);
@@ -87,7 +95,12 @@ const OrganisationPage = () => {
     else { detailOpen.current = false; setDetailApp(null); }
   }, []);
   useEffect(() => {
-    const onPop = () => { detailOpen.current = false; setDetailApp(null); };
+    const onPop = event => {
+      detailOpen.current = false;
+      setDetailApp(null);
+      const nextView = event.state?.trustiOrgView;
+      if (nextView === 'synthese' || nextView === 'saisie') setView(nextView);
+    };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
@@ -109,8 +122,13 @@ const OrganisationPage = () => {
     if (status !== 'ready' || restored.current) return;
     restored.current = true;
     const saved = loadOrganisationState();
+    const ids = saved ? saved.ids.filter(id => appsById.has(id)) : [];
+    // Évaluation déjà enregistrée : on arrive sur la synthèse, pas sur la saisie.
+    const initialView = ids.length > 0 ? 'synthese' : 'saisie';
+    window.history.replaceState({ ...(window.history.state || {}), trustiOrgView: initialView }, '');
+    setView(initialView);
     if (!saved) return;
-    setSelectedIds(saved.ids.filter(id => appsById.has(id)));
+    setSelectedIds(ids);
     setCriticality(saved.criticality);
     if (ORG_PROFILES.some(p => p.id === saved.profile)) setProfile(saved.profile);
     setOrgName(saved.orgName);
@@ -139,6 +157,20 @@ const OrganisationPage = () => {
 
   const summary = useMemo(() => computeOrganisationSummary(selectedApps, criticality), [selectedApps, criticality]);
   const plan = useMemo(() => buildActionPlan(selectedApps, apps, criticality), [selectedApps, apps, criticality]);
+  // Sans outil, la synthèse n'a rien à montrer : on reste sur la saisie.
+  const isSynthese = status === 'ready' && view === 'synthese' && summary.total > 0;
+
+  const showView = useCallback(next => {
+    if (next === viewRef.current) return;
+    window.scrollTo(0, 0);
+    // Retour à la vue précédente : on recule dans l'historique plutôt que d'empiler.
+    if (window.history.state?.trustiOrgPrevView === next) {
+      window.history.back();
+      return;
+    }
+    window.history.pushState({ trustiOrgView: next, trustiOrgPrevView: viewRef.current }, '');
+    setView(next);
+  }, []);
 
   const toggle = useCallback(id => {
     setSelectedIds(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
@@ -155,6 +187,8 @@ const OrganisationPage = () => {
     setProfile(null);
     setOrgName('');
     clearOrganisationState();
+    window.history.replaceState({ ...(window.history.state || {}), trustiOrgView: 'saisie' }, '');
+    setView('saisie');
   }, []);
 
   const today = new Date().toISOString().slice(0, 10);
@@ -201,6 +235,7 @@ const OrganisationPage = () => {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 pt-6 pb-24 lg:pb-6">
+        {!isSynthese && (
         <div className="mb-5">
           <h1 className="text-2xl sm:text-3xl font-black text-slate-800">Quelle est la souveraineté numérique de votre parc applicatif ?</h1>
           <p className="mt-2 text-slate-600 max-w-3xl">
@@ -211,8 +246,9 @@ const OrganisationPage = () => {
             <Lock size={13} /> Votre sélection reste dans ce navigateur : elle n'est jamais envoyée à Trusti.
           </p>
         </div>
+        )}
 
-        {status === 'ready' && (
+        {status === 'ready' && !isSynthese && (
           <section className="mb-5 bg-white/80 rounded-2xl border border-white p-4 shadow-sm">
             <p className="text-sm font-black text-slate-800 mb-2">Votre structure</p>
             <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Type de structure">
@@ -256,7 +292,49 @@ const OrganisationPage = () => {
           </div>
         )}
 
-        {status === 'ready' && (
+        {isSynthese && (
+          <div className="max-w-3xl mx-auto">
+            <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs font-black uppercase tracking-wider text-slate-400">Synthèse de votre parc</p>
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-800 break-words">{orgName.trim() || 'Votre organisation'}</h1>
+                <p className="mt-1 text-sm text-slate-500">
+                  {profileLabel ? `${profileLabel} · ` : ''}{summary.total} outil{summary.total > 1 ? 's' : ''} évalué{summary.total > 1 ? 's' : ''}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => showView('saisie')}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm font-black text-indigo-600 hover:border-indigo-400 shadow-sm"
+              >
+                <Pencil size={16} /> Modifier mes outils
+              </button>
+            </div>
+            {message && (
+              <p className="mb-3 text-sm font-bold text-indigo-700 bg-indigo-50 rounded-xl px-3 py-2" role="status">{message}</p>
+            )}
+            <OrganisationResult
+              selectedApps={selectedApps}
+              criticality={criticality}
+              summary={summary}
+              plan={plan}
+              onCriticalityChange={setLevel}
+              onRemove={toggle}
+              onClear={clearAll}
+              onExportCsv={exportCsv}
+              onExportJson={exportJson}
+              onOpenApp={openApp}
+              onDownloadPdf={isNativeAndroid ? undefined : downloadPdf}
+              pdfStatus={pdfStatus}
+              compact={false}
+            />
+            <p className="mt-4 flex items-center gap-1.5 text-xs font-bold text-emerald-700">
+              <Lock size={13} /> Votre évaluation reste dans ce navigateur : elle n'est jamais envoyée à Trusti.
+            </p>
+          </div>
+        )}
+
+        {status === 'ready' && !isSynthese && (
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_400px] gap-6 items-start">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -297,7 +375,17 @@ const OrganisationPage = () => {
               </p>
             </div>
 
-            <aside id="resultat" className="lg:sticky lg:top-20 scroll-mt-20">
+            {/* Ordinateur : la colonne reste visible et défile seule, sans attendre la fin de la liste. */}
+            <aside id="resultat" className="lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-1 lg:pb-2 scroll-mt-20">
+              {summary.total > 0 && (
+                <button
+                  type="button"
+                  onClick={() => showView('synthese')}
+                  className="hidden lg:flex mb-3 w-full items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-black hover:bg-indigo-700 shadow-sm"
+                >
+                  <CheckCircle2 size={16} /> Terminer et voir la synthèse
+                </button>
+              )}
               <OrganisationResult
                 selectedApps={selectedApps}
                 criticality={criticality}
@@ -318,8 +406,8 @@ const OrganisationPage = () => {
         )}
       </main>
 
-      {/* Téléphone : le résultat est sous la liste, une barre fixe y mène. */}
-      {status === 'ready' && summary.total > 0 && (
+      {/* Téléphone : le résultat est sous la liste ; une barre fixe mène à la synthèse. */}
+      {status === 'ready' && !isSynthese && summary.total > 0 && (
         <div className="lg:hidden fixed bottom-0 inset-x-0 z-20 bg-white/90 backdrop-blur-md border-t border-white/60 px-4 py-3">
           <div className="max-w-6xl mx-auto flex items-center gap-3">
             <span className={`${GRADE_COLORS[summary.overallGrade]} ${['B', 'C', 'D'].includes(summary.overallGrade) ? 'text-slate-900' : 'text-white'} w-10 h-10 rounded-xl flex items-center justify-center font-black text-xl shrink-0`}>
@@ -328,7 +416,7 @@ const OrganisationPage = () => {
             <span className="flex-1 text-sm font-bold text-slate-700">
               {summary.total} outil{summary.total > 1 ? 's' : ''} évalué{summary.total > 1 ? 's' : ''}
             </span>
-            <a href="#resultat" className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-black shrink-0">Voir le résultat</a>
+            <button type="button" onClick={() => showView('synthese')} className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-black shrink-0">Voir la synthèse</button>
           </div>
         </div>
       )}

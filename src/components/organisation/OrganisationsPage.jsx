@@ -1,11 +1,14 @@
-import React, { useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Building2, ClipboardCheck, Rocket } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ArrowLeft, ArrowRight, BarChart3, Building2, ClipboardCheck, Rocket } from 'lucide-react';
 import { STANDALONE_URLS } from '../../utils/standalonePage';
+import { loadOrganisationState } from '../../utils/organisationStorage';
 
 /**
  * Rubrique « Organisations » (adresse « ?organisations ») : propose les deux parcours.
  * - Évaluer mon organisation → page historique « ?organisation », inchangée.
- * - Créer mon organisation  → page « ?creer-organisation » (en préparation).
+ * - Créer mon organisation  → page « ?creer-organisation ».
+ * Une évaluation déjà enregistrée dans ce navigateur est proposée en premier
+ * (elle s'ouvre sur sa synthèse).
  */
 const PATHS = [
   {
@@ -37,6 +40,9 @@ const PATHS = [
 ];
 
 const OrganisationsPage = () => {
+  const [saved] = useState(loadOrganisationState);
+  const savedCount = saved?.ids.length || 0;
+
   useEffect(() => {
     document.title = 'Organisations · Trusti';
   }, []);
@@ -64,6 +70,24 @@ const OrganisationsPage = () => {
             Trusti vous accompagne pour évaluer votre environnement numérique actuel ou construire celui de demain.
           </p>
         </div>
+
+        {savedCount > 0 && (
+          <a
+            href={STANDALONE_URLS.EVALUATE_ORGANISATION}
+            className="mb-4 sm:mb-6 flex items-center gap-4 bg-white/90 rounded-3xl border border-emerald-200 p-5 sm:p-6 shadow-sm hover:shadow-lg hover:border-emerald-300 transition-all group"
+          >
+            <span className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0">
+              <BarChart3 size={24} aria-hidden="true" />
+            </span>
+            <span className="flex-1 min-w-0">
+              <span className="block font-black text-slate-800 break-words">{saved.orgName.trim() || 'Votre organisation'}</span>
+              <span className="block text-sm text-slate-500">
+                Évaluation enregistrée : {savedCount} outil{savedCount > 1 ? 's' : ''}. Voir la synthèse, la note et les exports.
+              </span>
+            </span>
+            <ArrowRight size={20} className="text-emerald-600 shrink-0 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+          </a>
+        )}
 
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
           {PATHS.map(({ id, Icon, title, description, cta, href, accent }) => (

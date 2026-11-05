@@ -25,10 +25,9 @@ Pages autonomes, comme `?organisation`, choisies par `resolveStandalonePage`
 
 | Adresse | Composant | Contenu |
 |---------|-----------|---------|
-| `?organisations` | `OrganisationsPage.jsx` | Deux cartes : « Évaluer mon organisation » (→ `?organisation`) et « Créer mon organisation » (→ `?creer-organisation`) |
+| `?organisations` | `OrganisationsPage.jsx` | Deux cartes : « Évaluer mon organisation » (→ `?organisation`) et « Créer mon organisation » (→ `?creer-organisation`). Si une évaluation est enregistrée dans le navigateur, une carte au-dessus mène directement à sa synthèse |
 | `?creer-organisation` | `CreateOrganisationPage.jsx` | Assistant « Créer mon organisation » (V1, voir ci-dessous) |
 
-L'évaluation (`OrganisationPage.jsx`, calculs, sauvegarde `localStorage`) n'est pas modifiée.
 
 ### Assistant « Créer mon organisation » (V1)
 
@@ -44,7 +43,11 @@ L'évaluation (`OrganisationPage.jsx`, calculs, sauvegarde `localStorage`) n'est
 - Logique pure dans `src/utils/creationKit.js` (`buildStarterKit`, `mergeKitIntoSelection`),
   testée dans `tests/technical/creationKit.test.js`. Un id absent du catalogue est ignoré.
 - Résultat : outils regroupés par étape de mise en place, Trusti Score projeté du kit
-  (`computeOrganisationSummary`, sans pondération).
+  (`computeOrganisationSummary`, sans pondération). Sous chaque outil, liens officiels « Site
+  web », « Google Play », « App Store » quand la fiche les a (`website`, `play_store_url`,
+  `apple_store_url`).
+- « Télécharger le rapport du kit (PDF) » en fin de kit (même générateur que l'évaluation, titre
+  « Kit de démarrage », plan d'action calculé sur le kit). Masqué dans l'APK.
 - « Enregistrer ce kit » écrit la sélection dans la sauvegarde de l'évaluation
   (`trusti_organisation_v1`) puis ouvre `?organisation`. Si une évaluation existe déjà, la
   personne choisit : ajouter (rien n'est perdu, criticités et nom conservés) ou remplacer.
@@ -71,6 +74,9 @@ défaut. Pour les trois pages autonomes, `src/main.jsx` écoute l'événement Ca
 - Marquer ou retirer une app : `UPDATE applications SET usage_pro = TRUE|FALSE WHERE id = '<id>'`
   (validation de David, comme toute écriture). Retour arrière complet :
   `UPDATE applications SET usage_pro = FALSE` ou `ALTER TABLE applications DROP COLUMN usage_pro`.
+- Sites web officiels ajoutés le 2026-11-05 (champ `website` vide) pour 8 outils des kits :
+  Bitwarden, Infomaniak Mail, kDrive, kMeet, Lumo, Olvid, Proton Drive, Tuta. Adresses
+  vérifiées (réponse 200). Retour arrière : remettre `website = NULL` sur ces ids.
 - API : `GET /api/apps?pro=true` (`getProApps` dans `server/database/service-postgres.js`). Le
   format commun `formatAppFromDB` n'est pas modifié ; la réponse ajoute seulement
   `curatedAlternativeIds` (relations `alternative` de `app_relations`).
@@ -88,6 +94,21 @@ défaut. Pour les trois pages autonomes, `src/main.jsx` écoute l'événement Ca
 - **Plan d'action** : chaque outil noté C, D ou E, trié par criticité puis note, avec l'alternative
   mieux notée : d'abord parmi les alternatives choisies (`app_relations`), sinon parmi les apps
   mieux notées de la même catégorie ; choix final par `pickRecommendedAlternative`.
+
+## Vues « synthèse » et « saisie » (`OrganisationPage.jsx`)
+
+- **Synthèse** : note, exports, criticités, plan d'action, sur une colonne. Vue d'arrivée quand
+  une évaluation est déjà enregistrée (après « Enregistrer ce kit » aussi). Bouton « Modifier mes
+  outils » vers la saisie.
+- **Saisie** : liste des outils à cocher, résultat à côté (ordinateur) ou dessous (téléphone).
+  « Terminer et voir la synthèse » (ordinateur) et la barre fixe « Voir la synthèse »
+  (téléphone) mènent à la synthèse. Sans outil coché, la page reste sur la saisie.
+- Chaque changement de vue est une entrée d'historique (`history.state.trustiOrgView`) : le
+  bouton retour (navigateur ou Android) revient à la vue précédente.
+- Ordinateur : la colonne de résultat a son propre défilement (hauteur de l'écran), elle ne
+  dépend plus de la longueur de la liste de gauche.
+- Les exports (PDF, CSV, « Enregistrer l'évaluation ») sont juste sous la note, plus en bas de
+  page.
 
 ## Fiches détail
 
@@ -110,6 +131,9 @@ défaut. Pour les trois pages autonomes, `src/main.jsx` écoute l'événement Ca
 - Bouton « Télécharger le rapport (PDF) » : fichier généré dans le navigateur
   (`src/utils/organisationPdf.js`, bibliothèques `jspdf` et `jspdf-autotable` chargées seulement
   au clic, dans un fichier à part) puis téléchargé directement, sans passer par l'impression.
+- Lisible imprimé en noir et blanc : la note est écrite en toutes lettres (« Note B : … »), les
+  pastilles ont un contour et la répartition est une pastille par note (lettre dedans) suivie
+  du nombre d'outils ; les cellules de note des tableaux portent leur lettre.
 - Contenu A4 : nom de l'organisation (champ facultatif), profil, date, note, indicateurs, plan
   d'action, annexe des outils, rappel de méthode, pied de page « Page x / n ». Les tableaux
   continuent sur les pages suivantes avec leur en-tête répété.

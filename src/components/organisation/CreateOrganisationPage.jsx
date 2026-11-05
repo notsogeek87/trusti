@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, Building2, Check, ClipboardCheck, Rocket, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Building2, Check, ClipboardCheck, ExternalLink, FileDown, Rocket, ShieldCheck, Sparkles } from 'lucide-react';
 import { STANDALONE_URLS } from '../../utils/standalonePage';
 import { useProCatalog } from '../../hooks/useProCatalog';
 import LoadingSpinner from '../ui/LoadingSpinner';
@@ -13,7 +13,9 @@ import {
   KITS_REVIEWED_AT,
 } from '../../constants/creationKits';
 import { buildStarterKit, mergeKitIntoSelection } from '../../utils/creationKit';
-import { computeOrganisationSummary } from '../../utils/organisationAssessment';
+import { computeOrganisationSummary, buildActionPlan } from '../../utils/organisationAssessment';
+import { downloadOrganisationPdf } from '../../utils/organisationPdf';
+import { isNativeAndroid } from '../../utils/platform';
 import { loadOrganisationState, saveOrganisationState } from '../../utils/organisationStorage';
 
 /**
@@ -140,10 +142,53 @@ const Question = ({ index, question, value, onPick, onBack }) => (
   </div>
 );
 
-const KitResult = ({ answers, kit, onRestart }) => {
+/** Liens officiels d'un outil (site web en premier : certains outils n'ont pas d'appli). */
+const AppLinks = ({ app }) => {
+  const links = [
+    ['Site web', app.website],
+    ['Google Play', app.playStoreUrl],
+    ['App Store', app.appleStoreUrl],
+  ].filter(([, url]) => typeof url === 'string' && /^https?:\/\//i.test(url.trim()));
+  if (links.length === 0) return null;
+  return (
+    <p className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1">
+      {links.map(([label, url]) => (
+        <a
+          key={label}
+          href={url.trim()}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:underline"
+        >
+          <ExternalLink size={12} aria-hidden="true" /> {label}
+        </a>
+      ))}
+    </p>
+  );
+};
+
+const KitResult = ({ answers, kit, catalog, onRestart }) => {
   const [confirming, setConfirming] = useState(null);
+  const [pdfStatus, setPdfStatus] = useState('idle');
   const summary = useMemo(() => computeOrganisationSummary(kit.apps), [kit.apps]);
   const typeOption = CREATION_TYPES.find(t => t.id === answers.type);
+
+  const downloadPdf = () => {
+    setPdfStatus('working');
+    downloadOrganisationPdf({
+      orgName: 'Kit de démarrage',
+      profileLabel: typeOption?.label || null,
+      selectedApps: kit.apps,
+      criticality: {},
+      summary,
+      plan: buildActionPlan(kit.apps, catalog, {}),
+    })
+      .then(() => setPdfStatus('idle'))
+      .catch(err => {
+        console.error('PDF', err);
+        setPdfStatus('error');
+      });
+  };
   const labels = QUESTIONS.map(q => q.options.find(o => o.id === answers[q.key])?.label).filter(Boolean);
   const textColor = ['B', 'C', 'D'].includes(summary.overallGrade) ? 'text-slate-900' : 'text-white';
   let position = 0;
@@ -218,6 +263,7 @@ const KitResult = ({ answers, kit, onRestart }) => {
                         </div>
                         <p className="mt-1 text-sm text-slate-600">{item.why}</p>
                         <p className="mt-1 text-[11px] font-bold text-slate-400">{COST_LABELS[item.cost]}</p>
+                        <AppLinks app={item.app} />
                       </>
                     ) : (
                       <p className="mt-1 text-sm text-slate-600">{item.note}</p>
@@ -233,7 +279,8 @@ const KitResult = ({ answers, kit, onRestart }) => {
       <section className="bg-white/90 rounded-2xl p-5 shadow-sm">
         <p className="font-black text-slate-800">Et ensuite ?</p>
         <p className="mt-1 text-sm text-slate-600">
-          Enregistrez ce kit comme point de départ de votre évaluation : vous pourrez l'ajuster outil par outil, le suivre dans le temps et l'exporter en PDF.
+          Enregistrez ce kit comme point de départ de votre évaluation : vous pourrez l'ajuster outil par outil et le suivre dans le temps.
+          {!isNativeAndroid && ' Vous pouvez aussi télécharger dès maintenant le rapport du kit.'}
         </p>
         {confirming ? (
           <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
@@ -260,6 +307,19 @@ const KitResult = ({ answers, kit, onRestart }) => {
           >
             <ClipboardCheck size={18} /> Enregistrer ce kit dans « Évaluer mon organisation »
           </button>
+        )}
+        {!isNativeAndroid && summary.total > 0 && (
+          <>
+            <button
+              type="button"
+              onClick={downloadPdf}
+              disabled={pdfStatus === 'working'}
+              className="mt-2 w-full bg-white border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 font-bold py-3 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+            >
+              <FileDown size={18} /> {pdfStatus === 'working' ? 'Création du PDF…' : 'Télécharger le rapport du kit (PDF)'}
+            </button>
+            {pdfStatus === 'error' && <p className="mt-2 text-sm font-bold text-rose-600" role="alert">Le PDF n'a pas pu être créé. Réessayez.</p>}
+          </>
         )}
       </section>
 
@@ -342,7 +402,7 @@ const CreateOrganisationPage = () => {
       </div>
     );
   } else {
-    content = <KitResult answers={answers} kit={kit} onRestart={() => window.history.go(1 - step)} />;
+    content = <KitResult answers={answers} kit={kit} catalog={apps} onRestart={() => window.history.go(1 - step)} />;
   }
 
   return (

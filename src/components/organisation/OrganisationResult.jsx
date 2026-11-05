@@ -75,7 +75,8 @@ const CriticalityPicker = ({ value, onChange, appName }) => (
 );
 
 /**
- * Résultat de l'évaluation : note, indicateurs, criticités, plan d'action, exports.
+ * Résultat de l'évaluation : note, exports (juste sous la note, pour être vus),
+ * criticités, plan d'action.
  */
 const OrganisationResult = ({ selectedApps, criticality, summary, plan, onCriticalityChange, onRemove, onClear, onExportCsv, onExportJson, onOpenApp, onDownloadPdf, pdfStatus = 'idle', compact = false }) => {
   if (summary.total === 0) {
@@ -124,6 +125,26 @@ const OrganisationResult = ({ selectedApps, criticality, summary, plan, onCritic
             hint={summary.europeanShare === null ? 'Non renseigné' : `Sur ${summary.europeanKnown} fiche${summary.europeanKnown > 1 ? 's' : ''} renseignée${summary.europeanKnown > 1 ? 's' : ''}`}
           />
         </div>
+      </section>
+
+      <section className="flex flex-wrap gap-2">
+        {onDownloadPdf && (
+          <button
+            type="button"
+            onClick={onDownloadPdf}
+            disabled={pdfStatus === 'working'}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-black hover:bg-emerald-700 disabled:opacity-60"
+          >
+            <FileDown size={16} /> {pdfStatus === 'working' ? 'Création du PDF…' : 'Télécharger le rapport (PDF)'}
+          </button>
+        )}
+        {pdfStatus === 'error' && <p className="w-full text-sm font-bold text-rose-600" role="alert">Le PDF n'a pas pu être créé. Réessayez.</p>}
+        <button type="button" onClick={onExportCsv} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-black hover:bg-indigo-700">
+          <FileSpreadsheet size={16} /> Exporter en tableur (CSV)
+        </button>
+        <button type="button" onClick={onExportJson} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-indigo-600 border border-indigo-200 text-sm font-black hover:border-indigo-400">
+          <Download size={16} /> Enregistrer l'évaluation
+        </button>
       </section>
 
       <section className="bg-white/90 rounded-2xl p-5 shadow-sm">
@@ -201,25 +222,6 @@ const OrganisationResult = ({ selectedApps, criticality, summary, plan, onCritic
         </section>
       )}
 
-      <section className="flex flex-wrap gap-2">
-        {onDownloadPdf && (
-          <button
-            type="button"
-            onClick={onDownloadPdf}
-            disabled={pdfStatus === 'working'}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-black hover:bg-emerald-700 disabled:opacity-60"
-          >
-            <FileDown size={16} /> {pdfStatus === 'working' ? 'Création du PDF…' : 'Télécharger le rapport (PDF)'}
-          </button>
-        )}
-        {pdfStatus === 'error' && <p className="w-full text-sm font-bold text-rose-600" role="alert">Le PDF n'a pas pu être créé. Réessayez.</p>}
-        <button type="button" onClick={onExportCsv} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-black hover:bg-indigo-700">
-          <FileSpreadsheet size={16} /> Exporter en tableur (CSV)
-        </button>
-        <button type="button" onClick={onExportJson} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-indigo-600 border border-indigo-200 text-sm font-black hover:border-indigo-400">
-          <Download size={16} /> Enregistrer l'évaluation
-        </button>
-      </section>
     </div>
   );
 };
