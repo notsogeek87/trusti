@@ -23,12 +23,33 @@ import argparse
 import json
 import os
 import sys
+from pathlib import Path
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
 SCOPES = ["https://www.googleapis.com/auth/androidpublisher"]
+
+# Notes de version (« Nouveautés » de la fiche Play Store) : un fichier par
+# langue, nommé d'après le code Play (fr-FR.txt...). Limite Google : 500
+# caractères par langue (vérifiée aussi par tests/technical/playStoreReleaseNotes.test.js).
+NOTES_DIR = Path(__file__).resolve().parent.parent / "play-store" / "notes-de-version"
+NOTES_MAX = 500
+
+
+def read_release_notes(notes_dir=NOTES_DIR):
+    notes = []
+    if not notes_dir.is_dir():
+        return notes
+    for path in sorted(notes_dir.glob("*.txt")):
+        text = path.read_text(encoding="utf-8").strip()
+        if not text:
+            continue
+        if len(text) > NOTES_MAX:
+            sys.exit(f"{path.name} : {len(text)} caractères, Google en accepte {NOTES_MAX} au maximum.")
+        notes.append({"language": path.stem, "text": text})
+    return notes
 
 
 def main():
@@ -81,6 +102,24 @@ def main():
     print(f"Bundle uploadé : versionCode {version_code}")
 
     release = {"versionCodes": [version_code], "status": args.status}
+    # Seules les langues présentes dans la fiche Play Store sont envoyées :
+    # l'API refuse une note dans une langue que la fiche ne déclare pas.
+    notes = read_release_notes()
+    if notes:
+        listed = {
+            l["language"]
+            for l in edits.listings().list(packageName=args.package, editId=edit_id).execute().get("listings", [])
+        }
+        skipped = [n["language"] for n in notes if n["language"] not in listed]
+        if skipped:
+            print(f"::warning::Notes ignorées (langue absente de la fiche : {skipped}). Langues de la fiche : {sorted(listed)}")
+        notes = [n for n in notes if n["language"] in listed]
+    if notes:
+        release["releaseNotes"] = notes
+        for n in notes:
+            print(f"Notes de version [{n['language']}] :\n{n['text']}")
+    else:
+        print("::warning::Aucune note de version envoyée (play-store/notes-de-version/).")
     # countryTargeting : obligatoire en production (« Release in track
     # targeting no countries » sinon), mais invalide hors production quel que
     # soit le status (confirmé par l'API elle-même en le testant). En

@@ -124,6 +124,16 @@ d'abord les canaux réels de l'app pour échouer vite si `--track` ne
 correspond à aucun (voir le script pour le contexte : un nom de canal
 supposé, comme "alpha", peut ne correspondre à rien de réel).
 
+### Notes de version (« Nouveautés » sur la fiche)
+
+Le texte affiché aux utilisateurs dans « Nouveautés » vient de
+`play-store/notes-de-version/<langue>.txt` (ex. `fr-FR.txt`), envoyé avec la
+release par `tools/publish_play_store.py`. **À mettre à jour avant chaque
+envoi en production** : résumé des nouveautés visibles depuis la dernière
+publication, en langage utilisateur (pas de jargon technique), 500 caractères
+maximum (contrôlé par `npm test`). Une langue absente de la fiche Play Store
+est ignorée avec un avertissement.
+
 ## Différence avec android.yml / F-Droid
 
 - `android.yml` (déjà existant) : build **debug**, signé de la clé debug
