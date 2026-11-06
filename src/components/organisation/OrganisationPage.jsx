@@ -7,9 +7,9 @@ import OrganisationResult from './OrganisationResult';
 import AppDetailModal from '../modals/AppDetailModal';
 import SuggestToolDialog from './SuggestToolDialog';
 import { ORG_PROFILES, profileApps } from '../../constants/orgProfiles';
-import { isNativeAndroid } from '../../utils/platform';
 import { ViewModeContext } from '../../contexts/ViewModeContext';
 import downloadJSON from '../../utils/downloadJSON';
+import { saveBlob } from '../../utils/saveFile';
 import { downloadOrganisationPdf } from '../../utils/organisationPdf';
 import { GRADE_COLORS } from '../../constants/grades';
 import { loadOrganisationState, saveOrganisationState, clearOrganisationState } from '../../utils/organisationStorage';
@@ -28,15 +28,7 @@ function normalize(text) {
 
 function downloadCsv(content, filename) {
   // BOM UTF-8 : accents corrects à l'ouverture dans Excel
-  const blob = new Blob(['﻿' + content], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  return saveBlob(new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8' }), filename);
 }
 
 function useMediaQuery(query) {
@@ -192,8 +184,12 @@ const OrganisationPage = () => {
   }, []);
 
   const today = new Date().toISOString().slice(0, 10);
-  const exportCsv = () => downloadCsv(toCsv(selectedApps, criticality, plan), `trusti-organisation-${today}.csv`);
-  const exportJson = () => downloadJSON(buildOrganisationExport(selectedIds, criticality, summary), `trusti-organisation-${today}.json`);
+  const reportExportError = err => {
+    console.error('Export', err);
+    window.alert('Le fichier n\'a pas pu être enregistré. Réessayez.');
+  };
+  const exportCsv = () => downloadCsv(toCsv(selectedApps, criticality, plan), `trusti-organisation-${today}.csv`).catch(reportExportError);
+  const exportJson = () => downloadJSON(buildOrganisationExport(selectedIds, criticality, summary), `trusti-organisation-${today}.json`).catch(reportExportError);
 
   const downloadPdf = () => {
     setPdfStatus('working');
@@ -324,7 +320,7 @@ const OrganisationPage = () => {
               onExportCsv={exportCsv}
               onExportJson={exportJson}
               onOpenApp={openApp}
-              onDownloadPdf={isNativeAndroid ? undefined : downloadPdf}
+              onDownloadPdf={downloadPdf}
               pdfStatus={pdfStatus}
               compact={false}
             />
@@ -397,7 +393,7 @@ const OrganisationPage = () => {
                 onExportCsv={exportCsv}
                 onExportJson={exportJson}
                 onOpenApp={openApp}
-                onDownloadPdf={isNativeAndroid ? undefined : downloadPdf}
+                onDownloadPdf={downloadPdf}
                 pdfStatus={pdfStatus}
                 compact={isWide}
               />

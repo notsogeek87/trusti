@@ -15,7 +15,6 @@ import {
 import { buildStarterKit, mergeKitIntoSelection } from '../../utils/creationKit';
 import { computeOrganisationSummary, buildActionPlan } from '../../utils/organisationAssessment';
 import { downloadOrganisationPdf } from '../../utils/organisationPdf';
-import { isNativeAndroid } from '../../utils/platform';
 import { loadOrganisationState, saveOrganisationState } from '../../utils/organisationStorage';
 
 /**
@@ -280,7 +279,7 @@ const KitResult = ({ answers, kit, catalog, onRestart }) => {
         <p className="font-black text-slate-800">Et ensuite ?</p>
         <p className="mt-1 text-sm text-slate-600">
           Enregistrez ce kit comme point de départ de votre évaluation : vous pourrez l'ajuster outil par outil et le suivre dans le temps.
-          {!isNativeAndroid && ' Vous pouvez aussi télécharger dès maintenant le rapport du kit.'}
+           Vous pouvez aussi télécharger dès maintenant le rapport du kit.
         </p>
         {confirming ? (
           <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
@@ -308,7 +307,7 @@ const KitResult = ({ answers, kit, catalog, onRestart }) => {
             <ClipboardCheck size={18} /> Enregistrer ce kit dans « Évaluer mon organisation »
           </button>
         )}
-        {!isNativeAndroid && summary.total > 0 && (
+        {summary.total > 0 && (
           <>
             <button
               type="button"

@@ -11,6 +11,7 @@ import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.ActivityCallback;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import java.io.OutputStream;
+import android.util.Base64;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -18,7 +19,10 @@ import java.nio.charset.StandardCharsets;
  * (Storage Access Framework, ACTION_CREATE_DOCUMENT) : l'utilisateur choisit
  * l'emplacement et confirme, sans passer par la feuille de partage. Utilisé
  * par l'export des données Trusti (Réglages > Espace de stockage), qui doit
- * "s'enregistrer" plutôt que se "partager".
+ * "s'enregistrer" plutôt que se "partager", et par les exports de
+ * l'évaluation organisation (CSV, JSON, rapport PDF).
+ *
+ * Option « base64: true » : content est du binaire encodé en base64 (PDF).
  */
 @CapacitorPlugin(name = "SaveFile")
 public class SaveFilePlugin extends Plugin {
@@ -62,7 +66,10 @@ public class SaveFilePlugin extends Plugin {
                 call.reject("Impossible d'ouvrir l'emplacement choisi");
                 return;
             }
-            out.write(content.getBytes(StandardCharsets.UTF_8));
+            byte[] bytes = Boolean.TRUE.equals(call.getBoolean("base64", false))
+                ? Base64.decode(content, Base64.DEFAULT)
+                : content.getBytes(StandardCharsets.UTF_8);
+            out.write(bytes);
             JSObject result2 = new JSObject();
             result2.put("uri", uri.toString());
             call.resolve(result2);

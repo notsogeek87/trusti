@@ -200,16 +200,9 @@ export async function buildOrganisationPdf({ orgName, profileLabel, selectedApps
   return doc;
 }
 
-/** Génère le PDF et le télécharge (navigateur). */
+/** Génère le PDF et l'enregistre (téléchargement navigateur ou sélecteur Android). */
 export async function downloadOrganisationPdf(params) {
   const doc = await buildOrganisationPdf(params);
-  const blob = doc.output('blob');
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = reportFilename(params.orgName, params.date);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  setTimeout(() => URL.revokeObjectURL(url), 10000);
+  const { saveBlob } = await import('./saveFile.js');
+  await saveBlob(doc.output('blob'), reportFilename(params.orgName, params.date));
 }

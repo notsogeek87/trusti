@@ -45,7 +45,7 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
   }
 
   const handleExport = () => {
-    downloadJSON(exportTechnicalAnalysisJSON(analysis), `${analysis.packageName}-analyse-technique.json`);
+    downloadJSON(exportTechnicalAnalysisJSON(analysis), `${analysis.packageName}-analyse-technique.json`).catch(err => console.error('Export', err));
   };
 
   const { alert, watch } = countSignalsByLevel(analysis);
