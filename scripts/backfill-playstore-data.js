@@ -2,13 +2,13 @@
  * Script de backfill : fiabilise en base le nom, l'icône et l'URL Play Store
  * de toutes les apps qui ont un package Android renseigné, en utilisant le
  * Play Store comme source de vérité (même logique que enrichFromPlayStore
- * dans server/database/service-postgres.js, appliquée ici à tout l'historique).
+ * dans server/database/postgres/store-enrichment.js, appliquée ici à tout l'historique).
  *
  * Sans ce script, les données restent correctes à la lecture (l'API les
  * corrige à la volée) mais les valeurs brutes en base restent celles
  * saisies à la main par l'admin tant que l'app n'est pas ré-enregistrée.
  *
- * Usage : node backfill-playstore-data.js [--dry-run]
+ * Usage : npm run db:backfill-playstore [-- --dry-run]
  */
 import * as dotenv from 'dotenv';
 dotenv.config();

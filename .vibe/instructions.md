@@ -140,15 +140,7 @@ Voir [docs/BACKLOG.md](../docs/BACKLOG.md) pour le détail.
 Rien en cours : `App.jsx`, `useAppManagement.js`, `server/index.js` et `service-postgres.js` sont découpés.
 
 ### Moyen terme
-3. **Nettoyer les scripts racine** 
-   - `test-*.js`, `fix-icons-*.js`, `check-*.js`, `*.log`, `*.txt`
-   - Soit les déplacer dans `scripts/` avec une meilleure organisation
-   - Soit les documenter et les intégrer dans `package.json`
-
-4. **Synchroniser le README** 
-   - Les scripts `db:init`, `db:backup` sont mentionnés mais pas dans `package.json`
-
-5. **Vérifier la présence de `android/app/debug.keystore`** dans le dépôt
+- Étendre les tests au-delà de `tests/technical` (voir docs/BACKLOG.md)
 
 ---
 

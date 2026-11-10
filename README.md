@@ -14,15 +14,9 @@ src/
 │   ├── AppsList.jsx     # Liste d'applications
 │   ├── ExplainerPanel.jsx    # Panneau explicatif
 │   └── ShareButton.jsx  # Bouton de partage
-├── constants/           # Constantes et données
-│   ├── appsData.js      # Base de données des applications
-│   ├── grades.js        # Configuration des notes A-E
-│   └── tabs.js          # Configuration des onglets
-├── hooks/               # Hooks React personnalisés
-│   ├── useAppManagement.js   # Gestion de l'état des apps
-│   └── useModals.js          # Gestion des modales
-├── utils/               # Fonctions utilitaires
-│   └── shareUtils.js    # Utilitaires de partage
+├── constants/           # Constantes (catégories, notes A-E, onglets…)
+├── hooks/               # Hooks React personnalisés (état de l'app, voir ci-dessous)
+├── utils/               # Fonctions utilitaires, pures et testées quand c'est possible
 ├── styles/              # Styles CSS
 │   └── index.css        # Styles globaux et Tailwind
 ├── App.jsx              # Composant principal
@@ -57,12 +51,19 @@ npm run preview
 
 ### Hooks Personnalisés
 
-- **useAppManagement** : Gère l'état global des applications, filtres, et recherche
-- **useModals** : Gère l'ouverture/fermeture des différentes modales
+`App.jsx` ne fait qu'assembler l'état et choisir l'écran affiché ; la logique vit dans les hooks :
+
+- **useAppManagement** : onglet actif, recherche et listes d'apps ; assemble `useUserSelections`
+  (choix sauvegardés en local), `useCatalogApps` (catalogue paginé) et `useRemoteAppLists`
+  (palmarès, « Mes Apps », recherche). La liste affichée est calculée dans `utils/appListing.js`.
+- **useOnboardingFlow** : bienvenue, sélection des apps, re-scan et propositions de re-scan
+- **useMyAppsView** : tri et filtres de « Mes Apps » (logique pure dans `utils/myAppsFilters.js`)
+- **useAppDetail**, **useShareLinks**, **useBackNavigation** : fiche d'une app, liens de partage, bouton retour
+- **useModals** : ouverture/fermeture des modales
 
 ### Constantes
 
-- **appsData.js** : Base de données centralisée des applications
+- **categories.js** : Catégories du catalogue
 - **grades.js** : Configuration des notes et couleurs
 - **tabs.js** : Configuration des onglets de navigation
 
@@ -91,15 +92,18 @@ Le projet utilise **PostgreSQL** hébergé sur [Neon](https://neon.tech).
 ### Scripts disponibles
 
 ```bash
-# Initialiser la base de données
+# Créer les tables et index
 npm run db:init
 
 # Migrer vers PostgreSQL
 npm run db:migrate-to-postgres
 
-# Backup des données
-npm run db:backup
+# Fiabiliser nom, icône et URL Play Store de toutes les apps (--dry-run pour simuler)
+npm run db:backfill-playstore -- --dry-run
 ```
+
+Côté serveur, `server/database/service-postgres.js` est la porte d'entrée unique des routes
+`api/*.js` ; les requêtes sont rangées par domaine dans `server/database/postgres/`.
 
 ### Documentation
 

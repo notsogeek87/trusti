@@ -74,10 +74,10 @@ dans le temps, alerte automatique sur les suggestions, alternatives choisies
 - [x] Découper `src/App.jsx` : état dans des hooks (`useOnboardingFlow`, `useMyAppsView`, `useAppDetail`, `useShareLinks`, `useBackNavigation`), en-têtes d'onglets et écrans en composants
 - [x] Découper `src/hooks/useAppManagement.js` : choix de l'utilisateur (`useUserSelections`), catalogue paginé (`useCatalogApps`), palmarès / « Mes Apps » / recherche (`useRemoteAppLists`), liste affichée en fonctions pures testées (`utils/appListing.js`)
 - [x] Découper `server/database/service-postgres.js` : façade inchangée pour `api/*.js`, code par domaine dans `server/database/postgres/` (lecture, écriture, relations, données associées, enrichissement Play Store, mise en forme testée)
-- [ ] Nettoyer les scripts `test-*.js`, `fix-icons-*` et logs à la racine
+- [x] Nettoyer la racine : scripts de débogage ponctuels et rapports supprimés (restent dans l'historique git), backfill Play Store déplacé dans `scripts/` (`npm run db:backfill-playstore`)
 - [ ] Étendre les tests au-delà de `tests/technical`
-- [ ] Resynchroniser le README (scripts `db:init`, `db:backup` absents de `package.json`)
-- [ ] Vérifier la présence de `android/app/debug.keystore` dans le dépôt
+- [x] Resynchroniser le README (`db:init` ajouté, `db:backup` retiré faute de script)
+- [x] Vérifier la présence de `android/app/debug.keystore` dans le dépôt : présente et voulue (clé de debug standard, voir l'audit sécurité du 11/10)
 
 ### 9. Créer mon organisation
 **V1 livrée** : assistant en 3 questions (associations et petites entreprises), kits choisis à la

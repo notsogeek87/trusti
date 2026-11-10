@@ -45,7 +45,6 @@ Ce fichier standardise l'interaction avec tous les agents IA (Vibe Code, Claude 
 | **Feature** | Ajouter de nouvelles routes API dans `api/` | Moyenne |
 | **Feature** | Ajouter de nouveaux composants React | Moyenne |
 | **Docs** | Mettre à jour la documentation dans `docs/` | Moyenne |
-| **Chore** | Nettoyer les scripts racine (test-*.js, fix-icons-*.js) | Basse |
 | **Chore** | Mettre à jour les dépendances dans `package.json` | Basse |
 
 ### Pour Claude Code ✅
