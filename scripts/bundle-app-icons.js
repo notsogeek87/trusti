@@ -22,7 +22,10 @@ import { fileURLToPath } from 'url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = path.join(ROOT, 'public/app-icons');
-const API_URL = 'https://trusti-alpha.vercel.app/api/apps?onboarding=true';
+// Source de la liste des icônes : le site Vercel par défaut, ou un autre site Trusti
+// (ex. Hyperfluid) via la variable ICONS_SOURCE_URL.
+const API_URL =
+  process.env.ICONS_SOURCE_URL || 'https://trusti-alpha.vercel.app/api/apps?onboarding=true';
 const CONCURRENCY = 16;
 const EXT = { 'image/webp': 'webp', 'image/png': 'png', 'image/jpeg': 'jpg', 'image/svg+xml': 'svg' };
 

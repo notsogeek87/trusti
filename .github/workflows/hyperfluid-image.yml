@@ -50,6 +50,11 @@ jobs:
           fi
           echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
 
+      - name: Icônes servies depuis le domaine Trusti
+        env:
+          ICONS_SOURCE_URL: https://trusti-default-trusti-score.apps.hyperfluid.cloud/api/apps?onboarding=true
+        run: npm run icons:bundle
+
       - name: Construire l'image
         run: docker build -t "ghcr.io/notsogeek87/trusti:${VERSION}" .
 
