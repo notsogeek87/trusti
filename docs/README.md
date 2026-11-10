@@ -15,6 +15,7 @@ démarrage rapide.
 - [2026-10-11 : suppression de la connexion et de l'administration](architecture/2026-10-11-suppression-connexion-et-administration.md)
 - [2026-10-11 : audit de sécurité](architecture/2026-10-11-audit-securite.md)
 - [2026-10-11 : Tailwind compilé au build, fin du CDN](architecture/2026-10-11-tailwind-compile-au-build.md)
+- [2026-11-10 : découpage par domaine (App.jsx, hooks, accès aux données) — où mettre quoi](architecture/2026-11-10-decoupage-par-domaine.md)
 
 ## 📡 API
 

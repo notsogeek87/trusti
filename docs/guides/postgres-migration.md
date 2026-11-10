@@ -119,19 +119,17 @@ Les endpoints suivants sont disponibles via les serverless functions:
 
 ## Gestion en local
 
-Pour le développement local, deux options:
-
-### Option 1: Utiliser PostgreSQL (recommandé)
-
-Créer un fichier `.env`:
+Pour le développement local, créer un fichier `.env` pointant vers une base Neon
+(idéalement une branche de développement, pas la production) :
 
 ```bash
 DATABASE_URL=postgresql://...
 ```
 
-### Option 2: Utiliser JSON (développement uniquement)
-
-Modifier `server/index.js` pour utiliser `service-json.js` au lieu de `service-postgres.js`.
+Puis `npm run db:init` pour créer les tables et index. L'ancienne option « JSON »
+(`service-json.js`) n'existe plus : toutes les routes passent par
+`server/database/service-postgres.js` (voir
+[le découpage par domaine](../architecture/2026-11-10-decoupage-par-domaine.md)).
 
 ## Backup et restauration
 
