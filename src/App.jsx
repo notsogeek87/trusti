@@ -17,7 +17,7 @@ import { useToast } from './contexts/ToastContext';
 import { areNudgesEnabled, setNudgesEnabled } from './utils/alternativeNudges';
 import { areGradeAlertsEnabled, setGradeAlertsEnabled } from './utils/gradeChanges';
 import { getMigrationsInProgress } from './utils/migrationGuide';
-import { getAllMigrationGuideStates } from './utils/migrationGuideStorage';
+import { getAllMigrationGuideStates, removeMigrationGuideState, saveMigrationGuideState } from './utils/migrationGuideStorage';
 import { isNativeAndroid } from './utils/platform';
 
 // Layout
@@ -165,12 +165,26 @@ const App = () => {
   });
 
   // Parcours de migration guidée commencés et pas terminés (relus à chaque
-  // fermeture de fiche, où le parcours a pu avancer)
+  // fermeture de fiche, où le parcours a pu avancer, et après un abandon)
+  const [migrationGuidesVersion, setMigrationGuidesVersion] = useState(0);
   const migrationsInProgress = useMemo(() => {
     if (activeTab !== TABS.MY_APPS || selectedApp) return [];
     const mine = filteredApps.filter(app => myApps.has(app.id));
     return getMigrationsInProgress(getAllMigrationGuideStates(), mine, { migratedApps, catalogApps: apps });
-  }, [activeTab, selectedApp, filteredApps, myApps, migratedApps, apps]);
+  }, [activeTab, selectedApp, filteredApps, myApps, migratedApps, apps, migrationGuidesVersion]);
+
+  // Abandon d'un parcours depuis la carte : annulable, et relançable depuis la fiche
+  const abandonMigration = (app) => {
+    const previous = removeMigrationGuideState(app.id);
+    setMigrationGuidesVersion(v => v + 1);
+    toast.success('Migration abandonnée', {
+      label: 'Annuler',
+      onClick: () => {
+        saveMigrationGuideState(app.id, previous);
+        setMigrationGuidesVersion(v => v + 1);
+      },
+    });
+  };
 
   // Ouverture depuis une notification de suggestion : on passe sur « Mes Apps »
   // (qui charge les données de l'app et son alternative), puis on ouvre sa fiche.
@@ -394,7 +408,7 @@ const App = () => {
                     onSelectApp={openAppDetail}
                     onDismiss={dismissGradeChanges}
                   />
-                  <MigrationsInProgressCard items={migrationsInProgress} onResume={resumeMigration} />
+                  <MigrationsInProgressCard items={migrationsInProgress} onResume={resumeMigration} onAbandon={abandonMigration} />
                 </>
               )}
 

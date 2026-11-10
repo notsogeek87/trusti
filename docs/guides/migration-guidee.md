@@ -8,7 +8,7 @@
 Deux points d'entrée, pour une app notée **C, D ou E** qui a au moins une alternative de meilleur grade :
 
 - dans sa fiche, le bloc « Alternatives » affiche un bouton **Migrer pas à pas** ;
-- dans « Mes Apps », la carte « Migrations en cours » liste les parcours commencés et pas terminés. « Reprendre » rouvre la fiche avec le parcours, à l'étape où il s'était arrêté.
+- dans « Mes Apps », la carte « Migrations en cours » liste les parcours commencés et pas terminés. « Reprendre » rouvre la fiche avec le parcours, à l'étape où il s'était arrêté. Une ligne compacte par parcours ; la croix l'abandonne (progression effacée, « Annuler » dans la notification pendant 6 s, et le parcours reste relançable depuis la fiche).
 
 Le lien ouvre un parcours en quatre étapes :
 
@@ -34,6 +34,7 @@ Le lien ouvre un parcours en quatre étapes :
 | `src/components/modals/MigrationGuideModal.jsx` | Interface du parcours |
 | `src/components/modals/AppDetailModal.jsx` | Bouton de lancement depuis la fiche (prop `onCompleteMigration`) |
 | `src/components/MigrationsInProgressCard.jsx` | Carte « Migrations en cours » de « Mes Apps » (prop `resumeMigration` de la fiche, état dans `src/hooks/useAppDetail.js`) |
+| `src/utils/migrationGuideStorage.js` | Progression en local ; `removeMigrationGuideState` pour l'abandon (testé dans `tests/technical/migrationGuideStorage.test.js`) |
 | `tests/technical/migrationGuide.test.js` | Tests de la logique pure |
 
 ## Données et vie privée
