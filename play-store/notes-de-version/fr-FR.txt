@@ -1,6 +1,4 @@
 Nouveautés :
-• Alertes quand la note d'une de vos apps change (notification et historique sur la fiche).
-• Migration guidée : étapes d'export et d'import lisibles dans l'app, suivi des migrations en cours.
-• Alternatives plus pertinentes : catégories détaillées par usage.
-• Mes Apps affiche d'abord les apps qui ont une alternative.
-• Icônes d'apps plus fiables.
+• Migrations en cours : une carte plus compacte, et une croix pour abandonner un parcours (annulable, relançable depuis la fiche de l'app).
+• Les apps retirées du catalogue disparaissent aussi de Mes Apps.
+• Améliorations de fiabilité.
