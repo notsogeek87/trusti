@@ -6,6 +6,7 @@ import gplay from 'google-play-scraper';
 import { fetchWithTimeout } from '../fetchWithTimeout.js';
 import { formatAssessmentFromDB } from '../assessment.js';
 import { collapseGradeChanges, buildGradeTimeline } from '../gradeChanges.js';
+import { buildTransferGuide } from '../migrationGuides.js';
 import { formatTeamPick } from './team-pick.js';
 
 // Charger .env en développement local
@@ -778,6 +779,27 @@ export async function getGradeChangesSince(since) {
 }
 
 /**
+ * Guide de migration fromId -> toId (table app_migration_guides) : export depuis l'app
+ * quittée, import dans l'alternative. Sections à null si aucun guide (ou table absente).
+ */
+export async function getMigrationGuide(fromId, toId) {
+  try {
+    const rows = await sql`
+      SELECT app_id, direction, summary, steps, notes, direct_from, direct_export,
+             source_url, checked_at::text AS checked_at, verified
+      FROM app_migration_guides
+      WHERE (app_id = ${String(fromId)} AND direction = 'export')
+         OR (app_id = ${String(toId)} AND direction = 'import')
+    `;
+    return buildTransferGuide(rows, fromId, toId);
+  } catch (error) {
+    if (error?.code === '42P01') return buildTransferGuide([], fromId, toId);
+    console.error('Error getting migration guide:', error);
+    throw error;
+  }
+}
+
+/**
  * Obtenir une application par ID
  */
 export async function getAppById(id) {
@@ -1420,6 +1442,7 @@ export default {
   getAssessmentForApp,
   getGradeHistoryForApp,
   getGradeChangesSince,
+  getMigrationGuide,
   createApp,
   updateApp,
   deleteApp,

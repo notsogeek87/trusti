@@ -26,7 +26,9 @@ Le lien ouvre un parcours en quatre étapes :
 | Fichier | Rôle |
 |---|---|
 | `src/constants/migrationGuide.js` | Étapes, conseils par catégorie, conseils de nettoyage |
-| `src/constants/appMigrationGuides.js` | Guides par app (export de l'app quittée, import dans l'alternative), avec source officielle et date de vérification |
+| Table `app_migration_guides` | Guides par app (export de l'app quittée, import dans l'alternative), avec source officielle, date et statut de vérification |
+| `server/migrationGuides.js` | Mise en forme pour l'API (`buildTransferGuide`, import direct) |
+| `src/hooks/useMigrationGuide.js` | Chargement du guide (`GET /api/apps?migration_guide_from=…&migration_guide_to=…`, cache 1 h) |
 | `src/utils/migrationGuide.js` | Logique pure : `getDataTips`, `getMigrationCandidates`, `canStartMigration`, `computeProgress`, `getMigrationsInProgress` |
 | `src/utils/migrationGuideStorage.js` | Lecture/écriture de la progression |
 | `src/components/modals/MigrationGuideModal.jsx` | Interface du parcours |
@@ -41,30 +43,44 @@ La progression est stockée **uniquement** dans le `localStorage`, clé `trusti_
 ## Limites actuelles
 
 - Textes en version unique.
-- Guides par app pour une quinzaine d'apps quittées (WhatsApp, Telegram, Messenger, Facebook, Instagram, Gmail, Google Photos, Drive, Keep, YouTube, Chrome, LastPass, Dashlane, Google Authenticator, Evernote) et d'alternatives (Signal, Proton Mail, Infomaniak Mail, Tuta, Ente, kDrive, Pixelfed, Vivaldi, LibreTube, Bitwarden, KeePassXC, Passbolt, Proton Authenticator, Joplin). Les autres gardent les conseils par catégorie.
+- Guides par app (en base) pour une quinzaine d'apps quittées (WhatsApp, Telegram, Messenger, Facebook, Instagram, Gmail, Google Photos, Drive, Keep, YouTube, Chrome, LastPass, Dashlane, Google Authenticator, Evernote) et d'alternatives (Signal, Proton Mail, Infomaniak Mail, Tuta, Ente, kDrive, Pixelfed, Vivaldi, LibreTube, Bitwarden, KeePassXC, Passbolt, Proton Authenticator, Joplin). Les autres gardent les conseils par catégorie.
 - Depuis « Mes Apps », les alternatives proposées viennent des apps déjà chargées du catalogue (comme le sélecteur d'alternative).
 
-## Ajouter un guide par app
+## Les guides par app sont en base
 
-Dans `src/constants/appMigrationGuides.js`, clé = id de l'app dans la table `applications`. Le guide doit se suffire à lui-même : l'utilisateur ne devrait pas avoir à ouvrir la source. Vérifier chaque étape sur la page d'aide officielle de l'éditeur, la citer dans `source` et dater la vérification dans `checkedAt` :
+Les textes sont dans la table `app_migration_guides` (Neon, base `trusti-db`), une ligne par app et par sens (`export` pour l'app quittée, `import` pour l'alternative). Une correction est visible tout de suite sur le web **et dans l'APK, sans nouvelle version** : l'app les charge à l'étape « Transférer vos données » (cache 1 h). Hors connexion et sans cache, l'étape affiche les conseils par catégorie.
 
-```js
-// Dans APP_IMPORT_GUIDES
-'1769541460710': {
-  summary: 'Easy Switch copie vos e-mails, contacts et agendas dans Proton Mail.', // « En bref »
-  steps: [                                       // étapes numérotées, menus exacts
-    'Sur un ordinateur, connectez-vous à mail.proton.me.',
-    'Allez dans Paramètres > Tous les paramètres > Importer via Easy Switch.',
-  ],
-  notes: ['Comptes Google Workspace non pris en charge.'], // « À savoir »
-  directFrom: ['1769803097037'],                 // Gmail : l'alternative importe seule
-  directExport: 'Pas besoin d\'exporter : Proton se connecte à votre compte Gmail.',
-  source: 'https://proton.me/support/switch-from-gmail-to-proton',
-  checkedAt: '2026-11-10',
-},
+| Colonne | Contenu |
+|---|---|
+| `app_id`, `direction` | Clé : id de l'app (table `applications`) et `export` ou `import` |
+| `summary` | « En bref » : ce qui est repris, où, combien de temps |
+| `steps` | Étapes numérotées (tableau JSON de textes), menus exacts |
+| `notes` | « À savoir » (tableau JSON) : ce qui ne suit pas, pièges, sécurité |
+| `direct_from`, `direct_export` | (import) apps depuis lesquelles l'alternative importe seule ; l'export est alors remplacé par la phrase `direct_export` |
+| `source_url`, `checked_at` | Page d'aide officielle et date de vérification |
+| `verified` | `true` seulement si chaque étape a été relue sur `source_url` |
+
+Le guide doit se suffire à lui-même : l'utilisateur ne devrait pas avoir à ouvrir la source.
+
+Corriger une étape :
+
+```sql
+UPDATE app_migration_guides
+SET steps = jsonb_set(steps, '{1}', to_jsonb('Touchez ⋮ > Plus > Exporter la discussion.'::text)),
+    checked_at = CURRENT_DATE, verified = true, updated_at = now()
+WHERE app_id = '1769879213451' AND direction = 'export';
 ```
 
-Un test vérifie que chaque guide a un résumé, au moins deux étapes, une source `https://` et une date.
+Ajouter un guide :
+
+```sql
+INSERT INTO app_migration_guides (app_id, direction, summary, steps, notes, source_url, checked_at, verified)
+VALUES ('mastodon', 'import', 'En bref…',
+        '["Étape 1", "Étape 2"]', '["À savoir"]',
+        'https://docs.joinmastodon.org/…', CURRENT_DATE, true);
+```
+
+Création de la table (idempotent) : `npm run db:add-migration-guides`. Les 29 guides de départ ont été insérés le 2026-11-10 ; 10 sont marqués `verified` (page officielle relue), les autres restent à vérifier : `SELECT app_id, direction, source_url FROM app_migration_guides WHERE NOT verified;`.
 
 ## Exemple
 

@@ -1,5 +1,4 @@
 import { MIGRATION_STEPS, DATA_TIPS, DEFAULT_DATA_TIPS } from '../constants/migrationGuide.js';
-import { APP_EXPORT_GUIDES, APP_IMPORT_GUIDES } from '../constants/appMigrationGuides.js';
 import { pickRecommendedAlternative, isStrictlyBetterGrade } from './alternatives.js';
 
 /**
@@ -13,36 +12,24 @@ function getCategoryTips(category) {
   return found ? { export: found.export, import: found.import } : DEFAULT_DATA_TIPS;
 }
 
-// Guide prêt à afficher : résumé, étapes numérotées, points d'attention, source.
-const toSection = (guide) => ({
-  summary: guide.summary || null,
-  steps: guide.steps || [],
-  notes: guide.notes || [],
-  source: guide.source || null,
-});
 const fromTips = (tips) => ({ summary: null, steps: tips, notes: [], source: null });
 
 /**
  * Contenu de l'étape « Transférer vos données », côté app quittée (`export`) et côté
- * alternative (`import`). Guide propre à l'app quand il existe
- * (constants/appMigrationGuides.js), sinon conseils de la catégorie. Si l'alternative
- * importe directement depuis l'app quittée (`directFrom`), l'export se résume à une phrase.
+ * alternative (`import`). `guide` vient de la base (useMigrationGuide, voir
+ * server/migrationGuides.js) ; un côté sans guide retombe sur les conseils de la catégorie.
  *
+ * @param {string} category catégorie de l'app quittée
+ * @param {{export: object|null, import: object|null}|null} [guide]
  * @returns {{ export: Section, import: Section, specific: boolean }}
  *   Section = { summary: string|null, steps: string[], notes: string[], source: string|null }
  */
-export function getDataTips(category, { appId, altId } = {}) {
+export function getDataTips(category, guide = null) {
   const fallback = getCategoryTips(category);
-  const exportGuide = appId != null ? APP_EXPORT_GUIDES[String(appId)] : null;
-  const importGuide = altId != null ? APP_IMPORT_GUIDES[String(altId)] : null;
-  const direct = importGuide?.directFrom?.includes(String(appId)) && importGuide.directExport;
-
   return {
-    export: direct
-      ? { summary: direct, steps: [], notes: [], source: null }
-      : exportGuide ? toSection(exportGuide) : fromTips(fallback.export),
-    import: importGuide ? toSection(importGuide) : fromTips(fallback.import),
-    specific: Boolean(exportGuide || importGuide),
+    export: guide?.export || fromTips(fallback.export),
+    import: guide?.import || fromTips(fallback.import),
+    specific: Boolean(guide?.export || guide?.import),
   };
 }
 

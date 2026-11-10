@@ -2,7 +2,6 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { getDataTips, getMigrationCandidates, canStartMigration, computeProgress } from '../../src/utils/migrationGuide.js';
 import { DEFAULT_DATA_TIPS } from '../../src/constants/migrationGuide.js';
-import { APP_EXPORT_GUIDES, APP_IMPORT_GUIDES } from '../../src/constants/appMigrationGuides.js';
 
 test('les conseils suivent la catégorie, avec repli générique', () => {
   assert.ok(getDataTips('Gestionnaires de Mots de Passe').export.steps[0].includes('CSV'));
@@ -14,45 +13,18 @@ test('les conseils suivent la catégorie, avec repli générique', () => {
   assert.deepEqual(getDataTips(undefined).export.steps, DEFAULT_DATA_TIPS.export);
 });
 
-test('guide propre à l\'app quittée et à l\'alternative : résumé, étapes, points d\'attention, source', () => {
-  // WhatsApp -> Signal
-  const tips = getDataTips('Messagerie', { appId: '1769879213451', altId: '1769540367871' });
-  assert.equal(tips.specific, true);
-  assert.ok(tips.export.summary.includes('WhatsApp'));
-  assert.ok(tips.export.steps.some(t => t.includes('Exporter la discussion')));
-  assert.ok(tips.export.notes.length > 0);
-  assert.ok(tips.import.summary.includes('Signal'));
-  assert.ok(tips.export.source.startsWith('https://'));
-  assert.ok(tips.import.source.startsWith('https://'));
-});
+test('le guide de la base remplace les conseils de la catégorie, côté par côté', () => {
+  const section = { summary: 'En bref', steps: ['a', 'b'], notes: ['n'], source: 'https://x' };
+  const both = getDataTips('Messagerie', { export: section, import: section });
+  assert.equal(both.specific, true);
+  assert.equal(both.export.summary, 'En bref');
+  assert.equal(both.import.source, 'https://x');
 
-test('un côté sans guide retombe sur les conseils de la catégorie', () => {
-  // Gmail -> une messagerie sans guide dédié
-  const tips = getDataTips('Email', { appId: '1769803097037', altId: 'mailo' });
-  assert.ok(tips.export.steps.some(t => t.includes('takeout.google.com')));
-  assert.equal(tips.import.summary, null);
-  assert.ok(tips.import.steps.some(t => t.includes('contacts')));
-  assert.equal(tips.import.source, null);
-});
-
-test('import direct : l\'export se résume à une phrase, sans étapes', () => {
-  // Gmail -> Proton Mail (Easy Switch se connecte à Gmail)
-  const tips = getDataTips('Email', { appId: '1769803097037', altId: '1769541460710' });
-  assert.ok(tips.export.summary.startsWith('Pas besoin d\'exporter'));
-  assert.deepEqual(tips.export.steps, []);
-  assert.equal(tips.export.source, null);
-  assert.ok(tips.import.steps.some(t => t.includes('Easy Switch')));
-});
-
-test('chaque guide se suit sans quitter l\'app : résumé, étapes, source https et date', () => {
-  for (const [id, guide] of Object.entries({ ...APP_EXPORT_GUIDES, ...APP_IMPORT_GUIDES })) {
-    assert.ok(typeof guide.summary === 'string' && guide.summary.length > 20, id);
-    assert.ok(Array.isArray(guide.steps) && guide.steps.length >= 2, id);
-    assert.ok([...guide.steps, ...(guide.notes || [])].every(t => typeof t === 'string' && t.length > 0), id);
-    assert.match(guide.source, /^https:\/\//, id);
-    assert.match(guide.checkedAt, /^\d{4}-\d{2}-\d{2}$/, id);
-    if (guide.directFrom) assert.equal(typeof guide.directExport, 'string', id);
-  }
+  // Seul l'export a un guide : l'import garde les conseils de la catégorie
+  const half = getDataTips('Email', { export: section, import: null });
+  assert.equal(half.export.summary, 'En bref');
+  assert.equal(half.import.summary, null);
+  assert.ok(half.import.steps.some(t => t.includes('contacts')));
 });
 
 test('les candidats sont de meilleur grade, la meilleure en premier', () => {

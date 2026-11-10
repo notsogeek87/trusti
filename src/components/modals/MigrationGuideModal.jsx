@@ -4,6 +4,7 @@ import ScoreIndicator from '../ui/ScoreIndicator';
 import { MIGRATION_STEPS, CLEANUP_TIPS } from '../../constants/migrationGuide';
 import { getDataTips, getMigrationCandidates, computeProgress } from '../../utils/migrationGuide';
 import { getMigrationGuideState, saveMigrationGuideState } from '../../utils/migrationGuideStorage';
+import { useMigrationGuide } from '../../hooks/useMigrationGuide';
 import { extractPackageId } from '../../utils/androidPackage';
 import { isNativeAndroid } from '../../utils/platform';
 import InstalledApps from '../../native/InstalledApps';
@@ -107,7 +108,8 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
   const alt = candidates.find(c => String(c.id) === state.altId) || candidates[0];
   const step = MIGRATION_STEPS[stepIndex];
   const done = state.done;
-  const tips = getDataTips(app.category, { appId: app.id, altId: alt?.id });
+  const migrationGuide = useMigrationGuide(app.id, alt?.id);
+  const tips = getDataTips(app.category, migrationGuide.guide);
   const oldPackage = extractPackageId(app.playStoreUrl);
   const altPackage = extractPackageId(alt?.playStoreUrl);
   const oldInstalled = oldPackage && installed.includes(oldPackage);
@@ -245,8 +247,14 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
 
             {step.id === 'transfer' && (
               <div className="space-y-3">
-                <GuideSection title={`1. Récupérer vos données de ${app.name}`} section={tips.export} />
-                <GuideSection title={`2. Les mettre dans ${alt.name}`} section={tips.import} />
+                {migrationGuide.status === 'loading' ? (
+                  <div className="h-40 bg-slate-50 rounded-xl border border-slate-100 animate-pulse" aria-label="Chargement du guide" />
+                ) : (
+                  <>
+                    <GuideSection title={`1. Récupérer vos données de ${app.name}`} section={tips.export} />
+                    <GuideSection title={`2. Les mettre dans ${alt.name}`} section={tips.import} />
+                  </>
+                )}
                 <StepCheck checked={!!done.transfer} onChange={v => setDone('transfer', v)}>Mes données sont transférées</StepCheck>
               </div>
             )}

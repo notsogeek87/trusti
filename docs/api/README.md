@@ -48,6 +48,12 @@ Endpoint principal, backé par PostgreSQL (`service-postgres.js`).
   `assessment.gradeHistory` = `{ firstAssessedAt, changes: [{ date, from, to }] }`
   (changements du plus récent au plus ancien), lu dans `app_assessment_history`
   (voir `server/gradeChanges.js` : `buildGradeTimeline`).
+- **GET** `?migration_guide_from=:id&migration_guide_to=:id` : guide de migration
+  lu dans `app_migration_guides`. Réponse : `{ success: true, guide: { export, import } }`,
+  chaque côté `{ summary, steps[], notes[], source, checkedAt, verified }` ou `null`
+  sans guide. Si l'alternative importe directement depuis l'app quittée, `export` se
+  résume à une phrase sans étapes. 400 si l'un des deux ids manque. Voir
+  [Migration guidée](../guides/migration-guidee.md).
 - **GET** `?grade_changes_since=AAAA-MM-JJ` : changements de note de tout le
   catalogue depuis cette date (90 jours si vide, 365 jours au plus ; 400 si la
   date est invalide). Réponse : `{ success: true, since, changes: [{ appId, name,

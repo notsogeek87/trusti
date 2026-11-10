@@ -18,7 +18,7 @@ Statut : 💡 idée · 📝 à cadrer · 🚧 en cours · ✅ fait
 | 9 | Créer mon organisation : kit numérique de démarrage | Haute | Moyen | 🚧 V1 faite (voir [guide](guides/evaluation-organisation.md#assistant--créer-mon-organisation--v1)) |
 
 ### 1. Migration guidée
-**MVP livré** : parcours en 4 étapes depuis la fiche d'une app C/D/E. Guides d'export/import par app vérifiés aux sources officielles (une quinzaine d'apps de chaque côté), carte « Migrations en cours » dans « Mes Apps ». Reste à faire : étendre les guides à d'autres apps, revérifier les sources régulièrement (`checkedAt`).
+**MVP livré** : parcours en 4 étapes depuis la fiche d'une app C/D/E. Guides d'export/import par app vérifiés aux sources officielles (une quinzaine d'apps de chaque côté), carte « Migrations en cours » dans « Mes Apps ». Les guides sont en base (`app_migration_guides`) : corrigés sans nouvelle version de l'APK. Reste à faire : vérifier les 19 guides `verified = false`, couvrir les alternatives recommandées manquantes (Mastodon, Proton Drive, PeerTube, Google Maps vers OsmAnd/Organic Maps, export TikTok et Snapchat).
 
 Pour une app notée D/E installée, proposer pas à pas le passage à l'alternative A/B :
 lien de téléchargement, guide d'export des données, désinstallation (permission

@@ -28,7 +28,7 @@ export default async function handler(req, res) {
 
   try {
     // Extraire le type depuis l'URL ou le body
-    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, onboarding, categories, ids, grade, alternatives_for, assessment_for, grade_changes_since, pro } = req.query;
+    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, onboarding, categories, ids, grade, alternatives_for, assessment_for, grade_changes_since, migration_guide_from, migration_guide_to, pro } = req.query;
     
     if (req.method === 'GET') {
       // GET /api/apps?type=trusti
@@ -66,6 +66,16 @@ export default async function handler(req, res) {
           dbService.getGradeHistoryForApp(assessment_for),
         ]);
         return res.status(200).json({ success: true, assessment: assessment ? { ...assessment, gradeHistory } : null });
+      }
+
+      // GET /api/apps?migration_guide_from=:id&migration_guide_to=:id — guide de migration
+      // (export depuis l'app quittée, import dans l'alternative), textes en base.
+      if (migration_guide_from || migration_guide_to) {
+        if (!migration_guide_from || !migration_guide_to) {
+          return res.status(400).json({ success: false, error: 'migration_guide_from et migration_guide_to sont requis' });
+        }
+        const guide = await dbService.getMigrationGuide(migration_guide_from, migration_guide_to);
+        return res.status(200).json({ success: true, guide });
       }
 
       // GET /api/apps?grade_changes_since=AAAA-MM-JJ — changements de note du catalogue
