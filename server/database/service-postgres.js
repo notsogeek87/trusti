@@ -1,7 +1,7 @@
 /**
- * Service de base de données PostgreSQL via Neon pour Vercel
+ * Service de base de données PostgreSQL (Neon ou Postgres classique)
  */
-import { neon } from '@neondatabase/serverless';
+import sql from './sql.js';
 import gplay from 'google-play-scraper';
 import { fetchWithTimeout } from '../fetchWithTimeout.js';
 import { formatAssessmentFromDB } from '../assessment.js';
@@ -17,8 +17,7 @@ if (process.env.NODE_ENV !== 'production') {
   }
 }
 
-// Initialiser la connexion Neon
-const sql = neon(process.env.DATABASE_URL);
+// Accès base : voir ./sql.js (Neon ou Postgres classique selon DATABASE_URL)
 
 // Cache des infos Play Store (nom + icône), partagé pour éviter les appels réseau redondants
 const playStoreCache = {};
