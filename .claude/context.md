@@ -29,7 +29,7 @@ npm run cap:sync     # Build Vite puis cap sync android (avant tout build Gradle
 
 ```
 src/
-├── App.jsx                    # Composant root (631L) — état global, routing tabs
+├── App.jsx                    # Composant root : assemble les hooks, choisit l'écran (onglets via activeTab)
 ├── main.jsx                   # Point d'entrée React
 ├── components/
 │   ├── layout/
@@ -151,7 +151,7 @@ manuelle web) en mode purement additif, sans repasser par le welcome modal.
 - Le bouton reset données (`RotateCcw` dans Header) est visible uniquement si connecté
 - L'admin est protégé par PIN (localStorage), pas de rôle serveur
 - Les tokens magic link expirent en 15 min
-- `App.jsx` est le fichier le plus complexe (631L) — éviter d'y ajouter de la logique, préférer des hooks
+- `App.jsx` ne fait qu'assembler : toute nouvelle logique va dans un hook (`src/hooks/`) ou un composant
 
 ## Android / APK (Capacitor)
 

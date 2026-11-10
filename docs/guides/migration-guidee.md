@@ -33,7 +33,7 @@ Le lien ouvre un parcours en quatre étapes :
 | `src/utils/migrationGuideStorage.js` | Lecture/écriture de la progression |
 | `src/components/modals/MigrationGuideModal.jsx` | Interface du parcours |
 | `src/components/modals/AppDetailModal.jsx` | Bouton de lancement depuis la fiche (prop `onCompleteMigration`) |
-| `src/components/MigrationsInProgressCard.jsx` | Carte « Migrations en cours » de « Mes Apps » (prop `resumeMigration` de la fiche, état dans `App.jsx`) |
+| `src/components/MigrationsInProgressCard.jsx` | Carte « Migrations en cours » de « Mes Apps » (prop `resumeMigration` de la fiche, état dans `src/hooks/useAppDetail.js`) |
 | `tests/technical/migrationGuide.test.js` | Tests de la logique pure |
 
 ## Données et vie privée

@@ -70,7 +70,9 @@ dans le temps, alerte automatique sur les suggestions, alternatives choisies
 
 ## Dette technique
 
-- [ ] Découper `src/App.jsx` (~630 lignes) et `server/index.js` (~740 lignes)
+- [x] Découper `server/index.js` (modules `server/*.js`)
+- [x] Découper `src/App.jsx` : état dans des hooks (`useOnboardingFlow`, `useMyAppsView`, `useAppDetail`, `useShareLinks`, `useBackNavigation`), en-têtes d'onglets et écrans en composants
+- [ ] Découper `src/hooks/useAppManagement.js` (~800 lignes) et `server/database/service-postgres.js` (~1400 lignes)
 - [ ] Nettoyer les scripts `test-*.js`, `fix-icons-*` et logs à la racine
 - [ ] Étendre les tests au-delà de `tests/technical`
 - [ ] Resynchroniser le README (scripts `db:init`, `db:backup` absents de `package.json`)

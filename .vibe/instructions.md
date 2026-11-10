@@ -15,7 +15,7 @@ Trusti est un **comparateur d'applications privacy-first** qui évalue la souver
 ```
 trusti/
 ├── src/                          # Code frontend React
-│   ├── App.jsx                   # ⚠️ 631 LIGNES - Composant root, état global, routing tabs
+│   ├── App.jsx                   # Composant root : assemble les hooks, routing tabs
 │   ├── main.jsx                  # Point d'entrée React
 │   ├── components/
 │   │   ├── layout/               # Header, Navigation
@@ -118,8 +118,7 @@ npm test                 # Tests unitaires (tests/technical/**/*.test.js)
   - Dev : `http://localhost:3001/api`
   - APK natif : `https://trusti-alpha.vercel.app/api` (URL absolue)
 - **⚠️ Ne pas casser le build Capacitor** - `android/` dépend de `dist/` généré par Vite
-- **⚠️ `App.jsx` est trop gros (631L)** - À découper avant d'y ajouter de la logique
-- **⚠️ `server/index.js` est trop gros (740L)** - À découper en modules
+- **⚠️ `App.jsx` ne fait qu'assembler** - Mettre toute nouvelle logique dans un hook ou un composant
 - **⚠️ Les tokens magic link expirent en 15 min**
 
 ### 🟢 Bonnes pratiques
@@ -137,15 +136,8 @@ npm test                 # Tests unitaires (tests/technical/**/*.test.js)
 Voir [docs/BACKLOG.md](../docs/BACKLOG.md) pour le détail.
 
 ### Urgent (À faire avant d'ajouter des features)
-1. **Découper `src/App.jsx` (631L)** en hooks/custom components
-   - Extraire la logique d'état global dans des hooks dédiés
-   - Séparer le routing tabs en composants distincts
-   - Créer des sous-composants pour chaque section
-
-2. **Découper `server/index.js` (740L)** en modules
-   - Séparer les routes par domaine
-   - Extraire la logique métier dans des services
-   - Créer des middlewares réutilisables
+1. **Découper `src/hooks/useAppManagement.js` (~800L)** en hooks par domaine
+2. **Découper `server/database/service-postgres.js` (~1400L)** par domaine (apps, relations, guides…)
 
 ### Moyen terme
 3. **Nettoyer les scripts racine** 
