@@ -30,7 +30,7 @@
 | Fichier | Rôle |
 |---|---|
 | `server/gradeChanges.js` | Logique pure côté serveur : `parseSince`, `collapseGradeChanges`, `buildGradeTimeline` |
-| `server/database/service-postgres.js` | `getGradeChangesSince`, `getGradeHistoryForApp` |
+| `server/database/postgres/app-insights.js` | `getGradeChangesSince`, `getGradeHistoryForApp` (exposées par `service-postgres.js`) |
 | `src/utils/gradeChanges.js` | Logique pure côté appareil (changements à afficher, « J'ai vu ») et réglage |
 | `src/hooks/useGradeChanges.js` | Chargement, état « vu », synchronisation vers le natif |
 | `src/components/GradeChangesCard.jsx` | Carte de « Mes Apps » |

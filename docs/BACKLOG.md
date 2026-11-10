@@ -73,7 +73,7 @@ dans le temps, alerte automatique sur les suggestions, alternatives choisies
 - [x] Découper `server/index.js` (modules `server/*.js`)
 - [x] Découper `src/App.jsx` : état dans des hooks (`useOnboardingFlow`, `useMyAppsView`, `useAppDetail`, `useShareLinks`, `useBackNavigation`), en-têtes d'onglets et écrans en composants
 - [x] Découper `src/hooks/useAppManagement.js` : choix de l'utilisateur (`useUserSelections`), catalogue paginé (`useCatalogApps`), palmarès / « Mes Apps » / recherche (`useRemoteAppLists`), liste affichée en fonctions pures testées (`utils/appListing.js`)
-- [ ] Découper `server/database/service-postgres.js` (~1400 lignes) par domaine
+- [x] Découper `server/database/service-postgres.js` : façade inchangée pour `api/*.js`, code par domaine dans `server/database/postgres/` (lecture, écriture, relations, données associées, enrichissement Play Store, mise en forme testée)
 - [ ] Nettoyer les scripts `test-*.js`, `fix-icons-*` et logs à la racine
 - [ ] Étendre les tests au-delà de `tests/technical`
 - [ ] Resynchroniser le README (scripts `db:init`, `db:backup` absents de `package.json`)

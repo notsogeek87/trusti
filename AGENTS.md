@@ -42,7 +42,6 @@ Ce fichier standardise l'interaction avec tous les agents IA (Vibe Code, Claude 
 |----------|--------|----------|
 | **Bugfix** | Corriger des bugs dans `src/components/` | Haute |
 | **Bugfix** | Corriger des bugs dans `api/*.js` ou `server/*.js` | Haute |
-| **Refactor** | Découper `server/database/service-postgres.js` (~1400L) par domaine | Haute |
 | **Feature** | Ajouter de nouvelles routes API dans `api/` | Moyenne |
 | **Feature** | Ajouter de nouveaux composants React | Moyenne |
 | **Docs** | Mettre à jour la documentation dans `docs/` | Moyenne |
@@ -140,8 +139,8 @@ api/                    # Routes serverless Vercel
 ├── *.js                # Une route = un fichier
 
 server/                 # Backend Express (dev)
-├── index.js             # Point d'entrée (à découper)
-└── database/           # Accès base de données
+├── index.js             # Point d'entrée Express (routes par module server/*.js)
+└── database/           # Accès base de données (façade service-postgres.js, modules dans postgres/)
 ```
 
 ### Style de code

@@ -38,9 +38,10 @@ trusti/
 │   └── star-apps.js              # Apps grade D/E
 │
 ├── server/                       # Backend Express (DEV uniquement, port 3001)
-│   ├── index.js                  # ⚠️ 740 LIGNES - À découper
+│   ├── index.js                  # Point d'entrée Express, routes par module server/*.js
 │   └── database/
-│       └── service-postgres.js   # Requêtes SQL Neon
+│       ├── service-postgres.js   # Façade d'accès aux données (importée par api/*.js)
+│       └── postgres/             # Requêtes SQL Neon par domaine
 │
 ├── android/                      # Projet Capacitor
 │   ├── app/                      # Code natif Android
@@ -136,7 +137,7 @@ npm test                 # Tests unitaires (tests/technical/**/*.test.js)
 Voir [docs/BACKLOG.md](../docs/BACKLOG.md) pour le détail.
 
 ### Urgent (À faire avant d'ajouter des features)
-1. **Découper `server/database/service-postgres.js` (~1400L)** par domaine (apps, relations, guides…)
+Rien en cours : `App.jsx`, `useAppManagement.js`, `server/index.js` et `service-postgres.js` sont découpés.
 
 ### Moyen terme
 3. **Nettoyer les scripts racine** 

@@ -64,9 +64,10 @@ api/                           # Vercel serverless (production)
 └── star-apps.js               # Apps grade D/E
 
 server/
-├── index.js                   # Express dev (port 3001, 740L)
+├── index.js                   # Express dev (port 3001), routes par module server/*.js
 └── database/
-    └── service-postgres.js    # Requêtes SQL Neon
+    ├── service-postgres.js    # Façade d'accès aux données (importée par api/*.js)
+    └── postgres/              # Requêtes SQL Neon par domaine (lecture, écriture, relations, mise en forme…)
 ```
 
 ## Variables d'environnement (.env)

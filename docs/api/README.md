@@ -4,7 +4,8 @@ Pour qui / Pourquoi : point d'entrée pour tout développeur qui doit consommer
 ou modifier une route serverless Vercel du projet. Les fonctions vivent dans
 `api/` (une fonction = un fichier = une route, convention Vercel) et
 s'appuient sur `server/database/service-postgres.js` pour l'accès aux
-données. Aucun routage custom : `vercel.json` ne fait que pointer
+données (façade ; les requêtes sont rangées par domaine dans
+`server/database/postgres/`). Aucun routage custom : `vercel.json` ne fait que pointer
 `buildCommand`/`outputDirectory`, donc `api/apps.js` sert automatiquement
 `/api/apps`, etc.
 
