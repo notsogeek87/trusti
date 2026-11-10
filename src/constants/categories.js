@@ -192,3 +192,69 @@ export const CATEGORY_MAPPING = {
   'Système d\'exploitation / Smartphone': 'Systèmes d\'exploitation',
   'Système d\'exploitation / PC': 'Systèmes d\'exploitation'
 };
+
+/**
+ * Sous-catégories créées en découpant des catégories trop larges (audit du
+ * 2026-11-10, docs/analyses/audit-alternatives-2026-11-10.md) -> catégorie d'avant.
+ * Les alternatives se calculent par catégorie exacte (même usage) ; le Palmarès,
+ * lui, garde ses podiums d'avant le découpage (voir getPodiumCategory).
+ */
+export const SPLIT_SUBCATEGORIES = {
+  'Shopping / Grande distribution': 'Shopping',
+  'Shopping / Places de marché': 'Shopping',
+  'Shopping / Mode': 'Shopping',
+  'Shopping / Beauté': 'Shopping',
+  'Shopping / High-tech': 'Shopping',
+  'Shopping / Seconde main': 'Shopping',
+  'Shopping / Bricolage & maison': 'Shopping',
+  'Jeux / Mobile': 'Jeux',
+  'Jeux / Indépendants': 'Jeux',
+  'Personnalisation / Icônes': 'Personnalisation',
+  'Personnalisation / Widgets': 'Personnalisation',
+  'Personnalisation / Fonds d\'écran': 'Personnalisation',
+  'Sécurité / Bloqueurs de pub': 'Utilitaires',
+  'Téléphone & SMS / Identification d\'appels': 'Téléphone & SMS',
+  'Téléphone & SMS / Second numéro': 'Téléphone & SMS',
+  'Maison / Serrures connectées': 'Maison connectée',
+  'Streaming Vidéo / Films & séries': 'Streaming Vidéo',
+  'Streaming Vidéo / Vidéos en ligne': 'Streaming Vidéo',
+  'Streaming Vidéo / Médiathèque personnelle': 'Streaming Vidéo',
+  'Streaming Vidéo / Box & TV': 'Streaming Vidéo',
+  'Streaming Vidéo / Direct': 'Streaming Vidéo',
+  'Réseaux sociaux / Photos': 'Réseaux sociaux',
+  'Réseaux sociaux / Vidéo courte': 'Réseaux sociaux',
+  'Réseaux sociaux / Forums': 'Réseaux sociaux',
+  'Réseaux sociaux / Professionnel': 'Réseaux sociaux',
+  'Réseaux sociaux / Événements': 'Réseaux sociaux',
+  'Réseaux sociaux / Avatars': 'Réseaux sociaux',
+  'Messagerie / Équipes & communautés': 'Messagerie',
+  'Messagerie / Enfants': 'Messagerie',
+  'Retouche Photo / Montage & IA': 'Retouche Photo',
+  'Retouche Photo / Retouche classique': 'Retouche Photo',
+  'Retouche Photo / Selfies & visage': 'Retouche Photo',
+  'Sport & Fitness / Entraînement': 'Sport & Fitness',
+  'Transport & Mobilité / VTC': 'Transport & Mobilité',
+  'Email / Logiciels de messagerie': 'Email',
+};
+
+// Bloqueur de pub : rangé sous « Sécurité & VPN » dans le filtre du catalogue.
+CATEGORY_MAPPING['Sécurité / Bloqueurs de pub'] = 'Sécurité & VPN';
+
+/**
+ * Catégorie principale (filtre du catalogue) d'une catégorie détaillée. Une
+ * sous-catégorie « Parent / Détail » sans correspondance propre suit son parent
+ * (« Shopping / Mode » -> « Shopping »), ce qui évite de modifier l'app pour
+ * chaque nouvelle sous-catégorie. Sinon : « Divers ».
+ */
+export function getMainCategory(category) {
+  if (!category) return 'Divers';
+  if (CATEGORY_MAPPING[category]) return CATEGORY_MAPPING[category];
+  const parent = String(category).split(' / ')[0];
+  return CATEGORY_MAPPING[parent] || 'Divers';
+}
+
+/** Podium du Palmarès : catégorie détaillée, sauf sous-catégorie issue d'un découpage. */
+export function getPodiumCategory(category) {
+  if (!category) return 'Divers';
+  return SPLIT_SUBCATEGORIES[category] || category;
+}

@@ -62,3 +62,13 @@ Ce n'est pas un défaut de la règle : le catalogue n'a pas d'app mieux notée p
 - Il est concentré : six catégories fourre-tout font 75 des 96 cas.
 - Une partie se corrige sans toucher au code, en découpant ces catégories (par exemple Shopping en Grande distribution, Mode, Bricolage, Places de marché, Seconde main). Une app sans alternative vaut mieux qu'une alternative absurde.
 - Le reste (CRM et support, développement, supervision) concerne des apps d'une même catégorie aux usages différents ; c'est là que les liens saisis à la main aident.
+
+## Décision (10 novembre 2026)
+
+Découpage validé des catégories fourre-tout et des cas discutables en sous-catégories « Parent / Détail » (Shopping, Jeux, Personnalisation, Streaming Vidéo, Réseaux sociaux, Messagerie, Retouche Photo…). Une app sans alternative pour son usage n'en affiche plus, plutôt qu'une alternative hors sujet.
+
+- **Script :** `server/database/migrations/2026-11-10-recategorisation.sql` (135 apps, idempotent, vérifie la catégorie d'origine). **À appliquer après le déploiement du code ci-dessous.**
+- **Onboarding inchangé :** mêmes 7 étapes ; le serveur inclut les sous-catégories des parents découpés (`server/onboardingCategories.js`), sans élargir aux autres sous-catégories existantes (« Finance / Crypto »…).
+- **Filtre du catalogue :** une sous-catégorie suit son parent (`getMainCategory`, `src/constants/categories.js`). Effet de bord voulu : les sous-catégories existantes « Jeux / … », « Finance / … », « Productivité / … » quittent « Divers » pour leur parent.
+- **Palmarès inchangé :** les nouvelles sous-catégories gardent le podium d'avant (`getPodiumCategory`, liste `SPLIT_SUBCATEGORIES`).
+- **Restent à traiter :** CRM et support, développement, supervision, iOS (lecture d'`app_relations`), Kigardeki et Circle Club (usage à préciser), apps libres à ajouter pour combler les « aucune » (Lemmy, Loops, éditeur photo libre).

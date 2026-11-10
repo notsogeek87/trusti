@@ -7,6 +7,7 @@ import { fetchWithTimeout } from '../fetchWithTimeout.js';
 import { formatAssessmentFromDB } from '../assessment.js';
 import { collapseGradeChanges, buildGradeTimeline } from '../gradeChanges.js';
 import { buildTransferGuide } from '../migrationGuides.js';
+import { onboardingSubcategoryParents } from '../onboardingCategories.js';
 import { formatTeamPick } from './team-pick.js';
 
 // Charger .env en développement local
@@ -503,23 +504,31 @@ export async function getOnboardingApps(options = {}) {
     let total;
 
     if (categories.length > 0) {
-      // Filtre par catégories (pour le lazy loading par étape)
+      // Filtre par catégories (pour le lazy loading par étape). Les sous-catégories
+      // « Parent / … » des catégories découpées suivent leur parent (voir onboardingCategories.js).
+      const parents = onboardingSubcategoryParents(categories);
       const countResult = await sql`
         SELECT COUNT(*) as count FROM applications
-        WHERE COALESCE(show_in_onboarding, 1) = 1 AND category = ANY(${categories})
+        WHERE COALESCE(show_in_onboarding, 1) = 1
+          AND (category = ANY(${categories})
+               OR (position(' / ' in category) > 0 AND split_part(category, ' / ', 1) = ANY(${parents})))
       `;
       total = parseInt(countResult[0].count);
 
       apps = limit > 0
         ? await sql`
             SELECT * FROM applications
-            WHERE COALESCE(show_in_onboarding, 1) = 1 AND category = ANY(${categories})
+            WHERE COALESCE(show_in_onboarding, 1) = 1
+              AND (category = ANY(${categories})
+                   OR (position(' / ' in category) > 0 AND split_part(category, ' / ', 1) = ANY(${parents})))
             ORDER BY popularity ASC, name ASC
             LIMIT ${limit} OFFSET ${offset}
           `
         : await sql`
             SELECT * FROM applications
-            WHERE COALESCE(show_in_onboarding, 1) = 1 AND category = ANY(${categories})
+            WHERE COALESCE(show_in_onboarding, 1) = 1
+              AND (category = ANY(${categories})
+                   OR (position(' / ' in category) > 0 AND split_part(category, ' / ', 1) = ANY(${parents})))
             ORDER BY popularity ASC, name ASC
           `;
     } else {
