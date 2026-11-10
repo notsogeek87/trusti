@@ -6,6 +6,7 @@ dotenv.config();
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
+import { pickDriver } from './database/sql.js';
 
 import appsHandler from '../api/apps.js';
 import customTrustiAppsHandler from '../api/custom-trusti-apps.js';
@@ -34,7 +35,11 @@ app.all('/api/clean-duplicates', cleanDuplicatesHandler);
 app.all('/api/lookup-playstore', lookupPlayStoreHandler);
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    db: pickDriver(process.env.DATABASE_URL, process.env.DB_DRIVER),
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Une route /api inconnue renvoie 404 JSON, jamais la page HTML.
