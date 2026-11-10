@@ -1,9 +1,14 @@
 name: Hyperfluid add pg
 
-# À lancer à la main (Actions > Run workflow) sur la branche hyperfluid :
-# installe le driver pg, met à jour package.json et package-lock.json,
-# puis commit sur la branche. Supprimable une fois fait.
+# Se lance tout seul quand ce fichier est poussé sur la branche hyperfluid
+# (un workflow_dispatch n'apparaît que s'il est sur la branche par défaut).
+# Installe le driver pg, met à jour package.json et package-lock.json, puis
+# commit sur la branche. Sans effet si pg est déjà installé. Supprimable ensuite.
 on:
+  push:
+    branches: [hyperfluid]
+    paths:
+      - ".github/workflows/hyperfluid-add-pg.yml"
   workflow_dispatch:
 
 permissions:
@@ -20,12 +25,18 @@ jobs:
           node-version: "22"
 
       - name: Installer pg
-        run: npm install pg --no-audit --no-fund --loglevel=error
+        run: |
+          if grep -q '"pg":' package.json; then
+            echo "pg déjà installé, rien à faire"; echo "SKIP=1" >> "$GITHUB_ENV"; exit 0
+          fi
+          npm install pg --no-audit --no-fund --loglevel=error
 
       - name: Vérifier que le lock est cohérent
+        if: env.SKIP != '1'
         run: npm ci --no-audit --no-fund --loglevel=error
 
       - name: Commit sur la branche
+        if: env.SKIP != '1'
         run: |
           set -e
           git config user.name "github-actions[bot]"
