@@ -136,8 +136,7 @@ npm test                 # Tests unitaires (tests/technical/**/*.test.js)
 Voir [docs/BACKLOG.md](../docs/BACKLOG.md) pour le détail.
 
 ### Urgent (À faire avant d'ajouter des features)
-1. **Découper `src/hooks/useAppManagement.js` (~800L)** en hooks par domaine
-2. **Découper `server/database/service-postgres.js` (~1400L)** par domaine (apps, relations, guides…)
+1. **Découper `server/database/service-postgres.js` (~1400L)** par domaine (apps, relations, guides…)
 
 ### Moyen terme
 3. **Nettoyer les scripts racine** 

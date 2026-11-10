@@ -42,7 +42,6 @@ Ce fichier standardise l'interaction avec tous les agents IA (Vibe Code, Claude 
 |----------|--------|----------|
 | **Bugfix** | Corriger des bugs dans `src/components/` | Haute |
 | **Bugfix** | Corriger des bugs dans `api/*.js` ou `server/*.js` | Haute |
-| **Refactor** | Découper `src/hooks/useAppManagement.js` (~800L) en hooks | Haute |
 | **Refactor** | Découper `server/database/service-postgres.js` (~1400L) par domaine | Haute |
 | **Feature** | Ajouter de nouvelles routes API dans `api/` | Moyenne |
 | **Feature** | Ajouter de nouveaux composants React | Moyenne |

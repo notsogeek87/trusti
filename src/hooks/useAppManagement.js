@@ -1,798 +1,90 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { TABS } from '../constants/tabs';
-import { API_URL } from '../utils/apiConfig';
-import { cachedFetchJSON } from '../utils/fetchCache';
-import { pickRecommendedAlternative, isStrictlyBetterGrade } from '../utils/alternatives';
 import { hasCompletedOnboarding } from '../utils/onboardingStorage';
-
-const GOOD_GRADES = ['A', 'B', 'C'];
-
-// Pour une app à risque, détermine quelle alternative afficher par défaut.
-// Si l'utilisateur a déjà une des alternatives candidates dans "Mes Apps"
-// (même un grade B), on la met en avant comme "déjà migré" plutôt que la
-// meilleure du catalogue qu'il n'utilise pas — mais si une meilleure existe
-// quand même (ex: un A alors qu'il a un B), on le signale séparément
-// (`betterAlternative`) sans pour autant la substituer.
-const buildAlternativeInfo = (app, candidatePool, myAppsSet) => {
-  const candidates = candidatePool.filter(replacementApp => {
-    if (!GOOD_GRADES.includes(replacementApp.grade)) return false;
-    if (replacementApp.replacesAppIds && Array.isArray(replacementApp.replacesAppIds)) {
-      return replacementApp.replacesAppIds.includes(app.id);
-    }
-    return replacementApp.replacesAppId === app.id;
-  });
-  if (candidates.length === 0) return null;
-
-  const usedAlternative = pickRecommendedAlternative(candidates.filter(c => myAppsSet.has(c.id)));
-  // Le « choix de l'équipe » passe avant la mieux notée (voir alternatives.js)
-  const bestOverall = pickRecommendedAlternative(candidates);
-
-  if (usedAlternative) {
-    const betterAlternative =
-      bestOverall.id !== usedAlternative.id && isStrictlyBetterGrade(bestOverall.grade, usedAlternative.grade)
-        ? { id: bestOverall.id, name: bestOverall.name, grade: bestOverall.grade }
-        : null;
-    return {
-      alternative: usedAlternative.name,
-      altIcon: usedAlternative.icon,
-      altGrade: usedAlternative.grade,
-      alternativeAdopted: true,
-      betterAlternative,
-    };
-  }
-
-  return {
-    alternative: bestOverall.name,
-    altIcon: bestOverall.icon,
-    altGrade: bestOverall.grade,
-    alternativeAdopted: false,
-    betterAlternative: null,
-  };
-};
+import { computeFilteredApps } from '../utils/appListing';
+import { useUserSelections } from './useUserSelections';
+import { useCatalogApps } from './useCatalogApps';
+import { useAwardsApps, useMyAppsData, useAppSearch } from './useRemoteAppLists';
 
 /**
- * Hook personnalisé pour gérer l'état des applications
- * Maintenant avec support de la sauvegarde par utilisateur
- * 
- * Toutes les apps sont des Applications avec un GRADE (A, B, C, D, E)
- * Le filtrage se fait côté front selon les besoins
+ * État des applications : onglet actif, recherche, choix de l'utilisateur
+ * (sauvegardés en local), listes chargées depuis l'API, et liste affichée.
+ *
+ * Assemble useUserSelections, useCatalogApps, useAwardsApps, useMyAppsData
+ * et useAppSearch ; la liste affichée est calculée par computeFilteredApps
+ * (utils/appListing.js).
+ *
+ * @param {Function} saveUserData voir useAuth
+ * @param {Function} getUserData voir useAuth
+ * @param {string} selectedCategory catégorie du catalogue (« Toutes » par défaut)
+ * @param {boolean} needsMyAppsData un écran hors onglet a besoin des données de « Mes Apps »
  */
 export const useAppManagement = (saveUserData, getUserData, selectedCategory = 'Toutes', needsMyAppsData = false) => {
-  // Un utilisateur qui rouvre l'app après avoir déjà fait l'onboarding
-  // retombe directement sur "Mes Apps" (1er onglet) plutôt que le catalogue.
+  // Après l'onboarding, la réouverture de l'app tombe directement sur « Mes Apps »
   const [activeTab, setActiveTab] = useState(
     () => (hasCompletedOnboarding() ? TABS.MY_APPS : TABS.APPLICATIONS)
   );
-  const [searchTerm, setSearchTerm] = useState("");
-  const [myApps, setMyApps] = useState(new Set());
-  // Favoris du catalogue ("+" sur une app hors Mes Apps) : filtrées ensuite
-  // via le filtre "À tester" dans le catalogue, indépendant de "Mes Apps".
-  const [favoriteApps, setFavoriteApps] = useState(new Set());
-  const [migratedApps, setMigratedApps] = useState(new Set());
-  const [customMigrations, setCustomMigrations] = useState(new Map());
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedApp, setSelectedApp] = useState(null);
-  
-  // Liste unifiée de toutes les applications
-  const [apps, setApps] = useState([]);
-  const [isLoadingApps, setIsLoadingApps] = useState(true);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [isInitialized, setIsInitialized] = useState(false);
-  
-  // État pour les résultats de recherche
-  const [searchResults, setSearchResults] = useState([]);
-  const [isSearching, setIsSearching] = useState(false);
-  
-  // État de pagination
-  const [pagination, setPagination] = useState({
-    total: 0,
-    limit: 20,
-    offset: 0,
-    hasMore: false,
-    isLoadingMore: false
+
+  const selections = useUserSelections(saveUserData, getUserData);
+  const { myApps } = selections;
+
+  const catalog = useCatalogApps({ activeTab, selectedCategory });
+  const { awardsApps, isLoadingAwards } = useAwardsApps(activeTab);
+  const { myAppsData, isLoadingMyApps } = useMyAppsData({
+    activeTab,
+    myApps,
+    needsMyAppsData,
+    onMissingApps: selections.forgetApps,
   });
-  
-  // État pour savoir si toutes les apps sont chargées (pour le filtrage par catégorie)
-  const [allAppsLoaded, setAllAppsLoaded] = useState(false);
+  const { searchResults, isSearching } = useAppSearch(searchTerm);
 
-  // État spécifique pour les apps Awards (show_in_awards = 1)
-  const [awardsApps, setAwardsApps] = useState([]);
-  const [isLoadingAwards, setIsLoadingAwards] = useState(false);
-  const [awardsLoaded, setAwardsLoaded] = useState(false);
-
-  // État spécifique pour les apps "Mes Apps" (chargées par IDs)
-  const [myAppsData, setMyAppsData] = useState([]);
-  const [isLoadingMyApps, setIsLoadingMyApps] = useState(false);
-  const [myAppsLoaded, setMyAppsLoaded] = useState(false);
-
-  // Charger les données sauvegardées en local (voir useAuth.getUserData)
-  useEffect(() => {
-    setIsInitialized(false); // Réinitialiser avant de charger
-
-    const userData = getUserData ? getUserData('apps') : null;
-    if (userData) {
-      setMyApps(new Set(userData.myApps || []));
-      setFavoriteApps(new Set(userData.favoriteApps || []));
-      setMigratedApps(new Set(userData.migratedApps || []));
-      setCustomMigrations(new Map(userData.customMigrations || []));
-    } else {
-      // Rien de sauvegardé encore : état vide
-      setMyApps(new Set());
-      setFavoriteApps(new Set());
-      setMigratedApps(new Set());
-      setCustomMigrations(new Map());
-    }
-
-    // Petite temporisation pour s'assurer que les states sont bien définis
-    setTimeout(() => setIsInitialized(true), 100);
-  }, [getUserData]);
-
-  // Sauvegarder les données quand elles changent (mais pas au premier chargement)
-  useEffect(() => {
-    if (isInitialized && saveUserData) {
-      saveUserData('apps', {
-        myApps: Array.from(myApps),
-        favoriteApps: Array.from(favoriteApps),
-        migratedApps: Array.from(migratedApps),
-        customMigrations: Array.from(customMigrations.entries())
-      });
-    }
-  }, [myApps, favoriteApps, migratedApps, customMigrations]);
-  // Note: On ne met pas saveUserData dans les dépendances pour éviter la boucle
-
-  // Charger toutes les applications au montage
-  useEffect(() => {
-    const loadApps = async (append = false) => {
-      try {
-        
-        // Utiliser une pagination avec limit=20 pour améliorer les performances
-        // et permettre le chargement progressif des applications
-        const currentOffset = append ? pagination.offset + pagination.limit : 0;
-        const limit = 20; // Charger 20 apps par page
-        // Tri par grade (identique à l'ordre d'affichage du catalogue) pour que
-        // chaque page chargée s'ajoute à la fin sans réordonner les cartes déjà visibles
-        const url = `${API_URL}/apps?limit=${limit}&offset=${currentOffset}&sortBy=grade`;
-
-        const data = await cachedFetchJSON(url);
-        const appsArray = data.success ? data.apps : [];
-
-        // Normaliser les IDs en strings pour la cohérence
-        const normalizedApps = appsArray.map(app => ({
-          ...app,
-          id: String(app.id),
-          replacesAppId: app.replacesAppId ? String(app.replacesAppId) : undefined,
-          replacesAppIds: app.replacesAppIds ? app.replacesAppIds.map(id => String(id)) : undefined
-        }));
-
-        // Mettre à jour les apps (ajouter ou remplacer)
-        if (append) {
-          setApps(prev => [...prev, ...normalizedApps]);
-        } else {
-          setApps(normalizedApps);
-        }
-        
-        // Mettre à jour l'état de pagination
-        if (data.pagination) {
-          setPagination({
-            total: data.pagination.total,
-            limit: data.pagination.limit,
-            offset: currentOffset,
-            hasMore: data.pagination.hasMore,
-            isLoadingMore: false
-          });
-        }
-      } catch (error) {
-        console.error('Erreur lors du chargement des applications:', error);
-        if (!append) {
-          setApps([]);
-        }
-        setPagination(prev => ({ ...prev, isLoadingMore: false }));
-      } finally {
-        if (!append) {
-          setIsLoadingApps(false);
-        }
-      }
-    };
-
-    loadApps();
-    
-    // Note: Le rechargement automatique est désactivé pour ne pas interférer avec la pagination
-    // Si l'admin modifie des données, l'utilisateur peut rafraîchir la page manuellement
-  }, []); // Pas de dépendance à pagination pour éviter les boucles
-  
-  // Charger les apps Awards quand l'onglet TOP_ALTERNATIVES est actif
-  useEffect(() => {
-    const loadAwardsApps = async () => {
-      // Ne charger que si l'onglet Awards est actif
-      if (activeTab !== TABS.TOP_ALTERNATIVES) {
-        return;
-      }
-      
-      // Si déjà en train de charger, ne rien faire
-      if (isLoadingAwards) {
-        return;
-      }
-      
-      console.log('🏆 Chargement des apps Awards (show_in_awards = 1)');
-      setIsLoadingAwards(true);
-      
-      try {
-        
-        const url = `${API_URL}/apps?awards=true`;
-
-        const data = await cachedFetchJSON(url, { ttl: 10 * 60 * 1000 });
-        const appsArray = data.success ? data.apps : [];
-        
-        // Normaliser les IDs en strings pour la cohérence
-        const normalizedApps = appsArray.map(app => ({
-          ...app,
-          id: String(app.id),
-          replacesAppId: app.replacesAppId ? String(app.replacesAppId) : undefined,
-          replacesAppIds: app.replacesAppIds ? app.replacesAppIds.map(id => String(id)) : undefined
-        }));
-        
-        setAwardsApps(normalizedApps);
-        setAwardsLoaded(true);
-        
-      } catch (error) {
-        console.error('❌ Erreur lors du chargement des apps Awards:', error);
-        setAwardsApps([]);
-      } finally {
-        setIsLoadingAwards(false);
-      }
-    };
-    
-    loadAwardsApps();
-  }, [activeTab]); // Recharger à chaque changement d'onglet
-  
-  // Charger les apps "Mes Apps" par leurs IDs quand l'onglet MY_APPS est actif,
-  // ou qu'un autre écran en a besoin indépendamment de l'onglet actif (ex: la
-  // gestion de l'espace de stockage, qui liste "Mes Apps" même si l'utilisateur
-  // est resté sur un autre onglet).
-  useEffect(() => {
-    const loadMyApps = async () => {
-      if ((activeTab !== TABS.MY_APPS && !needsMyAppsData) || myApps.size === 0) {
-        if (activeTab !== TABS.MY_APPS && !needsMyAppsData) {
-          // Réinitialiser quand on quitte l'onglet
-          setMyAppsLoaded(false);
-        }
-        return;
-      }
-      
-      // Si déjà en train de charger, ne rien faire
-      if (isLoadingMyApps) {
-        return;
-      }
-      
-      setIsLoadingMyApps(true);
-      
-      try {
-        
-        // Convertir le Set en tableau d'IDs
-        const idsArray = Array.from(myApps);
-        const idsParam = idsArray.join(',');
-
-        const url = `${API_URL}/apps?ids=${encodeURIComponent(idsParam)}`;
-
-        const data = await cachedFetchJSON(url);
-        const appsArray = data.success ? data.apps : [];
-        
-        // Normaliser les IDs en strings pour la cohérence
-        const normalizedApps = appsArray.map(app => ({
-          ...app,
-          id: String(app.id),
-          replacesAppId: app.replacesAppId ? String(app.replacesAppId) : undefined,
-          replacesAppIds: app.replacesAppIds ? app.replacesAppIds.map(id => String(id)) : undefined
-        }));
-        
-        setMyAppsData(normalizedApps);
-        setMyAppsLoaded(true);
-
-        // Apps supprimées du catalogue : l'API ne les renvoie plus, on les
-        // retire de la liste de l'utilisateur au lieu de laisser un
-        // "Chargement..." éternel. Seulement si l'appel a réussi.
-        if (data.success) {
-          const knownIds = new Set(normalizedApps.map(app => app.id));
-          const staleIds = idsArray.map(String).filter(id => !knownIds.has(id));
-          if (staleIds.length > 0) {
-            const stale = new Set(staleIds);
-            const keep = (set) => new Set(Array.from(set).filter(id => !stale.has(String(id))));
-            setMyApps(keep);
-            setFavoriteApps(keep);
-            setMigratedApps(keep);
-          }
-        }
-
-      } catch (error) {
-        console.error('❌ Erreur lors du chargement de Mes Apps:', error);
-        setMyAppsData([]);
-      } finally {
-        setIsLoadingMyApps(false);
-      }
-    };
-    
-    loadMyApps();
-  }, [activeTab, myApps, needsMyAppsData]); // Recharger quand l'onglet, myApps, ou ce besoin externe change
-  
-  // Charger toutes les apps quand nécessaire :
-  // - Une catégorie est sélectionnée (sauf "Toutes")
-  // - L'onglet MY_APPS est actif
-  useEffect(() => {
-    const loadAllAppsForCategory = async () => {
-      // Déterminer si on a besoin de charger toutes les apps
-      const needsAllApps = 
-        selectedCategory !== 'Toutes' || 
-        activeTab === TABS.MY_APPS;
-      
-      // Si on n'a pas besoin de toutes les apps, ne rien faire
-      if (!needsAllApps) {
-        return;
-      }
-      
-      // Si toutes les apps sont déjà chargées, ne rien faire
-      if (allAppsLoaded) {
-        return;
-      }
-
-      // Le premier chargement (pagination.total) n'est pas encore connu :
-      // `pagination.hasMore` vaut `false` par défaut à l'état initial, donc
-      // sans cette garde on conclurait à tort qu'il n'y a rien à charger
-      // avant même que le premier appel réseau n'ait répondu (arrivée
-      // directe sur l'onglet "Mes Apps" après onboarding). On attend que
-      // pagination.total soit connu pour statuer.
-      if (pagination.total === 0) {
-        return;
-      }
-
-      // S'il n'y a plus d'apps à charger, marquer comme terminé
-      if (!pagination.hasMore) {
-        setAllAppsLoaded(true);
-        return;
-      }
-      
-      setIsLoadingApps(true);
-      
-      try {
-        
-        let allApps = [...apps]; // Commencer avec les apps déjà chargées
-        let offset = apps.length;
-        const batchSize = 50;
-        let hasMore = true;
-        
-        // Charger par lots jusqu'à avoir tout
-        while (hasMore && offset < pagination.total) {
-          // Même tri que la 1ère page (sortBy=grade) : sans ça, l'offset
-          // pointe dans un autre ordre et des apps (souvent les alternatives
-          // d'apps de "Mes Apps") ne sont jamais chargées.
-          const url = `${API_URL}/apps?limit=${batchSize}&offset=${offset}&sortBy=grade`;
-
-          const data = await cachedFetchJSON(url);
-          const appsArray = data.success ? data.apps : [];
-          
-          if (appsArray.length === 0) {
-            break;
-          }
-          
-          // Normaliser les IDs en strings pour la cohérence
-          const normalizedApps = appsArray.map(app => ({
-            ...app,
-            id: String(app.id),
-            replacesAppId: app.replacesAppId ? String(app.replacesAppId) : undefined,
-            replacesAppIds: app.replacesAppIds ? app.replacesAppIds.map(id => String(id)) : undefined
-          }));
-          
-          const knownIds = new Set(allApps.map(a => a.id));
-          allApps = [...allApps, ...normalizedApps.filter(a => !knownIds.has(a.id))];
-          offset += appsArray.length;
-          hasMore = data.pagination?.hasMore || false;
-        }
-        
-        setApps(allApps);
-        setAllAppsLoaded(true);
-        
-        // Mettre à jour la pagination pour indiquer qu'il n'y a plus rien à charger
-        setPagination({
-          total: pagination.total,
-          limit: 0,
-          offset: allApps.length,
-          hasMore: false,
-          isLoadingMore: false
-        });
-        
-      } catch (error) {
-        console.error('❌ Erreur lors du chargement:', error);
-      } finally {
-        setIsLoadingApps(false);
-      }
-    };
-    
-    loadAllAppsForCategory();
-  }, [selectedCategory, activeTab, pagination.total]);
-
-  // Détecter quand le chargement initial est terminé
-  useEffect(() => {
-    if (!isLoadingApps) {
-      // Attendre un peu pour une transition fluide
-      setTimeout(() => setIsInitialLoading(false), 300);
-    }
-  }, [isLoadingApps]);
-
-  // Effectuer une recherche API quand searchTerm change
-  useEffect(() => {
-    if (!searchTerm.trim()) {
-      // Si la recherche est vide, réinitialiser les résultats
-      setSearchResults([]);
-      setIsSearching(false);
-      return;
-    }
-
-    // Ignore la réponse d'une recherche dépassée (frappe rapide : une réponse
-    // lente à « fa » ne doit pas écraser celle de « facebook »)
-    let cancelled = false;
-
-    // Lancer la recherche immédiatement (le debounce est déjà fait dans SearchBar)
-    const performSearch = async () => {
-      setIsSearching(true);
-      try {
-        
-        const url = `${API_URL}/apps?search=${encodeURIComponent(searchTerm)}`;
-        const response = await fetch(url);
-        const data = await response.json();
-        if (cancelled) return;
-        
-        if (data.success) {
-          // Normaliser les IDs en strings pour la cohérence
-          const normalizedApps = data.apps.map(app => ({
-            ...app,
-            id: String(app.id),
-            replacesAppId: app.replacesAppId ? String(app.replacesAppId) : undefined,
-            replacesAppIds: app.replacesAppIds ? app.replacesAppIds.map(id => String(id)) : undefined
-          }));
-          
-          setSearchResults(normalizedApps);
-        }
-      } catch (error) {
-        if (cancelled) return;
-        console.error('Erreur lors de la recherche:', error);
-        setSearchResults([]);
-      } finally {
-        if (!cancelled) setIsSearching(false);
-      }
-    };
-
-    performSearch();
-    return () => { cancelled = true; };
-  }, [searchTerm]);
-
-  // Filtrer les applications selon l'onglet actif et la recherche
-  const filteredApps = useMemo(() => {
-    // Pour TOP_ALTERNATIVES, utiliser awardsApps (chargées via API spécifique)
-    // sauf si une recherche est active
-    if (activeTab === TABS.TOP_ALTERNATIVES && !searchTerm.trim()) {
-      return awardsApps; // Déjà triées par catégorie dans l'API
-    }
-    
-    // Pour MY_APPS, utiliser myAppsData (chargées par IDs)
-    // sauf si une recherche est active
-    if (activeTab === TABS.MY_APPS && !searchTerm.trim()) {
-      // Créer une Map des apps déjà chargées pour un accès rapide
-      const loadedAppsMap = new Map(myAppsData.map(app => [String(app.id), app]));
-      
-      // Pour chaque app dans myApps, vérifier si elle est chargée ou créer un skeleton
-      const allMyApps = Array.from(myApps).map(id => {
-        const loadedApp = loadedAppsMap.get(String(id));
-        
-        // Si l'app est chargée, la retourner
-        if (loadedApp) {
-          return loadedApp;
-        }
-        
-        // Si l'app n'est pas encore chargée, créer un skeleton
-        // (ne pas dépendre de isLoadingMyApps qui est global et change rapidement)
-        return {
-          id: String(id),
-          name: 'Chargement...',
-          grade: 'C',
-          category: '',
-          icon: '⏳',
-          reason: '',
-          isLoadingSkeleton: true
-        };
-      });
-      
-      // Enrichir avec les alternatives (seulement pour les apps réelles, pas les skeletons)
-      const list = allMyApps.map(app => {
-        // Si c'est un skeleton, le retourner tel quel
-        if (app.isLoadingSkeleton) {
-          return app;
-        }
-        
-        // Chercher si une app avec meilleur grade remplace cette app (alternative)
-        // On cherche dans myAppsData ou apps
-        const allAvailableApps = [...new Map([...myAppsData, ...apps].map(a => [a.id, a])).values()];
-        const availableIds = new Set(allAvailableApps.map(a => String(a.id)));
-        
-        const alternativeInfo = buildAlternativeInfo(app, allAvailableApps, myApps);
-
-        if (alternativeInfo) {
-          return { ...app, ...alternativeInfo };
-        }
-        
-        // Détecter si l'app a des relations qui ne sont pas encore chargées
-        // Cela indique qu'on devrait afficher un loader
-        if (app.grade !== "A") {
-          // Vérifier si l'app a des alternativeAppIds qui ne sont pas dans le cache
-          const hasUnloadedAlternatives = app.alternativeAppIds && 
-            app.alternativeAppIds.length > 0 &&
-            app.alternativeAppIds.some(id => !availableIds.has(String(id)));
-          
-          // Si on a des alternatives non chargées OU qu'on est en train de charger
-          if (hasUnloadedAlternatives || isLoadingMyApps) {
-            return {
-              ...app,
-              isLoadingAlternative: true
-            };
-          }
-        }
-        
-        return app;
-      });
-      
-      // Trier par grade (E > D > C > B > A - du plus mauvais au meilleur) puis par nom
-      const gradeOrder = { 'E': 1, 'D': 2, 'C': 3, 'B': 4, 'A': 5 };
-      list.sort((a, b) => {
-        const gradeCompare = (gradeOrder[a.grade] || 999) - (gradeOrder[b.grade] || 999);
-        if (gradeCompare !== 0) return gradeCompare;
-        return a.name.localeCompare(b.name);
-      });
-      
-      return list;
-    }
-    
-    // Si une recherche est active, utiliser les résultats de recherche
-    const sourceApps = searchTerm.trim() ? searchResults : apps;
-    
-    let list = [];
-    
-    if (activeTab === TABS.APPLICATIONS) {
-      // Toutes les apps du catalogue
-      list = [...sourceApps];
-
-      // Cas du flux paginé côté serveur (catégorie "Toutes", pas de recherche) :
-      // l'API renvoie déjà les pages triées par grade puis nom (sortBy=grade).
-      // Re-trier ici avec le comparateur JS (localeCompare, sensible à la
-      // locale) peut donner un ordre légèrement différent de celui de
-      // Postgres pour certains noms (accents, ponctuation, casse) et donc
-      // réordonner des cartes déjà affichées à chaque page chargée. On garde
-      // alors l'ordre du serveur tel quel pour que le lazyload ne fasse
-      // qu'ajouter des cartes en fin de liste, sans décaler les précédentes.
-      const isServerPaginatedStream = !searchTerm.trim() && selectedCategory === 'Toutes';
-      if (!isServerPaginatedStream) {
-        // Trier par grade (A > B > C > D > E) puis par nom
-        const gradeOrder = { 'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5 };
-        list.sort((a, b) => {
-          const gradeCompare = (gradeOrder[a.grade] || 999) - (gradeOrder[b.grade] || 999);
-          if (gradeCompare !== 0) return gradeCompare;
-          return a.name.localeCompare(b.name);
-        });
-      }
-    } else if (activeTab === TABS.MY_APPS) {
-      // Si recherche active dans MY_APPS, filtrer les résultats de recherche
-      list = sourceApps
-        .filter(app => myApps.has(app.id))
-        .map(app => {
-          // Chercher si une app avec meilleur grade remplace cette app (alternative)
-          const alternativeInfo = buildAlternativeInfo(app, apps, myApps);
-          return alternativeInfo ? { ...app, ...alternativeInfo } : app;
-        });
-      
-      // Trier par grade (E > D > C > B > A - du plus mauvais au meilleur) puis par nom
-      const gradeOrder = { 'E': 1, 'D': 2, 'C': 3, 'B': 4, 'A': 5 };
-      list.sort((a, b) => {
-        const gradeCompare = (gradeOrder[a.grade] || 999) - (gradeOrder[b.grade] || 999);
-        if (gradeCompare !== 0) return gradeCompare;
-        return a.name.localeCompare(b.name);
-      });
-    } else if (activeTab === TABS.TOP_ALTERNATIVES) {
-      // Si recherche active, filtrer les résultats de recherche par showInAwards
-      list = sourceApps.filter(app => app.showInAwards === true && ['A', 'B'].includes(app.trustiScore || app.grade));
-      
-      // Trier par catégorie puis par nom
-      list.sort((a, b) => {
-        const categoryCompare = (a.category || '').localeCompare(b.category || '');
-        if (categoryCompare !== 0) return categoryCompare;
-        return a.name.localeCompare(b.name);
-      });
-    }
-    
-    return list;
-  }, [activeTab, myApps, searchTerm, searchResults, apps, awardsApps, myAppsData, isLoadingMyApps, selectedCategory]);
-
-  // Ajouter/retirer une app de "Mes Apps"
-  const toggleMyApp = (e, id) => {
-    e.stopPropagation();
-    setMyApps(prev => {
-      const newList = new Set(prev);
-      if (newList.has(id)) {
-        newList.delete(id);
-      } else {
-        newList.add(id);
-      }
-      return newList;
-    });
-  };
-
-  // Ajouter/retirer une app des favoris du catalogue ("+" sur une app qui
-  // n'est pas dans "Mes Apps") — n'affecte jamais "Mes Apps".
-  const toggleFavorite = (e, id) => {
-    e.stopPropagation();
-    setFavoriteApps(prev => {
-      const newList = new Set(prev);
-      if (newList.has(id)) {
-        newList.delete(id);
-      } else {
-        newList.add(id);
-      }
-      return newList;
-    });
-  };
-
-  // Ajouter plusieurs apps sans risque de toggle (toujours additive)
-  const addMyApps = (ids) => {
-    setMyApps(prev => {
-      const next = new Set(prev);
-      ids.forEach(id => next.add(String(id)));
-      return next;
-    });
-  };
-
-  // Retirer plusieurs apps de "Mes Apps" (ex: apps confirmées désinstallées
-  // lors d'un nouveau scan du téléphone)
-  const removeMyApps = (ids) => {
-    if (!ids || ids.length === 0) return;
-    setMyApps(prev => {
-      const next = new Set(prev);
-      ids.forEach(id => next.delete(String(id)));
-      return next;
-    });
-  };
-
-  // Vider "Mes Apps" (et les favoris du catalogue associés) — utilisé par la
-  // gestion de l'espace de stockage pour repartir d'une sélection vide sans
-  // toucher à l'historique de migrations.
-  const clearMyApps = () => {
-    setMyApps(new Set());
-    setFavoriteApps(new Set());
-  };
-
-  // Vider l'historique de migrations (statut migré + alternatives
-  // personnalisées) sans retirer les apps de "Mes Apps".
-  const clearMigrations = () => {
-    setMigratedApps(new Set());
-    setCustomMigrations(new Map());
-  };
-
-  // Marquer/démarquer comme migré
-  const toggleMigrate = (e, id) => {
-    e.stopPropagation();
-    setMigratedApps(prev => {
-      const newList = new Set(prev);
-      if (newList.has(id)) {
-        newList.delete(id);
-      } else {
-        newList.add(id);
-      }
-      return newList;
-    });
-  };
-
-  // Définir une migration personnalisée
-  const setCustomMigration = (appId, alternativeName) => {
-    setCustomMigrations(prev => new Map(prev).set(appId, alternativeName));
-  };
-
-  // Importer un lot de migrations partagées (toujours additif)
-  // entries = [{ id, customAlt? }]
-  const importMigrations = (entries = []) => {
-    if (!entries.length) return;
-    const ids = entries.map(({ id }) => String(id));
-
-    // Les apps migrées font aussi partie de "Mes Apps"
-    setMyApps(prev => {
-      const next = new Set(prev);
-      ids.forEach(id => next.add(id));
-      return next;
-    });
-
-    setMigratedApps(prev => {
-      const next = new Set(prev);
-      ids.forEach(id => next.add(id));
-      return next;
-    });
-
-    // Appliquer les alternatives personnalisées éventuelles
-    const withCustom = entries.filter(({ customAlt }) => Boolean(customAlt));
-    if (withCustom.length) {
-      setCustomMigrations(prev => {
-        const next = new Map(prev);
-        withCustom.forEach(({ id, customAlt }) => next.set(String(id), customAlt));
-        return next;
-      });
-    }
-  };
-  
-  // Charger plus d'applications
-  const loadMoreApps = async () => {
-    if (pagination.isLoadingMore || !pagination.hasMore) return;
-    
-    setPagination(prev => ({ ...prev, isLoadingMore: true }));
-    
-    try {
-      
-      // Charger la page suivante
-      const nextOffset = pagination.offset + pagination.limit;
-      const data = await cachedFetchJSON(`${API_URL}/apps?limit=${pagination.limit}&offset=${nextOffset}&sortBy=grade`);
-      const appsArray = data.success ? data.apps : [];
-      
-      // Normaliser les IDs en strings pour la cohérence
-      const normalizedApps = appsArray.map(app => ({
-        ...app,
-        id: String(app.id),
-        replacesAppId: app.replacesAppId ? String(app.replacesAppId) : undefined,
-        replacesAppIds: app.replacesAppIds ? app.replacesAppIds.map(id => String(id)) : undefined
-      }));
-      
-      // Ajouter les nouvelles apps à la liste existante
-      setApps(prev => [...prev, ...normalizedApps]);
-      
-      // Mettre à jour l'état de pagination
-      if (data.pagination) {
-        setPagination({
-          total: data.pagination.total,
-          limit: data.pagination.limit,
-          offset: nextOffset,
-          hasMore: data.pagination.hasMore,
-          isLoadingMore: false
-        });
-      }
-    } catch (error) {
-      console.error('Erreur lors du chargement de plus d\'applications:', error);
-      setPagination(prev => ({ ...prev, isLoadingMore: false }));
-    }
-  };
+  const filteredApps = useMemo(() => computeFilteredApps({
+    activeTab,
+    searchTerm,
+    selectedCategory,
+    catalogApps: catalog.apps,
+    searchResults,
+    awardsApps,
+    myApps,
+    myAppsData,
+    isLoadingMyApps,
+  }), [activeTab, myApps, searchTerm, searchResults, catalog.apps, awardsApps, myAppsData, isLoadingMyApps, selectedCategory]);
 
   return {
     // État
     activeTab,
     searchTerm,
     myApps,
-    favoriteApps,
-    migratedApps,
-    customMigrations,
+    favoriteApps: selections.favoriteApps,
+    migratedApps: selections.migratedApps,
+    customMigrations: selections.customMigrations,
     selectedApp,
-    apps,
-    isLoadingApps,
-    isInitialLoading,
-    isInitialized,
+    apps: catalog.apps,
+    isLoadingApps: catalog.isLoadingApps,
+    isInitialLoading: catalog.isInitialLoading,
+    isInitialized: selections.isInitialized,
     isSearching,
     isLoadingAwards,
     isLoadingMyApps,
     myAppsData,
     filteredApps,
-    pagination,
-    
+    pagination: catalog.pagination,
+
     // Actions
     setActiveTab,
     setSearchTerm,
-    toggleMyApp,
-    toggleFavorite,
-    addMyApps,
-    removeMyApps,
-    clearMyApps,
-    clearMigrations,
-    toggleMigrate,
-    setCustomMigration,
-    importMigrations,
+    toggleMyApp: selections.toggleMyApp,
+    toggleFavorite: selections.toggleFavorite,
+    addMyApps: selections.addMyApps,
+    removeMyApps: selections.removeMyApps,
+    clearMyApps: selections.clearMyApps,
+    clearMigrations: selections.clearMigrations,
+    toggleMigrate: selections.toggleMigrate,
+    setCustomMigration: selections.setCustomMigration,
+    importMigrations: selections.importMigrations,
     setSelectedApp,
-    loadMoreApps,
+    loadMoreApps: catalog.loadMoreApps,
   };
 };
