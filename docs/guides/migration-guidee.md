@@ -94,7 +94,7 @@ VALUES ('mastodon', 'import', 'En bref…',
         'https://docs.joinmastodon.org/…', CURRENT_DATE, true);
 ```
 
-Création de la table (idempotent) : `npm run db:add-migration-guides`. Les 29 guides de départ ont été insérés le 2026-11-10 ; 10 sont marqués `verified` (page officielle relue), les autres restent à vérifier : `SELECT app_id, direction, source_url FROM app_migration_guides WHERE NOT verified;`.
+Création de la table (idempotent) : `npm run db:add-migration-guides`. Les 29 guides de départ ont été insérés le 2026-11-10 ; 10 étaient marqués `verified` (page officielle relue). Les 19 autres ont été relus le même jour sur leurs pages officielles et corrigés sur validation de David (17 corrigés, 2 exacts) : tous les guides sont maintenant `verified`. Erreurs notables corrigées : Pixelfed attend l'archive Instagram en ZIP sans la décompresser (300 publications par import), source de Signal remplacée (page WhatsApp), import Tuta réservé aux offres Legend et Unlimited, source de l'export Chrome remplacée (page Vivaldi). Evernote et Dashlane bloquent la lecture automatique : vérifiés sur les extraits de leurs pages officielles. Pour trouver un guide à revoir : `SELECT app_id, direction, source_url, checked_at FROM app_migration_guides WHERE NOT verified OR checked_at < now() - interval '6 months';`.
 
 ## Exemple
 
