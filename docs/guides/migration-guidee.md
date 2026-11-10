@@ -55,18 +55,31 @@ Les textes sont dans la table `app_migration_guides` (Neon, base `trusti-db`), u
 | `app_id`, `direction` | Clé : id de l'app (table `applications`) et `export` ou `import` |
 | `summary` | « En bref » : ce qui est repris, où, combien de temps |
 | `steps` | Étapes numérotées (tableau JSON de textes), menus exacts |
-| `notes` | « À savoir » (tableau JSON) : ce qui ne suit pas, pièges, sécurité |
+| `notes` | Tableau JSON. Chaque note est un texte (encadré ambre « À savoir ») ou `{"text": "…", "level": "danger"}` (encadré rouge « Attention ») pour un vrai risque : mots de passe en clair, perte d'accès à un compte |
 | `direct_from`, `direct_export` | (import) apps depuis lesquelles l'alternative importe seule ; l'export est alors remplacé par la phrase `direct_export` |
 | `source_url`, `checked_at` | Page d'aide officielle et date de vérification |
 | `verified` | `true` seulement si chaque étape a été relue sur `source_url` |
 
 Le guide doit se suffire à lui-même : l'utilisateur ne devrait pas avoir à ouvrir la source.
 
+### Mise en forme des textes
+
+`summary`, `steps`, `notes` et `direct_export` acceptent un **Markdown limité**, rendu par `src/components/ui/RichText.jsx` (`react-markdown`, règles dans `src/utils/richText.js`) :
+
+| Écrire en base | Rendu | Usage |
+|---|---|---|
+| `**Paramètres > Exporter**` | gras | noms de menus et de boutons à repérer à l'écran |
+| `*facultatif*` | italique | nuance |
+| `` `subscriptions.csv` `` | code | noms de fichiers, adresses internes (`vivaldi://…`) |
+| `[takeout.google.com](https://takeout.google.com)` | lien | adresse à ouvrir ; **https uniquement**, les autres liens sont neutralisés |
+
+Tout le reste est ignoré (seul le texte est gardé) : titres, images, tableaux, listes, citations. Le HTML est supprimé, jamais interprété. Les couleurs ne s'écrivent pas en base : elles dépendent du champ (résumé, étape) et du niveau des notes (`info`, `danger`). Tests : `tests/technical/richText.test.js`.
+
 Corriger une étape :
 
 ```sql
 UPDATE app_migration_guides
-SET steps = jsonb_set(steps, '{1}', to_jsonb('Touchez ⋮ > Plus > Exporter la discussion.'::text)),
+SET steps = jsonb_set(steps, '{1}', to_jsonb('Touchez **⋮** > **Plus > Exporter la discussion**.'::text)),
     checked_at = CURRENT_DATE, verified = true, updated_at = now()
 WHERE app_id = '1769879213451' AND direction = 'export';
 ```
@@ -76,7 +89,8 @@ Ajouter un guide :
 ```sql
 INSERT INTO app_migration_guides (app_id, direction, summary, steps, notes, source_url, checked_at, verified)
 VALUES ('mastodon', 'import', 'En bref…',
-        '["Étape 1", "Étape 2"]', '["À savoir"]',
+        '["Étape 1 : **Paramètres > Importer**", "Étape 2"]',
+        '["À savoir", {"text": "Supprimez le fichier : il est en clair.", "level": "danger"}]',
         'https://docs.joinmastodon.org/…', CURRENT_DATE, true);
 ```
 

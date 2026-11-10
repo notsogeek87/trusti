@@ -50,7 +50,8 @@ Endpoint principal, backé par PostgreSQL (`service-postgres.js`).
   (voir `server/gradeChanges.js` : `buildGradeTimeline`).
 - **GET** `?migration_guide_from=:id&migration_guide_to=:id` : guide de migration
   lu dans `app_migration_guides`. Réponse : `{ success: true, guide: { export, import } }`,
-  chaque côté `{ summary, steps[], notes[], source, checkedAt, verified }` ou `null`
+  chaque côté `{ summary, steps[], notes[{ text, level }], source, checkedAt, verified }` ou `null`
+  (`level` : `info` ou `danger` ; textes en Markdown limité, voir le guide)
   sans guide. Si l'alternative importe directement depuis l'app quittée, `export` se
   résume à une phrase sans étapes. 400 si l'un des deux ids manque. Voir
   [Migration guidée](../guides/migration-guidee.md).

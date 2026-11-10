@@ -9,13 +9,29 @@
 
 const asList = (value) => (Array.isArray(value) ? value.filter(v => typeof v === 'string' && v.trim()) : []);
 
-/** Ligne de la table -> section prête à afficher. */
+export const NOTE_LEVELS = ['info', 'danger'];
+
+/**
+ * « À savoir » : chaque note est un texte (niveau info) ou { text, level } avec
+ * level = 'danger' pour un vrai risque (mots de passe en clair, perte d'accès…).
+ * La couleur est choisie par l'app selon le niveau, jamais stockée en base.
+ */
+const asNotes = (value) => (Array.isArray(value) ? value : [])
+  .map(note => (typeof note === 'string'
+    ? { text: note, level: 'info' }
+    : { text: note?.text, level: NOTE_LEVELS.includes(note?.level) ? note.level : 'info' }))
+  .filter(note => typeof note.text === 'string' && note.text.trim());
+
+/**
+ * Ligne de la table -> section prête à afficher. Les textes peuvent contenir un Markdown
+ * limité (gras, italique, code, lien https), interprété par l'app (src/utils/richText.js).
+ */
 export function formatGuideSection(row) {
   if (!row) return null;
   return {
     summary: row.summary || null,
     steps: asList(row.steps),
-    notes: asList(row.notes),
+    notes: asNotes(row.notes),
     source: row.source_url || null,
     checkedAt: row.checked_at ? String(row.checked_at).slice(0, 10) : null,
     verified: Boolean(row.verified),

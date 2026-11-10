@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { X, Check, ExternalLink, Info, Trash2, ChevronLeft, ChevronRight, PartyPopper } from 'lucide-react';
+import { X, Check, ExternalLink, Info, AlertTriangle, Trash2, ChevronLeft, ChevronRight, PartyPopper } from 'lucide-react';
+import RichText from '../ui/RichText';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { MIGRATION_STEPS, CLEANUP_TIPS } from '../../constants/migrationGuide';
 import { getDataTips, getMigrationCandidates, computeProgress } from '../../utils/migrationGuide';
@@ -24,14 +25,40 @@ const TipList = ({ title, tips }) => (
 );
 
 // Guide d'un côté du transfert (voir getDataTips) : tout ce qu'il faut pour le suivre sans
-// quitter Trusti. La source officielle reste en pied de bloc, pour qui veut vérifier.
+// quitter Trusti. Textes venus de la base, avec un Markdown limité (RichText). Les notes
+// « danger » (mots de passe en clair, perte d'accès…) passent en rouge, les autres en ambre.
+// La source officielle reste en pied de bloc, pour qui veut vérifier.
+const NOTE_STYLES = {
+  danger: { box: 'bg-rose-50 border-rose-200', title: 'text-rose-800', text: 'text-rose-900', Icon: AlertTriangle, label: 'Attention' },
+  info: { box: 'bg-amber-50 border-amber-200', title: 'text-amber-800', text: 'text-amber-900', Icon: Info, label: 'À savoir' },
+};
+
+const NoteBox = ({ level, notes }) => {
+  if (notes.length === 0) return null;
+  const style = NOTE_STYLES[level];
+  return (
+    <div className={`border rounded-lg px-2.5 py-2 ${style.box}`}>
+      <p className={`flex items-center gap-1 text-[11px] font-black mb-1 ${style.title}`}>
+        <style.Icon size={12} /> {style.label}
+      </p>
+      <ul className="space-y-1">
+        {notes.map(note => (
+          <li key={note.text} className={`text-[11px] leading-relaxed ${style.text}`}><RichText>{note.text}</RichText></li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
 const GuideSection = ({ title, section }) => {
   const numbered = section.steps.length > 1 && section.summary;
+  // Conseils par catégorie : simples textes ; guides de la base : { text, level }
+  const notes = section.notes.map(n => (typeof n === 'string' ? { text: n, level: 'info' } : n));
   return (
     <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 space-y-2">
       <p className="text-[11px] font-black uppercase tracking-tight text-slate-500">{title}</p>
       {section.summary && (
-        <p className="text-xs text-slate-800 font-semibold leading-relaxed">{section.summary}</p>
+        <div className="text-xs text-slate-800 font-semibold leading-relaxed"><RichText>{section.summary}</RichText></div>
       )}
       {section.steps.length > 0 && (numbered ? (
         <ol className="space-y-2">
@@ -40,7 +67,7 @@ const GuideSection = ({ title, section }) => {
               <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-black flex items-center justify-center shrink-0">
                 {i + 1}
               </span>
-              <span className="pt-0.5">{step}</span>
+              <span className="pt-0.5 min-w-0"><RichText>{step}</RichText></span>
             </li>
           ))}
         </ol>
@@ -48,23 +75,13 @@ const GuideSection = ({ title, section }) => {
         <ul className="space-y-1.5">
           {section.steps.map(step => (
             <li key={step} className="text-xs text-slate-600 leading-relaxed flex gap-2">
-              <span className="text-indigo-400 shrink-0">•</span>{step}
+              <span className="text-indigo-400 shrink-0">•</span><span className="min-w-0"><RichText>{step}</RichText></span>
             </li>
           ))}
         </ul>
       ))}
-      {section.notes.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-2">
-          <p className="flex items-center gap-1 text-[11px] font-black text-amber-800 mb-1">
-            <Info size={12} /> À savoir
-          </p>
-          <ul className="space-y-1">
-            {section.notes.map(note => (
-              <li key={note} className="text-[11px] text-amber-900 leading-relaxed">{note}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <NoteBox level="danger" notes={notes.filter(n => n.level === 'danger')} />
+      <NoteBox level="info" notes={notes.filter(n => n.level !== 'danger')} />
       {section.source && (
         <a href={section.source} target="_blank" rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-[10px] text-slate-400 hover:text-indigo-600">

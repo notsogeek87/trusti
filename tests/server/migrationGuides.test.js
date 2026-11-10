@@ -21,7 +21,7 @@ test('formatGuideSection : section prête à afficher', () => {
   assert.deepEqual(formatGuideSection(gmailExport), {
     summary: 'Google fournit vos e-mails en MBOX.',
     steps: ['Ouvrez takeout.google.com.', 'Cochez Mail.'],
-    notes: ['Lien valable 7 jours.'],
+    notes: [{ text: 'Lien valable 7 jours.', level: 'info' }],
     source: 'https://support.google.com/x',
     checkedAt: '2026-11-10',
     verified: true,
@@ -53,4 +53,19 @@ test('buildTransferGuide : sans guide, les deux côtés sont null', () => {
   assert.deepEqual(buildTransferGuide([], GMAIL, PROTON), { export: null, import: null });
   // une ligne d'import pour l'app quittée n'est pas un export
   assert.equal(buildTransferGuide([{ ...protonImport, app_id: GMAIL }], GMAIL, PROTON).export, null);
+});
+
+test('formatGuideSection : notes en texte ou avec niveau, niveau inconnu ramené à info', () => {
+  const s = formatGuideSection({ ...gmailExport, notes: [
+    'Simple',
+    { text: 'Mots de passe en clair', level: 'danger' },
+    { text: 'Couleur imposée', level: 'red' },
+    { text: '' },
+    { level: 'danger' },
+  ] });
+  assert.deepEqual(s.notes, [
+    { text: 'Simple', level: 'info' },
+    { text: 'Mots de passe en clair', level: 'danger' },
+    { text: 'Couleur imposée', level: 'info' },
+  ]);
 });
