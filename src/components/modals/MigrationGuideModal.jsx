@@ -207,7 +207,11 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
                 <li key={s.id} className="flex-1">
                   <button
                     onClick={() => setStepIndex(i)}
-                    className={`w-full h-1.5 rounded-full ${done[s.id] ? 'bg-emerald-500' : i === stepIndex ? 'bg-indigo-500' : 'bg-slate-200'}`}
+                    // L'étape affichée prime sur « faite » : sinon une étape en cours déjà
+                    // cochée se confond avec les autres et l'on ne sait plus où l'on est.
+                    className={`w-full rounded-full transition-all ${i === stepIndex
+                      ? `h-2 ${done[s.id] ? 'bg-emerald-600 ring-2 ring-emerald-200' : 'bg-indigo-500 ring-2 ring-indigo-200'}`
+                      : `h-1.5 ${done[s.id] ? 'bg-emerald-300' : 'bg-slate-200'}`}`}
                     aria-label={`Étape ${i + 1} : ${s.title}`}
                     aria-current={i === stepIndex ? 'step' : undefined}
                   />
