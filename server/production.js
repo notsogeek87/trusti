@@ -34,10 +34,22 @@ app.all('/api/suggest-tool', suggestToolHandler);
 app.all('/api/clean-duplicates', cleanDuplicatesHandler);
 app.all('/api/lookup-playstore', lookupPlayStoreHandler);
 
+// Diagnostic sans secret : seulement protocole et nom d'hôte, jamais les identifiants.
+function describeDbUrl(url) {
+  if (!url) return 'absente';
+  try {
+    const u = new URL(url);
+    return `${u.protocol}//${u.hostname}`;
+  } catch {
+    return `invalide (${String(url).length} caractères)`;
+  }
+}
+
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     db: pickDriver(process.env.DATABASE_URL, process.env.DB_DRIVER),
+    dbHost: describeDbUrl(process.env.DATABASE_URL),
     timestamp: new Date().toISOString(),
   });
 });
