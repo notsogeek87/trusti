@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { X, Check, ExternalLink, Trash2, ChevronLeft, ChevronRight, PartyPopper } from 'lucide-react';
+import { X, Check, ExternalLink, Info, AlertTriangle, Trash2, ChevronLeft, ChevronRight, PartyPopper } from 'lucide-react';
+import RichText from '../ui/RichText';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { MIGRATION_STEPS, CLEANUP_TIPS } from '../../constants/migrationGuide';
 import { getDataTips, getMigrationCandidates, computeProgress } from '../../utils/migrationGuide';
 import { getMigrationGuideState, saveMigrationGuideState } from '../../utils/migrationGuideStorage';
+import { useMigrationGuide } from '../../hooks/useMigrationGuide';
 import { extractPackageId } from '../../utils/androidPackage';
 import { isNativeAndroid } from '../../utils/platform';
 import InstalledApps from '../../native/InstalledApps';
@@ -21,6 +23,74 @@ const TipList = ({ title, tips }) => (
     </ul>
   </div>
 );
+
+// Guide d'un côté du transfert (voir getDataTips) : tout ce qu'il faut pour le suivre sans
+// quitter Trusti. Textes venus de la base, avec un Markdown limité (RichText). Les notes
+// « danger » (mots de passe en clair, perte d'accès…) passent en rouge, les autres en ambre.
+// La source officielle reste en pied de bloc, pour qui veut vérifier.
+const NOTE_STYLES = {
+  danger: { box: 'bg-rose-50 border-rose-200', title: 'text-rose-800', text: 'text-rose-900', Icon: AlertTriangle, label: 'Attention' },
+  info: { box: 'bg-amber-50 border-amber-200', title: 'text-amber-800', text: 'text-amber-900', Icon: Info, label: 'À savoir' },
+};
+
+const NoteBox = ({ level, notes }) => {
+  if (notes.length === 0) return null;
+  const style = NOTE_STYLES[level];
+  return (
+    <div className={`border rounded-lg px-2.5 py-2 ${style.box}`}>
+      <p className={`flex items-center gap-1 text-[11px] font-black mb-1 ${style.title}`}>
+        <style.Icon size={12} /> {style.label}
+      </p>
+      <ul className="space-y-1">
+        {notes.map(note => (
+          <li key={note.text} className={`text-[11px] leading-relaxed ${style.text}`}><RichText>{note.text}</RichText></li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+const GuideSection = ({ title, section }) => {
+  const numbered = section.steps.length > 1 && section.summary;
+  // Conseils par catégorie : simples textes ; guides de la base : { text, level }
+  const notes = section.notes.map(n => (typeof n === 'string' ? { text: n, level: 'info' } : n));
+  return (
+    <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 space-y-2">
+      <p className="text-[11px] font-black uppercase tracking-tight text-slate-500">{title}</p>
+      {section.summary && (
+        <div className="text-xs text-slate-800 font-semibold leading-relaxed"><RichText>{section.summary}</RichText></div>
+      )}
+      {section.steps.length > 0 && (numbered ? (
+        <ol className="space-y-2">
+          {section.steps.map((step, i) => (
+            <li key={step} className="text-xs text-slate-600 leading-relaxed flex gap-2">
+              <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-black flex items-center justify-center shrink-0">
+                {i + 1}
+              </span>
+              <span className="pt-0.5 min-w-0"><RichText>{step}</RichText></span>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <ul className="space-y-1.5">
+          {section.steps.map(step => (
+            <li key={step} className="text-xs text-slate-600 leading-relaxed flex gap-2">
+              <span className="text-indigo-400 shrink-0">•</span><span className="min-w-0"><RichText>{step}</RichText></span>
+            </li>
+          ))}
+        </ul>
+      ))}
+      <NoteBox level="danger" notes={notes.filter(n => n.level === 'danger')} />
+      <NoteBox level="info" notes={notes.filter(n => n.level !== 'danger')} />
+      {section.source && (
+        <a href={section.source} target="_blank" rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-[10px] text-slate-400 hover:text-indigo-600">
+          <ExternalLink size={10} /> Source : aide officielle
+        </a>
+      )}
+    </div>
+  );
+};
 
 const StepCheck = ({ checked, onChange, children }) => (
   <button
@@ -55,7 +125,8 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
   const alt = candidates.find(c => String(c.id) === state.altId) || candidates[0];
   const step = MIGRATION_STEPS[stepIndex];
   const done = state.done;
-  const tips = getDataTips(app.category);
+  const migrationGuide = useMigrationGuide(app.id, alt?.id);
+  const tips = getDataTips(app.category, migrationGuide.guide);
   const oldPackage = extractPackageId(app.playStoreUrl);
   const altPackage = extractPackageId(alt?.playStoreUrl);
   const oldInstalled = oldPackage && installed.includes(oldPackage);
@@ -136,7 +207,11 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
                 <li key={s.id} className="flex-1">
                   <button
                     onClick={() => setStepIndex(i)}
-                    className={`w-full h-1.5 rounded-full ${done[s.id] ? 'bg-emerald-500' : i === stepIndex ? 'bg-indigo-500' : 'bg-slate-200'}`}
+                    // L'étape affichée prime sur « faite » : sinon une étape en cours déjà
+                    // cochée se confond avec les autres et l'on ne sait plus où l'on est.
+                    className={`w-full rounded-full transition-all ${i === stepIndex
+                      ? `h-2 ${done[s.id] ? 'bg-emerald-600 ring-2 ring-emerald-200' : 'bg-indigo-500 ring-2 ring-indigo-200'}`
+                      : `h-1.5 ${done[s.id] ? 'bg-emerald-300' : 'bg-slate-200'}`}`}
                     aria-label={`Étape ${i + 1} : ${s.title}`}
                     aria-current={i === stepIndex ? 'step' : undefined}
                   />
@@ -193,8 +268,14 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
 
             {step.id === 'transfer' && (
               <div className="space-y-3">
-                <TipList title={`Depuis ${app.name}`} tips={tips.export} />
-                <TipList title={`Vers ${alt.name}`} tips={tips.import} />
+                {migrationGuide.status === 'loading' ? (
+                  <div className="h-40 bg-slate-50 rounded-xl border border-slate-100 animate-pulse" aria-label="Chargement du guide" />
+                ) : (
+                  <>
+                    <GuideSection title={`1. Récupérer vos données de ${app.name}`} section={tips.export} />
+                    <GuideSection title={`2. Les mettre dans ${alt.name}`} section={tips.import} />
+                  </>
+                )}
                 <StepCheck checked={!!done.transfer} onChange={v => setDone('transfer', v)}>Mes données sont transférées</StepCheck>
               </div>
             )}
@@ -227,9 +308,11 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
                   Terminer la migration
                 </button>
               ) : (
-                <button onClick={() => { if (step.id === 'choose') setDone('choose', true); setStepIndex(stepIndex + 1); }}
+                // Passer à la suite valide l'étape quittée : le fil se remplit au fur et à
+                // mesure. La case de l'étape reste décochable si l'on revient en arrière.
+                <button onClick={() => { setDone(step.id, true); setStepIndex(stepIndex + 1); }}
                   className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1">
-                  Étape suivante <ChevronRight size={16} />
+                  C'est fait, étape suivante <ChevronRight size={16} />
                 </button>
               )}
             </div>

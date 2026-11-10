@@ -77,8 +77,8 @@ défaut. Pour les trois pages autonomes, `src/main.jsx` écoute l'événement Ca
 - Sites web officiels ajoutés le 2026-11-05 (champ `website` vide) pour 8 outils des kits :
   Bitwarden, Infomaniak Mail, kDrive, kMeet, Lumo, Olvid, Proton Drive, Tuta. Adresses
   vérifiées (réponse 200). Retour arrière : remettre `website = NULL` sur ces ids.
-- API : `GET /api/apps?pro=true` (`getProApps` dans `server/database/service-postgres.js`). Le
-  format commun `formatAppFromDB` n'est pas modifié ; la réponse ajoute seulement
+- API : `GET /api/apps?pro=true` (`getProApps` dans `server/database/postgres/apps-read.js`). Le
+  format commun `formatAppFromDB` (`postgres/app-format.js`) n'est pas modifié ; la réponse ajoute seulement
   `curatedAlternativeIds` (relations `alternative` de `app_relations`).
 
 ## Calculs (`src/utils/organisationAssessment.js`, testés dans `tests/technical/organisationAssessment.test.js`)

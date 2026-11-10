@@ -1,235 +1,78 @@
-import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef, Suspense, lazy } from 'react';
-import { App as CapacitorApp } from '@capacitor/app';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAppManagement } from './hooks/useAppManagement';
 import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
-import { TABS } from './constants/tabs';
-import { CATEGORIES, FAVORITES_FILTER } from './constants/categories';
-import { Sparkles, Share2, RefreshCw, Star } from 'lucide-react';
-import { ViewModeContext } from './contexts/ViewModeContext';
-import { parseShareParams, clearShareParams, hasShareParams, getSharedAppIdFromUrl } from './utils/shareUtils';
-import { API_URL } from './utils/apiConfig';
-import { hasCompletedOnboarding, markOnboardingComplete } from './utils/onboardingStorage';
-import { getMyAppsSortPref, setMyAppsSortPref, sortMyApps } from './utils/myAppsSort';
-import { areNudgesEnabled, setNudgesEnabled } from './utils/alternativeNudges';
 import { useAlternativeNudges } from './hooks/useAlternativeNudges';
+import { useGradeChanges } from './hooks/useGradeChanges';
+import { useIsSmallViewport } from './hooks/useIsSmallViewport';
+import { usePreferenceToggle } from './hooks/usePreferenceToggle';
+import { useMyAppsView } from './hooks/useMyAppsView';
+import { useAppDetail } from './hooks/useAppDetail';
+import { useShareLinks } from './hooks/useShareLinks';
+import { useOnboardingFlow } from './hooks/useOnboardingFlow';
+import { useBackNavigation } from './hooks/useBackNavigation';
+import { TABS } from './constants/tabs';
+import { ViewModeContext } from './contexts/ViewModeContext';
+import { useToast } from './contexts/ToastContext';
+import { areNudgesEnabled, setNudgesEnabled } from './utils/alternativeNudges';
+import { areGradeAlertsEnabled, setGradeAlertsEnabled } from './utils/gradeChanges';
+import { getMigrationsInProgress } from './utils/migrationGuide';
+import { getAllMigrationGuideStates, removeMigrationGuideState, saveMigrationGuideState } from './utils/migrationGuideStorage';
+import { isNativeAndroid } from './utils/platform';
 
 // Layout
 import Header from './components/layout/Header';
-
-// UI Components
-import LoadingSpinner from './components/ui/LoadingSpinner';
 import Navigation from './components/layout/Navigation';
+import SplashScreen from './components/layout/SplashScreen';
 
-// UI Components
+// Écrans et sections
 import SearchBar from './components/ui/SearchBar';
 import ExplainerPanel from './components/ExplainerPanel';
 import AppsList from './components/AppsList';
+import CategoryFilterBar from './components/CategoryFilterBar';
+import AwardsHeader from './components/AwardsHeader';
+import MyAppsHeader from './components/MyAppsHeader';
 import MyAppsSummary from './components/MyAppsSummary';
 import DataHygieneCard from './components/DataHygieneCard';
-import MyAppsFilterMenu, { DEFAULT_MIGRATION_FILTER, DEFAULT_ALTERNATIVE_FILTER } from './components/MyAppsFilterMenu';
+import GradeChangesCard from './components/GradeChangesCard';
+import MigrationsInProgressCard from './components/MigrationsInProgressCard';
+import MyAppsFilterMenu from './components/MyAppsFilterMenu';
+import MyAppsFilterNotice from './components/MyAppsFilterNotice';
 import LandingPage from './components/LandingPage';
-import OnboardingApps from './components/OnboardingApps';
-import OnboardingAppsNative from './components/OnboardingAppsNative';
-import { isNativeAndroid } from './utils/platform';
-import { runBackHandler } from './utils/backHandlers';
+import AppsSelectionScreen from './components/AppsSelectionScreen';
+import RescanPrompts from './components/RescanPrompts';
+import StoragePage from './components/StoragePage';
 
-// Modals
+// Modales
 import AppDetailModal from './components/modals/AppDetailModal';
-import RescanPrompt from './components/ui/RescanPrompt';
 import ShareModal from './components/modals/ShareModal';
 import TrustiShareModal from './components/modals/TrustiShareModal';
 import ImportAppsModal from './components/modals/ImportAppsModal';
 import MigrationSelectorModal from './components/modals/MigrationSelectorModal';
 import WelcomeModal from './components/modals/WelcomeModal';
-import StoragePage from './components/StoragePage';
-import { useToast } from './contexts/ToastContext';
-import { APP_UNINSTALLED_EVENT } from './utils/uninstallWatcher';
-import InstalledApps from './native/InstalledApps';
-import { loadPackagesSnapshot, savePackagesSnapshot, packagesChanged, markRescanPromptHandled, isWebPromptDue } from './utils/rescanPrompt';
-
-const useIsSmallViewport = () => {
-  const [isSmall, setIsSmall] = useState(() => window.innerWidth < 768);
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)');
-    const handler = (e) => setIsSmall(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-  return isSmall;
-};
-
-// Fonction pour trier les apps par popularité (utilise le champ popularity de la BDD)
-const sortAppsByPopularity = (apps) => {
-  return apps.slice().sort((a, b) => {
-    const popA = a.popularity || 9999;
-    const popB = b.popularity || 9999;
-    
-    // Trier par popularité (rang le plus bas = plus populaire)
-    if (popA !== popB) {
-      return popA - popB;
-    }
-    
-    // Si même popularité, tri alphabétique
-    return a.name.localeCompare(b.name);
-  });
-};
 
 /**
- * Composant principal de l'application Trusti
+ * Composant principal de l'application Trusti : assemble l'état (hooks) et
+ * choisit l'écran affiché (landing, sélection des apps, fiche, stockage ou
+ * vue principale à onglets).
  */
 const App = () => {
-  // Gestion de l'authentification
-  const {
-    isLoading: isAuthLoading,
-    getUserData,
-    saveUserData,
-  } = useAuth();
-
-  // État pour la landing page
-  // La landing page ne s'affiche plus automatiquement, seulement sur demande
-  const [showLandingPage, setShowLandingPage] = useState(false);
-  const savedScrollY = useRef(0);
-
-  const handleCloseLandingPage = () => {
-    setShowLandingPage(false);
-  };
-
-  const handleOpenLandingPage = () => {
-    setShowLandingPage(true);
-  };
-
-  // Est-on arrivé via un lien de partage ? (évalué une seule fois au montage,
-  // avant que l'URL ne soit nettoyée). Dans ce cas on court-circuite le
-  // welcome/onboarding pour aller droit à la modal d'import.
-  const [arrivedViaShare] = useState(() => hasShareParams());
-
-  // Onboarding (welcome + sélection/scan des apps) : une seule fois par
-  // appareil, indépendamment de la connexion — PWA/APK sauvegardent en local
-  // (voir useAuth) donc pas besoin de compte pour retrouver ses choix.
-  const [showWelcomeModal, setShowWelcomeModal] = useState(
-    () => !hasCompletedOnboarding() && !arrivedViaShare
-  );
-
-  // État pour la page d'onboarding
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  // Sur Android natif, l'utilisateur peut basculer du scan auto vers la sélection manuelle classique
-  const [forceManualOnboarding, setForceManualOnboarding] = useState(false);
-
-  // Arrivée via lien de partage = engagement suffisant pour ne pas reproposer
-  // le welcome/onboarding ensuite sur cet appareil.
-  useEffect(() => {
-    if (arrivedViaShare) markOnboardingComplete();
-  }, [arrivedViaShare]);
-
-  // Handler pour "Oui, c'est ma première fois"
-  const handleFirstTimeYes = () => {
-    markOnboardingComplete();
-    setShowWelcomeModal(false);
-    // Afficher la page d'onboarding de sélection des apps
-    setShowOnboarding(true);
-  };
-
-  // Handler pour "Non, je connais déjà"
-  const handleFirstTimeNo = () => {
-    markOnboardingComplete();
-    setShowWelcomeModal(false);
-  };
-
-  // Handler pour la fin de l'onboarding
-  const handleOnboardingComplete = (selectedAppIds) => {
-    // Sélection faite, passée ou quittée : ne pas la rouvrir d'office (web, aucune app)
-    autoSelectionShown.current = true;
-    // Ajouter toutes les apps sélectionnées à "Mes Apps" (ajout simple : une
-    // app déjà suivie ne doit pas être retirée)
-    if (selectedAppIds && selectedAppIds.size > 0) {
-      addMyApps([...selectedAppIds].map(String));
-    }
-    
-    // Fermer l'onboarding
-    setShowOnboarding(false);
-    rememberRescanState();
-    
-    // "Mes Apps" dès qu'il y a une app (choisie maintenant ou déjà suivie),
-    // sinon le catalogue
-    const hasApps = (selectedAppIds && selectedAppIds.size > 0) || myApps.size > 0;
-    setActiveTab(hasApps ? TABS.MY_APPS : TABS.APPLICATIONS);
-    
-    // Scroller en haut de la page
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 100);
-  };
-
-  // Re-scan manuel depuis "Mes Apps" : relance le scan (Android natif) ou la
-  // sélection manuelle (PWA/web) pour repérer de nouvelles apps installées
-  // sans repasser par tout l'onboarding. Le scan natif remonte aussi les apps
-  // du catalogue confirmées désinstallées (package non retrouvé) pour qu'on
-  // les retire de "Mes Apps" — sinon la liste n'est jamais vraiment "à jour".
-  // La sélection manuelle (PWA/web, sans lecture réelle du téléphone) reste
-  // purement additive, faute de moyen de vérifier ce qui est désinstallé.
-  const [showRescan, setShowRescan] = useState(false);
-  const [showRescanPrompt, setShowRescanPrompt] = useState(false);
-  const [forceManualRescan, setForceManualRescan] = useState(false);
-  // Rescan accepté depuis une proposition : sur l'APK, le scan natif démarre
-  // directement ; sur le web, l'écran des deux choix s'affiche.
-  const [rescanFromPrompt, setRescanFromPrompt] = useState(false);
-  // Proposition de rescan à la réouverture de l'app (web et APK)
-  const [showReopenPrompt, setShowReopenPrompt] = useState(false);
-
-  // Mémorise l'état « vu » des apps : packages installés (APK) et date de la
-  // dernière proposition/scan, pour ne reproposer un scan que si nécessaire.
-  const rememberRescanState = () => {
-    markRescanPromptHandled();
-    if (!isNativeAndroid) return;
-    InstalledApps.getInstalledPackages()
-      .then(res => savePackagesSnapshot(res.packages || []))
-      .catch(() => {});
-  };
-
-  const handleRescanComplete = (selectedAppIds, notInstalledIds) => {
-    rememberRescanState();
-    if (notInstalledIds && notInstalledIds.length > 0) {
-      removeMyApps(notInstalledIds);
-    }
-    if (selectedAppIds && selectedAppIds.size > 0) {
-      addMyApps([...selectedAppIds].map(String));
-    }
-    setShowRescan(false);
-    setForceManualRescan(false);
-    setRescanFromPrompt(false);
-    // Même règle qu'à la fin de l'onboarding : "Mes Apps" s'il reste une app, sinon le catalogue
-    const remaining = new Set([...myApps].map(String));
-    (notInstalledIds || []).forEach(id => remaining.delete(String(id)));
-    (selectedAppIds ? [...selectedAppIds] : []).forEach(id => remaining.add(String(id)));
-    setActiveTab(remaining.size > 0 ? TABS.MY_APPS : TABS.APPLICATIONS);
-  };
-
-  // État pour le filtre de catégorie dans l'onglet Applications
+  const { getUserData, saveUserData } = useAuth();
   const toast = useToast();
+  const isMobile = useIsSmallViewport();
+
+  // La landing page ne s'affiche que sur demande
+  const [showLandingPage, setShowLandingPage] = useState(false);
+
+  // Filtre de catégorie de l'onglet Applications
   const [selectedCategory, setSelectedCategory] = useState('Toutes');
 
-  // État pour le filtre migrée / à migrer dans l'onglet Mes Apps
-  const [migrationFilter, setMigrationFilter] = useState(DEFAULT_MIGRATION_FILTER);
-
-  // État pour le filtre avec/sans alternative connue dans l'onglet Mes Apps.
-  // Par défaut on masque les apps sans alternative connue (rien à proposer
-  // à l'utilisateur pour elles), pour que la liste reste actionnable.
-  const [alternativeFilter, setAlternativeFilter] = useState(DEFAULT_ALTERNATIVE_FILTER);
-
-  // Réglage de tri de l'onglet "Mes Apps" (discret, persisté en local) :
-  // TrustiScore décroissant par défaut, comme historiquement.
-  const [mySort, setMySort] = useState(() => getMyAppsSortPref());
-  useEffect(() => {
-    setMyAppsSortPref(mySort);
-  }, [mySort]);
-
-  // Gestion de l'espace de stockage (voir StorageManagerModal) — déclaré avant
-  // useAppManagement pour pouvoir lui signaler qu'il a besoin des données
-  // complètes de "Mes Apps" même si l'onglet actif est différent.
+  // Écran « Espace de stockage » : déclaré avant useAppManagement, qui a
+  // besoin de savoir qu'il faut les données complètes de « Mes Apps » même si
+  // l'onglet actif est différent.
   const [showStorageManager, setShowStorageManager] = useState(false);
+  const closeStorageManager = useCallback(() => setShowStorageManager(false), []);
 
-  // Gestion de l'état des applications (avec sauvegarde utilisateur)
   const {
     activeTab,
     searchTerm,
@@ -263,115 +106,47 @@ const App = () => {
     loadMoreApps,
   } = useAppManagement(saveUserData, getUserData, selectedCategory, showStorageManager);
 
-  // Web (hors APK) : si aucune app n'est sélectionnée à l'ouverture, on
-  // propose directement l'écran de sélection. Une seule fois par session, et
-  // jamais par-dessus le welcome ou un lien de partage.
-  const autoSelectionShown = useRef(false);
-  useEffect(() => {
-    if (autoSelectionShown.current || !isInitialized || isNativeAndroid) return;
-    if (arrivedViaShare || showWelcomeModal || showOnboarding) return;
-    autoSelectionShown.current = true;
-    if (myApps.size === 0) setShowOnboarding(true);
-  }, [isInitialized, myApps, arrivedViaShare, showWelcomeModal, showOnboarding]);
+  const {
+    showExplainer,
+    setShowExplainer,
+    showShareModal,
+    setShowShareModal,
+    showTrustiShareModal,
+    setShowTrustiShareModal,
+    showMigrationSelector,
+    setShowMigrationSelector,
+  } = useModals();
 
-  // Réouverture de l'app (web et APK) : on propose de relancer un scan pour
-  // garder « Mes Apps » à jour, seulement si utile (voir utils/rescanPrompt.js :
-  // APK = apps réellement changées, web = au plus une fois par semaine).
-  // Décidé une seule fois, au chargement : pas
-  // pour une première visite (welcome/onboarding), un lien de partage, ni sur
-  // le web sans app (la sélection s'ouvre déjà toute seule, voir ci-dessus).
-  const reopenPromptDecided = useRef(false);
-  useEffect(() => {
-    if (reopenPromptDecided.current || !isInitialized) return;
-    reopenPromptDecided.current = true;
-    if (arrivedViaShare || showWelcomeModal || showOnboarding || showLandingPage || showRescan) return;
-    if (!isNativeAndroid && myApps.size === 0) return;
-    if (!isNativeAndroid) {
-      if (isWebPromptDue()) setShowReopenPrompt(true);
-      return;
-    }
-    // APK : on ne propose que si les apps du catalogue installées ont
-    // réellement changé depuis le dernier scan (ou le dernier refus).
-    InstalledApps.getInstalledPackages()
-      .then(res => {
-        const current = res.packages || [];
-        const previous = loadPackagesSnapshot();
-        if (previous === null) {
-          // Pas encore de référence (mise à jour de l'app) : on l'enregistre
-          // sans déranger l'utilisateur.
-          savePackagesSnapshot(current);
-          return;
-        }
-        if (packagesChanged(previous, current)) setShowReopenPrompt(true);
-      })
-      .catch(() => {});
-  }, [isInitialized, myApps, arrivedViaShare, showWelcomeModal, showOnboarding, showLandingPage, showRescan]);
+  const flow = useOnboardingFlow({
+    isInitialized,
+    myApps,
+    addMyApps,
+    removeMyApps,
+    setActiveTab,
+    setSelectedApp,
+    closeStorageManager,
+    showLandingPage,
+  });
 
-  // Une app "Mes Apps" est considérée migrée si elle est déjà au top (grade A)
-  // ou si l'alternative recommandée est déjà utilisée.
-  const isAppMigrated = (app) => app.grade === 'A' || app.alternativeAdopted === true;
+  const myAppsView = useMyAppsView({ activeTab, filteredApps, myApps, customMigrations });
+  const { myAppsSorted, myAppsDisplayed } = myAppsView;
 
-  // Une app est considérée comme ayant une alternative dès lors qu'elle est
-  // déjà au top (grade A, aucune alternative nécessaire), qu'une alternative
-  // recommandée existe, ou qu'une migration personnalisée a été choisie.
-  const appHasAlternative = (app) =>
-    app.grade === 'A' || !!app.alternative || !!customMigrations.get(app.id) || !!app.isLoadingAlternative;
+  const { openAppDetail, closeAppDetail, resumeMigration, resumeMigrationId } = useAppDetail({
+    selectedApp,
+    setSelectedApp,
+  });
 
-  // Compteurs pour le filtre migrée / à migrer (sur la liste non filtrée par ce critère)
-  const migrationCounts = useMemo(() => {
-    if (activeTab !== TABS.MY_APPS) return { migrated: 0, todo: 0 };
-    const realApps = filteredApps.filter(app => !app.isLoadingSkeleton);
-    const migrated = realApps.filter(isAppMigrated).length;
-    return { migrated, todo: realApps.length - migrated };
-  }, [activeTab, filteredApps]);
+  const { pendingImport, confirmImport, cancelImport } = useShareLinks({
+    openAppDetail,
+    closeStorageManager,
+    addMyApps,
+    importMigrations,
+    setActiveTab,
+    toast,
+  });
 
-  // Compteurs pour le filtre avec / sans alternative (sur la liste non filtrée par ce critère)
-  const alternativeCounts = useMemo(() => {
-    if (activeTab !== TABS.MY_APPS) return { with: 0, without: 0 };
-    const realApps = filteredApps.filter(app => !app.isLoadingSkeleton);
-    const withAlt = realApps.filter(appHasAlternative).length;
-    return { with: withAlt, without: realApps.length - withAlt };
-  }, [activeTab, filteredApps, customMigrations]);
-
-  // Ordre d'ajout à "Mes Apps" (le Set préserve l'ordre d'insertion), utilisé
-  // par le tri "Date d'ajout".
-  const myAppsOrder = useMemo(
-    () => new Map(Array.from(myApps).map((id, index) => [String(id), index])),
-    [myApps]
-  );
-
-  // Toutes les apps de "Mes Apps", triées selon le réglage choisi (utilisé
-  // par la liste affichée ci-dessous, mais aussi par le partage : le lien
-  // "Partager mon TrustiScore" doit refléter le même ordre que ce que
-  // l'utilisateur voit).
-  const myAppsSorted = useMemo(() => {
-    const relevant = filteredApps.filter(app => myApps.has(app.id));
-    return sortMyApps(relevant, mySort, myAppsOrder);
-  }, [filteredApps, myApps, mySort, myAppsOrder]);
-
-  // Liste effectivement affichée dans "Mes Apps" : version triée ci-dessus,
-  // avec en plus les filtres migrée / à migrer et avec / sans alternative.
-  const myAppsDisplayed = useMemo(() => {
-    if (activeTab !== TABS.MY_APPS) return filteredApps;
-    if (migrationFilter === 'all' && alternativeFilter === 'all') return myAppsSorted;
-    return myAppsSorted.filter(app => {
-      if (app.isLoadingSkeleton) return false;
-      if (migrationFilter !== 'all' && (migrationFilter === 'migrated') !== isAppMigrated(app)) {
-        return false;
-      }
-      if (alternativeFilter !== 'all' && (alternativeFilter === 'with') !== appHasAlternative(app)) {
-        return false;
-      }
-      return true;
-    });
-  }, [activeTab, filteredApps, myAppsSorted, migrationFilter, alternativeFilter, customMigrations]);
-
-  // Suggestions d'alternatives par notification (Android natif, voir useAlternativeNudges)
-  const [nudgesEnabled, setNudgesEnabledState] = useState(() => areNudgesEnabled());
-  const toggleNudges = (enabled) => {
-    setNudgesEnabled(enabled);
-    setNudgesEnabledState(enabled);
-  };
+  // Suggestions d'alternatives par notification (Android natif)
+  const [nudgesEnabled, toggleNudges] = usePreferenceToggle(areNudgesEnabled, setNudgesEnabled);
   const { openRequestId: nudgeOpenId, clearOpenRequest: clearNudgeOpen } = useAlternativeNudges({
     myAppsList: filteredApps,
     isMyAppsTab: activeTab === TABS.MY_APPS && !searchTerm.trim(),
@@ -380,21 +155,36 @@ const App = () => {
     enabled: nudgesEnabled,
   });
 
-  // Import via lien de partage (?apps=... et/ou ?mig=...)
-  const [pendingImport, setPendingImport] = useState(null);
+  // Notes de « Mes Apps » qui ont changé depuis la dernière visite (web et APK)
+  const [gradeAlertsEnabled, toggleGradeAlerts] = usePreferenceToggle(areGradeAlertsEnabled, setGradeAlertsEnabled);
+  const { changes: gradeChanges, dismiss: dismissGradeChanges } = useGradeChanges({
+    myApps,
+    ready: isInitialized,
+    active: activeTab === TABS.MY_APPS && isInitialized,
+    alertsEnabled: gradeAlertsEnabled,
+  });
 
-  const shouldRestoreScroll = useRef(false);
+  // Parcours de migration guidée commencés et pas terminés (relus à chaque
+  // fermeture de fiche, où le parcours a pu avancer, et après un abandon)
+  const [migrationGuidesVersion, setMigrationGuidesVersion] = useState(0);
+  const migrationsInProgress = useMemo(() => {
+    if (activeTab !== TABS.MY_APPS || selectedApp) return [];
+    const mine = filteredApps.filter(app => myApps.has(app.id));
+    return getMigrationsInProgress(getAllMigrationGuideStates(), mine, { migratedApps, catalogApps: apps });
+  }, [activeTab, selectedApp, filteredApps, myApps, migratedApps, apps, migrationGuidesVersion]);
 
-  const openAppDetail = useCallback((app) => {
-    savedScrollY.current = window.scrollY;
-    window.scrollTo({ top: 0, behavior: 'instant' });
-    setSelectedApp(app);
-  }, [setSelectedApp]);
-
-  const closeAppDetail = useCallback(() => {
-    shouldRestoreScroll.current = true;
-    setSelectedApp(null);
-  }, [setSelectedApp]);
+  // Abandon d'un parcours depuis la carte : annulable, et relançable depuis la fiche
+  const abandonMigration = (app) => {
+    const previous = removeMigrationGuideState(app.id);
+    setMigrationGuidesVersion(v => v + 1);
+    toast.success('Migration abandonnée', {
+      label: 'Annuler',
+      onClick: () => {
+        saveMigrationGuideState(app.id, previous);
+        setMigrationGuidesVersion(v => v + 1);
+      },
+    });
+  };
 
   // Ouverture depuis une notification de suggestion : on passe sur « Mes Apps »
   // (qui charge les données de l'app et son alternative), puis on ouvre sa fiche.
@@ -416,214 +206,37 @@ const App = () => {
     }
   }, [nudgeOpenId, activeTab, searchTerm, filteredApps, myApps]);
 
-  // Gestion des modales
-  const {
-    showExplainer,
-    setShowExplainer,
-    showShareModal,
-    setShowShareModal,
-    showTrustiShareModal,
-    setShowTrustiShareModal,
-    showMigrationSelector,
-    setShowMigrationSelector,
-  } = useModals();
-
-  // Scroller en haut lors du changement d'onglet ou de catégorie
+  // Remonter en haut au changement d'onglet ou de catégorie
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeTab, selectedCategory]);
 
-  // Restaurer la position de scroll après fermeture du détail
-  // useLayoutEffect = synchrone avant le paint, évite le flash "retour en haut"
-  useLayoutEffect(() => {
-    if (!selectedApp && shouldRestoreScroll.current) {
-      shouldRestoreScroll.current = false;
-      window.scrollTo({ top: savedScrollY.current, behavior: 'instant' });
-    }
-  }, [selectedApp]);
-
-  // Ouverture de la fiche d'une app partagée (?app=<id>) : on la charge par
-  // son ID (elle n'est pas forcément dans la page de liste déjà chargée).
-  const openSharedApp = useCallback(async (appId) => {
-    try {
-      const response = await fetch(`${API_URL}/apps?ids=${encodeURIComponent(appId)}`);
-      const data = await response.json();
-      const found = data.success && Array.isArray(data.apps) ? data.apps[0] : null;
-      if (!found) {
-        toast.error("Cette app n'existe plus dans Trusti.");
-        return;
-      }
-      setShowStorageManager(false);
-      openAppDetail({
-        ...found,
-        id: String(found.id),
-        replacesAppId: found.replacesAppId ? String(found.replacesAppId) : undefined,
-        replacesAppIds: found.replacesAppIds ? found.replacesAppIds.map(String) : undefined,
-      });
-    } catch (error) {
-      console.error("Erreur lors de l'ouverture de l'app partagée:", error);
-      toast.error("Impossible d'ouvrir l'app partagée. Vérifie ta connexion.");
-    }
-  }, [openAppDetail, toast]);
-
-  // Détecter un lien de partage au chargement (?app=..., ?apps=... et/ou
-  // ?mig=...) : ouvrir la fiche ou la modal d'import, puis nettoyer l'URL.
-  useEffect(() => {
-    const sharedAppId = getSharedAppIdFromUrl();
-    const { appIds, migrations } = parseShareParams();
-    if (sharedAppId) {
-      openSharedApp(sharedAppId);
-    } else if (appIds.length > 0 || migrations.length > 0) {
-      setPendingImport({ appIds, migrations });
-    }
-    if (sharedAppId || appIds.length > 0 || migrations.length > 0) {
-      clearShareParams();
-    }
-  }, []);
-
-
-  // Confirmer l'import depuis la modal de partage.
-  // On applique directement la sélection sur cet appareil.
-  const handleImportShared = ({ appIds = [], migrations = [] }) => {
-    if (appIds.length > 0) addMyApps(appIds.map(String));
-    if (migrations.length > 0) importMigrations(migrations);
-    setActiveTab(TABS.MY_APPS);
-    setPendingImport(null);
-  };
-
-  // Réinitialiser la catégorie lors du changement d'onglet
+  // Réinitialiser la catégorie en quittant l'onglet Applications
   useEffect(() => {
     if (activeTab !== TABS.APPLICATIONS) {
       setSelectedCategory('Toutes');
     }
   }, [activeTab]);
 
-  // Gérer le bouton retour du smartphone/navigateur
-  useEffect(() => {
-    const handleBackButton = (event) => {
-      // Un écran plein (onboarding, import, proposition de rescan) gère son
-      // propre retour : on lui laisse la main et on réarme l'historique pour
-      // que le retour suivant reste dans l'app.
-      if (runBackHandler()) {
-        window.history.pushState({ page: 'trusti' }, '');
-        return;
-      }
+  const closeMigrationSelector = useCallback(() => setShowMigrationSelector(null), [setShowMigrationSelector]);
 
-      // Si le modal de migration est ouvert
-      if (showMigrationSelector) {
-        event.preventDefault();
-        setShowMigrationSelector(null);
-        return;
-      }
-      
-      // Si un modal de détails est ouvert
-      if (selectedApp) {
-        event.preventDefault();
-        shouldRestoreScroll.current = true;
-        setSelectedApp(null);
-        return;
-      }
-      
-      // Si on est sur "Mes Apps", revenir à "Applications"
-      if (activeTab === TABS.MY_APPS) {
-        event.preventDefault();
-        setActiveTab(TABS.APPLICATIONS);
-        return;
-      }
-      
-      // Sinon, laisser le comportement par défaut
-    };
+  useBackNavigation({
+    activeTab,
+    setActiveTab,
+    selectedApp,
+    closeAppDetail,
+    showMigrationSelector,
+    closeMigrationSelector,
+    closables: [
+      [showStorageManager, closeStorageManager],
+      [showShareModal, () => setShowShareModal(false)],
+      [showTrustiShareModal, () => setShowTrustiShareModal(false)],
+      [!!pendingImport, cancelImport],
+      [showExplainer, () => setShowExplainer(false)],
+    ],
+  });
 
-    // Ajouter un état initial dans l'historique
-    if (window.history.state === null) {
-      window.history.pushState({ page: 'trusti' }, '');
-    }
-
-    window.addEventListener('popstate', handleBackButton);
-    
-    return () => {
-      window.removeEventListener('popstate', handleBackButton);
-    };
-  }, [selectedApp, showMigrationSelector, activeTab, setSelectedApp, setShowMigrationSelector, setActiveTab]);
-
-  // Ajouter un état dans l'historique quand on ouvre un modal ou change d'onglet
-  useEffect(() => {
-    if (selectedApp || showMigrationSelector || activeTab === TABS.MY_APPS) {
-      window.history.pushState({ page: 'trusti' }, '');
-    }
-  }, [selectedApp, showMigrationSelector, activeTab]);
-
-  // Gérer le bouton retour matériel Android (app native Capacitor).
-  // Dans le WebView natif, ce bouton ne déclenche PAS l'événement navigateur
-  // "popstate" : il émet l'événement natif Capacitor "backButton". Sans
-  // écouteur dessus, le comportement par défaut est de fermer l'app
-  // directement, même si un détail d'app ou une modale est ouvert.
-  useEffect(() => {
-    if (!isNativeAndroid) return;
-
-    let listenerHandle;
-    let cancelled = false;
-
-    CapacitorApp.addListener('backButton', () => {
-      if (runBackHandler()) return;
-
-      if (showMigrationSelector) {
-        setShowMigrationSelector(null);
-        return;
-      }
-
-      if (selectedApp) {
-        shouldRestoreScroll.current = true;
-        setSelectedApp(null);
-        return;
-      }
-
-      if (showStorageManager) {
-        setShowStorageManager(false);
-        return;
-      }
-
-      if (showShareModal) {
-        setShowShareModal(false);
-        return;
-      }
-
-      if (showTrustiShareModal) {
-        setShowTrustiShareModal(false);
-        return;
-      }
-
-      if (pendingImport) {
-        setPendingImport(null);
-        return;
-      }
-
-      if (showExplainer) {
-        setShowExplainer(false);
-        return;
-      }
-
-      if (activeTab === TABS.MY_APPS) {
-        setActiveTab(TABS.APPLICATIONS);
-        return;
-      }
-
-      CapacitorApp.exitApp();
-    }).then((handle) => {
-      if (cancelled) {
-        handle.remove();
-      } else {
-        listenerHandle = handle;
-      }
-    });
-
-    return () => {
-      cancelled = true;
-      listenerHandle?.remove();
-    };
-  }, [selectedApp, showStorageManager, showMigrationSelector, showShareModal, showTrustiShareModal, pendingImport, showExplainer, activeTab, setSelectedApp, setShowMigrationSelector, setShowShareModal, setShowTrustiShareModal, setShowExplainer, setActiveTab]);
-
-  // Retrait d'une app de « Mes Apps » : toujours annulable (remplace le swipe)
+  // Retrait d'une app de « Mes Apps » : toujours annulable
   const handleToggleMyApp = (e, id) => {
     const wasInMyApps = myApps.has(id);
     toggleMyApp(e, id);
@@ -635,133 +248,83 @@ const App = () => {
     }
   };
 
-  // Après une désinstallation confirmée depuis Trusti : propose de relancer
-  // un scan pour que « Mes Apps » reflète la réalité du téléphone.
-  useEffect(() => {
-    const onUninstalled = () => setShowRescanPrompt(true);
-    window.addEventListener(APP_UNINSTALLED_EVENT, onUninstalled);
-    return () => window.removeEventListener(APP_UNINSTALLED_EVENT, onUninstalled);
-  }, []);
-
-  const startRescanFromPrompt = () => {
-    setShowRescanPrompt(false);
-    setShowReopenPrompt(false);
-    setSelectedApp(null);
-    setShowStorageManager(false);
-    setActiveTab(TABS.MY_APPS);
-    setRescanFromPrompt(true);
-    setShowRescan(true);
-  };
-
-  // Refus à la réouverture : on atterrit sur « Mes Apps »
-  const dismissReopenPrompt = () => {
-    setShowReopenPrompt(false);
-    rememberRescanState();
-    setActiveTab(TABS.MY_APPS);
-  };
-
-  const rescanPrompt = !showRescan && (
-    showRescanPrompt ? (
-      <RescanPrompt onScan={startRescanFromPrompt} onDismiss={() => setShowRescanPrompt(false)} />
-    ) : showReopenPrompt ? (
-      <RescanPrompt
-        Icon={RefreshCw}
-        title="Tes apps ont changé ?"
-        message="Relance un scan pour garder ton TrustiScore à jour."
-        scanLabel="Oui, relancer le scan"
-        dismissLabel="Non, voir Mes Apps"
-        onScan={startRescanFromPrompt}
-        onDismiss={dismissReopenPrompt}
-      />
-    ) : null
+  const rescanPrompts = !flow.showRescan && (
+    <RescanPrompts
+      showAfterUninstall={flow.showRescanPrompt}
+      showOnReopen={flow.showReopenPrompt}
+      onScan={flow.startRescanFromPrompt}
+      onDismissAfterUninstall={flow.dismissRescanPrompt}
+      onDismissOnReopen={flow.dismissReopenPrompt}
+    />
   );
 
-  const isMobile = useIsSmallViewport();
+  const migrationSelector = showMigrationSelector && (
+    <MigrationSelectorModal
+      currentAppId={showMigrationSelector}
+      currentSelection={customMigrations.get(showMigrationSelector)}
+      onSelect={(altName) => setCustomMigration(showMigrationSelector, altName)}
+      onClose={closeMigrationSelector}
+      onSelectApp={(app) => {
+        closeMigrationSelector();
+        openAppDetail(app);
+      }}
+      allApps={apps}
+    />
+  );
 
-  // Afficher la landing page en premier si c'est la première visite
   if (showLandingPage) {
-    return (
-      <LandingPage onClose={handleCloseLandingPage} />
-    );
+    return <LandingPage onClose={() => setShowLandingPage(false)} />;
   }
 
-  // Afficher la page d'onboarding de sélection des apps
-  if (showOnboarding) {
-    if (isNativeAndroid && !forceManualOnboarding) {
-      return (
-        <OnboardingAppsNative
-          onComplete={handleOnboardingComplete}
-          onManualSelection={() => setForceManualOnboarding(true)}
-        />
-      );
-    }
+  // Onboarding : sélection des apps à la première visite
+  if (flow.showOnboarding) {
     return (
-      <OnboardingApps
-        onComplete={handleOnboardingComplete}
-        onExit={isNativeAndroid ? () => setForceManualOnboarding(false) : undefined}
+      <AppsSelectionScreen
+        manual={flow.forceManualOnboarding}
+        onManualChange={flow.setForceManualOnboarding}
+        onComplete={flow.completeOnboarding}
       />
     );
   }
 
-  // Re-scan manuel (déclenché depuis "Mes Apps") : même écran que l'onboarding
-  // mais purement additif, sans welcome/redirection de compte.
-  if (showRescan) {
-    if (isNativeAndroid && !forceManualRescan) {
-      return (
-        <OnboardingAppsNative
-          onComplete={handleRescanComplete}
-          onManualSelection={() => setForceManualRescan(true)}
-          autoStart={rescanFromPrompt}
-        />
-      );
-    }
-    // Web : le rescan reste un choix (capture ou à la main), on montre les deux options
+  // Re-scan (depuis « Mes Apps » ou une proposition) : même écran, sans welcome
+  if (flow.showRescan) {
     return (
-      <OnboardingApps
-        onComplete={handleRescanComplete}
-        onExit={isNativeAndroid ? () => setForceManualRescan(false) : undefined}
+      <AppsSelectionScreen
+        manual={flow.forceManualRescan}
+        onManualChange={flow.setForceManualRescan}
+        onComplete={flow.completeRescan}
+        autoStart={flow.rescanFromPrompt}
       />
     );
   }
 
-  // Affichage du détail d'une application
   if (selectedApp) {
     return (
-    <ViewModeContext.Provider value={isMobile}>
-      <AppDetailModal
-        key={selectedApp?.id}
-        app={selectedApp}
-        isInMyApps={myApps.has(selectedApp.id)}
-        onToggleMyApp={handleToggleMyApp}
-        onChangeAlternative={setShowMigrationSelector}
-        onClose={closeAppDetail}
-        onSelectApp={openAppDetail}
-        onCompleteMigration={(from, to) => importMigrations([{ id: from.id, customAlt: to?.name }])}
-        allApps={apps}
-      />
-      {rescanPrompt}
-      {showMigrationSelector && (
-        <MigrationSelectorModal
-          currentAppId={showMigrationSelector}
-          currentSelection={customMigrations.get(showMigrationSelector)}
-          onSelect={(altName) => setCustomMigration(showMigrationSelector, altName)}
-          onClose={() => setShowMigrationSelector(null)}
-          onSelectApp={(app) => {
-            setShowMigrationSelector(null);
-            openAppDetail(app);
-          }}
+      <ViewModeContext.Provider value={isMobile}>
+        <AppDetailModal
+          key={selectedApp?.id}
+          app={selectedApp}
+          isInMyApps={myApps.has(selectedApp.id)}
+          onToggleMyApp={handleToggleMyApp}
+          onChangeAlternative={setShowMigrationSelector}
+          onClose={closeAppDetail}
+          onSelectApp={openAppDetail}
+          onCompleteMigration={(from, to) => importMigrations([{ id: from.id, customAlt: to?.name }])}
           allApps={apps}
+          resumeMigration={resumeMigrationId === selectedApp.id}
         />
-      )}
-    </ViewModeContext.Provider>
+        {rescanPrompts}
+        {migrationSelector}
+      </ViewModeContext.Provider>
     );
   }
 
-  // Écran dédié "Espace de stockage" (page à part entière, pas une popup)
+  // Écran dédié « Espace de stockage » (page à part entière, pas une popup)
   if (showStorageManager) {
     return (
       <StoragePage
-        onClose={() => setShowStorageManager(false)}
+        onClose={closeStorageManager}
         myAppsCount={myApps.size}
         migrationsCount={migratedApps.size}
         myAppsData={myAppsData}
@@ -771,330 +334,202 @@ const App = () => {
         onSelectApp={openAppDetail}
         nudgesEnabled={nudgesEnabled}
         onToggleNudges={toggleNudges}
+        gradeAlertsEnabled={gradeAlertsEnabled}
+        onToggleGradeAlerts={toggleGradeAlerts}
       />
     );
   }
 
+  const isMyAppsTab = activeTab === TABS.MY_APPS;
+  const showMyAppsCards = isMyAppsTab && !searchTerm.trim();
+
   // Vue principale
   return (
-  <ViewModeContext.Provider value={isMobile}>
-  <div className="min-h-screen bg-transparent font-sans text-slate-900">
-    <>
-    {/* Écran de chargement initial */}
-    {isInitialLoading && (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-indigo-50 via-white to-purple-50">
-        <div style={{ animation: 'splashFadeIn 0.5s ease-out both' }}>
-          <img src="/assets/logo.png" alt="Trusti" className="w-28 h-28 mb-3 drop-shadow-lg" />
+    <ViewModeContext.Provider value={isMobile}>
+      <div className="min-h-screen bg-transparent font-sans text-slate-900">
+        {isInitialLoading && <SplashScreen />}
+
+        <Header
+          onOpenStorageManager={() => setShowStorageManager(true)}
+          onShowLandingPage={() => setShowLandingPage(true)}
+        />
+
+        {/* items-start casserait le sticky du menu : sans stretch, la colonne du
+            menu ne fait que la hauteur d'un écran (h-screen) et n'a donc aucune
+            marge pour rester "collée" au scroll — elle disparaît avec le reste
+            dès qu'on dépasse un écran de contenu (visible en tablette/paysage,
+            où le menu latéral remplace la barre du bas). */}
+        <div className={isMobile ? '' : 'flex'}>
+          <Navigation
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            myAppsCount={myApps.size}
+          />
+          <main className={isMobile
+            ? 'max-w-md mx-auto px-4 py-3 pb-24'
+            : 'flex-1 min-w-0 px-6 py-3 pb-6'
+          }>
+            {!isMyAppsTab && (
+              <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} isSearching={isSearching} />
+            )}
+
+            <div key={activeTab} style={{ animation: 'tabFadeIn 0.18s ease-out' }}>
+              {activeTab === TABS.APPLICATIONS && (
+                <CategoryFilterBar
+                  selectedCategory={selectedCategory}
+                  onSelectCategory={setSelectedCategory}
+                  favoritesCount={favoriteApps.size}
+                  isLoading={isLoadingApps}
+                />
+              )}
+
+              {isMyAppsTab && (
+                <MyAppsHeader
+                  count={myApps.size}
+                  isLoading={isLoadingMyApps}
+                  onRescan={flow.startRescan}
+                  onShare={() => setShowTrustiShareModal(true)}
+                />
+              )}
+
+              {/* Bilan en une seule carte : TrustiScore du téléphone + migrations,
+                  puis une ligne compacte d'hygiène numérique (mots de passe) */}
+              {showMyAppsCards && (
+                <>
+                  <MyAppsSummary
+                    apps={filteredApps}
+                    onShareMigrations={migratedApps.size > 0 ? () => setShowShareModal(true) : undefined}
+                  >
+                    {myApps.size > 0 && <DataHygieneCard myApps={filteredApps} catalogApps={apps} />}
+                  </MyAppsSummary>
+                  <GradeChangesCard
+                    changes={gradeChanges}
+                    apps={filteredApps}
+                    onSelectApp={openAppDetail}
+                    onDismiss={dismissGradeChanges}
+                  />
+                  <MigrationsInProgressCard items={migrationsInProgress} onResume={resumeMigration} onAbandon={abandonMigration} />
+                </>
+              )}
+
+              {/* Recherche + réglages (tri, filtres) sur une seule ligne, sous le
+                  bilan, car ils portent sur les apps listées ci-dessous */}
+              {isMyAppsTab && (
+                <div className="flex items-start gap-2 mb-3">
+                  <div className="flex-1 min-w-0">
+                    <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} isSearching={isSearching} className="" />
+                  </div>
+                  {myApps.size > 0 && (
+                    <MyAppsFilterMenu
+                      sort={myAppsView.mySort}
+                      onSortChange={myAppsView.setMySort}
+                      migrationFilter={myAppsView.migrationFilter}
+                      onMigrationFilterChange={myAppsView.setMigrationFilter}
+                      alternativeFilter={myAppsView.alternativeFilter}
+                      onAlternativeFilterChange={myAppsView.setAlternativeFilter}
+                      migrationCounts={myAppsView.migrationCounts}
+                      alternativeCounts={myAppsView.alternativeCounts}
+                    />
+                  )}
+                </div>
+              )}
+
+              {isMyAppsTab && myApps.size > 0 && myAppsDisplayed.length < myAppsSorted.length && (
+                <MyAppsFilterNotice
+                  shown={myAppsDisplayed.length}
+                  total={myAppsSorted.length}
+                  migrationFilter={myAppsView.migrationFilter}
+                  alternativeFilter={myAppsView.effectiveAlternativeFilter}
+                  onShowAll={myAppsView.resetFilters}
+                />
+              )}
+
+              {activeTab === TABS.TOP_ALTERNATIVES && <AwardsHeader isLoading={isLoadingApps} />}
+
+              {showExplainer && (
+                <ExplainerPanel onClose={() => setShowExplainer(false)} />
+              )}
+
+              <AppsList
+                apps={isMyAppsTab ? myAppsDisplayed : filteredApps}
+                activeTab={activeTab}
+                myApps={myApps}
+                favoriteApps={favoriteApps}
+                migratedApps={migratedApps}
+                customMigrations={customMigrations}
+                onToggleMyApp={handleToggleMyApp}
+                onToggleFavorite={toggleFavorite}
+                onToggleMigrate={toggleMigrate}
+                onSelectApp={openAppDetail}
+                selectedCategory={selectedCategory}
+                searchTerm={searchTerm}
+                pagination={pagination}
+                onLoadMore={loadMoreApps}
+                isLoadingAwards={isLoadingAwards}
+                isLoadingMyApps={isLoadingMyApps}
+              />
+            </div>
+          </main>
         </div>
 
-        <p className="text-2xl font-black text-slate-800 tracking-tight mb-1" style={{ animation: 'splashFadeIn 0.5s 0.1s ease-out both', opacity: 0 }}>
-          Trusti
-        </p>
-        <p className="text-sm text-slate-400 font-medium mb-10" style={{ animation: 'splashFadeIn 0.5s 0.2s ease-out both', opacity: 0 }}>
-          Votre guide pour maîtriser vos apps et vos données
-        </p>
+        {showShareModal && (
+          <ShareModal
+            migratedApps={migratedApps}
+            customMigrations={customMigrations}
+            allApps={apps}
+            sortedAppIds={myAppsSorted.map(app => app.id)}
+            onClose={() => setShowShareModal(false)}
+          />
+        )}
 
-        <div className="flex items-center gap-2" style={{ animation: 'splashFadeIn 0.5s 0.35s ease-out both', opacity: 0 }}>
-          {[0, 1, 2].map(i => (
-            <span
-              key={i}
-              className="w-2 h-2 rounded-full bg-indigo-400"
-              style={{ animation: `splashBounce 1.2s ease-in-out ${i * 0.18}s infinite` }}
-            />
-          ))}
-        </div>
+        {showTrustiShareModal && (
+          <TrustiShareModal
+            selectedApps={myAppsSorted}
+            customMigrations={customMigrations}
+            allApps={apps}
+            onClose={() => setShowTrustiShareModal(false)}
+          />
+        )}
+
+        {/* Import via lien de partage */}
+        {pendingImport && (
+          <ImportAppsModal
+            appIds={pendingImport.appIds}
+            migrations={pendingImport.migrations}
+            onConfirm={confirmImport}
+            onClose={cancelImport}
+          />
+        )}
+
+        {migrationSelector}
+
+        {flow.showWelcomeModal && (
+          <WelcomeModal
+            onFirstTimeYes={flow.acceptWelcome}
+            // Sur l'APK, le scan est obligatoire : pas de bouton pour l'esquiver
+            onFirstTimeNo={isNativeAndroid ? undefined : flow.declineWelcome}
+          />
+        )}
+
+        {rescanPrompts}
+
+        {/* Widget de chat Trusti masqué (composant TrustiChatWidget conservé, à réactiver ici) */}
 
         <style>{`
-          @keyframes splashFadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to   { opacity: 1; transform: translateY(0); }
+          @keyframes pulse-subtle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
           }
-          @keyframes splashBounce {
-            0%, 80%, 100% { transform: translateY(0);    opacity: 0.35; }
-            40%            { transform: translateY(-8px); opacity: 1; }
+          .animate-pulse-subtle {
+            animation: pulse-subtle 3s infinite ease-in-out;
+          }
+          @keyframes tabFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
           }
         `}</style>
       </div>
-    )}
-    
-    <Header
-      onOpenStorageManager={() => setShowStorageManager(true)}
-      onShowLandingPage={() => setShowLandingPage(true)}
-    />
-
-    {/* items-start casserait le sticky du menu : sans stretch, la colonne du
-        menu ne fait que la hauteur d'un écran (h-screen) et n'a donc aucune
-        marge pour rester "collée" au scroll — elle disparaît avec le reste
-        dès qu'on dépasse un écran de contenu (visible en tablette/paysage,
-        où le menu latéral remplace la barre du bas). */}
-    <div className={isMobile ? '' : 'flex'}>
-    <Navigation
-      activeTab={activeTab}
-      onTabChange={setActiveTab}
-      myAppsCount={myApps.size}
-    />
-    <main className={isMobile
-      ? 'max-w-md mx-auto px-4 py-3 pb-24'
-      : 'flex-1 min-w-0 px-6 py-3 pb-6'
-    }>
-      {activeTab !== TABS.MY_APPS && (
-        <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} isSearching={isSearching} />
-      )}
-
-      <div key={activeTab} style={{ animation: 'tabFadeIn 0.18s ease-out' }}>
-
-      {/* Titre pour l'onglet Applications */}
-      {activeTab === TABS.APPLICATIONS && (
-        <div className="mb-3 text-center">
-          <div className="flex items-center justify-center gap-2 mb-0.5">
-            <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
-              Apps populaires
-            </p>
-            {isLoadingApps && (
-              <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
-            )}
-          </div>
-          {/* Sélecteur de catégorie - scrollable horizontal pour mobile */}
-          <div className="mt-2">
-            <div className="relative">
-            <div className="overflow-x-auto scrollbar-hide">
-              <div className="flex gap-1.5 pb-1.5 px-0.5">
-                {['Toutes', FAVORITES_FILTER, ...CATEGORIES].map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => setSelectedCategory(category)}
-                    className={`
-                      flex-shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition-all inline-flex items-center gap-1
-                      ${
-                        selectedCategory === category
-                          ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md scale-105'
-                          : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-300 hover:shadow-sm'
-                      }
-                    `}
-                  >
-                    {category === FAVORITES_FILTER && (
-                      <Star size={11} className={selectedCategory === category ? 'fill-current' : ''} />
-                    )}
-                    {category}
-                    {category === FAVORITES_FILTER && favoriteApps.size > 0 && (
-                      <span>({favoriteApps.size})</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Titre pour l'onglet Mes Apps */}
-      {activeTab === TABS.MY_APPS && (
-        <div className="mb-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg font-black text-slate-900 leading-tight">Mes applications</h2>
-                {isLoadingMyApps && (
-                  <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent shrink-0"></div>
-                )}
-              </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                {myApps.size > 0
-                  ? `${myApps.size} application${myApps.size > 1 ? 's' : ''} suivie${myApps.size > 1 ? 's' : ''}`
-                  : 'Relance un scan pour repérer tes apps'}
-              </p>
-            </div>
-            <div className="shrink-0 flex items-center gap-2">
-              <button
-                onClick={() => setShowRescan(true)}
-                className="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
-                aria-label="Actualiser"
-                title="Relancer un scan pour actualiser ton TrustiScore avec tes apps récentes"
-              >
-                <RefreshCw size={16} />
-              </button>
-              {myApps.size > 0 && (
-                <button
-                  onClick={() => setShowTrustiShareModal(true)}
-                  className="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
-                  aria-label="Partager"
-                  title="Partager mon TrustiScore"
-                >
-                  <Share2 size={16} />
-                </button>
-              )}
-            </div>
-          </div>
-
-        </div>
-      )}
-
-      {/* Bilan en une seule carte : TrustiScore du téléphone + migrations,
-          puis une ligne compacte d'hygiène numérique (mots de passe) */}
-      {activeTab === TABS.MY_APPS && !searchTerm.trim() && (
-        <MyAppsSummary
-          apps={filteredApps}
-          onShareMigrations={migratedApps.size > 0 ? () => setShowShareModal(true) : undefined}
-        >
-          {myApps.size > 0 && <DataHygieneCard myApps={filteredApps} catalogApps={apps} />}
-        </MyAppsSummary>
-      )}
-
-      {/* Recherche + réglages (tri, filtres) sur une seule ligne, sous le
-          bilan, car ils portent sur les apps listées ci-dessous */}
-      {activeTab === TABS.MY_APPS && (
-        <div className="flex items-start gap-2 mb-3">
-          <div className="flex-1 min-w-0">
-            <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} isSearching={isSearching} className="" />
-          </div>
-          {myApps.size > 0 && (
-            <MyAppsFilterMenu
-              sort={mySort}
-              onSortChange={setMySort}
-              migrationFilter={migrationFilter}
-              onMigrationFilterChange={setMigrationFilter}
-              alternativeFilter={alternativeFilter}
-              onAlternativeFilterChange={setAlternativeFilter}
-              migrationCounts={migrationCounts}
-              alternativeCounts={alternativeCounts}
-            />
-          )}
-        </div>
-      )}
-
-      {/* Les filtres étant repliés, on rappelle discrètement ce qui est masqué */}
-      {activeTab === TABS.MY_APPS && myApps.size > 0 && myAppsDisplayed.length < myAppsSorted.length && (
-        <p className="text-[11px] text-slate-400 -mt-1 mb-3 px-1">
-          {myAppsDisplayed.length} sur {myAppsSorted.length} apps
-          {migrationFilter === 'todo' && ' · à migrer'}
-          {migrationFilter === 'migrated' && ' · migrées'}
-          {alternativeFilter === 'with' && ' · avec alternative'}
-          {alternativeFilter === 'without' && ' · sans alternative'}
-        </p>
-      )}
-
-      {/* Titre pour l'onglet Nos recommandations */}
-      {activeTab === TABS.TOP_ALTERNATIVES && (
-        <div className="mb-3 text-center">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
-              Nos Awards
-            </p>
-            {isLoadingApps && (
-              <div className="animate-spin rounded-full h-3 w-3 border-2 border-slate-400 border-t-transparent"></div>
-            )}
-          </div>
-          <p className="text-[11px] text-slate-400 px-2 leading-relaxed">
-            Le podium des apps les plus respectueuses (TrustiScore A ou B), par catégorie
-          </p>
-        </div>
-      )}
-
-      {/* Panneau explicatif */}
-      {showExplainer && (
-        <ExplainerPanel onClose={() => setShowExplainer(false)} />
-      )}
-
-      {/* Liste des applications */}
-      <AppsList
-        apps={activeTab === TABS.MY_APPS ? myAppsDisplayed : filteredApps}
-        activeTab={activeTab}
-        myApps={myApps}
-        favoriteApps={favoriteApps}
-        migratedApps={migratedApps}
-        customMigrations={customMigrations}
-        onToggleMyApp={handleToggleMyApp}
-        onToggleFavorite={toggleFavorite}
-        onToggleMigrate={toggleMigrate}
-        onSelectApp={openAppDetail}
-        selectedCategory={selectedCategory}
-        searchTerm={searchTerm}
-        pagination={pagination}
-        onLoadMore={loadMoreApps}
-        isLoadingAwards={isLoadingAwards}
-        isLoadingMyApps={isLoadingMyApps}
-      />
-      </div>
-    </main>
-    </div>
-
-    {/* Modal de partage des migrations */}
-    {showShareModal && (
-      <ShareModal
-        migratedApps={migratedApps}
-        customMigrations={customMigrations}
-        allApps={apps}
-        sortedAppIds={myAppsSorted.map(app => app.id)}
-        onClose={() => setShowShareModal(false)}
-      />
-    )}
-
-    {/* Modal de partage des TrustiApp */}
-    {showTrustiShareModal && (
-      <TrustiShareModal
-        selectedApps={myAppsSorted}
-        customMigrations={customMigrations}
-        allApps={apps}
-        onClose={() => setShowTrustiShareModal(false)}
-      />
-    )}
-
-    {/* Modal d'import via lien de partage */}
-    {pendingImport && (
-      <ImportAppsModal
-        appIds={pendingImport.appIds}
-        migrations={pendingImport.migrations}
-        onConfirm={handleImportShared}
-        onClose={() => setPendingImport(null)}
-      />
-    )}
-
-    {/* Modal de sélection de migration */}
-    {showMigrationSelector && !selectedApp && (
-      <MigrationSelectorModal
-        currentAppId={showMigrationSelector}
-        currentSelection={customMigrations.get(showMigrationSelector)}
-        onSelect={(altName) => setCustomMigration(showMigrationSelector, altName)}
-        onClose={() => setShowMigrationSelector(null)}
-        onSelectApp={(app) => {
-          setShowMigrationSelector(null);
-          openAppDetail(app);
-        }}
-        allApps={apps}
-      />
-    )}
-
-    {/* Modal de bienvenue (première visite) */}
-    {showWelcomeModal && (
-      <WelcomeModal
-        onFirstTimeYes={handleFirstTimeYes}
-        // Sur l'APK, le scan est obligatoire : pas de bouton pour l'esquiver
-        onFirstTimeNo={isNativeAndroid ? undefined : handleFirstTimeNo}
-      />
-    )}
-
-    {rescanPrompt}
-    </>
-
-    {/* Widget de chat Trusti (visible partout sauf pendant la vérification du token, la page de bienvenue, l'onboarding, le chargement initial) */}
-    {/* Petit chatbot masqué (composant TrustiChatWidget conservé, à réactiver ici) */}
-
-    <style>{`
-      @keyframes pulse-subtle {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.85; }
-      }
-      .animate-pulse-subtle {
-        animation: pulse-subtle 3s infinite ease-in-out;
-      }
-      @keyframes tabFadeIn {
-        from { opacity: 0; transform: translateY(6px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
-    `}</style>
-  </div>
-  </ViewModeContext.Provider>
+    </ViewModeContext.Provider>
   );
 };
 

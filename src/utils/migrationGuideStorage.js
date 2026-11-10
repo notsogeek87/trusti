@@ -32,3 +32,26 @@ export const saveMigrationGuideState = (appId, state) => {
     // localStorage indisponible (navigation privée stricte) : progression perdue.
   }
 };
+
+/** Toutes les progressions enregistrées : { [appId]: { altId, done } }. */
+export const getAllMigrationGuideStates = () => {
+  const all = readAll();
+  return Object.fromEntries(Object.keys(all).map(id => [id, getMigrationGuideState(id)]));
+};
+
+/**
+ * Abandonne le parcours d'une app : sa progression est effacée (elle disparaît
+ * de la carte « Migrations en cours »). Renvoie l'état effacé, pour pouvoir
+ * l'annuler avec saveMigrationGuideState.
+ */
+export const removeMigrationGuideState = (appId) => {
+  const previous = getMigrationGuideState(appId);
+  try {
+    const all = readAll();
+    delete all[String(appId)];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+  } catch {
+    // localStorage indisponible : rien à effacer.
+  }
+  return previous;
+};

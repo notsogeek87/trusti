@@ -15,7 +15,7 @@ Trusti est un **comparateur d'applications privacy-first** qui évalue la souver
 ```
 trusti/
 ├── src/                          # Code frontend React
-│   ├── App.jsx                   # ⚠️ 631 LIGNES - Composant root, état global, routing tabs
+│   ├── App.jsx                   # Composant root : assemble les hooks, routing tabs
 │   ├── main.jsx                  # Point d'entrée React
 │   ├── components/
 │   │   ├── layout/               # Header, Navigation
@@ -38,9 +38,10 @@ trusti/
 │   └── star-apps.js              # Apps grade D/E
 │
 ├── server/                       # Backend Express (DEV uniquement, port 3001)
-│   ├── index.js                  # ⚠️ 740 LIGNES - À découper
+│   ├── index.js                  # Point d'entrée Express, routes par module server/*.js
 │   └── database/
-│       └── service-postgres.js   # Requêtes SQL Neon
+│       ├── service-postgres.js   # Façade d'accès aux données (importée par api/*.js)
+│       └── postgres/             # Requêtes SQL Neon par domaine
 │
 ├── android/                      # Projet Capacitor
 │   ├── app/                      # Code natif Android
@@ -118,8 +119,7 @@ npm test                 # Tests unitaires (tests/technical/**/*.test.js)
   - Dev : `http://localhost:3001/api`
   - APK natif : `https://trusti-alpha.vercel.app/api` (URL absolue)
 - **⚠️ Ne pas casser le build Capacitor** - `android/` dépend de `dist/` généré par Vite
-- **⚠️ `App.jsx` est trop gros (631L)** - À découper avant d'y ajouter de la logique
-- **⚠️ `server/index.js` est trop gros (740L)** - À découper en modules
+- **⚠️ `App.jsx` ne fait qu'assembler** - Mettre toute nouvelle logique dans un hook ou un composant
 - **⚠️ Les tokens magic link expirent en 15 min**
 
 ### 🟢 Bonnes pratiques
@@ -137,26 +137,10 @@ npm test                 # Tests unitaires (tests/technical/**/*.test.js)
 Voir [docs/BACKLOG.md](../docs/BACKLOG.md) pour le détail.
 
 ### Urgent (À faire avant d'ajouter des features)
-1. **Découper `src/App.jsx` (631L)** en hooks/custom components
-   - Extraire la logique d'état global dans des hooks dédiés
-   - Séparer le routing tabs en composants distincts
-   - Créer des sous-composants pour chaque section
-
-2. **Découper `server/index.js` (740L)** en modules
-   - Séparer les routes par domaine
-   - Extraire la logique métier dans des services
-   - Créer des middlewares réutilisables
+Rien en cours : `App.jsx`, `useAppManagement.js`, `server/index.js` et `service-postgres.js` sont découpés.
 
 ### Moyen terme
-3. **Nettoyer les scripts racine** 
-   - `test-*.js`, `fix-icons-*.js`, `check-*.js`, `*.log`, `*.txt`
-   - Soit les déplacer dans `scripts/` avec une meilleure organisation
-   - Soit les documenter et les intégrer dans `package.json`
-
-4. **Synchroniser le README** 
-   - Les scripts `db:init`, `db:backup` sont mentionnés mais pas dans `package.json`
-
-5. **Vérifier la présence de `android/app/debug.keystore`** dans le dépôt
+- Étendre les tests au-delà de `tests/technical` (voir docs/BACKLOG.md)
 
 ---
 

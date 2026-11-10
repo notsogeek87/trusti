@@ -101,6 +101,8 @@ const StoragePage = ({
   onSelectApp,
   nudgesEnabled = true,
   onToggleNudges,
+  gradeAlertsEnabled = true,
+  onToggleGradeAlerts,
 }) => {
   // null = scan pas encore terminé, [] = scan fait, rien trouvé.
   const [installedPackages, setInstalledPackages] = useState(null);
@@ -325,7 +327,12 @@ const StoragePage = ({
 
         {/* Suggestions d'alternatives par notification — app Android native uniquement. */}
         {isNativeAndroid && onToggleNudges && (
-          <AlternativeNudgesSection enabled={nudgesEnabled} onToggle={onToggleNudges} />
+          <AlternativeNudgesSection
+            enabled={nudgesEnabled}
+            onToggle={onToggleNudges}
+            gradeAlertsEnabled={gradeAlertsEnabled}
+            onToggleGradeAlerts={onToggleGradeAlerts}
+          />
         )}
 
         {/* Export / import des données locales — en tête de page pour rester visible immédiatement. */}

@@ -7,7 +7,9 @@ import { SORT_OPTIONS } from '../utils/myAppsSort';
 // tri de l'en-tête et les deux listes déroulantes qui chargeaient l'écran.
 // Une pastille signale un réglage différent de celui par défaut.
 export const DEFAULT_MIGRATION_FILTER = 'all';
-export const DEFAULT_ALTERNATIVE_FILTER = 'all';
+// Par défaut, « Mes Apps » ne montre que les apps pour lesquelles Trusti a quelque chose à
+// proposer (alternative connue, ou déjà notée A) : la liste reste actionnable.
+export const DEFAULT_ALTERNATIVE_FILTER = 'with';
 
 // Le tri "Taille" n'a de sens que sur l'écran Espace de stockage.
 const LIST_SORT_OPTIONS = SORT_OPTIONS.filter(option => option.id !== 'size');

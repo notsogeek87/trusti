@@ -1,6 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
+import AppIconImage from '../ui/AppIconImage';
 
 /**
  * Modal de sélection d'une alternative de migration
@@ -96,18 +97,9 @@ const MigrationSelectorModal = ({
                   >
                     {/* Icône ou image */}
                     {alt.icon && alt.icon.startsWith('http') ? (
-                      <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-white border border-slate-200">
-                        <img 
-                          src={alt.icon} 
-                          alt={alt.name}
-                          className="w-8 h-8 rounded-md"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
-                          }}
-                        />
-                        <div className="hidden w-8 h-8 items-center justify-center text-lg">
-                          📱
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-white border border-slate-200 overflow-hidden">
+                        <div className="w-8 h-8 rounded-md overflow-hidden">
+                          <AppIconImage src={alt.icon} name={alt.name} className="w-full h-full object-contain" />
                         </div>
                       </div>
                     ) : (

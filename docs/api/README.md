@@ -4,7 +4,9 @@ Pour qui / Pourquoi : point d'entrée pour tout développeur qui doit consommer
 ou modifier une route serverless Vercel du projet. Les fonctions vivent dans
 `api/` (une fonction = un fichier = une route, convention Vercel) et
 s'appuient sur `server/database/service-postgres.js` pour l'accès aux
-données. Aucun routage custom : `vercel.json` ne fait que pointer
+données (façade ; les requêtes sont rangées par domaine dans
+`server/database/postgres/`, voir
+[le découpage par domaine](../architecture/2026-11-10-decoupage-par-domaine.md)). Aucun routage custom : `vercel.json` ne fait que pointer
 `buildCommand`/`outputDirectory`, donc `api/apps.js` sert automatiquement
 `/api/apps`, etc.
 
@@ -45,6 +47,24 @@ Endpoint principal, backé par PostgreSQL (`service-postgres.js`).
   `src/components/assessment/AssessmentDetail.jsx` dans la fiche d'une app
   (masqué en mode enfant pour l'instant) ; sans connexion ou sans évaluation, la
   fiche garde le texte court `reason`.
+  `assessment.gradeHistory` = `{ firstAssessedAt, changes: [{ date, from, to }] }`
+  (changements du plus récent au plus ancien), lu dans `app_assessment_history`
+  (voir `server/gradeChanges.js` : `buildGradeTimeline`).
+- **GET** `?migration_guide_from=:id&migration_guide_to=:id` : guide de migration
+  lu dans `app_migration_guides`. Réponse : `{ success: true, guide: { export, import } }`,
+  chaque côté `{ summary, steps[], notes[{ text, level }], source, checkedAt, verified }` ou `null`
+  (`level` : `info` ou `danger` ; textes en Markdown limité, voir le guide)
+  sans guide. Si l'alternative importe directement depuis l'app quittée, `export` se
+  résume à une phrase sans étapes. 400 si l'un des deux ids manque. Voir
+  [Migration guidée](../guides/migration-guidee.md).
+- **GET** `?grade_changes_since=AAAA-MM-JJ` : changements de note de tout le
+  catalogue depuis cette date (90 jours si vide, 365 jours au plus ; 400 si la
+  date est invalide). Réponse : `{ success: true, since, changes: [{ appId, name,
+  previousGrade, grade, date }] }`, un changement net par app (plusieurs
+  réévaluations sont fusionnées, un retour à la note de départ disparaît). Même
+  réponse pour tous, mise en cache CDN : chaque appareil filtre ensuite ses
+  propres apps. Le `summary` interne de l'historique n'est jamais renvoyé. Voir
+  [Alertes de note](../guides/alertes-notes.md).
 - **POST / PUT / DELETE** : création, mise à jour, suppression d'une
   application (réservé aux clients authentifiés).
 

@@ -29,7 +29,7 @@ npm run cap:sync     # Build Vite puis cap sync android (avant tout build Gradle
 
 ```
 src/
-├── App.jsx                    # Composant root (631L) — état global, routing tabs
+├── App.jsx                    # Composant root : assemble les hooks, choisit l'écran (onglets via activeTab)
 ├── main.jsx                   # Point d'entrée React
 ├── components/
 │   ├── layout/
@@ -64,9 +64,10 @@ api/                           # Vercel serverless (production)
 └── star-apps.js               # Apps grade D/E
 
 server/
-├── index.js                   # Express dev (port 3001, 740L)
+├── index.js                   # Express dev (port 3001), routes par module server/*.js
 └── database/
-    └── service-postgres.js    # Requêtes SQL Neon
+    ├── service-postgres.js    # Façade d'accès aux données (importée par api/*.js)
+    └── postgres/              # Requêtes SQL Neon par domaine (lecture, écriture, relations, mise en forme…)
 ```
 
 ## Variables d'environnement (.env)
@@ -151,7 +152,7 @@ manuelle web) en mode purement additif, sans repasser par le welcome modal.
 - Le bouton reset données (`RotateCcw` dans Header) est visible uniquement si connecté
 - L'admin est protégé par PIN (localStorage), pas de rôle serveur
 - Les tokens magic link expirent en 15 min
-- `App.jsx` est le fichier le plus complexe (631L) — éviter d'y ajouter de la logique, préférer des hooks
+- `App.jsx` ne fait qu'assembler : toute nouvelle logique va dans un hook (`src/hooks/`) ou un composant ; voir `docs/architecture/2026-11-10-decoupage-par-domaine.md` (où mettre quoi)
 
 ## Android / APK (Capacitor)
 

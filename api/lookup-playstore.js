@@ -1,6 +1,6 @@
 // Vercel Serverless Function - Aperçu Play Store pour préremplir le formulaire admin
 // (lecture seule, ne touche pas la base — l'enregistrement re-synchronise de
-// toute façon nom/icône via enrichFromPlayStore côté service-postgres.js)
+// toute façon nom/icône via enrichFromPlayStore côté server/database/postgres/store-enrichment.js)
 import 'dotenv/config';
 import gplay from 'google-play-scraper';
 import { isAuthorizedAdminRequest } from '../server/adminToken.js';

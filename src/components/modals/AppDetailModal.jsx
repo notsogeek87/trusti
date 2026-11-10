@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, CheckCircle, Route, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink, Trash2, StickyNote, Star, Share2 } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { GRADE_INFO } from '../../constants/grades';
@@ -49,7 +49,7 @@ const sectionAnim = (delay = 0) => ({
 /**
  * Modal des détails d'une application
  */
-const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, onCompleteMigration, onChangeAlternative, allApps = [] }) => {
+const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, onCompleteMigration, onChangeAlternative, allApps = [], resumeMigration = false }) => {
   const [isExiting, setIsExiting] = useState(false);
   const [showMigrationGuide, setShowMigrationGuide] = useState(false);
   // State pour stocker les apps chargées dynamiquement
@@ -162,6 +162,17 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
     app.alternativeAppIds && app.alternativeAppIds.includes(String(altApp.id))
   );
   
+  // « Reprendre » depuis « Migrations en cours » : le parcours s'ouvre dès que les
+  // alternatives sont chargées (une seule fois).
+  const resumeHandled = useRef(false);
+  useEffect(() => {
+    if (!resumeMigration || resumeHandled.current || isLoadingRelations) return;
+    if (canStartMigration(app, alternatives)) {
+      resumeHandled.current = true;
+      setShowMigrationGuide(true);
+    }
+  }, [resumeMigration, isLoadingRelations, alternatives.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // replacesAppIds = apps avec pire score dans la même catégorie
   const replacedApps = availableApps.filter(replacedApp => 
     app.replacesAppIds && app.replacesAppIds.includes(String(replacedApp.id))
@@ -423,21 +434,21 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                 {app.playStoreUrl && (
                   <a href={app.playStoreUrl} target="_blank" rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 bg-white hover:bg-emerald-100 text-emerald-700 font-bold text-xs py-2.5 px-3 rounded-xl transition-all border-2 border-emerald-200 hover:border-emerald-400 shadow-sm">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%2Fid%2FOIP.5MxY8CYsuOK6daH6aocNLAHaIe%3Fpid%3DApi&f=1&ipt=423621f87e3335ef5aa176e8f68343d5e008b4674699573ed4712e0d066a903b&ipo=images" alt="Play Store" className="w-5 h-5" />
+                    <img src="/assets/stores/play-store.png" alt="Play Store" className="w-5 h-5" />
                     Play Store
                   </a>
                 )}
                 {app.appleStoreUrl && (
                   <a href={app.appleStoreUrl} target="_blank" rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs py-2.5 px-3 rounded-xl transition-all border-2 border-slate-200 hover:border-slate-400 shadow-sm">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.jhRunii665tZxgBO17E0OwHaHa%3Fpid%3DApi&f=1&ipt=b405abc4f0e4ab24a5fd3be09175722438e0f888eb681770c42d8f1462036efb&ipo=images" alt="App Store" className="w-5 h-5" />
+                    <img src="/assets/stores/app-store.png" alt="App Store" className="w-5 h-5" />
                     App Store
                   </a>
                 )}
                 {app.fDroidUrl && (
                   <a href={app.fDroidUrl} target="_blank" rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 bg-white hover:bg-blue-100 text-blue-700 font-bold text-xs py-2.5 px-3 rounded-xl transition-all border-2 border-blue-200 hover:border-blue-400 shadow-sm">
-                    <img src="https://f-droid.org/assets/favicon.ico" alt="F-Droid" className="w-5 h-5" />
+                    <img src="/assets/stores/f-droid.png" alt="F-Droid" className="w-5 h-5" />
                     F-Droid
                   </a>
                 )}

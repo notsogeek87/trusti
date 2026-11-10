@@ -3,16 +3,13 @@ import AppCard from './AppCard';
 import LoadingSpinner from './ui/LoadingSpinner';
 import { buildAwardsPodiums } from '../utils/awards';
 import { TABS } from '../constants/tabs';
-import { CATEGORY_MAPPING, FAVORITES_FILTER } from '../constants/categories';
+import { getMainCategory, getPodiumCategory, FAVORITES_FILTER } from '../constants/categories';
 import { useIsMobile } from '../contexts/ViewModeContext';
 
 /**
  * Normalise une catégorie vers sa catégorie principale
  */
-const normalizeCategory = (category) => {
-  if (!category) return 'Divers';
-  return CATEGORY_MAPPING[category] || 'Divers';
-};
+const normalizeCategory = getMainCategory;
 
 /**
  * Liste des applications
@@ -95,7 +92,7 @@ const AppsList = ({
     // Un podium (3 apps A/B max) par catégorie détaillée : regrouper par
     // catégorie principale mettait Email, Messagerie et Visio en concurrence
     // sur un seul podium (la messagerie instantanée disparaissait).
-    const podiums = buildAwardsPodiums(apps, (category) => category || 'Divers');
+    const podiums = buildAwardsPodiums(apps, getPodiumCategory);
 
     return (
       <div className="space-y-6">
