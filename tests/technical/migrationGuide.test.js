@@ -5,45 +5,53 @@ import { DEFAULT_DATA_TIPS } from '../../src/constants/migrationGuide.js';
 import { APP_EXPORT_GUIDES, APP_IMPORT_GUIDES } from '../../src/constants/appMigrationGuides.js';
 
 test('les conseils suivent la catégorie, avec repli générique', () => {
-  assert.ok(getDataTips('Gestionnaires de Mots de Passe').export[0].includes('CSV'));
-  assert.ok(getDataTips('Email').import.length > 0);
-  const generic = { ...DEFAULT_DATA_TIPS, exportSource: null, importSource: null };
-  assert.deepEqual(getDataTips('Jeux'), generic);
-  assert.deepEqual(getDataTips(undefined), generic);
+  assert.ok(getDataTips('Gestionnaires de Mots de Passe').export.steps[0].includes('CSV'));
+  assert.ok(getDataTips('Email').import.steps.length > 0);
+  const generic = getDataTips('Jeux');
+  assert.deepEqual(generic.export, { summary: null, steps: DEFAULT_DATA_TIPS.export, notes: [], source: null });
+  assert.deepEqual(generic.import, { summary: null, steps: DEFAULT_DATA_TIPS.import, notes: [], source: null });
+  assert.equal(generic.specific, false);
+  assert.deepEqual(getDataTips(undefined).export.steps, DEFAULT_DATA_TIPS.export);
 });
 
-test('guide propre à l\'app quittée et à l\'alternative, avec la source officielle', () => {
+test('guide propre à l\'app quittée et à l\'alternative : résumé, étapes, points d\'attention, source', () => {
   // WhatsApp -> Signal
   const tips = getDataTips('Messagerie', { appId: '1769879213451', altId: '1769540367871' });
-  assert.ok(tips.export.some(t => t.includes('Exporter la discussion')));
-  assert.ok(tips.import.some(t => t.includes('Signal')));
-  assert.ok(tips.exportSource.startsWith('https://'));
-  assert.ok(tips.importSource.startsWith('https://'));
+  assert.equal(tips.specific, true);
+  assert.ok(tips.export.summary.includes('WhatsApp'));
+  assert.ok(tips.export.steps.some(t => t.includes('Exporter la discussion')));
+  assert.ok(tips.export.notes.length > 0);
+  assert.ok(tips.import.summary.includes('Signal'));
+  assert.ok(tips.export.source.startsWith('https://'));
+  assert.ok(tips.import.source.startsWith('https://'));
 });
 
 test('un côté sans guide retombe sur les conseils de la catégorie', () => {
   // Gmail -> une messagerie sans guide dédié
   const tips = getDataTips('Email', { appId: '1769803097037', altId: 'mailo' });
-  assert.ok(tips.export.some(t => t.includes('takeout.google.com')));
-  assert.ok(tips.import.some(t => t.includes('contacts')));
-  assert.equal(tips.importSource, null);
+  assert.ok(tips.export.steps.some(t => t.includes('takeout.google.com')));
+  assert.equal(tips.import.summary, null);
+  assert.ok(tips.import.steps.some(t => t.includes('contacts')));
+  assert.equal(tips.import.source, null);
 });
 
-test('import direct : l\'export est remplacé par une seule consigne', () => {
+test('import direct : l\'export se résume à une phrase, sans étapes', () => {
   // Gmail -> Proton Mail (Easy Switch se connecte à Gmail)
   const tips = getDataTips('Email', { appId: '1769803097037', altId: '1769541460710' });
-  assert.equal(tips.export.length, 1);
-  assert.ok(tips.export[0].startsWith('Pas besoin d\'exporter'));
-  assert.equal(tips.exportSource, null);
-  assert.ok(tips.import.some(t => t.includes('Easy Switch')));
+  assert.ok(tips.export.summary.startsWith('Pas besoin d\'exporter'));
+  assert.deepEqual(tips.export.steps, []);
+  assert.equal(tips.export.source, null);
+  assert.ok(tips.import.steps.some(t => t.includes('Easy Switch')));
 });
 
-test('chaque guide a des conseils, une source https et une date de vérification', () => {
+test('chaque guide se suit sans quitter l\'app : résumé, étapes, source https et date', () => {
   for (const [id, guide] of Object.entries({ ...APP_EXPORT_GUIDES, ...APP_IMPORT_GUIDES })) {
-    assert.ok(Array.isArray(guide.tips) && guide.tips.length > 0, id);
-    assert.ok(guide.tips.every(t => typeof t === 'string' && t.length > 0), id);
+    assert.ok(typeof guide.summary === 'string' && guide.summary.length > 20, id);
+    assert.ok(Array.isArray(guide.steps) && guide.steps.length >= 2, id);
+    assert.ok([...guide.steps, ...(guide.notes || [])].every(t => typeof t === 'string' && t.length > 0), id);
     assert.match(guide.source, /^https:\/\//, id);
     assert.match(guide.checkedAt, /^\d{4}-\d{2}-\d{2}$/, id);
+    if (guide.directFrom) assert.equal(typeof guide.directExport, 'string', id);
   }
 });
 

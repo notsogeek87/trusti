@@ -13,13 +13,23 @@ function getCategoryTips(category) {
   return found ? { export: found.export, import: found.import } : DEFAULT_DATA_TIPS;
 }
 
+// Guide prêt à afficher : résumé, étapes numérotées, points d'attention, source.
+const toSection = (guide) => ({
+  summary: guide.summary || null,
+  steps: guide.steps || [],
+  notes: guide.notes || [],
+  source: guide.source || null,
+});
+const fromTips = (tips) => ({ summary: null, steps: tips, notes: [], source: null });
+
 /**
- * Conseils de l'étape « Transférer vos données ». Guide propre à l'app quittée
- * (`appId`) et à l'alternative (`altId`) quand il existe (constants/appMigrationGuides.js),
- * sinon conseils de la catégorie. Si l'alternative importe directement depuis l'app
- * quittée (`directFrom`), l'export est remplacé par une seule consigne.
+ * Contenu de l'étape « Transférer vos données », côté app quittée (`export`) et côté
+ * alternative (`import`). Guide propre à l'app quand il existe
+ * (constants/appMigrationGuides.js), sinon conseils de la catégorie. Si l'alternative
+ * importe directement depuis l'app quittée (`directFrom`), l'export se résume à une phrase.
  *
- * @returns {{ export: string[], import: string[], exportSource: string|null, importSource: string|null }}
+ * @returns {{ export: Section, import: Section, specific: boolean }}
+ *   Section = { summary: string|null, steps: string[], notes: string[], source: string|null }
  */
 export function getDataTips(category, { appId, altId } = {}) {
   const fallback = getCategoryTips(category);
@@ -28,10 +38,11 @@ export function getDataTips(category, { appId, altId } = {}) {
   const direct = importGuide?.directFrom?.includes(String(appId)) && importGuide.directExport;
 
   return {
-    export: direct || exportGuide?.tips || fallback.export,
-    import: importGuide?.tips || fallback.import,
-    exportSource: direct ? null : exportGuide?.source || null,
-    importSource: importGuide?.source || null,
+    export: direct
+      ? { summary: direct, steps: [], notes: [], source: null }
+      : exportGuide ? toSection(exportGuide) : fromTips(fallback.export),
+    import: importGuide ? toSection(importGuide) : fromTips(fallback.import),
+    specific: Boolean(exportGuide || importGuide),
   };
 }
 

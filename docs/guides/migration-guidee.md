@@ -16,7 +16,7 @@ Le lien ouvre un parcours en quatre étapes :
 |---|---|
 | Choisir l'alternative | Liste des alternatives de meilleur grade, la recommandée en premier (`pickBestAlternative`) |
 | Installer la nouvelle app | Liens Play Store / F-Droid / site officiel. Sur Android natif, l'installation est constatée automatiquement |
-| Transférer vos données | Guide propre à l'app quittée et à l'alternative quand il existe, avec un lien « Aide officielle ». Sinon, conseils selon la catégorie |
+| Transférer vos données | Deux blocs, « Récupérer vos données de X » puis « Les mettre dans Y ». Quand un guide propre à l'app existe : résumé « En bref », étapes numérotées et encadré « À savoir », de quoi suivre sans quitter Trusti ; la source officielle est en petit en pied de bloc. Sinon, conseils selon la catégorie |
 | Quitter l'ancienne app | Conseils (suppression du compte, accès) et bouton de désinstallation sur Android natif |
 
 « Terminer la migration » (actif une fois la dernière case cochée) ajoute l'app à « Mes Apps », la marque comme migrée et enregistre l'alternative choisie, via `importMigrations`. La progression est reprise là où elle s'est arrêtée à la réouverture.
@@ -46,20 +46,25 @@ La progression est stockée **uniquement** dans le `localStorage`, clé `trusti_
 
 ## Ajouter un guide par app
 
-Dans `src/constants/appMigrationGuides.js`, clé = id de l'app dans la table `applications`. Vérifier chaque étape sur la page d'aide officielle de l'éditeur, la citer dans `source` et dater la vérification dans `checkedAt` :
+Dans `src/constants/appMigrationGuides.js`, clé = id de l'app dans la table `applications`. Le guide doit se suffire à lui-même : l'utilisateur ne devrait pas avoir à ouvrir la source. Vérifier chaque étape sur la page d'aide officielle de l'éditeur, la citer dans `source` et dater la vérification dans `checkedAt` :
 
 ```js
 // Dans APP_IMPORT_GUIDES
 '1769541460710': {
-  tips: ['Sur mail.proton.me : Paramètres > Tous les paramètres > Importer via Easy Switch.'],
-  directFrom: ['1769803097037'],   // Gmail : l'alternative importe seule
-  directExport: ['Pas besoin d\'exporter : Proton se connecte à votre compte Gmail.'],
+  summary: 'Easy Switch copie vos e-mails, contacts et agendas dans Proton Mail.', // « En bref »
+  steps: [                                       // étapes numérotées, menus exacts
+    'Sur un ordinateur, connectez-vous à mail.proton.me.',
+    'Allez dans Paramètres > Tous les paramètres > Importer via Easy Switch.',
+  ],
+  notes: ['Comptes Google Workspace non pris en charge.'], // « À savoir »
+  directFrom: ['1769803097037'],                 // Gmail : l'alternative importe seule
+  directExport: 'Pas besoin d\'exporter : Proton se connecte à votre compte Gmail.',
   source: 'https://proton.me/support/switch-from-gmail-to-proton',
   checkedAt: '2026-11-10',
 },
 ```
 
-Un test vérifie que chaque guide a des conseils, une source `https://` et une date.
+Un test vérifie que chaque guide a un résumé, au moins deux étapes, une source `https://` et une date.
 
 ## Exemple
 
