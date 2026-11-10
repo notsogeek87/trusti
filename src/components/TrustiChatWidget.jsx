@@ -61,7 +61,7 @@ const TrustiChatWidget = ({ onOpenLandingPage }) => {
             /* Pill compacte */
             <div className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white pl-2.5 pr-3.5 py-2 rounded-full shadow-lg transition-all duration-300 opacity-75 hover:opacity-100 hover:scale-105">
               <img
-                src="/assets/trusti-gif.gif"
+                src="/assets/trusti-assistant.webp"
                 alt=""
                 className="w-6 h-6 rounded-full"
               />
@@ -71,7 +71,7 @@ const TrustiChatWidget = ({ onOpenLandingPage }) => {
             /* GIF plein format (5 premières secondes ou au hover) */
             <div className="relative">
               <img
-                src="/assets/trusti-gif.gif"
+                src="/assets/trusti-assistant.webp"
                 alt="Assistant Trusti"
                 className="w-14 h-14 rounded-full shadow-xl border-[3px] border-white transition-transform duration-200 group-hover:scale-110"
               />
@@ -97,7 +97,7 @@ const TrustiChatWidget = ({ onOpenLandingPage }) => {
           {/* Header */}
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-3.5 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src="/assets/trusti-gif.gif" alt="Assistant Trusti" className="w-10 h-10 rounded-full border-2 border-white" />
+              <img src="/assets/trusti-assistant.webp" alt="Assistant Trusti" className="w-10 h-10 rounded-full border-2 border-white" />
               <div>
                 <h3 className="font-black text-base">Assistant Trusti</h3>
                 <p className="text-[11px] text-white/80 flex items-center gap-1">
@@ -116,7 +116,7 @@ const TrustiChatWidget = ({ onOpenLandingPage }) => {
             {messages.map((message, index) => (
               <div key={index} className={`flex gap-3 mb-4 ${message.type === 'user' ? 'justify-end' : ''}`}>
                 {message.type === 'bot' && (
-                  <img src="/assets/trusti-gif.gif" alt="Trusti" className="w-8 h-8 rounded-full shrink-0" />
+                  <img src="/assets/trusti-assistant.webp" alt="Trusti" className="w-8 h-8 rounded-full shrink-0" />
                 )}
                 <div className={`flex-1 ${message.type === 'user' ? 'max-w-[80%]' : ''}`}>
                   <div className={`rounded-2xl px-4 py-3 shadow-sm ${
