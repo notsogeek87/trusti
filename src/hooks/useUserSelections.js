@@ -41,8 +41,10 @@ export const useUserSelections = (saveUserData, getUserData) => {
     setTimeout(() => setIsInitialized(true), 100);
   }, [getUserData]);
 
-  // Sauvegarde à chaque changement (pas au premier chargement). saveUserData
-  // n'est pas en dépendance pour éviter une boucle.
+  // Sauvegarde à chaque changement, une fois le chargement terminé. Aussi à la
+  // fin du chargement : une app supprimée du catalogue et retirée avant (voir
+  // forgetApps) doit disparaître du stockage, pas seulement de l'écran.
+  // saveUserData n'est pas en dépendance pour éviter une boucle.
   useEffect(() => {
     if (isInitialized && saveUserData) {
       saveUserData('apps', {
@@ -52,7 +54,7 @@ export const useUserSelections = (saveUserData, getUserData) => {
         customMigrations: Array.from(customMigrations.entries()),
       });
     }
-  }, [myApps, favoriteApps, migratedApps, customMigrations]);
+  }, [isInitialized, myApps, favoriteApps, migratedApps, customMigrations]);
 
   const toggleMyApp = (e, id) => {
     e.stopPropagation();
