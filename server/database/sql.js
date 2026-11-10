@@ -23,10 +23,27 @@ export function pickDriver(url, forced) {
   }
 }
 
+/**
+ * Hyperfluid fournit parfois le secret du PostgreSQL géré sous forme de bloc JSON
+ * (host, port, internal_database_url...). On en extrait alors l'adresse interne ;
+ * une adresse classique (postgres://...) est renvoyée telle quelle.
+ */
+export function resolveDatabaseUrl(raw = process.env.DATABASE_URL) {
+  if (!raw) return raw;
+  const text = String(raw).trim();
+  if (!text.startsWith('{')) return text;
+  try {
+    const obj = JSON.parse(text);
+    return obj.internal_database_url || obj.database_url || text;
+  } catch {
+    return text;
+  }
+}
+
 let runner;
 
 async function buildRunner() {
-  const url = process.env.DATABASE_URL;
+  const url = resolveDatabaseUrl();
   if (pickDriver(url, process.env.DB_DRIVER) === 'neon') {
     const { neon } = await import('@neondatabase/serverless');
     const client = neon(url);

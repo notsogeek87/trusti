@@ -6,7 +6,7 @@ dotenv.config();
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
-import { pickDriver } from './database/sql.js';
+import { pickDriver, resolveDatabaseUrl } from './database/sql.js';
 
 import appsHandler from '../api/apps.js';
 import customTrustiAppsHandler from '../api/custom-trusti-apps.js';
@@ -61,8 +61,8 @@ function describeDbUrl(url) {
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
-    db: pickDriver(process.env.DATABASE_URL, process.env.DB_DRIVER),
-    dbHost: describeDbUrl(process.env.DATABASE_URL),
+    db: pickDriver(resolveDatabaseUrl(), process.env.DB_DRIVER),
+    dbHost: describeDbUrl(resolveDatabaseUrl()),
     timestamp: new Date().toISOString(),
   });
 });

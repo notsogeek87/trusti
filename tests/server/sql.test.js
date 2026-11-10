@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { toQuery, pickDriver } from '../../server/database/sql.js';
+import { toQuery, pickDriver, resolveDatabaseUrl } from '../../server/database/sql.js';
 
 test('toQuery numérote les paramètres', () => {
   const q = toQuery(['SELECT * FROM t WHERE a = ', ' AND b = ', ''], [1, 'x']);
@@ -17,4 +17,14 @@ test('pickDriver : Neon par hôte, pg sinon, DB_DRIVER prioritaire', () => {
   assert.equal(pickDriver('postgresql://u:p@db.interne:5432/db', undefined), 'pg');
   assert.equal(pickDriver('postgresql://u:p@db.interne:5432/db', 'neon'), 'neon');
   assert.equal(pickDriver('postgresql://u:p@x.neon.tech/db', 'pg'), 'pg');
+});
+
+test('resolveDatabaseUrl lit internal_database_url dans un bloc JSON', () => {
+  const blob = JSON.stringify({ host: 'h', internal_database_url: 'postgres://u:p@in:5432/d' });
+  assert.equal(resolveDatabaseUrl(blob), 'postgres://u:p@in:5432/d');
+});
+
+test('resolveDatabaseUrl laisse une adresse classique inchangée', () => {
+  assert.equal(resolveDatabaseUrl('postgres://u:p@h/d'), 'postgres://u:p@h/d');
+  assert.equal(resolveDatabaseUrl(undefined), undefined);
 });
