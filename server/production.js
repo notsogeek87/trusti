@@ -34,6 +34,19 @@ app.all('/api/suggest-tool', suggestToolHandler);
 app.all('/api/clean-duplicates', cleanDuplicatesHandler);
 app.all('/api/lookup-playstore', lookupPlayStoreHandler);
 
+// Noms des champs d'un bloc JSON ou KEY=valeur, sans jamais afficher les valeurs.
+function listFieldNames(text) {
+  try {
+    const parsed = JSON.parse(text);
+    if (parsed && typeof parsed === 'object') return Object.keys(parsed).join(', ');
+  } catch {}
+  return text
+    .split(/\r?\n|&/)
+    .map((line) => line.match(/^\s*([A-Za-z0-9_.-]{1,60})\s*[=:]/)?.[1])
+    .filter(Boolean)
+    .join(', ') || 'format inconnu';
+}
+
 // Diagnostic sans secret : seulement protocole et nom d'hôte, jamais les identifiants.
 function describeDbUrl(url) {
   if (!url) return 'absente';
@@ -41,7 +54,7 @@ function describeDbUrl(url) {
     const u = new URL(url);
     return `${u.protocol}//${u.hostname}`;
   } catch {
-    return `invalide (${String(url).length} caractères)`;
+    return `invalide (${String(url).length} caractères) ; champs : ${listFieldNames(String(url))}`;
   }
 }
 
