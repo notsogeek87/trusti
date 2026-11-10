@@ -32,3 +32,16 @@ test('onboarding : chaque parent élargi est bien un parent découpé', () => {
   const splitParents = new Set(Object.keys(SPLIT_SUBCATEGORIES).map(s => s.split(' / ')[0]));
   for (const parent of ONBOARDING_SPLIT_PARENTS) assert.ok(splitParents.has(parent), parent);
 });
+
+test('audit des alternatives, volet 2 : les nouvelles sous-catégories gardent leur grande catégorie', () => {
+  const subs = [
+    'CRM & Support / CRM', 'CRM & Support / Tickets',
+    'Sauvegarde & Supervision / Sauvegarde', 'Sauvegarde & Supervision / Supervision',
+    'Gestion de projet / Tableau blanc', 'Tech & Dev / Terminal',
+    'Tech & Dev / Publication Android', "Système d'exploitation / iPhone",
+  ];
+  for (const sub of subs) {
+    assert.equal(getMainCategory(sub), getMainCategory(SPLIT_SUBCATEGORIES[sub]), sub);
+    assert.notEqual(getMainCategory(sub), 'Divers', sub);
+  }
+});

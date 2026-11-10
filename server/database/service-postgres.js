@@ -8,6 +8,7 @@ import { formatAssessmentFromDB } from '../assessment.js';
 import { collapseGradeChanges, buildGradeTimeline } from '../gradeChanges.js';
 import { buildTransferGuide } from '../migrationGuides.js';
 import { onboardingSubcategoryParents } from '../onboardingCategories.js';
+import { computeRelations } from '../relations.js';
 import { formatTeamPick } from './team-pick.js';
 
 // Charger .env en développement local
@@ -1192,61 +1193,13 @@ async function deleteRelations(appId) {
 }
 
 /**
- * Obtenir les relations d'une app
- */
-/**
- * Obtenir les relations automatiques d'une application basées sur la catégorie et le trustiScore
- * - TrustiApps (A/B/C) remplacent les StarApps (D/E) de même catégorie
- * - StarApps (D/E) ont comme alternatives les TrustiApps (A/B/C) de même catégorie
+ * Relations d'une seule app (alternatives / remplace), même calcul que
+ * buildRelationsMap : catégorie + liens saisis à la main (voir server/relations.js).
  */
 async function getAppRelations(appId) {
   try {
-    // Récupérer l'app courante pour connaître sa catégorie et son trustiScore
-    const apps = await sql`
-      SELECT trusti_score, category 
-      FROM applications 
-      WHERE id = ${appId}
-    `;
-    
-    if (apps.length === 0) {
-      return { alternativeAppIds: [], replacesAppIds: [] };
-    }
-    
-    const currentApp = apps[0];
-    const currentScore = currentApp.trusti_score;
-    const currentCategory = currentApp.category;
-    
-    // Ordre des scores (A est meilleur que E)
-    const scoreOrder = { 'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5 };
-    const currentScoreValue = scoreOrder[currentScore] || 999;
-    
-    const alternativeAppIds = [];
-    const replacesAppIds = [];
-    
-    // 1. Récupérer toutes les apps de la même catégorie
-    const sameCategory = await sql`
-      SELECT id, trusti_score 
-      FROM applications 
-      WHERE category = ${currentCategory}
-      AND id != ${appId}
-    `;
-    
-    // 2. Séparer en alternatives (meilleurs scores) et remplace (pires scores)
-    sameCategory.forEach(app => {
-      const appScoreValue = scoreOrder[app.trusti_score] || 999;
-      
-      // Alternative = score meilleur (valeur plus petite)
-      if (appScoreValue < currentScoreValue) {
-        alternativeAppIds.push(String(app.id));
-      }
-      
-      // Remplace = score pire (valeur plus grande)
-      if (appScoreValue > currentScoreValue) {
-        replacesAppIds.push(String(app.id));
-      }
-    });
-    
-    return { alternativeAppIds, replacesAppIds };
+    const map = await buildRelationsMap();
+    return map.get(String(appId)) || { alternativeAppIds: [], replacesAppIds: [] };
   } catch (error) {
     console.error('Error getting app relations:', error);
     return { alternativeAppIds: [], replacesAppIds: [] };
@@ -1254,45 +1207,20 @@ async function getAppRelations(appId) {
 }
 
 /**
- * Construit en une seule requête les relations (alternatives/remplace) de
- * TOUTES les applications, groupées par catégorie et comparées par note.
- *
- * Remplace l'appel de getAppRelations() une fois par app (N+1 requêtes SQL,
- * la cause principale des chargements lents du catalogue, de la recherche
- * et des Awards) par une seule requête légère (id, category, trusti_score)
- * suivie d'un calcul en mémoire.
+ * Construit en deux requêtes légères les relations (alternatives/remplace) de
+ * TOUTES les applications : même catégorie mieux notée, plus les liens
+ * « alternative » saisis à la main dans app_relations (autre catégorie
+ * possible), toujours seulement vers une app strictement mieux notée.
+ * Calcul en mémoire dans computeRelations (server/relations.js).
  *
  * @returns {Promise<Map<string, {alternativeAppIds: string[], replacesAppIds: string[]}>>}
  */
 async function buildRelationsMap() {
-  const rows = await sql`SELECT id, category, trusti_score FROM applications`;
-
-  const scoreOrder = { 'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5 };
-  const byCategory = new Map();
-  for (const row of rows) {
-    const list = byCategory.get(row.category) || [];
-    list.push(row);
-    byCategory.set(row.category, list);
-  }
-
-  const relationsMap = new Map();
-  for (const row of rows) {
-    const currentScoreValue = scoreOrder[row.trusti_score] || 999;
-    const peers = byCategory.get(row.category) || [];
-
-    const alternativeAppIds = [];
-    const replacesAppIds = [];
-    for (const peer of peers) {
-      if (peer.id === row.id) continue;
-      const peerScoreValue = scoreOrder[peer.trusti_score] || 999;
-      if (peerScoreValue < currentScoreValue) alternativeAppIds.push(String(peer.id));
-      if (peerScoreValue > currentScoreValue) replacesAppIds.push(String(peer.id));
-    }
-
-    relationsMap.set(String(row.id), { alternativeAppIds, replacesAppIds });
-  }
-
-  return relationsMap;
+  const [rows, curated] = await Promise.all([
+    sql`SELECT id, category, trusti_score FROM applications`,
+    sql`SELECT app_id, related_app_id FROM app_relations WHERE relation_type = 'alternative'`,
+  ]);
+  return computeRelations(rows, curated);
 }
 
 const EMPTY_RELATIONS = { alternativeAppIds: [], replacesAppIds: [] };
@@ -1344,7 +1272,7 @@ export async function getAppsByGrade(grades, options = {}) {
 
 /**
  * Obtenir les applications alternatives pour une app donnée
- * (apps de même catégorie avec une meilleure note)
+ * (apps de même catégorie ou liées à la main, avec une meilleure note)
  * @param {string} appId - ID de l'application
  * @returns {Promise<Array>} Liste des alternatives complètes
  */

@@ -190,7 +190,9 @@ export const CATEGORY_MAPPING = {
   // Systèmes d'exploitation (Android, iOS, Windows, Linux...), distincts des
   // composants système (catégorie « Système »).
   'Système d\'exploitation / Smartphone': 'Systèmes d\'exploitation',
-  'Système d\'exploitation / PC': 'Systèmes d\'exploitation'
+  'Système d\'exploitation / PC': 'Systèmes d\'exploitation',
+  // Parent : toute sous-catégorie « Système d'exploitation / … » (iPhone…)
+  'Système d\'exploitation': 'Systèmes d\'exploitation'
 };
 
 /**
@@ -236,6 +238,15 @@ export const SPLIT_SUBCATEGORIES = {
   'Sport & Fitness / Salles de sport': 'Shopping',
   'Transport & Mobilité / VTC': 'Transport & Mobilité',
   'Email / Logiciels de messagerie': 'Email',
+  // Deuxième volet de l'audit des alternatives (2026-11-10)
+  'CRM & Support / CRM': 'CRM & Support',
+  'CRM & Support / Tickets': 'CRM & Support',
+  'Sauvegarde & Supervision / Sauvegarde': 'Sauvegarde & Supervision',
+  'Sauvegarde & Supervision / Supervision': 'Sauvegarde & Supervision',
+  'Gestion de projet / Tableau blanc': 'Gestion de projet',
+  'Tech & Dev / Terminal': 'Outils / Développement',
+  'Tech & Dev / Publication Android': 'Outils / Développement',
+  'Système d\'exploitation / iPhone': 'Système d\'exploitation / Smartphone',
 };
 
 // Bloqueur de pub : rangé sous « Sécurité & VPN » dans le filtre du catalogue.
