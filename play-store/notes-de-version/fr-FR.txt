@@ -1,7 +1,6 @@
 Nouveautés :
-• Rubrique Organisations : évaluez les outils de votre association ou entreprise (note globale, plan d'action, rapport PDF et tableau).
-• « Créer mon organisation » : un kit d'outils souverains prêt à l'emploi pour associations et TPE.
-• Nouvelle catégorie Systèmes d'exploitation (smartphone et PC).
-• Palmarès : un podium par catégorie.
-• Partagez la fiche d'une app avec un lien.
-• Suggestions d'alternatives par notification.
+• Alertes quand la note d'une de vos apps change (notification et historique sur la fiche).
+• Migration guidée : étapes d'export et d'import lisibles dans l'app, suivi des migrations en cours.
+• Alternatives plus pertinentes : catégories détaillées par usage.
+• Mes Apps affiche d'abord les apps qui ont une alternative.
+• Icônes d'apps plus fiables.
