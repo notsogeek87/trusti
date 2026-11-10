@@ -1,5 +1,6 @@
 import React from 'react';
-import { AlertTriangle, HelpCircle, ExternalLink, Eye, Hourglass, Info, Landmark, MapPin, ShieldCheck, Wrench } from 'lucide-react';
+import { AlertTriangle, HelpCircle, ExternalLink, Eye, Hourglass, History, Info, Landmark, MapPin, ShieldCheck, Wrench } from 'lucide-react';
+import { isStrictlyBetterGrade } from '../../utils/alternatives';
 
 const CONFIDENCE_LABEL = { high: 'Confiance élevée', medium: 'Confiance moyenne', low: 'Confiance faible' };
 
@@ -104,6 +105,41 @@ const CriterionItem = ({ c }) => {
   );
 };
 
+const formatDay = (iso) => {
+  const date = new Date(`${iso}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? iso : date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+};
+
+// Historique de la note (gradeHistory, voir server/gradeChanges.js : buildGradeTimeline).
+const GradeHistory = ({ history }) => {
+  if (!history?.firstAssessedAt) return null;
+  const { changes, firstAssessedAt } = history;
+  return (
+    <div className="mt-3 pt-3 border-t border-slate-100">
+      <p className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-tight text-slate-500 mb-1.5">
+        <History size={12} /> Historique de la note
+      </p>
+      {changes.length === 0 ? (
+        <p className="text-xs text-slate-500">Note inchangée depuis la première évaluation, le {formatDay(firstAssessedAt)}.</p>
+      ) : (
+        <ul className="space-y-1">
+          {changes.map(c => {
+            const up = isStrictlyBetterGrade(c.to, c.from);
+            return (
+              <li key={`${c.date}:${c.to}`} className="text-xs text-slate-600">
+                <span className="text-slate-400">{formatDay(c.date)}</span>{' · '}
+                <span className={`font-bold ${up ? 'text-emerald-700' : 'text-rose-700'}`}>
+                  {c.from} → {c.to} ({up ? 'hausse' : 'baisse'})
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+};
+
 /**
  * Détail d'évaluation TrustiScore d'une app : score, critères, justifications et
  * sources. Les sources « background » portent la mention « à confirmer ».
@@ -162,6 +198,8 @@ const AssessmentDetail = ({ status, assessment }) => {
           {criteria.map(c => <CriterionItem key={c.key} c={c} />)}
         </ul>
       )}
+
+      <GradeHistory history={assessment.gradeHistory} />
     </div>
   );
 };

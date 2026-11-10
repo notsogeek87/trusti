@@ -13,6 +13,8 @@ import { hasCompletedOnboarding, markOnboardingComplete } from './utils/onboardi
 import { getMyAppsSortPref, setMyAppsSortPref, sortMyApps } from './utils/myAppsSort';
 import { areNudgesEnabled, setNudgesEnabled } from './utils/alternativeNudges';
 import { useAlternativeNudges } from './hooks/useAlternativeNudges';
+import { useGradeChanges } from './hooks/useGradeChanges';
+import { areGradeAlertsEnabled, setGradeAlertsEnabled } from './utils/gradeChanges';
 
 // Layout
 import Header from './components/layout/Header';
@@ -27,6 +29,7 @@ import ExplainerPanel from './components/ExplainerPanel';
 import AppsList from './components/AppsList';
 import MyAppsSummary from './components/MyAppsSummary';
 import DataHygieneCard from './components/DataHygieneCard';
+import GradeChangesCard from './components/GradeChangesCard';
 import MyAppsFilterMenu, { DEFAULT_MIGRATION_FILTER, DEFAULT_ALTERNATIVE_FILTER } from './components/MyAppsFilterMenu';
 import LandingPage from './components/LandingPage';
 import OnboardingApps from './components/OnboardingApps';
@@ -378,6 +381,19 @@ const App = () => {
     migratedApps,
     customMigrations,
     enabled: nudgesEnabled,
+  });
+
+  // Notes de « Mes Apps » qui ont changé depuis la dernière visite (web et APK)
+  const [gradeAlertsEnabled, setGradeAlertsEnabledState] = useState(() => areGradeAlertsEnabled());
+  const toggleGradeAlerts = (enabled) => {
+    setGradeAlertsEnabled(enabled);
+    setGradeAlertsEnabledState(enabled);
+  };
+  const { changes: gradeChanges, dismiss: dismissGradeChanges } = useGradeChanges({
+    myApps,
+    ready: isInitialized,
+    active: activeTab === TABS.MY_APPS && isInitialized,
+    alertsEnabled: gradeAlertsEnabled,
   });
 
   // Import via lien de partage (?apps=... et/ou ?mig=...)
@@ -771,6 +787,8 @@ const App = () => {
         onSelectApp={openAppDetail}
         nudgesEnabled={nudgesEnabled}
         onToggleNudges={toggleNudges}
+        gradeAlertsEnabled={gradeAlertsEnabled}
+        onToggleGradeAlerts={toggleGradeAlerts}
       />
     );
   }
@@ -939,6 +957,15 @@ const App = () => {
         >
           {myApps.size > 0 && <DataHygieneCard myApps={filteredApps} catalogApps={apps} />}
         </MyAppsSummary>
+      )}
+
+      {activeTab === TABS.MY_APPS && !searchTerm.trim() && (
+        <GradeChangesCard
+          changes={gradeChanges}
+          apps={filteredApps}
+          onSelectApp={openAppDetail}
+          onDismiss={dismissGradeChanges}
+        />
       )}
 
       {/* Recherche + réglages (tri, filtres) sur une seule ligne, sous le

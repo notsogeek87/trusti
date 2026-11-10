@@ -6,6 +6,8 @@ import { registerPlugin } from '@capacitor/core';
  * et programme (ou annule) la tâche périodique qui envoie au plus une notification par semaine.
  * checkPermission() / requestPermission() résolvent { display: 'granted' | 'denied' | 'prompt' }
  * (permission POST_NOTIFICATIONS, Android 13+).
+ * syncGradeAlerts({ enabled, apiUrl, apps: [{ appId }] }) programme (ou annule) GradeChangeWorker,
+ * qui notifie les changements de note des apps suivies (voir src/hooks/useGradeChanges.js).
  * consumeOpenRequest() renvoie { appId? } si Trusti a été ouvert depuis une notification ;
  * l'événement 'openApp' ({ appId }) signale un toucher quand Trusti était déjà ouvert.
  * N'existe que dans l'app Android native (voir isNativeAndroid).

@@ -1,6 +1,7 @@
 // Vercel Serverless Function - Apps Management (Trusti & Star)
 import dbService from '../server/database/service-postgres.js';
 import { isAuthorizedAdminRequest } from '../server/adminToken.js';
+import { parseSince } from '../server/gradeChanges.js';
 
 export default async function handler(req, res) {
   // CORS headers
@@ -27,7 +28,7 @@ export default async function handler(req, res) {
 
   try {
     // Extraire le type depuis l'URL ou le body
-    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, onboarding, categories, ids, grade, alternatives_for, assessment_for, pro } = req.query;
+    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, onboarding, categories, ids, grade, alternatives_for, assessment_for, grade_changes_since, pro } = req.query;
     
     if (req.method === 'GET') {
       // GET /api/apps?type=trusti
@@ -58,9 +59,25 @@ export default async function handler(req, res) {
       }
       
       // GET /api/apps?assessment_for=:id — détail de l'évaluation TrustiScore (null si non évaluée)
+      // Inclut l'historique de la note (gradeHistory : première évaluation + changements).
       if (assessment_for) {
-        const assessment = await dbService.getAssessmentForApp(assessment_for);
-        return res.status(200).json({ success: true, assessment });
+        const [assessment, gradeHistory] = await Promise.all([
+          dbService.getAssessmentForApp(assessment_for),
+          dbService.getGradeHistoryForApp(assessment_for),
+        ]);
+        return res.status(200).json({ success: true, assessment: assessment ? { ...assessment, gradeHistory } : null });
+      }
+
+      // GET /api/apps?grade_changes_since=AAAA-MM-JJ — changements de note du catalogue
+      // depuis cette date (90 jours par défaut, 365 au plus). Même réponse pour tous :
+      // l'appareil compare avec ses propres apps, sans rien envoyer de personnel.
+      if (grade_changes_since !== undefined) {
+        const since = parseSince(grade_changes_since);
+        if (!since) {
+          return res.status(400).json({ success: false, error: 'grade_changes_since doit être une date AAAA-MM-JJ' });
+        }
+        const changes = await dbService.getGradeChangesSince(since);
+        return res.status(200).json({ success: true, since, changes });
       }
 
       // GET /api/apps?pro=true — apps « usage pro » (évaluation du parc d'une organisation)

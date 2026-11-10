@@ -20,6 +20,8 @@ import com.getcapacitor.annotation.PermissionCallback;
  * SharedPreferences et une tâche périodique WorkManager (AlternativeNudgeWorker) choisit,
  * même quand Trusti est fermé, s'il faut en proposer une. Aucune donnée ne quitte l'appareil.
  *
+ * syncGradeAlerts() fait de même pour les alertes de changement de note (GradeChangeWorker).
+ *
  * Toucher la notification rouvre Trusti avec l'id de l'app : consumeOpenRequest() le lit au
  * démarrage à froid, l'événement "openApp" le signale quand Trusti était déjà ouvert.
  */
@@ -65,6 +67,23 @@ public class AlternativeNudgesPlugin extends Plugin {
             AlternativeNudgeWorker.schedule(getContext());
         } else {
             AlternativeNudgeWorker.cancel(getContext());
+        }
+        call.resolve();
+    }
+
+    /**
+     * Alertes de changement de note (GradeChangeWorker) : { enabled, apiUrl, apps: [{ appId, appName }] }.
+     * Les apps suivies restent sur le téléphone ; le worker lit une liste publique de changements.
+     */
+    @PluginMethod
+    public void syncGradeAlerts(PluginCall call) {
+        boolean enabled = Boolean.TRUE.equals(call.getBoolean("enabled", true));
+        JSArray apps = call.getArray("apps", new JSArray());
+        GradeChangeWorker.saveState(getContext(), enabled, call.getString("apiUrl"), apps.toString());
+        if (enabled) {
+            GradeChangeWorker.schedule(getContext());
+        } else {
+            GradeChangeWorker.cancel(getContext());
         }
         call.resolve();
     }

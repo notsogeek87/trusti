@@ -5,6 +5,7 @@ import { neon } from '@neondatabase/serverless';
 import gplay from 'google-play-scraper';
 import { fetchWithTimeout } from '../fetchWithTimeout.js';
 import { formatAssessmentFromDB } from '../assessment.js';
+import { collapseGradeChanges, buildGradeTimeline } from '../gradeChanges.js';
 import { formatTeamPick } from './team-pick.js';
 
 // Charger .env en développement local
@@ -734,6 +735,49 @@ export async function getAssessmentForApp(id) {
 }
 
 /**
+ * Historique des notes d'une app (table app_assessment_history) : date de
+ * première évaluation et changements de note. Vide si la table n'existe pas.
+ */
+export async function getGradeHistoryForApp(id) {
+  try {
+    const rows = await sql`
+      SELECT grade, previous_grade, assessed_at::text AS assessed_at
+      FROM app_assessment_history
+      WHERE app_id = ${String(id)}
+      ORDER BY assessed_at ASC
+    `;
+    return buildGradeTimeline(rows);
+  } catch (error) {
+    if (error?.code === '42P01') return buildGradeTimeline([]);
+    console.error('Error getting grade history:', error);
+    throw error;
+  }
+}
+
+/**
+ * Changements de note de tout le catalogue depuis `since` (AAAA-MM-JJ, inclus),
+ * un changement net par app (voir collapseGradeChanges). Public et identique
+ * pour tous : chaque appareil compare ensuite avec ses propres apps, en local.
+ */
+export async function getGradeChangesSince(since) {
+  try {
+    const rows = await sql`
+      SELECT h.app_id, a.name, h.grade, h.previous_grade, h.assessed_at::text AS assessed_at
+      FROM app_assessment_history h
+      JOIN applications a ON a.id = h.app_id
+      WHERE h.assessed_at >= ${since}::date
+      ORDER BY h.assessed_at ASC
+      LIMIT 5000
+    `;
+    return collapseGradeChanges(rows);
+  } catch (error) {
+    if (error?.code === '42P01') return [];
+    console.error('Error getting grade changes:', error);
+    throw error;
+  }
+}
+
+/**
  * Obtenir une application par ID
  */
 export async function getAppById(id) {
@@ -1374,6 +1418,8 @@ export default {
   getAppsByIds,
   getAlternativesForApp,
   getAssessmentForApp,
+  getGradeHistoryForApp,
+  getGradeChangesSince,
   createApp,
   updateApp,
   deleteApp,
