@@ -220,7 +220,8 @@ const App = () => {
 
   // État pour le filtre avec/sans alternative connue dans l'onglet Mes Apps.
   // Par défaut on masque les apps sans alternative connue (rien à proposer
-  // à l'utilisateur pour elles), pour que la liste reste actionnable.
+  // à l'utilisateur pour elles), pour que la liste reste actionnable
+  // (DEFAULT_ALTERNATIVE_FILTER = 'with').
   const [alternativeFilter, setAlternativeFilter] = useState(DEFAULT_ALTERNATIVE_FILTER);
 
   // Réglage de tri de l'onglet "Mes Apps" (discret, persisté en local) :
@@ -357,20 +358,26 @@ const App = () => {
 
   // Liste effectivement affichée dans "Mes Apps" : version triée ci-dessus,
   // avec en plus les filtres migrée / à migrer et avec / sans alternative.
+  // Filtre « avec alternative » sans aucune app concernée : on montre tout plutôt
+  // qu'une liste vide (cas fréquent juste après l'ajout d'apps sans alternative).
+  const effectiveAlternativeFilter =
+    alternativeFilter === 'with' && alternativeCounts.with === 0 ? 'all' : alternativeFilter;
+
   const myAppsDisplayed = useMemo(() => {
     if (activeTab !== TABS.MY_APPS) return filteredApps;
-    if (migrationFilter === 'all' && alternativeFilter === 'all') return myAppsSorted;
+    if (migrationFilter === 'all' && effectiveAlternativeFilter === 'all') return myAppsSorted;
     return myAppsSorted.filter(app => {
-      if (app.isLoadingSkeleton) return false;
+      // Cartes de chargement gardées : le filtre est actif dès l'ouverture.
+      if (app.isLoadingSkeleton) return true;
       if (migrationFilter !== 'all' && (migrationFilter === 'migrated') !== isAppMigrated(app)) {
         return false;
       }
-      if (alternativeFilter !== 'all' && (alternativeFilter === 'with') !== appHasAlternative(app)) {
+      if (effectiveAlternativeFilter !== 'all' && (effectiveAlternativeFilter === 'with') !== appHasAlternative(app)) {
         return false;
       }
       return true;
     });
-  }, [activeTab, filteredApps, myAppsSorted, migrationFilter, alternativeFilter, customMigrations]);
+  }, [activeTab, filteredApps, myAppsSorted, migrationFilter, effectiveAlternativeFilter, customMigrations]);
 
   // Suggestions d'alternatives par notification (Android natif, voir useAlternativeNudges)
   const [nudgesEnabled, setNudgesEnabledState] = useState(() => areNudgesEnabled());
@@ -1024,8 +1031,16 @@ const App = () => {
           {myAppsDisplayed.length} sur {myAppsSorted.length} apps
           {migrationFilter === 'todo' && ' · à migrer'}
           {migrationFilter === 'migrated' && ' · migrées'}
-          {alternativeFilter === 'with' && ' · avec alternative'}
-          {alternativeFilter === 'without' && ' · sans alternative'}
+          {effectiveAlternativeFilter === 'with' && ' · avec alternative'}
+          {effectiveAlternativeFilter === 'without' && ' · sans alternative'}
+          {' · '}
+          <button
+            type="button"
+            onClick={() => { setMigrationFilter('all'); setAlternativeFilter('all'); }}
+            className="font-bold text-indigo-500 hover:text-indigo-700 underline underline-offset-2"
+          >
+            Tout afficher
+          </button>
         </p>
       )}
 
