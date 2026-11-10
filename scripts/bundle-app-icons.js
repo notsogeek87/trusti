@@ -1,16 +1,19 @@
 #!/usr/bin/env node
 /**
- * Embarque une première version des icônes du catalogue dans l'APK
- * (public/app-icons/, copié dans dist/ puis dans l'app par `cap sync`).
+ * Copie les icônes du catalogue sur le domaine Trusti (public/app-icons/,
+ * copié dans dist/). Utilisé :
+ *  - au build Vercel (vercel.json) : le site web sert les icônes depuis son
+ *    propre domaine, ce qui évite les blocages des réseaux d'entreprise
+ *    (googleusercontent.com, cdn.jsdelivr.net…) ;
+ *  - par `npm run cap:sync` : les icônes sont embarquées dans l'APK.
  *
  * Les URLs d'icônes restent la source de vérité (colonne `icon` en base).
  * Le manifeste associe chaque URL à son fichier local : si l'URL change en
- * base, elle n'est plus dans le manifeste et l'app retombe sur l'URL distante.
- * Les mises à jour d'icônes sont donc automatiques, sans republier l'APK.
+ * base, elle n'est plus dans le manifeste et l'app retombe sur l'URL distante
+ * jusqu'au prochain build (chaque déploiement re-télécharge tout).
  *
  * Tolérant aux pannes : une icône qui ne se télécharge pas est simplement
- * ignorée (l'app l'affichera depuis le réseau). Dossier ignoré par git,
- * régénéré par `npm run cap:sync`.
+ * ignorée (l'app l'affichera depuis le réseau). Dossier ignoré par git.
  */
 import fs from 'fs';
 import path from 'path';
@@ -20,7 +23,7 @@ import { fileURLToPath } from 'url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = path.join(ROOT, 'public/app-icons');
 const API_URL = 'https://trusti-alpha.vercel.app/api/apps?onboarding=true';
-const CONCURRENCY = 8;
+const CONCURRENCY = 16;
 const EXT = { 'image/webp': 'webp', 'image/png': 'png', 'image/jpeg': 'jpg', 'image/svg+xml': 'svg' };
 
 // Même logique que sizedIconUrl() dans AppIconImage.jsx
@@ -60,7 +63,7 @@ async function main() {
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
 
   fs.writeFileSync(path.join(OUT_DIR, 'manifest.json'), JSON.stringify(manifest));
-  console.log(`✅ ${Object.keys(manifest).length}/${urls.length} icônes embarquées dans public/app-icons/`);
+  console.log(`✅ ${Object.keys(manifest).length}/${urls.length} icônes copiées dans public/app-icons/`);
 }
 
 main().catch((e) => {

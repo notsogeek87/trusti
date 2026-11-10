@@ -2,6 +2,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { shareText } from '../../utils/shareUtils';
+import AppIconImage from '../ui/AppIconImage';
 
 /**
  * Modal de partage des migrations
@@ -60,11 +61,7 @@ const ShareModal = ({ migratedApps, customMigrations, allApps = [], sortedAppIds
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
                         {app.icon && app.icon.startsWith('http') ? (
-                          <img 
-                            src={app.icon} 
-                            alt={app.name} 
-                            className="w-full h-full object-cover"
-                          />
+                          <AppIconImage src={app.icon} name={app.name} />
                         ) : (
                           <div className={`${app.color} w-full h-full flex items-center justify-center text-lg text-white`}>
                             {app.icon}
@@ -87,11 +84,7 @@ const ShareModal = ({ migratedApps, customMigrations, allApps = [], sortedAppIds
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
                         {altApp?.icon && altApp.icon.startsWith('http') ? (
-                          <img 
-                            src={altApp.icon} 
-                            alt={customAlt || app.alternative} 
-                            className="w-full h-full object-cover"
-                          />
+                          <AppIconImage src={altApp.icon} name={altApp.name || customAlt || app.alternative || ''} alt={customAlt || app.alternative} />
                         ) : (
                           <div className={`${altApp?.color || 'bg-emerald-500'} w-full h-full flex items-center justify-center text-lg text-white`}>
                             {altApp?.icon || app.altIcon}

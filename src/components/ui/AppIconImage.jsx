@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
-import { Capacitor } from '@capacitor/core';
 import {
   sizedIconUrl,
   iconAttemptUrl,
@@ -12,18 +11,22 @@ import {
   ICON_RETRY_DELAYS,
 } from '../../utils/appIconLoader';
 
-// Icônes embarquées dans l'APK (scripts/bundle-app-icons.js). Le manifeste
-// associe URL distante -> fichier local ; une URL modifiée en base n'y figure
-// plus et est donc chargée depuis le réseau (mise à jour automatique).
+// Icônes copiées sur le domaine Trusti (scripts/bundle-app-icons.js), sur le
+// web (build Vercel) comme dans l'APK. Les réseaux d'entreprise bloquent souvent
+// les domaines d'origine (googleusercontent.com, jsdelivr…) : servir l'icône
+// depuis notre domaine évite ce blocage.
+// Le manifeste associe URL distante -> fichier local ; une URL modifiée en base
+// n'y figure plus et est donc chargée depuis le réseau jusqu'au prochain build.
 let bundledIcons = {};
+let bundledIconsReady = false;
 let bundledIconsPromise = null;
 const loadBundledIcons = () => {
-  if (!Capacitor.isNativePlatform()) return Promise.resolve();
   if (!bundledIconsPromise) {
     bundledIconsPromise = fetch('/app-icons/manifest.json')
       .then((r) => (r.ok ? r.json() : {}))
       .then((m) => { bundledIcons = m && typeof m === 'object' ? m : {}; })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => { bundledIconsReady = true; });
   }
   return bundledIconsPromise;
 };
@@ -39,7 +42,7 @@ function AppIconImage({ src, name = '', className = 'w-full h-full object-cover'
   const [failed, setFailed] = useState(() => isIconFailed(src));
   const [attempt, setAttempt] = useState(0);
   const [localMissed, setLocalMissed] = useState(false);
-  const [, setManifestReady] = useState(false);
+  const [manifestReady, setManifestReady] = useState(bundledIconsReady);
   const retryTimer = useRef(null);
 
   // Ne réinitialise que si l'URL change réellement (pas à chaque rendu).
@@ -75,7 +78,13 @@ function AppIconImage({ src, name = '', className = 'w-full h-full object-cover'
     if (!localFile) markIconLoaded(src);
   }, [localFile, src]);
 
-  if (failed) {
+  // Tant que le manifeste n'est pas lu, on ne sait pas si une copie locale
+  // existe : on évite une requête vers un domaine peut-être bloqué.
+  if (!manifestReady) {
+    return <div className="w-full h-full bg-slate-100" aria-hidden="true" />;
+  }
+
+  if (failed && !localFile) {
     return (
       <div className="w-full h-full bg-slate-200 text-slate-500 flex items-center justify-center font-black text-lg uppercase">
         {name.trim().charAt(0) || '?'}

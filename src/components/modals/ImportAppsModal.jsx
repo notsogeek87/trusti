@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { X } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { API_URL } from '../../utils/apiConfig';
+import AppIconImage from '../ui/AppIconImage';
 
 /**
  * Modal d'import : s'affiche quand l'utilisateur ouvre un lien de partage
@@ -67,7 +68,7 @@ const ImportAppsModal = ({ appIds = [], migrations = [], onConfirm, onClose }) =
   const renderIcon = (app) => (
     <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
       {app?.icon && app.icon.startsWith('http') ? (
-        <img src={app.icon} alt={app.name} className="w-full h-full object-cover" />
+        <AppIconImage src={app.icon} name={app.name} />
       ) : (
         <div className={`${app?.color || 'bg-slate-400'} w-full h-full flex items-center justify-center text-lg text-white`}>
           {app?.icon || '📱'}
