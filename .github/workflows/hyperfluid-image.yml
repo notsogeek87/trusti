@@ -10,6 +10,7 @@ on:
     paths-ignore:
       - ".github/workflows/hyperfluid-add-pg.yml"
       - ".github/workflows/hyperfluid-import-db.yml"
+      - ".github/workflows/hyperfluid-deps.yml"
       - "**.md"
     tags:
       - "hyperfluid-v*"
