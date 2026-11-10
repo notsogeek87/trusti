@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, CheckCircle, Route, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink, Trash2, StickyNote, Star, Share2 } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { GRADE_INFO } from '../../constants/grades';
@@ -49,7 +49,7 @@ const sectionAnim = (delay = 0) => ({
 /**
  * Modal des détails d'une application
  */
-const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, onCompleteMigration, onChangeAlternative, allApps = [] }) => {
+const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, onCompleteMigration, onChangeAlternative, allApps = [], resumeMigration = false }) => {
   const [isExiting, setIsExiting] = useState(false);
   const [showMigrationGuide, setShowMigrationGuide] = useState(false);
   // State pour stocker les apps chargées dynamiquement
@@ -162,6 +162,17 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
     app.alternativeAppIds && app.alternativeAppIds.includes(String(altApp.id))
   );
   
+  // « Reprendre » depuis « Migrations en cours » : le parcours s'ouvre dès que les
+  // alternatives sont chargées (une seule fois).
+  const resumeHandled = useRef(false);
+  useEffect(() => {
+    if (!resumeMigration || resumeHandled.current || isLoadingRelations) return;
+    if (canStartMigration(app, alternatives)) {
+      resumeHandled.current = true;
+      setShowMigrationGuide(true);
+    }
+  }, [resumeMigration, isLoadingRelations, alternatives.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // replacesAppIds = apps avec pire score dans la même catégorie
   const replacedApps = availableApps.filter(replacedApp => 
     app.replacesAppIds && app.replacesAppIds.includes(String(replacedApp.id))

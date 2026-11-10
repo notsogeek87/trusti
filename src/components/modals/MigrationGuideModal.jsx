@@ -9,7 +9,7 @@ import { isNativeAndroid } from '../../utils/platform';
 import InstalledApps from '../../native/InstalledApps';
 import { requestUninstall } from '../../utils/uninstallWatcher';
 
-const TipList = ({ title, tips }) => (
+const TipList = ({ title, tips, source }) => (
   <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
     <p className="text-[11px] font-black uppercase tracking-tight text-slate-500 mb-1.5">{title}</p>
     <ul className="space-y-1.5">
@@ -19,6 +19,12 @@ const TipList = ({ title, tips }) => (
         </li>
       ))}
     </ul>
+    {source && (
+      <a href={source} target="_blank" rel="noopener noreferrer"
+        className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-800">
+        <ExternalLink size={11} /> Aide officielle
+      </a>
+    )}
   </div>
 );
 
@@ -55,7 +61,7 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
   const alt = candidates.find(c => String(c.id) === state.altId) || candidates[0];
   const step = MIGRATION_STEPS[stepIndex];
   const done = state.done;
-  const tips = getDataTips(app.category);
+  const tips = getDataTips(app.category, { appId: app.id, altId: alt?.id });
   const oldPackage = extractPackageId(app.playStoreUrl);
   const altPackage = extractPackageId(alt?.playStoreUrl);
   const oldInstalled = oldPackage && installed.includes(oldPackage);
@@ -193,8 +199,8 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
 
             {step.id === 'transfer' && (
               <div className="space-y-3">
-                <TipList title={`Depuis ${app.name}`} tips={tips.export} />
-                <TipList title={`Vers ${alt.name}`} tips={tips.import} />
+                <TipList title={`Depuis ${app.name}`} tips={tips.export} source={tips.exportSource} />
+                <TipList title={`Vers ${alt.name}`} tips={tips.import} source={tips.importSource} />
                 <StepCheck checked={!!done.transfer} onChange={v => setDone('transfer', v)}>Mes données sont transférées</StepCheck>
               </div>
             )}

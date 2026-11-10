@@ -45,6 +45,17 @@ Endpoint principal, backé par PostgreSQL (`service-postgres.js`).
   `src/components/assessment/AssessmentDetail.jsx` dans la fiche d'une app
   (masqué en mode enfant pour l'instant) ; sans connexion ou sans évaluation, la
   fiche garde le texte court `reason`.
+  `assessment.gradeHistory` = `{ firstAssessedAt, changes: [{ date, from, to }] }`
+  (changements du plus récent au plus ancien), lu dans `app_assessment_history`
+  (voir `server/gradeChanges.js` : `buildGradeTimeline`).
+- **GET** `?grade_changes_since=AAAA-MM-JJ` : changements de note de tout le
+  catalogue depuis cette date (90 jours si vide, 365 jours au plus ; 400 si la
+  date est invalide). Réponse : `{ success: true, since, changes: [{ appId, name,
+  previousGrade, grade, date }] }`, un changement net par app (plusieurs
+  réévaluations sont fusionnées, un retour à la note de départ disparaît). Même
+  réponse pour tous, mise en cache CDN : chaque appareil filtre ensuite ses
+  propres apps. Le `summary` interne de l'historique n'est jamais renvoyé. Voir
+  [Alertes de note](../guides/alertes-notes.md).
 - **POST / PUT / DELETE** : création, mise à jour, suppression d'une
   application (réservé aux clients authentifiés).
 

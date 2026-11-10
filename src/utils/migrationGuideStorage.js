@@ -32,3 +32,9 @@ export const saveMigrationGuideState = (appId, state) => {
     // localStorage indisponible (navigation privée stricte) : progression perdue.
   }
 };
+
+/** Toutes les progressions enregistrées : { [appId]: { altId, done } }. */
+export const getAllMigrationGuideStates = () => {
+  const all = readAll();
+  return Object.fromEntries(Object.keys(all).map(id => [id, getMigrationGuideState(id)]));
+};

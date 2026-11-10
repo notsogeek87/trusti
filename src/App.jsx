@@ -30,6 +30,9 @@ import AppsList from './components/AppsList';
 import MyAppsSummary from './components/MyAppsSummary';
 import DataHygieneCard from './components/DataHygieneCard';
 import GradeChangesCard from './components/GradeChangesCard';
+import MigrationsInProgressCard from './components/MigrationsInProgressCard';
+import { getMigrationsInProgress } from './utils/migrationGuide';
+import { getAllMigrationGuideStates } from './utils/migrationGuideStorage';
 import MyAppsFilterMenu, { DEFAULT_MIGRATION_FILTER, DEFAULT_ALTERNATIVE_FILTER } from './components/MyAppsFilterMenu';
 import LandingPage from './components/LandingPage';
 import OnboardingApps from './components/OnboardingApps';
@@ -396,6 +399,19 @@ const App = () => {
     alertsEnabled: gradeAlertsEnabled,
   });
 
+  // Parcours de migration guidée commencés et pas terminés (relus à chaque fermeture
+  // de fiche, où le parcours a pu avancer)
+  const [resumeMigrationId, setResumeMigrationId] = useState(null);
+  // Fiche fermée par n'importe quel chemin (bouton retour compris) : on oublie la reprise
+  useEffect(() => {
+    if (!selectedApp) setResumeMigrationId(null);
+  }, [selectedApp]);
+  const migrationsInProgress = useMemo(() => {
+    if (activeTab !== TABS.MY_APPS || selectedApp) return [];
+    const mine = filteredApps.filter(app => myApps.has(app.id));
+    return getMigrationsInProgress(getAllMigrationGuideStates(), mine, { migratedApps, catalogApps: apps });
+  }, [activeTab, selectedApp, filteredApps, myApps, migratedApps, apps]);
+
   // Import via lien de partage (?apps=... et/ou ?mig=...)
   const [pendingImport, setPendingImport] = useState(null);
 
@@ -408,6 +424,7 @@ const App = () => {
   }, [setSelectedApp]);
 
   const closeAppDetail = useCallback(() => {
+    setResumeMigrationId(null);
     shouldRestoreScroll.current = true;
     setSelectedApp(null);
   }, [setSelectedApp]);
@@ -754,6 +771,7 @@ const App = () => {
         onSelectApp={openAppDetail}
         onCompleteMigration={(from, to) => importMigrations([{ id: from.id, customAlt: to?.name }])}
         allApps={apps}
+        resumeMigration={resumeMigrationId === selectedApp.id}
       />
       {rescanPrompt}
       {showMigrationSelector && (
@@ -965,6 +983,16 @@ const App = () => {
           apps={filteredApps}
           onSelectApp={openAppDetail}
           onDismiss={dismissGradeChanges}
+        />
+      )}
+
+      {activeTab === TABS.MY_APPS && !searchTerm.trim() && (
+        <MigrationsInProgressCard
+          items={migrationsInProgress}
+          onResume={(app) => {
+            setResumeMigrationId(app.id);
+            openAppDetail(app);
+          }}
         />
       )}
 
