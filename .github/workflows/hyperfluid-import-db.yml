@@ -1,0 +1,60 @@
+name: Hyperfluid import db
+
+# Copie la base Neon vers le PostgreSQL d'Hyperfluid (pg_dump 17 via Docker).
+# Se lance quand ce fichier est poussé sur la branche hyperfluid.
+# ATTENTION : remplace le contenu de la base cible (--clean --if-exists).
+# Secrets requis : NEON_DATABASE_URL, HYPERFLUID_DATABASE_URL.
+# Le dépôt est public : aucun log ne doit contenir d'URL ni de données.
+on:
+  push:
+    branches: [hyperfluid]
+    paths:
+      - ".github/workflows/hyperfluid-import-db.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    env:
+      SRC: ${{ secrets.NEON_DATABASE_URL }}
+      DST: ${{ secrets.HYPERFLUID_DATABASE_URL }}
+      PGIMG: postgres:17-alpine
+    steps:
+      - name: Vérifier les secrets
+        run: |
+          [ -n "$SRC" ] || { echo "Secret NEON_DATABASE_URL manquant"; exit 1; }
+          [ -n "$DST" ] || { echo "Secret HYPERFLUID_DATABASE_URL manquant"; exit 1; }
+
+      - name: Exporter Neon
+        run: |
+          set -euo pipefail
+          docker run --rm -e URL="$SRC" "$PGIMG" sh -c 'pg_dump "$URL" --no-owner --no-acl --clean --if-exists' > "$RUNNER_TEMP/dump.sql"
+          echo "Export terminé ($(wc -c < "$RUNNER_TEMP/dump.sql") octets)"
+
+      - name: Importer dans Hyperfluid
+        run: |
+          set -uo pipefail
+          docker run --rm -i -e URL="$DST" "$PGIMG" sh -c 'psql "$URL" -q -v ON_ERROR_STOP=0' \
+            < "$RUNNER_TEMP/dump.sql" > "$RUNNER_TEMP/import.log" 2>&1
+          NERR=$(grep -c "ERROR:" "$RUNNER_TEMP/import.log" || true)
+          echo "Erreurs pendant l'import : $NERR"
+          # Messages d'erreur sans valeurs (le dépôt est public)
+          grep "ERROR:" "$RUNNER_TEMP/import.log" | sed -E 's/\([^)]*\)/(…)/g' | cut -c1-200 | head -20 || true
+          rm -f "$RUNNER_TEMP/dump.sql" "$RUNNER_TEMP/import.log"
+
+      - name: Comparer le nombre de lignes
+        run: |
+          set -uo pipefail
+          q() { docker run --rm -e URL="$1" -e Q="$2" "$PGIMG" sh -c 'psql "$URL" -Atq -c "$Q"'; }
+          TABLES=$(q "$SRC" "select table_name from information_schema.tables where table_schema='public' and table_type='BASE TABLE' order by 1")
+          FAIL=0
+          for t in $TABLES; do
+            a=$(q "$SRC" "select count(*) from \"$t\"")
+            b=$(q "$DST" "select count(*) from \"$t\"" 2>/dev/null || echo "absente")
+            if [ "$a" = "$b" ]; then s="OK"; else s="DIFFERENT"; FAIL=1; fi
+            echo "$t : neon=$a hyperfluid=$b $s"
+          done
+          exit $FAIL
