@@ -73,7 +73,9 @@ UPDATE applications SET category = 'Achats / Bons plans', updated_at = NOW()
 WHERE category = 'Shopping' AND id IN ('app_1770825808260_nu7x4mls4'); -- Fetch
 UPDATE applications SET category = 'Jeux / Store', updated_at = NOW()
 WHERE category = 'Shopping' AND id IN ('7b55b426-2339-4768-918b-cb447f61a1d1'); -- Nintendo Store
--- Restent dans « Shopping » : Kigardeki, Circle Club (usage à préciser).
+UPDATE applications SET category = 'Sport & Fitness / Salles de sport', updated_at = NOW()
+WHERE category = 'Shopping' AND id IN ('07010b21-cf06-427c-b134-068ec45c7838'); -- Circle Club (entrée en salle de sport)
+-- Reste seule dans « Shopping » : Kigardeki, donc sans alternative.
 
 -- Jeux
 UPDATE applications SET category = 'Jeux / Mobile', updated_at = NOW()

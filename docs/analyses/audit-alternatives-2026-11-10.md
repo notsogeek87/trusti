@@ -67,8 +67,9 @@ Ce n'est pas un défaut de la règle : le catalogue n'a pas d'app mieux notée p
 
 Découpage validé des catégories fourre-tout et des cas discutables en sous-catégories « Parent / Détail » (Shopping, Jeux, Personnalisation, Streaming Vidéo, Réseaux sociaux, Messagerie, Retouche Photo…). Une app sans alternative pour son usage n'en affiche plus, plutôt qu'une alternative hors sujet.
 
-- **Script :** `server/database/migrations/2026-11-10-recategorisation.sql` (135 apps, idempotent, vérifie la catégorie d'origine). **À appliquer après le déploiement du code ci-dessous.**
+- **Script :** `server/database/migrations/2026-11-10-recategorisation.sql` (136 apps, idempotent, vérifie la catégorie d'origine). **À appliquer après le déploiement du code ci-dessous.**
 - **Onboarding inchangé :** mêmes 7 étapes ; le serveur inclut les sous-catégories des parents découpés (`server/onboardingCategories.js`), sans élargir aux autres sous-catégories existantes (« Finance / Crypto »…).
 - **Filtre du catalogue :** une sous-catégorie suit son parent (`getMainCategory`, `src/constants/categories.js`). Effet de bord voulu : les sous-catégories existantes « Jeux / … », « Finance / … », « Productivité / … » quittent « Divers » pour leur parent.
 - **Palmarès inchangé :** les nouvelles sous-catégories gardent le podium d'avant (`getPodiumCategory`, liste `SPLIT_SUBCATEGORIES`).
-- **Restent à traiter :** CRM et support, développement, supervision, iOS (lecture d'`app_relations`), Kigardeki et Circle Club (usage à préciser), apps libres à ajouter pour combler les « aucune » (Lemmy, Loops, éditeur photo libre).
+- **Kigardeki** (app du mainteneur) reste seule dans « Shopping » et **Circle Club** (entrée en salle de sport) passe dans « Sport & Fitness / Salles de sport » : aucune des deux n'a d'alternative.
+- **Restent à traiter :** CRM et support, développement, supervision, iOS (lecture d'`app_relations`), apps libres à ajouter pour combler les « aucune » (Lemmy, Loops, éditeur photo libre).

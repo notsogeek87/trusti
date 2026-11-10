@@ -233,6 +233,7 @@ export const SPLIT_SUBCATEGORIES = {
   'Retouche Photo / Retouche classique': 'Retouche Photo',
   'Retouche Photo / Selfies & visage': 'Retouche Photo',
   'Sport & Fitness / Entraînement': 'Sport & Fitness',
+  'Sport & Fitness / Salles de sport': 'Shopping',
   'Transport & Mobilité / VTC': 'Transport & Mobilité',
   'Email / Logiciels de messagerie': 'Email',
 };
