@@ -308,9 +308,11 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
                   Terminer la migration
                 </button>
               ) : (
-                <button onClick={() => { if (step.id === 'choose') setDone('choose', true); setStepIndex(stepIndex + 1); }}
+                // Passer à la suite valide l'étape quittée : le fil se remplit au fur et à
+                // mesure. La case de l'étape reste décochable si l'on revient en arrière.
+                <button onClick={() => { setDone(step.id, true); setStepIndex(stepIndex + 1); }}
                   className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1">
-                  Étape suivante <ChevronRight size={16} />
+                  C'est fait, étape suivante <ChevronRight size={16} />
                 </button>
               )}
             </div>
