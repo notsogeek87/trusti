@@ -134,6 +134,9 @@ export const useOnboardingFlow = ({
     autoSelectionShown.current = true;
     markOnboardingComplete();
     setShowWelcomeModal(false);
+    // « Mes Apps » seulement s'il y a déjà des apps suivies, sinon on reste
+    // sur le catalogue (un « Mes Apps » vide serait décevant).
+    if (myApps.size > 0) setActiveTab(TABS.MY_APPS);
   };
 
   const completeOnboarding = (selectedAppIds) => {
