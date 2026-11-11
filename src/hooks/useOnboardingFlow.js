@@ -129,6 +129,9 @@ export const useOnboardingFlow = ({
 
   // « Non, je connais déjà »
   const declineWelcome = () => {
+    // Choix explicite de passer : la sélection auto du web (aucune app) ne
+    // doit pas s'ouvrir juste derrière.
+    autoSelectionShown.current = true;
     markOnboardingComplete();
     setShowWelcomeModal(false);
   };
