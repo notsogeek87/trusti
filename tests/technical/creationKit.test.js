@@ -5,7 +5,11 @@ import { KIT_NEEDS, CREATION_APPROACHES, COST_LABELS } from '../../src/constants
 
 // Catalogue factice contenant tous les outils cités par les kits
 const allIds = new Set();
-for (const need of KIT_NEEDS) for (const pick of Object.values(need.picks)) if (pick.appId) allIds.add(String(pick.appId));
+const allPicks = need => [
+  ...Object.values(need.picks),
+  ...Object.values(need.typePicks || {}).flatMap(picks => Object.values(picks)),
+];
+for (const need of KIT_NEEDS) for (const pick of allPicks(need)) if (pick.appId) allIds.add(String(pick.appId));
 const catalog = new Map([...allIds].map(id => [id, { id, name: id, grade: 'B' }]));
 
 const needIds = kit => kit.steps.flatMap(s => s.items.map(i => i.need.id));
@@ -81,6 +85,32 @@ test('les étapes suivent l\'ordre de mise en place', () => {
   const kit = buildStarterKit({ type: 'tpe', size: 'moyenne', approach: 'simple' }, catalog);
   assert.equal(kit.steps[0].step, 'Démarrer');
   assert.deepEqual(kit.steps.map(s => s.step), ['Démarrer', 'Sécuriser', 'Travailler ensemble', 'Gérer', 'Organiser']);
+});
+
+test('mairie : logiciels métiers, actes, démarches et information des habitants ; pas d\'adhérents ni de CRM', () => {
+  const kit = buildStarterKit({ type: 'collectivite', size: 'petite', approach: 'simple' }, catalog);
+  const ids = needIds(kit);
+  for (const id of ['email', 'metiers', 'actes', 'demarches', 'habitants', 'site']) assert.ok(ids.includes(id), id);
+  for (const id of ['adherents', 'newsletter', 'compta', 'crm']) assert.ok(!ids.includes(id), id);
+  const email = kit.steps.flatMap(s => s.items).find(i => i.need.id === 'email');
+  assert.match(email.why, /Suite territoriale/);
+});
+
+test('choix propre à un type : remplace le choix commun', () => {
+  const asso = buildStarterKit({ type: 'association', size: 'petite', approach: 'confidentiel' }, catalog);
+  const mairie = buildStarterKit({ type: 'collectivite', size: 'petite', approach: 'confidentiel' }, catalog);
+  const emailOf = kit => kit.steps.flatMap(s => s.items).find(i => i.need.id === 'email').app.id;
+  assert.equal(emailOf(asso), 'tutanota');
+  assert.equal(emailOf(mairie), 'mailo');
+});
+
+test('outil pas encore au catalogue : le conseil écrit s\'affiche à sa place', () => {
+  const partial = new Map(catalog);
+  partial.delete('panneaupocket');
+  const kit = buildStarterKit({ type: 'collectivite', size: 'solo', approach: 'simple' }, partial);
+  const habitants = kit.steps.flatMap(s => s.items).find(i => i.need.id === 'habitants');
+  assert.equal(habitants.app, null);
+  assert.match(habitants.note, /PanneauPocket/);
 });
 
 test('mergeKitIntoSelection : ajout sans perte, ou remplacement', () => {

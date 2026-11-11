@@ -7,6 +7,7 @@
 import { GRADES, GRADE_COLORS } from '../constants/grades.js';
 import { CRITICALITY_LEVELS, DEFAULT_CRITICALITY } from '../constants/proFamilies.js';
 import { familyForCategory } from './organisationAssessment.js';
+import { AUDIT_WEIGHTS } from '../constants/auditChecklist.js';
 
 const ORG_GRADE_LABEL = {
   A: 'Parc très souverain',
@@ -58,7 +59,7 @@ export function reportFilename(orgName, date = new Date()) {
  * Construit le document PDF.
  * @returns {Promise<import('jspdf').jsPDF>}
  */
-export async function buildOrganisationPdf({ orgName, profileLabel, selectedApps, criticality = {}, summary, plan = [], date = new Date() }) {
+export async function buildOrganisationPdf({ orgName, profileLabel, selectedApps, criticality = {}, summary, plan = [], audit = null, help = [], date = new Date() }) {
   const [{ jsPDF }, { autoTable }] = await Promise.all([import('jspdf'), import('jspdf-autotable')]);
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const W = doc.internal.pageSize.getWidth();
@@ -159,6 +160,48 @@ export async function buildOrganisationPdf({ orgName, profileLabel, selectedApps
       ]),
       columnStyles: { 0: { cellWidth: 8, textColor: MUTED }, 1: { fontStyle: 'bold' }, 2: { cellWidth: 12 }, 3: { cellWidth: 24 }, 5: { cellWidth: 12 } },
       didParseCell: colorGrades([2, 5]),
+    });
+    y = doc.lastAutoTable.finalY + 9;
+  }
+
+  // Questionnaire d'audit : points de vigilance (seulement s'il a été rempli)
+  if (audit && audit.answered > 0) {
+    sectionTitle('Pratiques : points de vigilance');
+    doc.setFont('helvetica', 'normal').setFontSize(8.5).setTextColor(...MUTED);
+    doc.text(pdfText(`Questionnaire d'audit : ${audit.answered} réponse${audit.answered > 1 ? 's' : ''} sur ${audit.total} questions, `
+      + `${audit.risks.length} point${audit.risks.length > 1 ? 's' : ''} de vigilance, ${audit.unknown.length} à vérifier.`), M, y + 3);
+    y += 5;
+    if (audit.risks.length > 0) {
+      autoTable(doc, {
+        ...tableStyles,
+        startY: y,
+        head: [['#', 'PRIORITÉ', 'THÈME', 'RECOMMANDATION']],
+        body: audit.risks.map((q, i) => [String(i + 1), pdfText(AUDIT_WEIGHTS[q.weight]?.label || ''), pdfText(q.theme), pdfText(q.recommendation)]),
+        columnStyles: { 0: { cellWidth: 8, textColor: MUTED }, 1: { cellWidth: 22, fontStyle: 'bold' }, 2: { cellWidth: 38 } },
+      });
+      y = doc.lastAutoTable.finalY + 6;
+    }
+    if (audit.unknown.length > 0) {
+      autoTable(doc, {
+        ...tableStyles,
+        startY: y,
+        head: [['À VÉRIFIER']],
+        body: audit.unknown.map(q => [pdfText(q.label)]),
+      });
+      y = doc.lastAutoTable.finalY + 6;
+    }
+    y += 3;
+  }
+
+  // Qui peut vous aider
+  if (help.length > 0) {
+    sectionTitle('Qui peut vous aider ?');
+    autoTable(doc, {
+      ...tableStyles,
+      startY: y,
+      head: [['DISPOSITIF', 'POUR QUOI FAIRE', 'ADRESSE']],
+      body: help.map(h => [pdfText(h.label), pdfText(h.description), pdfText(h.url.replace(/^https:\/\//, ''))]),
+      columnStyles: { 0: { cellWidth: 40, fontStyle: 'bold' }, 2: { cellWidth: 46, textColor: MUTED } },
     });
     y = doc.lastAutoTable.finalY + 9;
   }

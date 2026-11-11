@@ -25,6 +25,11 @@ export const ORG_PROFILES = [
       'outlook', 'microsoft-teams', '1780761664182', 'microsoft-excel', 'microsoft-powerpoint', 'microsoft-sharepoint',
       'onedrive', 'tchap', 'webex', 'zoom', 'libreoffice', 'yousign', 'universign', 'glpi', 'doodle',
       '1769805919501', 'firefox', '1769805620267', 'app_1770825764543_wf8m0sp37', '1770752284146',
+      // Usages fréquents en mairie, hors outils de bureau
+      '1769803097037', '1769879213451', 'facebook', 'wordpress-com',
+      // Logiciels propres aux collectivités (ignorés tant qu'ils ne sont pas au catalogue)
+      'berger-levrault-emagnus', 'jvs-horizon', 'cosoluce', 'segilog', 'ciril-group', 'arpege', 'logitud',
+      'chorus-pro', 'i-parapheur', 's2low', 'demarches-simplifiees', 'panneaupocket', 'intramuros', 'illiwap',
     ],
   },
   {

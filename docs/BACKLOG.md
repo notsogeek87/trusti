@@ -83,5 +83,13 @@ dans le temps, alerte automatique sur les suggestions, alternatives choisies
 **V1 livrée** : assistant en 3 questions (associations et petites entreprises), kits choisis à la
 main, Trusti Score projeté, enregistrement dans « Évaluer mon organisation ». Reste à faire :
 questions sur les données sensibles (santé, mineurs) et les compétences techniques, variantes
-par besoin, plan de mise en place exportable en PDF, autres types de structure (collectivités,
-santé, enseignement), infos de coût et d'hébergement en base plutôt que dans les kits.
+par besoin, plan de mise en place exportable en PDF, autres types de structure (santé,
+enseignement), infos de coût et d'hébergement en base plutôt que dans les kits.
+
+**Mairies et collectivités (2026-11)** : type « Mairie ou collectivité » dans l'assistant (logiciels
+métiers, actes, démarches, information des habitants, site), famille « Logiciels des mairies et
+collectivités » (catégories `Collectivités / …`), questionnaire d'audit de terrain (pratiques,
+points de vigilance, dans la synthèse, l'export JSON v2 et le PDF), section « Qui peut vous
+aider ? », badge « Service de l'État ». Reste à faire :
+- [ ] Ajouter au catalogue les apps de collectivités listées dans `docs/analyses/apps-collectivites-2026-11.md` (notes à valider)
+- [ ] Comparaison anonymisée entre communes de même taille
