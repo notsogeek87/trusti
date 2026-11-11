@@ -60,7 +60,8 @@ const OLVID_ELUS_WHY = 'Messagerie chiffrée française, sans numéro de télép
 const METIERS_NOTE = 'Gardez votre éditeur actuel s\'il vous convient, mais avant tout renouvellement exigez par contrat l\'export complet de vos données dans un format ouvert. '
   + 'Alternatives : les logiciels libres OpenMairie (élections, cimetière, urbanisme…) ou l\'offre mutualisée de votre opérateur public de services numériques.';
 const ACTES_NOTE = 'Les logiciels libres de Libriciel (i-Parapheur, S²LOW, webdelib) sont souvent fournis par votre opérateur public de services numériques ou votre centre de gestion.';
-const DEMARCHES_WHY = 'Service de l\'État pour mettre en ligne les formulaires de la commune (inscriptions, demandes, dossiers), gratuit pour les administrations.';
+const DEMARCHES_WHY = 'Logiciel libre de l\'État pour mettre en ligne les formulaires de la commune (inscriptions, demandes, dossiers). '
+  + 'Fermé aux nouvelles collectivités depuis 2021 sur le site de l\'État : il leur est proposé par l\'ADULLACT, réservé à ses adhérents.';
 const HABITANTS_WHY = 'Application d\'information et d\'alerte des habitants, éditeur français : abonnement pour la commune, gratuite pour les habitants, sans compte à créer.';
 const HABITANTS_NOTE = 'Une application d\'information des habitants (PanneauPocket, IntraMuros, Illiwap…) plutôt qu\'une page Facebook, qui impose Facebook à ceux qui veulent suivre la commune.';
 const SITE_NOTE = 'Site chez un hébergeur français ou européen, mesure d\'audience sans cookies publicitaires (Matomo). Des offres mutualisées existent souvent via votre département ou votre opérateur public de services numériques.';
@@ -261,9 +262,9 @@ export const KIT_NEEDS = [
     minSize: 1,
     types: ['collectivite'],
     picks: {
-      simple: { appId: 'demarches-simplifiees', cost: 'gratuit', why: DEMARCHES_WHY, note: DEMARCHES_WHY },
-      confidentiel: { appId: 'demarches-simplifiees', cost: 'gratuit', why: DEMARCHES_WHY, note: DEMARCHES_WHY },
-      libre: { appId: 'demarches-simplifiees', cost: 'gratuit', why: DEMARCHES_WHY, note: DEMARCHES_WHY },
+      simple: { appId: 'demarches-simplifiees', cost: 'payant', why: DEMARCHES_WHY, note: DEMARCHES_WHY },
+      confidentiel: { appId: 'demarches-simplifiees', cost: 'payant', why: DEMARCHES_WHY, note: DEMARCHES_WHY },
+      libre: { appId: 'demarches-simplifiees', cost: 'payant', why: DEMARCHES_WHY, note: DEMARCHES_WHY },
     },
   },
   {

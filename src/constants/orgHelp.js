@@ -22,11 +22,11 @@ export const ORG_HELP = [
     url: 'https://suiteterritoriale.anct.gouv.fr',
   },
   {
-    id: 'demarches-simplifiees',
-    label: 'Démarches simplifiées',
+    id: 'adullact',
+    label: 'ADULLACT',
     profiles: ['collectivite'],
-    description: 'Service de l\'État pour mettre les formulaires de la commune en ligne, gratuit pour les administrations.',
-    url: 'https://www.demarches-simplifiees.fr',
+    description: 'Association des collectivités pour les logiciels libres : propose à ses adhérents des services en ligne, dont les formulaires de Démarches simplifiées (fermé aux nouvelles collectivités sur le site de l\'État depuis 2021).',
+    url: 'https://adullact.org',
   },
   {
     id: 'comptoir-du-libre',
