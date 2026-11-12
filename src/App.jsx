@@ -28,6 +28,7 @@ import SplashScreen from './components/layout/SplashScreen';
 // Écrans et sections
 import SearchBar from './components/ui/SearchBar';
 import ExplainerPanel from './components/ExplainerPanel';
+import HostingCredit from './components/ui/HostingCredit';
 import AppsList from './components/AppsList';
 import CategoryFilterBar from './components/CategoryFilterBar';
 import AwardsHeader from './components/AwardsHeader';
@@ -468,6 +469,11 @@ const App = () => {
                 isLoadingAwards={isLoadingAwards}
                 isLoadingMyApps={isLoadingMyApps}
               />
+
+              {/* Pied de page : mention d'hébergement (build Hyperfluid uniquement) */}
+              <footer className="mt-8 mb-2 text-center">
+                <HostingCredit />
+              </footer>
             </div>
           </main>
         </div>

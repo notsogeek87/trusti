@@ -1,7 +1,6 @@
 import React from 'react';
 import { X, ShieldCheck, BookOpen } from 'lucide-react';
 import { GRADE_INFO } from '../constants/grades';
-import HostingCredit from './ui/HostingCredit';
 
 /**
  * Panneau explicatif du TrustiScore
@@ -69,7 +68,6 @@ const ExplainerPanel = ({ onClose }) => {
 
         <div className="mt-8 pt-5 border-t border-slate-800 text-[11px] italic text-slate-500 text-center">
           Basé sur 12 critères (RGPD, Cloud Act, Open Source, Localisation).
-          <HostingCredit className="mt-2 not-italic" />
         </div>
         </div>
       </div>
