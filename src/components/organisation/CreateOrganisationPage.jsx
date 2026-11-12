@@ -41,12 +41,8 @@ const KIT_GRADE_LABEL = {
 const PageHeader = () => (
   <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-white/60">
     <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3 min-w-0">
-      <a href="/" className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-indigo-600 shrink-0">
-        <ArrowLeft size={16} /> Trusti
-      </a>
-      <span className="text-slate-300">/</span>
-      <a href={STANDALONE_URLS.ORGANISATIONS} className="text-sm font-bold text-slate-500 hover:text-indigo-600 shrink-0">
-        Organisations
+      <a href={STANDALONE_URLS.ORGANISATIONS} className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-indigo-600 shrink-0">
+        <ArrowLeft size={16} /> Organisations
       </a>
       <span className="text-slate-300">/</span>
       <span className="flex items-center gap-2 font-black text-indigo-600 min-w-0">

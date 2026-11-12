@@ -23,3 +23,11 @@ test('les adresses des liens se résolvent vers la bonne page', () => {
   assert.equal(resolveStandalonePage(search(STANDALONE_URLS.ORGANISATIONS)), STANDALONE_PAGES.ORGANISATIONS);
   assert.equal(resolveStandalonePage(search(STANDALONE_URLS.CREATE_ORGANISATION)), STANDALONE_PAGES.CREATE_ORGANISATION);
 });
+
+test('le retour sans historique remonte à la page parente', async () => {
+  const { standaloneParentUrl } = await import('../../src/utils/standalonePage.js');
+  assert.equal(standaloneParentUrl(STANDALONE_PAGES.EVALUATE_ORGANISATION), STANDALONE_URLS.ORGANISATIONS);
+  assert.equal(standaloneParentUrl(STANDALONE_PAGES.CREATE_ORGANISATION), STANDALONE_URLS.ORGANISATIONS);
+  assert.equal(standaloneParentUrl(STANDALONE_PAGES.ORGANISATIONS), '/');
+  assert.equal(standaloneParentUrl(null), '/');
+});

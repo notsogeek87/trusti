@@ -12,6 +12,7 @@ import downloadJSON from '../../utils/downloadJSON';
 import { saveBlob } from '../../utils/saveFile';
 import { downloadOrganisationPdf } from '../../utils/organisationPdf';
 import { GRADE_COLORS } from '../../constants/grades';
+import { STANDALONE_URLS } from '../../utils/standalonePage';
 import { loadOrganisationState, saveOrganisationState, clearOrganisationState } from '../../utils/organisationStorage';
 import {
   groupAppsByFamily,
@@ -226,8 +227,8 @@ const OrganisationPage = () => {
     <div className="min-h-[100dvh]">
       <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-white/60">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
-          <a href="/" className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-indigo-600">
-            <ArrowLeft size={16} /> Trusti
+          <a href={STANDALONE_URLS.ORGANISATIONS} className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-indigo-600 shrink-0">
+            <ArrowLeft size={16} /> Organisations
           </a>
           <span className="text-slate-300">/</span>
           <span className="flex items-center gap-2 font-black text-indigo-600 truncate">

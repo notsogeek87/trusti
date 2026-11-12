@@ -11,7 +11,7 @@ import ErrorBoundary from './components/ErrorBoundary.jsx'
 import './styles/index.css'
 
 import { App as CapacitorApp } from '@capacitor/app'
-import { resolveStandalonePage, STANDALONE_PAGES } from './utils/standalonePage.js'
+import { resolveStandalonePage, standaloneParentUrl, STANDALONE_PAGES } from './utils/standalonePage.js'
 import { isNativeAndroid } from './utils/platform.js'
 
 // Pages autonomes de la rubrique « Organisations », chargées à part : sans
@@ -24,15 +24,17 @@ const STANDALONE_COMPONENTS = {
   [STANDALONE_PAGES.ORGANISATIONS]: React.lazy(() => import('./components/organisation/OrganisationsPage.jsx')),
   [STANDALONE_PAGES.CREATE_ORGANISATION]: React.lazy(() => import('./components/organisation/CreateOrganisationPage.jsx')),
 }
-const StandalonePage = STANDALONE_COMPONENTS[resolveStandalonePage(window.location.search)]
+const standalonePage = resolveStandalonePage(window.location.search)
+const StandalonePage = STANDALONE_COMPONENTS[standalonePage]
 
 // Pages autonomes dans l'APK : le bouton retour matériel n'émet pas « popstate »
 // et ferme l'app par défaut. On le relie à l'historique (question précédente,
-// fiche détail, page Organisations…) ; sans historique, retour à l'accueil.
+// fiche détail, page Organisations…) ; sans historique, retour à la page parente
+// (rubrique Organisations pour une organisation, accueil pour la rubrique).
 if (StandalonePage && isNativeAndroid) {
   CapacitorApp.addListener('backButton', ({ canGoBack }) => {
     if (canGoBack) window.history.back()
-    else window.location.href = '/'
+    else window.location.href = standaloneParentUrl(standalonePage)
   })
 }
 

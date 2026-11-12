@@ -32,3 +32,17 @@ export const resolveStandalonePage = (search = '') => {
   if (params.has(STANDALONE_PAGES.CREATE_ORGANISATION)) return STANDALONE_PAGES.CREATE_ORGANISATION;
   return null;
 };
+
+/**
+ * Page « parente » d'une page autonome, cible du retour quand il n'y a pas
+ * d'historique : les pages d'une organisation remontent à la rubrique
+ * « Organisations », la rubrique remonte à l'accueil de Trusti.
+ * @param {string|null} page - une valeur de STANDALONE_PAGES
+ * @returns {string} adresse de la page parente
+ */
+export const standaloneParentUrl = page => {
+  if (page === STANDALONE_PAGES.EVALUATE_ORGANISATION || page === STANDALONE_PAGES.CREATE_ORGANISATION) {
+    return STANDALONE_URLS.ORGANISATIONS;
+  }
+  return '/';
+};
