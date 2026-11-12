@@ -4,6 +4,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
+# Mention « Hébergé en France par Hyperfluid » (voir src/components/ui/HostingCredit.jsx)
+ENV VITE_HOSTED_BY=hyperfluid
 RUN npm run build
 
 # --- Étape 2 : image d'exécution ---
