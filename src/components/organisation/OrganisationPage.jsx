@@ -12,6 +12,7 @@ import { computeAuditResult } from '../../utils/auditChecklist';
 import { helpForProfile } from '../../constants/orgHelp';
 import { ORG_PROFILES, profileApps } from '../../constants/orgProfiles';
 import { ViewModeContext } from '../../contexts/ViewModeContext';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import downloadJSON from '../../utils/downloadJSON';
 import { saveBlob } from '../../utils/saveFile';
 import { downloadOrganisationPdf } from '../../utils/organisationPdf';
@@ -34,17 +35,6 @@ function normalize(text) {
 function downloadCsv(content, filename) {
   // BOM UTF-8 : accents corrects à l'ouverture dans Excel
   return saveBlob(new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8' }), filename);
-}
-
-function useMediaQuery(query) {
-  const [matches, setMatches] = useState(() => window.matchMedia(query).matches);
-  useEffect(() => {
-    const mq = window.matchMedia(query);
-    const handler = e => setMatches(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, [query]);
-  return matches;
 }
 
 /**
