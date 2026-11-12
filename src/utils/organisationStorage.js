@@ -23,7 +23,23 @@ export function loadOrganisationState() {
   }
 }
 
+/**
+ * Vrai quand il n'y a plus rien à garder : ni outil, ni nom, ni profil.
+ * @param {string[]} ids
+ * @param {{profile?: string|null, orgName?: string}} [extra]
+ */
+export function isEmptyOrganisationState(ids, extra = {}) {
+  return (!Array.isArray(ids) || ids.length === 0)
+    && !extra.profile
+    && !String(extra.orgName || '').trim();
+}
+
 export function saveOrganisationState(ids, criticality, extra = {}) {
+  // Organisation vide (supprimée) : on efface l'entrée plutôt que d'en réécrire une vide.
+  if (isEmptyOrganisationState(ids, extra)) {
+    clearOrganisationState();
+    return;
+  }
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
       ids,

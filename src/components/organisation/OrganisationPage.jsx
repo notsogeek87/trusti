@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Building2, CheckCircle2, Lock, MessageSquarePlus, Pencil, Search, Upload } from 'lucide-react';
+import { ArrowLeft, Building2, CheckCircle2, Lock, MessageSquarePlus, Pencil, Search, Trash2, Upload } from 'lucide-react';
 import { useProCatalog } from '../../hooks/useProCatalog';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import FamilyPicker from './FamilyPicker';
@@ -172,8 +172,13 @@ const OrganisationPage = () => {
     setCriticality(prev => ({ ...prev, [id]: level }));
   }, []);
 
+  // Supprime l'organisation enregistrée : outils, criticités, profil et nom.
   const clearAll = useCallback(() => {
-    if (!window.confirm('Retirer tous les outils de l\'évaluation ?')) return;
+    const name = orgName.trim();
+    const question = name
+      ? `Supprimer l'organisation « ${name} » et son évaluation ? Cette action est définitive.`
+      : 'Supprimer cette organisation et son évaluation ? Cette action est définitive.';
+    if (!window.confirm(question)) return;
     setSelectedIds([]);
     setCriticality({});
     setProfile(null);
@@ -181,7 +186,8 @@ const OrganisationPage = () => {
     clearOrganisationState();
     window.history.replaceState({ ...(window.history.state || {}), trustiOrgView: 'saisie' }, '');
     setView('saisie');
-  }, []);
+    setMessage(null);
+  }, [orgName]);
 
   const today = new Date().toISOString().slice(0, 10);
   const reportExportError = err => {
@@ -298,6 +304,7 @@ const OrganisationPage = () => {
                   {profileLabel ? `${profileLabel} · ` : ''}{summary.total} outil{summary.total > 1 ? 's' : ''} évalué{summary.total > 1 ? 's' : ''}
                 </p>
               </div>
+              <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => showView('saisie')}
@@ -305,6 +312,14 @@ const OrganisationPage = () => {
               >
                 <Pencil size={16} /> Modifier mes outils
               </button>
+              <button
+                type="button"
+                onClick={clearAll}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm font-black text-rose-600 hover:border-rose-400 shadow-sm"
+              >
+                <Trash2 size={16} /> Supprimer l'organisation
+              </button>
+              </div>
             </div>
             {message && (
               <p className="mb-3 text-sm font-bold text-indigo-700 bg-indigo-50 rounded-xl px-3 py-2" role="status">{message}</p>

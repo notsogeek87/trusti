@@ -151,7 +151,7 @@ const OrganisationResult = ({ selectedApps, criticality, summary, plan, onCritic
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-black text-slate-800">Vos outils et leur criticité</h3>
           <button type="button" onClick={onClear} className="flex items-center gap-1 text-xs font-bold text-slate-400 hover:text-rose-600">
-            <Trash2 size={14} /> Tout retirer
+            <Trash2 size={14} /> Tout supprimer
           </button>
         </div>
         <p className="text-xs text-slate-500 mb-3">Touchez un outil pour ouvrir sa fiche détaillée.</p>
