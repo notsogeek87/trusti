@@ -26,6 +26,7 @@ const HostingCredit = ({ className = '', size = 'text-[11px]' }) => {
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1 underline decoration-slate-600 underline-offset-2 hover:text-slate-300"
       >
+        {host.label}
         {host.logo && logoOk && (
           <img
             src={host.logo}
@@ -35,7 +36,6 @@ const HostingCredit = ({ className = '', size = 'text-[11px]' }) => {
             onError={() => setLogoOk(false)}
           />
         )}
-        {host.label}
       </a>
     </p>
   );
