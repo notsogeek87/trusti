@@ -252,6 +252,7 @@ const KitResult = ({ answers, kit, catalog, onRestart, detailApp, openApp, close
       onClose={closeApp}
       onSelectApp={openApp}
       allApps={catalog}
+      closeAsCross
     />
   );
 

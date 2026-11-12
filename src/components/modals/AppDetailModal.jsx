@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, CheckCircle, Route, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink, Trash2, StickyNote, Star, Share2 } from 'lucide-react';
+import { ChevronLeft, X, CheckCircle, Route, PlusCircle, ShieldCheck, ArrowRight, Calendar, Shield, ExternalLink, Trash2, StickyNote, Star, Share2 } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { GRADE_INFO } from '../../constants/grades';
 import { useIsMobile } from '../../contexts/ViewModeContext';
@@ -49,7 +49,7 @@ const sectionAnim = (delay = 0) => ({
 /**
  * Modal des détails d'une application
  */
-const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, onCompleteMigration, onChangeAlternative, allApps = [], resumeMigration = false }) => {
+const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, onCompleteMigration, onChangeAlternative, allApps = [], resumeMigration = false, closeAsCross = false }) => {
   const [isExiting, setIsExiting] = useState(false);
   const [showMigrationGuide, setShowMigrationGuide] = useState(false);
   // State pour stocker les apps chargées dynamiquement
@@ -321,8 +321,16 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
       {/* ── Header ── */}
       <header className="bg-white border-b border-slate-100 sticky top-0 z-50 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-          <button onClick={handleClose} className="w-12 h-12 -ml-3 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors active:scale-90">
-            <ChevronLeft size={24} />
+          {/* closeAsCross : fiche affichée en panneau (ex. kit de démarrage), une croix « Fermer » plutôt qu'un retour */}
+          <button
+            onClick={handleClose}
+            aria-label={closeAsCross ? 'Fermer la fiche' : 'Retour'}
+            title={closeAsCross ? 'Fermer' : undefined}
+            className={closeAsCross
+              ? 'w-10 h-10 -ml-1 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors active:scale-90'
+              : 'w-12 h-12 -ml-3 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors active:scale-90'}
+          >
+            {closeAsCross ? <X size={20} /> : <ChevronLeft size={24} />}
           </button>
           <div className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Détails</div>
           <div className="flex items-center gap-1 -mr-2">
