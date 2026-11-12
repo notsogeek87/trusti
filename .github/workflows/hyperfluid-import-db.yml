@@ -1,5 +1,5 @@
 name: Hyperfluid import db
-# Relance : 2026-11-12T19:01Z
+# Relance : 2026-11-12T19:03Z
 
 # Copie la base Neon vers le PostgreSQL d'Hyperfluid (pg_dump 17 via Docker).
 # Se lance quand ce fichier est poussé sur la branche hyperfluid.
@@ -38,8 +38,15 @@ jobs:
       - name: Importer dans Hyperfluid
         run: |
           set -uo pipefail
+          # Test de connexion d'abord, message d'erreur affiché sans adresse ni identifiants
+          if ! docker run --rm -e URL="$DST" "$PGIMG" sh -c 'psql "$URL" -Atq -c "select 1"' > "$RUNNER_TEMP/conn.log" 2>&1; then
+            echo "Connexion à Hyperfluid impossible :"
+            sed -E 's#[a-z]+://[^ ]+#<url>#g; s/[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/<ip>/g; s/port [0-9]+/port <port>/g; s/"[^"]*"/"…"/g' "$RUNNER_TEMP/conn.log" | cut -c1-200
+            exit 2
+          fi
+          echo "Connexion OK"
           docker run --rm -i -e URL="$DST" "$PGIMG" sh -c 'psql "$URL" -q -v ON_ERROR_STOP=0' \
-            < "$RUNNER_TEMP/dump.sql" > "$RUNNER_TEMP/import.log" 2>&1
+            < "$RUNNER_TEMP/dump.sql" > "$RUNNER_TEMP/import.log" 2>&1 || true
           NERR=$(grep -c "ERROR:" "$RUNNER_TEMP/import.log" || true)
           echo "Erreurs pendant l'import : $NERR"
           # Messages d'erreur sans valeurs (le dépôt est public)
