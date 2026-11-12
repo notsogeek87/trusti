@@ -1,5 +1,5 @@
 name: Hyperfluid import db
-# Relance : 2026-11-12T19:07Z
+# Relance : 2026-11-12T19:16Z
 
 # Copie la base Neon vers le PostgreSQL d'Hyperfluid (pg_dump 17 via Docker).
 # Se lance quand ce fichier est poussé sur la branche hyperfluid.
@@ -28,6 +28,30 @@ jobs:
         run: |
           [ -n "$SRC" ] || { echo "Secret NEON_DATABASE_URL manquant"; exit 1; }
           [ -n "$DST" ] || { echo "Secret HYPERFLUID_DATABASE_URL manquant"; exit 1; }
+
+      # HYPERFLUID_DATABASE_URL peut être une adresse postgres://... ou le bloc JSON
+      # « (all fields) » copié depuis la console Hyperfluid : on en tire l'adresse publique.
+      - name: Préparer l'adresse Hyperfluid
+        run: |
+          set -euo pipefail
+          case "$DST" in
+            "{"*)
+              URL=$(printf '%s' "$DST" | python3 -c '
+          import json, sys, urllib.parse as u
+          d = json.load(sys.stdin)
+          url = d.get("database-url") or d.get("database_url")
+          if not url:
+              host = d.get("host"); port = d.get("port")
+              if not host or not port:
+                  sys.exit("Bloc JSON sans adresse publique (host/port) : accès public désactivé ?")
+              url = "postgres://%s:%s@%s:%s/%s" % (u.quote(d["username"], safe=""), u.quote(d["password"], safe=""), host, port, d["database"])
+          print(url)')
+              echo "::add-mask::$URL"
+              { echo "DST<<EOF_DST"; echo "$URL"; echo "EOF_DST"; } >> "$GITHUB_ENV"
+              echo "Adresse construite depuis le bloc JSON"
+              ;;
+            *) echo "Adresse fournie directement" ;;
+          esac
 
       - name: Exporter Neon
         run: |
