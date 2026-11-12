@@ -6,6 +6,10 @@ import FamilyPicker from './FamilyPicker';
 import OrganisationResult from './OrganisationResult';
 import AppDetailModal from '../modals/AppDetailModal';
 import SuggestToolDialog from './SuggestToolDialog';
+import AuditChecklist from './AuditChecklist';
+import OrganisationHelp from './OrganisationHelp';
+import { computeAuditResult } from '../../utils/auditChecklist';
+import { helpForProfile } from '../../constants/orgHelp';
 import { ORG_PROFILES, profileApps } from '../../constants/orgProfiles';
 import { ViewModeContext } from '../../contexts/ViewModeContext';
 import downloadJSON from '../../utils/downloadJSON';
@@ -62,6 +66,7 @@ const OrganisationPage = () => {
   const [detailApp, setDetailApp] = useState(null);
   const [profile, setProfile] = useState(null);
   const [orgName, setOrgName] = useState('');
+  const [audit, setAudit] = useState({});
   const [suggesting, setSuggesting] = useState(false);
   const [pdfStatus, setPdfStatus] = useState('idle');
   const [view, setView] = useState('saisie');
@@ -125,11 +130,24 @@ const OrganisationPage = () => {
     setCriticality(saved.criticality);
     if (ORG_PROFILES.some(p => p.id === saved.profile)) setProfile(saved.profile);
     setOrgName(saved.orgName);
+    setAudit(saved.audit);
   }, [status, appsById]);
 
   useEffect(() => {
-    if (restored.current) saveOrganisationState(selectedIds, criticality, { profile, orgName });
-  }, [selectedIds, criticality, profile, orgName]);
+    if (restored.current) saveOrganisationState(selectedIds, criticality, { profile, orgName, audit });
+  }, [selectedIds, criticality, profile, orgName, audit]);
+
+  const answerAudit = useCallback((id, value) => {
+    setAudit(prev => {
+      const next = { ...prev };
+      if (value) next[id] = value;
+      else delete next[id];
+      return next;
+    });
+  }, []);
+  const resetAudit = useCallback(() => {
+    if (window.confirm('Effacer toutes les réponses au questionnaire ?')) setAudit({});
+  }, []);
 
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
   const selectedApps = useMemo(() => selectedIds.map(id => appsById.get(id)).filter(Boolean), [selectedIds, appsById]);
@@ -184,6 +202,7 @@ const OrganisationPage = () => {
     setCriticality({});
     setProfile(null);
     setOrgName('');
+    setAudit({});
     clearOrganisationState();
     window.history.replaceState({ ...(window.history.state || {}), trustiOrgView: 'saisie' }, '');
     setView('saisie');
@@ -196,11 +215,15 @@ const OrganisationPage = () => {
     window.alert('Le fichier n\'a pas pu être enregistré. Réessayez.');
   };
   const exportCsv = () => downloadCsv(toCsv(selectedApps, criticality, plan), `trusti-organisation-${today}.csv`).catch(reportExportError);
-  const exportJson = () => downloadJSON(buildOrganisationExport(selectedIds, criticality, summary), `trusti-organisation-${today}.json`).catch(reportExportError);
+  const exportJson = () => downloadJSON(buildOrganisationExport(selectedIds, criticality, summary, { profile, orgName, audit }), `trusti-organisation-${today}.json`).catch(reportExportError);
 
   const downloadPdf = () => {
     setPdfStatus('working');
-    downloadOrganisationPdf({ orgName, profileLabel, selectedApps, criticality, summary, plan })
+    downloadOrganisationPdf({
+      orgName, profileLabel, selectedApps, criticality, summary, plan,
+      audit: computeAuditResult(audit, profile),
+      help: helpForProfile(profile),
+    })
       .then(() => setPdfStatus('idle'))
       .catch(err => {
         console.error('PDF', err);
@@ -218,6 +241,9 @@ const OrganisationPage = () => {
         if (!parsed) throw new Error('format');
         setSelectedIds(parsed.ids);
         setCriticality(parsed.criticality);
+        if (ORG_PROFILES.some(p => p.id === parsed.profile)) setProfile(parsed.profile);
+        if (parsed.orgName) setOrgName(parsed.orgName);
+        setAudit(parsed.audit);
         setMessage(`${parsed.ids.length} outil${parsed.ids.length > 1 ? 's' : ''} importé${parsed.ids.length > 1 ? 's' : ''}.`);
       })
       .catch(() => setMessage('Ce fichier n\'est pas une évaluation Trusti enregistrée.'));
@@ -340,6 +366,10 @@ const OrganisationPage = () => {
               pdfStatus={pdfStatus}
               compact={false}
             />
+            <div className="mt-3 flex flex-col gap-3">
+              <AuditChecklist profile={profile} answers={audit} onAnswer={answerAudit} onReset={resetAudit} onProfileChange={setProfile} />
+              <OrganisationHelp profile={profile} />
+            </div>
             <p className="mt-4 flex items-center gap-1.5 text-xs font-bold text-emerald-700">
               <Lock size={13} /> Votre évaluation reste dans ce navigateur : elle n'est jamais envoyée à Trusti.
             </p>

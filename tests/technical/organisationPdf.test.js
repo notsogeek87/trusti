@@ -2,6 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { pdfText, gradeRgb, reportFilename, buildOrganisationPdf } from '../../src/utils/organisationPdf.js';
 import { computeOrganisationSummary, buildActionPlan } from '../../src/utils/organisationAssessment.js';
+import { computeAuditResult } from '../../src/utils/auditChecklist.js';
+import { helpForProfile } from '../../src/constants/orgHelp.js';
 
 test('texte PDF : espaces invisibles retirés, caractères hors police remplacés', () => {
   assert.equal(pdfText('​​Microsoft Copilot'), 'Microsoft Copilot');
@@ -39,4 +41,18 @@ test('rapport court sur une seule page', async () => {
   const apps = [{ id: 'a', name: 'Tchap', grade: 'A', category: 'Messagerie', developer: 'DINUM', isEuropean: true }];
   const doc = await buildOrganisationPdf({ orgName: '', selectedApps: apps, summary: computeOrganisationSummary(apps, {}), plan: [] });
   assert.equal(doc.getNumberOfPages(), 1);
+});
+
+test('rapport avec questionnaire d\'audit et aides : sections ajoutées', async () => {
+  const apps = [{ id: 'a', name: 'GMail', grade: 'D', category: 'Email', developer: 'Google', isEuropean: false }];
+  const summary = computeOrganisationSummary(apps, {});
+  const audit = computeAuditResult({ mfa: 'non', dpo: 'non', sauvegarde: 'nsp' }, 'collectivite');
+  const doc = await buildOrganisationPdf({
+    orgName: 'Mairie de Test', profileLabel: 'Collectivité', selectedApps: apps, summary, plan: [],
+    audit, help: helpForProfile('collectivite'),
+  });
+  const text = Buffer.from(doc.output('arraybuffer')).toString('latin1');
+  assert.ok(text.includes('points de vigilance'), 'section vigilance');
+  assert.ok(text.includes('Qui peut vous aider'), 'section aides');
+  assert.ok(text.includes('suiteterritoriale.anct.gouv.fr'), 'lien Suite territoriale');
 });

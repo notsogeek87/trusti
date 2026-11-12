@@ -6,6 +6,7 @@
 import { GRADES } from '../constants/grades.js';
 import { PRO_FAMILIES, OTHER_FAMILY, CRITICALITY_LEVELS, DEFAULT_CRITICALITY } from '../constants/proFamilies.js';
 import { pickRecommendedAlternative, isStrictlyBetterGrade } from './alternatives.js';
+import { sanitizeAuditAnswers } from './auditChecklist.js';
 
 const GRADE_POINTS = { A: 4, B: 3, C: 2, D: 1, E: 0 };
 const WEAK_GRADES = new Set(['D', 'E']);
@@ -173,21 +174,29 @@ export function toCsv(selectedApps, criticality = {}, plan = []) {
 
 export const ORGANISATION_EXPORT_FORMAT = 'trusti-organisation';
 
-/** Fichier d'export JSON (rechargeable avec parseOrganisationImport). */
-export function buildOrganisationExport(selectedIds, criticality, summary) {
+/**
+ * Fichier d'export JSON (rechargeable avec parseOrganisationImport).
+ * Version 2 : ajoute le profil, le nom et les réponses au questionnaire d'audit
+ * (champs facultatifs : un fichier version 1 se relit toujours).
+ */
+export function buildOrganisationExport(selectedIds, criticality, summary, extra = {}) {
   return {
     format: ORGANISATION_EXPORT_FORMAT,
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
     selection: selectedIds.map(id => ({ id, criticality: criticality[id] || DEFAULT_CRITICALITY })),
     summary: summary ? { total: summary.total, overallGrade: summary.overallGrade, counts: summary.counts } : null,
+    profile: extra.profile || null,
+    orgName: extra.orgName || '',
+    audit: sanitizeAuditAnswers(extra.audit),
   };
 }
 
 /**
  * Lit un fichier exporté. Ne garde que les ids connus du catalogue et les
  * niveaux de criticité valides.
- * @returns {{ids: string[], criticality: Object<string,string>}|null} null si le fichier n'est pas reconnu
+ * @returns {{ids: string[], criticality: Object<string,string>, profile: string|null, orgName: string, audit: Object<string,string>}|null}
+ *   null si le fichier n'est pas reconnu
  */
 export function parseOrganisationImport(data, knownIds) {
   if (!data || data.format !== ORGANISATION_EXPORT_FORMAT || !Array.isArray(data.selection)) return null;
@@ -201,5 +210,11 @@ export function parseOrganisationImport(data, knownIds) {
     ids.push(id);
     if (levels.has(item.criticality)) criticality[id] = item.criticality;
   }
-  return { ids, criticality };
+  return {
+    ids,
+    criticality,
+    profile: typeof data.profile === 'string' ? data.profile : null,
+    orgName: typeof data.orgName === 'string' ? data.orgName.slice(0, 120) : '',
+    audit: sanitizeAuditAnswers(data.audit),
+  };
 }

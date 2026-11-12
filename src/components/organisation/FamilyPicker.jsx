@@ -1,5 +1,6 @@
 import React from 'react';
-import { Check } from 'lucide-react';
+import { Check, Landmark } from 'lucide-react';
+import { isPublicService } from '../../constants/publicServices';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import ProAppIcon from './ProAppIcon';
 
@@ -13,6 +14,11 @@ const AppChip = React.memo(({ app, selected, onToggle }) => (
   >
     <ProAppIcon app={app} />
     <span className="flex-1 min-w-0 text-sm font-bold text-slate-800 truncate" title={app.name}>{app.name}</span>
+    {isPublicService(app) && (
+      <span title="Service opéré par l'État" className="flex items-center gap-0.5 shrink-0 text-[10px] font-black uppercase text-blue-700 bg-blue-50 rounded px-1.5 py-0.5">
+        <Landmark size={11} aria-hidden="true" /> État
+      </span>
+    )}
     <ScoreIndicator grade={app.grade} />
     <span className={`w-5 h-5 shrink-0 rounded-full border flex items-center justify-center
       ${selected ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 text-transparent'}`}>

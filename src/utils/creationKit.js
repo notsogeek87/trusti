@@ -18,15 +18,16 @@ export function buildStarterKit({ type, size, approach }, appsById) {
     if (need.minSize > level) continue;
     if (need.types && !need.types.includes(type)) continue;
     if (need.approaches && !need.approaches.includes(approach)) continue;
-    const pick = need.picks[approach];
+    const pick = need.typePicks?.[type]?.[approach] || need.picks[approach];
     if (!pick) continue;
-    if (pick.note) {
-      items.push({ need, app: null, note: pick.note });
+    const app = pick.appId ? appsById.get(String(pick.appId)) : null;
+    if (app) {
+      items.push({ need, app, why: pick.why, cost: pick.cost });
       continue;
     }
-    const app = appsById.get(String(pick.appId));
-    if (!app) continue; // outil retiré du catalogue : on n'affiche pas une recommandation vide
-    items.push({ need, app, why: pick.why, cost: pick.cost });
+    // Pas d'outil au catalogue : le conseil écrit le remplace s'il existe ;
+    // sinon on n'affiche pas une recommandation vide.
+    if (pick.note) items.push({ need, app: null, note: pick.note });
   }
 
   const steps = KIT_STEPS

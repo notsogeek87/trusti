@@ -16,6 +16,7 @@ import { buildStarterKit, mergeKitIntoSelection } from '../../utils/creationKit'
 import { computeOrganisationSummary, buildActionPlan } from '../../utils/organisationAssessment';
 import { downloadOrganisationPdf } from '../../utils/organisationPdf';
 import { loadOrganisationState, saveOrganisationState } from '../../utils/organisationStorage';
+import { helpForProfile } from '../../constants/orgHelp';
 
 /**
  * Assistant « Créer mon organisation » (adresse « ?creer-organisation »), V1.
@@ -73,7 +74,7 @@ const Intro = ({ onStart }) => (
     </h1>
     <div className="mt-5 space-y-3 text-slate-600 sm:text-lg max-w-2xl mx-auto">
       <p>Trois questions, et Trusti vous propose un kit d'outils de départ : un outil par besoin, avec sa note de confiance et l'ordre dans lequel les mettre en place.</p>
-      <p className="text-sm text-slate-500">Pour l'instant : associations et petites entreprises. Aucun compte, rien n'est envoyé.</p>
+      <p className="text-sm text-slate-500">Pour l'instant : associations, petites entreprises et mairies. Aucun compte, rien n'est envoyé.</p>
     </div>
 
     <button
@@ -130,7 +131,7 @@ const Question = ({ index, question, value, onPick, onBack }) => (
     </div>
     {question.key === 'type' && (
       <p className="mt-5 text-sm text-slate-500">
-        Collectivité, santé, enseignement : bientôt. En attendant, vous pouvez{' '}
+        Santé, enseignement : bientôt. En attendant, vous pouvez{' '}
         <a href={STANDALONE_URLS.EVALUATE_ORGANISATION} className="font-bold text-indigo-600 hover:underline">évaluer vos outils actuels</a>.
       </p>
     )}
@@ -177,6 +178,7 @@ const KitResult = ({ answers, kit, catalog, onRestart }) => {
       criticality: {},
       summary,
       plan: buildActionPlan(kit.apps, catalog, {}),
+      help: helpForProfile(typeOption?.evaluationProfile),
     })
       .then(() => setPdfStatus('idle'))
       .catch(err => {

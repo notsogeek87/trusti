@@ -7,7 +7,12 @@
  * catalogue est simplement ignoré à l'affichage.
  *
  * Exclus volontairement : les outils de « La Suite numérique » (Docs, Fichiers, Visio,
- * Tchap), réservés aux agents publics.
+ * Tchap), réservés aux agents de l'État. Pour les collectivités, l'accès dépend de
+ * la Suite territoriale de l'ANCT (petites communes, via leur opérateur public de
+ * services numériques) : on le signale dans le texte, sans en faire un choix du kit.
+ *
+ * Un choix peut porter à la fois appId et note : la note s'affiche tant que l'outil
+ * n'est pas au catalogue. typePicks remplace picks pour un type de structure.
  *
  * Coût : indication grossière, à vérifier chez l'éditeur (affiché comme tel).
  * - 'libre'    : logiciel libre, sans licence à payer
@@ -22,6 +27,7 @@ export const KITS_REVIEWED_AT = '2026-11';
 export const CREATION_TYPES = [
   { id: 'association', label: 'Association', hint: 'Loi 1901, collectif, club, fédération locale…', evaluationProfile: 'association' },
   { id: 'tpe', label: 'Petite entreprise ou indépendant', hint: 'Micro-entreprise, TPE, startup, profession libérale…', evaluationProfile: 'entreprise' },
+  { id: 'collectivite', label: 'Mairie ou collectivité', hint: 'Commune, intercommunalité, syndicat, CCAS…', evaluationProfile: 'collectivite' },
 ];
 
 export const CREATION_SIZES = [
@@ -48,6 +54,18 @@ export const CREATION_APPROACHES = [
   },
 ];
 
+const MAIRIE_EMAIL_WHY = 'Messagerie d\'un fournisseur français, données hébergées en France, à l\'adresse de la commune. '
+  + 'Commune de moins de 3 500 habitants : demandez d\'abord à votre opérateur public de services numériques la messagerie de la Suite territoriale (ANCT).';
+const OLVID_ELUS_WHY = 'Messagerie chiffrée française, sans numéro de téléphone, certifiée par l\'ANSSI : à proposer aux élus et aux agents à la place des groupes WhatsApp.';
+const METIERS_NOTE = 'Gardez votre éditeur actuel s\'il vous convient, mais avant tout renouvellement exigez par contrat l\'export complet de vos données dans un format ouvert. '
+  + 'Alternatives : les logiciels libres OpenMairie (élections, cimetière, urbanisme…) ou l\'offre mutualisée de votre opérateur public de services numériques.';
+const ACTES_NOTE = 'Les logiciels libres de Libriciel (i-Parapheur, S²LOW, webdelib) sont souvent fournis par votre opérateur public de services numériques ou votre centre de gestion.';
+const DEMARCHES_WHY = 'Logiciel libre de l\'État pour mettre en ligne les formulaires de la commune (inscriptions, demandes, dossiers). '
+  + 'Fermé aux nouvelles collectivités depuis 2021 sur le site de l\'État : il leur est proposé par l\'ADULLACT, réservé à ses adhérents.';
+const HABITANTS_WHY = 'Application d\'information et d\'alerte des habitants, éditeur français : abonnement pour la commune, gratuite pour les habitants, sans compte à créer.';
+const HABITANTS_NOTE = 'Une application d\'information des habitants (PanneauPocket, IntraMuros, Illiwap…) plutôt qu\'une page Facebook, qui impose Facebook à ceux qui veulent suivre la commune.';
+const SITE_NOTE = 'Site chez un hébergeur français ou européen, mesure d\'audience sans cookies publicitaires (Matomo). Des offres mutualisées existent souvent via votre département ou votre opérateur public de services numériques.';
+
 export const COST_LABELS = {
   libre: 'Libre, sans licence',
   gratuit: 'Gratuit',
@@ -71,6 +89,13 @@ export const KIT_NEEDS = [
       simple: { appId: '1769804133553', cost: 'freemium', why: 'Messagerie d\'un hébergeur suisse, données en Suisse. Une adresse à votre nom de domaine est incluse gratuitement (seul le domaine est payant) ; au-delà, abonnement.' },
       confidentiel: { appId: 'tutanota', cost: 'payant', why: 'Messagerie chiffrée de bout en bout, hébergée en Allemagne. L\'adresse à votre nom de domaine demande une offre payante.' },
       libre: { appId: 'mailo', cost: 'payant', why: 'L\'e-mail est délicat à héberger soi-même : confiez-le à un fournisseur français, données hébergées en France.' },
+    },
+    typePicks: {
+      collectivite: {
+        simple: { appId: 'mailo', cost: 'payant', why: MAIRIE_EMAIL_WHY },
+        confidentiel: { appId: 'mailo', cost: 'payant', why: MAIRIE_EMAIL_WHY },
+        libre: { appId: 'mailo', cost: 'payant', why: MAIRIE_EMAIL_WHY },
+      },
     },
   },
   {
@@ -115,6 +140,13 @@ export const KIT_NEEDS = [
       simple: { appId: '0678b7ca-7f61-43f9-ba27-c93d800166d5', cost: 'freemium', why: 'Messagerie chiffrée française, sans numéro de téléphone.' },
       confidentiel: { appId: '0678b7ca-7f61-43f9-ba27-c93d800166d5', cost: 'freemium', why: 'Messagerie chiffrée française, sans numéro de téléphone.' },
       libre: { appId: 'element', cost: 'libre', why: 'Messagerie d\'équipe sur le protocole ouvert Matrix, auto-hébergeable.' },
+    },
+    typePicks: {
+      collectivite: {
+        simple: { appId: '0678b7ca-7f61-43f9-ba27-c93d800166d5', cost: 'freemium', why: OLVID_ELUS_WHY },
+        confidentiel: { appId: '0678b7ca-7f61-43f9-ba27-c93d800166d5', cost: 'freemium', why: OLVID_ELUS_WHY },
+        libre: { appId: 'element', cost: 'libre', why: 'Messagerie d\'équipe sur le protocole ouvert Matrix, auto-hébergeable : à proposer aux élus et aux agents à la place des groupes WhatsApp.' },
+      },
     },
   },
   {
@@ -197,6 +229,66 @@ export const KIT_NEEDS = [
       simple: { appId: 'twenty', cost: 'payant', why: 'CRM open source pour suivre clients et prospects. Version hébergée payante, gratuite si vous l\'hébergez.' },
       confidentiel: { appId: 'twenty', cost: 'payant', why: 'CRM open source pour suivre clients et prospects. Version hébergée payante, gratuite si vous l\'hébergez.' },
       libre: { appId: 'dolibarr', cost: 'libre', why: 'Le module « Tiers » de Dolibarr suit clients et prospects.' },
+    },
+  },
+  {
+    id: 'metiers',
+    label: 'Logiciels métiers (état civil, élections, finances, paie)',
+    step: 'Gérer',
+    minSize: 1,
+    types: ['collectivite'],
+    picks: {
+      simple: { note: METIERS_NOTE },
+      confidentiel: { note: METIERS_NOTE },
+      libre: { appId: 'openmairie', cost: 'libre', why: 'Logiciels libres conçus par et pour les collectivités : élections, cimetière, urbanisme, courrier. À installer par un prestataire ou votre opérateur public de services numériques.', note: METIERS_NOTE },
+    },
+  },
+  {
+    id: 'actes',
+    label: 'Délibérations, parapheur et contrôle de légalité',
+    step: 'Gérer',
+    minSize: 1,
+    types: ['collectivite'],
+    picks: {
+      simple: { appId: 'i-parapheur', cost: 'libre', why: 'Parapheur électronique libre de Libriciel (coopérative française), relié à la télétransmission des actes.', note: ACTES_NOTE },
+      confidentiel: { appId: 'i-parapheur', cost: 'libre', why: 'Parapheur électronique libre de Libriciel (coopérative française), relié à la télétransmission des actes.', note: ACTES_NOTE },
+      libre: { appId: 'i-parapheur', cost: 'libre', why: 'Parapheur électronique libre de Libriciel (coopérative française), relié à la télétransmission des actes.', note: ACTES_NOTE },
+    },
+  },
+  {
+    id: 'demarches',
+    label: 'Démarches en ligne des habitants',
+    step: 'Communiquer',
+    minSize: 1,
+    types: ['collectivite'],
+    picks: {
+      simple: { appId: 'demarches-simplifiees', cost: 'payant', why: DEMARCHES_WHY, note: DEMARCHES_WHY },
+      confidentiel: { appId: 'demarches-simplifiees', cost: 'payant', why: DEMARCHES_WHY, note: DEMARCHES_WHY },
+      libre: { appId: 'demarches-simplifiees', cost: 'payant', why: DEMARCHES_WHY, note: DEMARCHES_WHY },
+    },
+  },
+  {
+    id: 'habitants',
+    label: 'Informer les habitants',
+    step: 'Communiquer',
+    minSize: 1,
+    types: ['collectivite'],
+    picks: {
+      simple: { appId: 'panneaupocket', cost: 'payant', why: HABITANTS_WHY, note: HABITANTS_NOTE },
+      confidentiel: { appId: 'panneaupocket', cost: 'payant', why: HABITANTS_WHY, note: HABITANTS_NOTE },
+      libre: { appId: 'panneaupocket', cost: 'payant', why: HABITANTS_WHY, note: HABITANTS_NOTE },
+    },
+  },
+  {
+    id: 'site',
+    label: 'Site web de la commune',
+    step: 'Communiquer',
+    minSize: 1,
+    types: ['collectivite'],
+    picks: {
+      simple: { note: SITE_NOTE },
+      confidentiel: { note: SITE_NOTE },
+      libre: { appId: 'matomo', cost: 'libre', why: 'Mesure d\'audience libre et auto-hébergeable : les statistiques du site restent sur votre serveur.', note: SITE_NOTE },
     },
   },
   {
