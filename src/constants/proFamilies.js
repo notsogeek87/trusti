@@ -24,14 +24,14 @@ export const PRO_FAMILIES = [
     label: 'Bureautique et documents',
     categories: ['Bureautique', 'Productivité / Tableur', 'Productivité / Documents', 'Productivité / Tout-en-un', 'Wiki & Documentation', 'Gestion documentaire (GED)'],
   },
-  { id: 'stockage', label: 'Stockage et partage de fichiers', categories: ['Stockage Cloud', 'Productivité / Collaboration'] },
+  { id: 'stockage', label: 'Stockage et partage de fichiers', categories: ['Stockage Cloud', 'Productivité / Collaboration', 'Outils / Envoi de fichiers'] },
   { id: 'organisation', label: 'Notes, tâches et agenda', categories: ['Productivité / Notes', 'Prise de Notes', 'Productivité / Tâches', 'Productivité / Calendrier'] },
   { id: 'projet', label: 'Gestion de projet', categories: ['Gestion de projet'] },
   { id: 'ia', label: 'Intelligence artificielle', categories: ['IA'] },
   {
     id: 'client',
     label: 'Relation client, marketing et web',
-    categories: ['CRM & Support', 'Marketing / E-mailing', 'Sites web & E-commerce', 'Réseaux sociaux'],
+    categories: ['CRM & Support', 'Marketing / E-mailing', 'Sites web & E-commerce', 'Sites web & E-commerce / Mesure d\'audience', 'Réseaux sociaux'],
   },
   {
     id: 'finance',

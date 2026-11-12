@@ -1,6 +1,6 @@
 # Apps des mairies et collectivités à ajouter au catalogue (2026-11)
 
-Statut : **proposition, rien n'est écrit en base.** Chaque fiche demande une note
+Statut : **écrit en base le 2026-11-12** (lot 49 de `trustillm`, validé par David), voir la section « Écriture » en bas. Chaque fiche demande une note
 TrustiScore (skill `trusti-update-score`), une icône, le détail des 5 critères et
 `usage_pro = true`, puis la validation de David avant tout INSERT
 (procédure : skill `ajout-alternative-trusti`).
@@ -76,3 +76,12 @@ de la conversation et la trace du lot, écrite après validation.
 | `illiwap` | 1 | 2 | 4 | 3 | 2 | 61 | B (limite) |
 | `matomo` | 4 | 3 | 1 | 4 | 3 | 76 | B (A 91 si gouvernance 4) |
 | `framadate` | 4 | 2 | 4 | 4 | 3 | 86 | A |
+
+## Écriture (2026-11-12)
+
+18 fiches créées avec `usage_pro = true`, notes calculées validées (PanneauPocket B 68 après lecture
+des mentions légales : hébergement OVHcloud et Scaleway). 16 relations, détail des 5 critères exporté
+(`app_assessments`, `app_assessment_history`). Catégories finales : France Transfert en
+« Outils / Envoi de fichiers » (pas « Outils / Transfert », qui contient Quick Share), Matomo en
+« Sites web & E-commerce / Mesure d'audience ». Icônes manquantes : Cosoluce et OpenMairie (sites injoignables).
+Trace : `trustiscore_pipeline/data/assessments/2026-11-12_lot49_collectivites.json` (dépôt `trustillm`).
