@@ -9,11 +9,11 @@ const HOSTS = {
   hyperfluid: { label: 'Hébergé en France par Hyperfluid', url: 'https://www.hyperfluid.cloud/' },
 };
 
-const HostingCredit = ({ className = '' }) => {
+const HostingCredit = ({ className = '', size = 'text-[11px]' }) => {
   const host = HOSTS[import.meta.env.VITE_HOSTED_BY];
   if (!host) return null;
   return (
-    <p className={`text-[11px] text-slate-500 ${className}`}>
+    <p className={`${size} text-slate-500 ${className}`}>
       <a
         href={host.url}
         target="_blank"
