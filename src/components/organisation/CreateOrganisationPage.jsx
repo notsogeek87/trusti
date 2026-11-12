@@ -1,9 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, Building2, Check, ClipboardCheck, ExternalLink, FileDown, Rocket, ShieldCheck, Sparkles } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowLeft, ArrowRight, Building2, Check, ChevronRight, ClipboardCheck, ExternalLink, FileDown, Rocket, ShieldCheck, Sparkles } from 'lucide-react';
 import { STANDALONE_URLS } from '../../utils/standalonePage';
 import { useProCatalog } from '../../hooks/useProCatalog';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import ProAppIcon from './ProAppIcon';
+import AppDetailModal from '../modals/AppDetailModal';
+import { ViewModeContext } from '../../contexts/ViewModeContext';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { GRADES, GRADE_COLORS } from '../../constants/grades';
 import {
   CREATION_TYPES,
@@ -16,6 +19,7 @@ import { buildStarterKit, mergeKitIntoSelection } from '../../utils/creationKit'
 import { computeOrganisationSummary, buildActionPlan } from '../../utils/organisationAssessment';
 import { downloadOrganisationPdf } from '../../utils/organisationPdf';
 import { loadOrganisationState, saveOrganisationState } from '../../utils/organisationStorage';
+import { helpForProfile } from '../../constants/orgHelp';
 
 /**
  * Assistant « Créer mon organisation » (adresse « ?creer-organisation »), V1.
@@ -41,12 +45,8 @@ const KIT_GRADE_LABEL = {
 const PageHeader = () => (
   <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-white/60">
     <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3 min-w-0">
-      <a href="/" className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-indigo-600 shrink-0">
-        <ArrowLeft size={16} /> Trusti
-      </a>
-      <span className="text-slate-300">/</span>
-      <a href={STANDALONE_URLS.ORGANISATIONS} className="text-sm font-bold text-slate-500 hover:text-indigo-600 shrink-0">
-        Organisations
+      <a href={STANDALONE_URLS.ORGANISATIONS} className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-indigo-600 shrink-0">
+        <ArrowLeft size={16} /> Organisations
       </a>
       <span className="text-slate-300">/</span>
       <span className="flex items-center gap-2 font-black text-indigo-600 min-w-0">
@@ -77,7 +77,7 @@ const Intro = ({ onStart }) => (
     </h1>
     <div className="mt-5 space-y-3 text-slate-600 sm:text-lg max-w-2xl mx-auto">
       <p>Trois questions, et Trusti vous propose un kit d'outils de départ : un outil par besoin, avec sa note de confiance et l'ordre dans lequel les mettre en place.</p>
-      <p className="text-sm text-slate-500">Pour l'instant : associations et petites entreprises. Aucun compte, rien n'est envoyé.</p>
+      <p className="text-sm text-slate-500">Pour l'instant : associations, petites entreprises et mairies. Aucun compte, rien n'est envoyé.</p>
     </div>
 
     <button
@@ -134,7 +134,7 @@ const Question = ({ index, question, value, onPick, onBack }) => (
     </div>
     {question.key === 'type' && (
       <p className="mt-5 text-sm text-slate-500">
-        Collectivité, santé, enseignement : bientôt. En attendant, vous pouvez{' '}
+        Santé, enseignement : bientôt. En attendant, vous pouvez{' '}
         <a href={STANDALONE_URLS.EVALUATE_ORGANISATION} className="font-bold text-indigo-600 hover:underline">évaluer vos outils actuels</a>.
       </p>
     )}
@@ -166,7 +166,46 @@ const AppLinks = ({ app }) => {
   );
 };
 
-const KitResult = ({ answers, kit, catalog, onRestart }) => {
+/**
+ * Fiche détaillée d'un outil du kit. L'ouverture ajoute une entrée d'historique :
+ * le bouton retour (navigateur ou Android) ferme la fiche avant de quitter le kit.
+ */
+const useKitDetail = () => {
+  const [detailApp, setDetailApp] = useState(null);
+  const openApp = useCallback(app => {
+    const state = window.history.state || {};
+    if (!state.trustiKitDetail) window.history.pushState({ ...state, trustiKitDetail: true }, '');
+    setDetailApp(app);
+  }, []);
+  const closeApp = useCallback(() => {
+    if (window.history.state?.trustiKitDetail) window.history.back();
+    else setDetailApp(null);
+  }, []);
+  useEffect(() => {
+    const onPop = event => {
+      if (!event.state?.trustiKitDetail) setDetailApp(null);
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+  return { detailApp, openApp, closeApp };
+};
+
+const KitResult = ({ answers, kit, catalog, onRestart, detailApp, openApp, closeApp, isWide }) => {
+  // Écran large : le kit reste à gauche, la fiche s'affiche à droite.
+  // Sinon : fiche en plein écran par-dessus le kit.
+  const isMobile = useMediaQuery('(max-width: 767px)');
+  const split = isWide && detailApp;
+  const panelRef = useRef(null);
+  useEffect(() => {
+    if (panelRef.current) panelRef.current.scrollTop = 0;
+  }, [detailApp?.id]);
+  useEffect(() => {
+    if (!detailApp || isWide) return undefined;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previous; };
+  }, [detailApp, isWide]);
   const [confirming, setConfirming] = useState(null);
   const [pdfStatus, setPdfStatus] = useState('idle');
   const summary = useMemo(() => computeOrganisationSummary(kit.apps), [kit.apps]);
@@ -181,6 +220,7 @@ const KitResult = ({ answers, kit, catalog, onRestart }) => {
       criticality: {},
       summary,
       plan: buildActionPlan(kit.apps, catalog, {}),
+      help: helpForProfile(typeOption?.evaluationProfile),
     })
       .then(() => setPdfStatus('idle'))
       .catch(err => {
@@ -205,8 +245,20 @@ const KitResult = ({ answers, kit, catalog, onRestart }) => {
     else save('replace');
   };
 
+  const detail = detailApp && (
+    <AppDetailModal
+      key={detailApp.id}
+      app={detailApp}
+      onClose={closeApp}
+      onSelectApp={openApp}
+      allApps={catalog}
+      closeAsCross
+    />
+  );
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className={split ? 'grid grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-6 items-start' : ''}>
+    <div className="flex flex-col gap-4 min-w-0">
       <div className="flex items-center justify-between gap-3">
         <button type="button" onClick={onRestart} className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-indigo-600">
           <ArrowLeft size={16} /> Modifier mes réponses
@@ -244,24 +296,37 @@ const KitResult = ({ answers, kit, catalog, onRestart }) => {
           <ol className="flex flex-col gap-3">
             {items.map(item => {
               position += 1;
+              const active = item.app && detailApp?.id === item.app.id;
               return (
-                <li key={item.need.id} className="flex gap-3">
+                <li key={item.need.id} className={`flex gap-3 rounded-xl -mx-2 px-2 py-1 transition-colors ${active ? 'bg-indigo-50 ring-2 ring-indigo-200' : ''}`}>
                   <span className="w-6 h-6 rounded-full bg-slate-100 text-slate-500 text-xs font-black flex items-center justify-center shrink-0 mt-1">{position}</span>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold text-slate-400">{item.need.label}</p>
                     {item.app ? (
                       <>
-                        <div className="mt-1 flex items-center gap-2 min-w-0">
-                          <ProAppIcon app={item.app} size="w-8 h-8" />
-                          <span className="font-black text-slate-800 truncate">{item.app.name}</span>
-                          {item.app.grade && (
-                            <span className={`${GRADE_COLORS[item.app.grade]} ${['B', 'C', 'D'].includes(item.app.grade) ? 'text-slate-900' : 'text-white'} text-xs font-black w-6 h-6 rounded-md flex items-center justify-center shrink-0`}>
-                              {item.app.grade}
-                            </span>
-                          )}
-                        </div>
-                        <p className="mt-1 text-sm text-slate-600">{item.why}</p>
-                        <p className="mt-1 text-[11px] font-bold text-slate-400">{COST_LABELS[item.cost]}</p>
+                        <button
+                          type="button"
+                          onClick={() => openApp(item.app)}
+                          aria-label={`Voir la fiche détaillée de ${item.app.name}`}
+                          aria-current={active ? 'true' : undefined}
+                          className="group w-full text-left rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+                        >
+                          <span className="mt-1 flex items-center gap-2 min-w-0">
+                            <ProAppIcon app={item.app} size="w-8 h-8" />
+                            <span className="font-black text-slate-800 truncate group-hover:text-indigo-700">{item.app.name}</span>
+                            {item.app.grade && (
+                              <span className={`${GRADE_COLORS[item.app.grade]} ${['B', 'C', 'D'].includes(item.app.grade) ? 'text-slate-900' : 'text-white'} text-xs font-black w-6 h-6 rounded-md flex items-center justify-center shrink-0`}>
+                                {item.app.grade}
+                              </span>
+                            )}
+                            <ChevronRight size={18} className={`ml-auto shrink-0 transition-transform group-hover:translate-x-0.5 ${active ? 'text-indigo-600' : 'text-slate-300 group-hover:text-indigo-500'}`} aria-hidden="true" />
+                          </span>
+                          <span className="block mt-1 text-sm text-slate-600">{item.why}</span>
+                          <span className="block mt-1 text-[11px] font-bold text-slate-400">{COST_LABELS[item.cost]}</span>
+                          <span className="block mt-1 text-xs font-bold text-indigo-600 group-hover:underline">
+                            {active ? 'Fiche affichée' : 'Voir la fiche détaillée'}
+                          </span>
+                        </button>
                         <AppLinks app={item.app} />
                       </>
                     ) : (
@@ -327,6 +392,22 @@ const KitResult = ({ answers, kit, catalog, onRestart }) => {
         Ce kit est un point de départ, pas un avis juridique.
       </p>
     </div>
+
+    {split && (
+      <aside
+        ref={panelRef}
+        aria-label={`Fiche de ${detailApp.name}`}
+        className="sticky top-[4.5rem] h-[calc(100dvh-5.5rem)] overflow-y-auto overscroll-contain rounded-3xl bg-[#E9F0F6] border border-white shadow-sm"
+      >
+        <ViewModeContext.Provider value>{detail}</ViewModeContext.Provider>
+      </aside>
+    )}
+    {detailApp && !isWide && (
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-[#E9F0F6]" role="dialog" aria-modal="true" aria-label={`Fiche de ${detailApp.name}`}>
+        <ViewModeContext.Provider value={isMobile}>{detail}</ViewModeContext.Provider>
+      </div>
+    )}
+    </div>
   );
 };
 
@@ -341,6 +422,8 @@ const readHistoryState = () => {
 
 const CreateOrganisationPage = () => {
   const { status, apps, retry } = useProCatalog();
+  const { detailApp, openApp, closeApp } = useKitDetail();
+  const isWide = useMediaQuery('(min-width: 1024px)');
   const initial = useMemo(readHistoryState, []);
   const [step, setStep] = useState(initial.step); // 0 : intro ; 1..3 : questions ; 4 : résultat
   const [answers, setAnswers] = useState(initial.answers);
@@ -401,13 +484,22 @@ const CreateOrganisationPage = () => {
       </div>
     );
   } else {
-    content = <KitResult answers={answers} kit={kit} catalog={apps} onRestart={() => window.history.go(1 - step)} />;
+    content = <KitResult
+        answers={answers}
+        kit={kit}
+        catalog={apps}
+        detailApp={detailApp}
+        openApp={openApp}
+        closeApp={closeApp}
+        isWide={isWide}
+        onRestart={() => window.history.go(1 - step - (window.history.state?.trustiKitDetail ? 1 : 0))}
+      />;
   }
 
   return (
     <div className="min-h-[100dvh]">
       <PageHeader />
-      <main className="max-w-3xl mx-auto px-4 pt-8 pb-16 sm:pt-12">{content}</main>
+      <main className={`${content.type === KitResult && detailApp && isWide ? 'max-w-6xl' : 'max-w-3xl'} mx-auto px-4 pt-8 pb-16 sm:pt-12`}>{content}</main>
     </div>
   );
 };

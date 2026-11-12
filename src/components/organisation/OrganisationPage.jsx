@@ -1,17 +1,23 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Building2, CheckCircle2, Lock, MessageSquarePlus, Pencil, Search, Upload } from 'lucide-react';
+import { ArrowLeft, Building2, CheckCircle2, Lock, MessageSquarePlus, Pencil, Search, Trash2, Upload } from 'lucide-react';
 import { useProCatalog } from '../../hooks/useProCatalog';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import FamilyPicker from './FamilyPicker';
 import OrganisationResult from './OrganisationResult';
 import AppDetailModal from '../modals/AppDetailModal';
 import SuggestToolDialog from './SuggestToolDialog';
+import AuditChecklist from './AuditChecklist';
+import OrganisationHelp from './OrganisationHelp';
+import { computeAuditResult } from '../../utils/auditChecklist';
+import { helpForProfile } from '../../constants/orgHelp';
 import { ORG_PROFILES, profileApps } from '../../constants/orgProfiles';
 import { ViewModeContext } from '../../contexts/ViewModeContext';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import downloadJSON from '../../utils/downloadJSON';
 import { saveBlob } from '../../utils/saveFile';
 import { downloadOrganisationPdf } from '../../utils/organisationPdf';
 import { GRADE_COLORS } from '../../constants/grades';
+import { STANDALONE_URLS } from '../../utils/standalonePage';
 import { loadOrganisationState, saveOrganisationState, clearOrganisationState } from '../../utils/organisationStorage';
 import {
   groupAppsByFamily,
@@ -29,17 +35,6 @@ function normalize(text) {
 function downloadCsv(content, filename) {
   // BOM UTF-8 : accents corrects à l'ouverture dans Excel
   return saveBlob(new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8' }), filename);
-}
-
-function useMediaQuery(query) {
-  const [matches, setMatches] = useState(() => window.matchMedia(query).matches);
-  useEffect(() => {
-    const mq = window.matchMedia(query);
-    const handler = e => setMatches(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, [query]);
-  return matches;
 }
 
 /**
@@ -61,6 +56,7 @@ const OrganisationPage = () => {
   const [detailApp, setDetailApp] = useState(null);
   const [profile, setProfile] = useState(null);
   const [orgName, setOrgName] = useState('');
+  const [audit, setAudit] = useState({});
   const [suggesting, setSuggesting] = useState(false);
   const [pdfStatus, setPdfStatus] = useState('idle');
   const [view, setView] = useState('saisie');
@@ -124,11 +120,24 @@ const OrganisationPage = () => {
     setCriticality(saved.criticality);
     if (ORG_PROFILES.some(p => p.id === saved.profile)) setProfile(saved.profile);
     setOrgName(saved.orgName);
+    setAudit(saved.audit);
   }, [status, appsById]);
 
   useEffect(() => {
-    if (restored.current) saveOrganisationState(selectedIds, criticality, { profile, orgName });
-  }, [selectedIds, criticality, profile, orgName]);
+    if (restored.current) saveOrganisationState(selectedIds, criticality, { profile, orgName, audit });
+  }, [selectedIds, criticality, profile, orgName, audit]);
+
+  const answerAudit = useCallback((id, value) => {
+    setAudit(prev => {
+      const next = { ...prev };
+      if (value) next[id] = value;
+      else delete next[id];
+      return next;
+    });
+  }, []);
+  const resetAudit = useCallback(() => {
+    if (window.confirm('Effacer toutes les réponses au questionnaire ?')) setAudit({});
+  }, []);
 
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
   const selectedApps = useMemo(() => selectedIds.map(id => appsById.get(id)).filter(Boolean), [selectedIds, appsById]);
@@ -172,16 +181,23 @@ const OrganisationPage = () => {
     setCriticality(prev => ({ ...prev, [id]: level }));
   }, []);
 
+  // Supprime l'organisation enregistrée : outils, criticités, profil et nom.
   const clearAll = useCallback(() => {
-    if (!window.confirm('Retirer tous les outils de l\'évaluation ?')) return;
+    const name = orgName.trim();
+    const question = name
+      ? `Supprimer l'organisation « ${name} » et son évaluation ? Cette action est définitive.`
+      : 'Supprimer cette organisation et son évaluation ? Cette action est définitive.';
+    if (!window.confirm(question)) return;
     setSelectedIds([]);
     setCriticality({});
     setProfile(null);
     setOrgName('');
+    setAudit({});
     clearOrganisationState();
     window.history.replaceState({ ...(window.history.state || {}), trustiOrgView: 'saisie' }, '');
     setView('saisie');
-  }, []);
+    setMessage(null);
+  }, [orgName]);
 
   const today = new Date().toISOString().slice(0, 10);
   const reportExportError = err => {
@@ -189,11 +205,15 @@ const OrganisationPage = () => {
     window.alert('Le fichier n\'a pas pu être enregistré. Réessayez.');
   };
   const exportCsv = () => downloadCsv(toCsv(selectedApps, criticality, plan), `trusti-organisation-${today}.csv`).catch(reportExportError);
-  const exportJson = () => downloadJSON(buildOrganisationExport(selectedIds, criticality, summary), `trusti-organisation-${today}.json`).catch(reportExportError);
+  const exportJson = () => downloadJSON(buildOrganisationExport(selectedIds, criticality, summary, { profile, orgName, audit }), `trusti-organisation-${today}.json`).catch(reportExportError);
 
   const downloadPdf = () => {
     setPdfStatus('working');
-    downloadOrganisationPdf({ orgName, profileLabel, selectedApps, criticality, summary, plan })
+    downloadOrganisationPdf({
+      orgName, profileLabel, selectedApps, criticality, summary, plan,
+      audit: computeAuditResult(audit, profile),
+      help: helpForProfile(profile),
+    })
       .then(() => setPdfStatus('idle'))
       .catch(err => {
         console.error('PDF', err);
@@ -211,6 +231,9 @@ const OrganisationPage = () => {
         if (!parsed) throw new Error('format');
         setSelectedIds(parsed.ids);
         setCriticality(parsed.criticality);
+        if (ORG_PROFILES.some(p => p.id === parsed.profile)) setProfile(parsed.profile);
+        if (parsed.orgName) setOrgName(parsed.orgName);
+        setAudit(parsed.audit);
         setMessage(`${parsed.ids.length} outil${parsed.ids.length > 1 ? 's' : ''} importé${parsed.ids.length > 1 ? 's' : ''}.`);
       })
       .catch(() => setMessage('Ce fichier n\'est pas une évaluation Trusti enregistrée.'));
@@ -220,8 +243,8 @@ const OrganisationPage = () => {
     <div className="min-h-[100dvh]">
       <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-white/60">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
-          <a href="/" className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-indigo-600">
-            <ArrowLeft size={16} /> Trusti
+          <a href={STANDALONE_URLS.ORGANISATIONS} className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-indigo-600 shrink-0">
+            <ArrowLeft size={16} /> Organisations
           </a>
           <span className="text-slate-300">/</span>
           <span className="flex items-center gap-2 font-black text-indigo-600 truncate">
@@ -298,6 +321,7 @@ const OrganisationPage = () => {
                   {profileLabel ? `${profileLabel} · ` : ''}{summary.total} outil{summary.total > 1 ? 's' : ''} évalué{summary.total > 1 ? 's' : ''}
                 </p>
               </div>
+              <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => showView('saisie')}
@@ -305,6 +329,14 @@ const OrganisationPage = () => {
               >
                 <Pencil size={16} /> Modifier mes outils
               </button>
+              <button
+                type="button"
+                onClick={clearAll}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm font-black text-rose-600 hover:border-rose-400 shadow-sm"
+              >
+                <Trash2 size={16} /> Supprimer l'organisation
+              </button>
+              </div>
             </div>
             {message && (
               <p className="mb-3 text-sm font-bold text-indigo-700 bg-indigo-50 rounded-xl px-3 py-2" role="status">{message}</p>
@@ -324,6 +356,10 @@ const OrganisationPage = () => {
               pdfStatus={pdfStatus}
               compact={false}
             />
+            <div className="mt-3 flex flex-col gap-3">
+              <AuditChecklist profile={profile} answers={audit} onAnswer={answerAudit} onReset={resetAudit} onProfileChange={setProfile} />
+              <OrganisationHelp profile={profile} />
+            </div>
             <p className="mt-4 flex items-center gap-1.5 text-xs font-bold text-emerald-700">
               <Lock size={13} /> Votre évaluation reste dans ce navigateur : elle n'est jamais envoyée à Trusti.
             </p>

@@ -1,6 +1,7 @@
 /**
  * Sauvegarde locale de l'évaluation « organisation » (sélection, criticités,
- * profil et nom de l'organisation pour le rapport). Rien n'est envoyé au
+ * profil, nom de l'organisation pour le rapport et réponses au questionnaire
+ * d'audit). Rien n'est envoyé au
  * serveur. Le stockage peut être indisponible (navigation privée, données
  * bloquées) : chaque accès est protégé et la page fonctionne sans.
  */
@@ -17,19 +18,37 @@ export function loadOrganisationState() {
       criticality: data.criticality && typeof data.criticality === 'object' ? data.criticality : {},
       profile: typeof data.profile === 'string' ? data.profile : null,
       orgName: typeof data.orgName === 'string' ? data.orgName : '',
+      audit: data.audit && typeof data.audit === 'object' && !Array.isArray(data.audit) ? data.audit : {},
     };
   } catch {
     return null;
   }
 }
 
+/**
+ * Vrai quand il n'y a plus rien à garder : ni outil, ni nom, ni profil.
+ * @param {string[]} ids
+ * @param {{profile?: string|null, orgName?: string}} [extra]
+ */
+export function isEmptyOrganisationState(ids, extra = {}) {
+  return (!Array.isArray(ids) || ids.length === 0)
+    && !extra.profile
+    && !String(extra.orgName || '').trim();
+}
+
 export function saveOrganisationState(ids, criticality, extra = {}) {
+  // Organisation vide (supprimée) : on efface l'entrée plutôt que d'en réécrire une vide.
+  if (isEmptyOrganisationState(ids, extra)) {
+    clearOrganisationState();
+    return;
+  }
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
       ids,
       criticality,
       profile: extra.profile || null,
       orgName: extra.orgName || '',
+      audit: extra.audit || {},
       savedAt: new Date().toISOString(),
     }));
   } catch {

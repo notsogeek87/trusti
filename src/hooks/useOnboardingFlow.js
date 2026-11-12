@@ -129,8 +129,14 @@ export const useOnboardingFlow = ({
 
   // « Non, je connais déjà »
   const declineWelcome = () => {
+    // Choix explicite de passer : la sélection auto du web (aucune app) ne
+    // doit pas s'ouvrir juste derrière.
+    autoSelectionShown.current = true;
     markOnboardingComplete();
     setShowWelcomeModal(false);
+    // « Mes Apps » seulement s'il y a déjà des apps suivies, sinon on reste
+    // sur le catalogue (un « Mes Apps » vide serait décevant).
+    if (myApps.size > 0) setActiveTab(TABS.MY_APPS);
   };
 
   const completeOnboarding = (selectedAppIds) => {
