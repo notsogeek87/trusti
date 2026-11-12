@@ -19,7 +19,7 @@ export const ORG_PROFILES = [
   },
   {
     id: 'collectivite',
-    label: 'Collectivité, administration',
+    label: 'Mairie, collectivité, administration',
     appIds: [
       'windows',
       'outlook', 'microsoft-teams', '1780761664182', 'microsoft-excel', 'microsoft-powerpoint', 'microsoft-sharepoint',
