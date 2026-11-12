@@ -6,11 +6,17 @@ import React from 'react';
  * Le build Vercel n'a pas cette variable : rien ne s'affiche.
  */
 const HOSTS = {
-  hyperfluid: { label: 'Hébergé en France par Hyperfluid', url: 'https://www.hyperfluid.cloud/' },
+  hyperfluid: {
+    label: 'Hébergé en France par Hyperfluid',
+    url: 'https://www.hyperfluid.cloud/',
+    // Copié dans l'image au build (workflow hyperfluid-image) : aucune requête vers un tiers.
+    logo: '/hosting/hyperfluid.svg',
+  },
 };
 
 const HostingCredit = ({ className = '', size = 'text-[11px]' }) => {
   const host = HOSTS[import.meta.env.VITE_HOSTED_BY];
+  const [logoOk, setLogoOk] = React.useState(true);
   if (!host) return null;
   return (
     <p className={`${size} text-slate-500 ${className}`}>
@@ -18,8 +24,17 @@ const HostingCredit = ({ className = '', size = 'text-[11px]' }) => {
         href={host.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="underline decoration-slate-600 underline-offset-2 hover:text-slate-300"
+        className="inline-flex items-center gap-1 underline decoration-slate-600 underline-offset-2 hover:text-slate-300"
       >
+        {host.logo && logoOk && (
+          <img
+            src={host.logo}
+            alt=""
+            aria-hidden="true"
+            className="h-3 w-3 shrink-0 object-contain"
+            onError={() => setLogoOk(false)}
+          />
+        )}
         {host.label}
       </a>
     </p>
