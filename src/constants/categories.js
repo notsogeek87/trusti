@@ -69,6 +69,10 @@ export const ADMIN_CATEGORIES = [
     'Développement',
     'Design',
     'Agrégateurs RSS',
+    'Collectivités / Gestion municipale',
+    'Collectivités / Dématérialisation',
+    'Collectivités / Démarches en ligne',
+    'Collectivités / Information des habitants',
   ]).values(),
 ].sort((a, b) => a.localeCompare(b, 'fr'));
 
@@ -172,6 +176,8 @@ export const CATEGORY_MAPPING = {
   'Wiki & Documentation': 'Productivité/Organisation',
   'Gestion documentaire (GED)': 'Productivité/Organisation',
   'Signature électronique': 'Productivité/Organisation',
+  // Logiciels des mairies et collectivités (« Collectivités / Gestion municipale »…)
+  'Collectivités': 'Productivité/Organisation',
   'CRM & Support': 'Productivité/Organisation',
   'RH & Paie': 'Productivité/Organisation',
   'Comptabilité & Gestion': 'Finance',

@@ -5,6 +5,17 @@
  * métier. Une catégorie absente de cette liste tombe dans « Autres outils ».
  * Ne sert qu'à la nouvelle page : le catalogue grand public n'en dépend pas.
  */
+
+/**
+ * Catégories des logiciels propres aux collectivités (état civil, élections,
+ * finances, délibérations, information des habitants…). Format « Famille / Détail ».
+ */
+export const COLLECTIVITE_CATEGORIES = [
+  'Collectivités / Gestion municipale',
+  'Collectivités / Dématérialisation',
+  'Collectivités / Démarches en ligne',
+  'Collectivités / Information des habitants',
+];
 export const PRO_FAMILIES = [
   { id: 'messagerie', label: 'Messagerie et e-mail', categories: ['Messagerie', 'Email'] },
   { id: 'visio', label: 'Visioconférence', categories: ['Visioconférence'] },
@@ -13,14 +24,14 @@ export const PRO_FAMILIES = [
     label: 'Bureautique et documents',
     categories: ['Bureautique', 'Productivité / Tableur', 'Productivité / Documents', 'Productivité / Tout-en-un', 'Wiki & Documentation', 'Gestion documentaire (GED)'],
   },
-  { id: 'stockage', label: 'Stockage et partage de fichiers', categories: ['Stockage Cloud', 'Productivité / Collaboration'] },
+  { id: 'stockage', label: 'Stockage et partage de fichiers', categories: ['Stockage Cloud', 'Productivité / Collaboration', 'Outils / Envoi de fichiers'] },
   { id: 'organisation', label: 'Notes, tâches et agenda', categories: ['Productivité / Notes', 'Prise de Notes', 'Productivité / Tâches', 'Productivité / Calendrier'] },
   { id: 'projet', label: 'Gestion de projet', categories: ['Gestion de projet'] },
   { id: 'ia', label: 'Intelligence artificielle', categories: ['IA'] },
   {
     id: 'client',
     label: 'Relation client, marketing et web',
-    categories: ['CRM & Support', 'Marketing / E-mailing', 'Sites web & E-commerce', 'Réseaux sociaux'],
+    categories: ['CRM & Support', 'Marketing / E-mailing', 'Sites web & E-commerce', 'Sites web & E-commerce / Mesure d\'audience', 'Réseaux sociaux'],
   },
   {
     id: 'finance',
@@ -50,6 +61,11 @@ export const PRO_FAMILIES = [
   },
   { id: 'navigation', label: 'Navigateurs et moteurs de recherche', categories: ['Navigateurs Web', 'Moteurs de Recherche'] },
   { id: 'design', label: 'Design et création', categories: ['Design & Prototypage', 'Retouche Photo'] },
+  {
+    id: 'collectivite',
+    label: 'Logiciels des mairies et collectivités',
+    categories: COLLECTIVITE_CATEGORIES,
+  },
   {
     id: 'metiers',
     label: 'Logiciels métiers',

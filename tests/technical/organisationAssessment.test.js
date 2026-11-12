@@ -119,12 +119,24 @@ test('export puis import JSON : seuls les ids connus et niveaux valides sont rep
   const exported = buildOrganisationExport(['word', 'slack'], { word: 'vitale' }, computeOrganisationSummary([word, slack], {}));
   assert.equal(exported.selection[1].criticality, 'importante');
   const parsed = parseOrganisationImport(exported, ['word', 'slack']);
-  assert.deepEqual(parsed, { ids: ['word', 'slack'], criticality: { word: 'vitale', slack: 'importante' } });
+  assert.deepEqual(parsed, { ids: ['word', 'slack'], criticality: { word: 'vitale', slack: 'importante' }, profile: null, orgName: '', audit: {} });
 
   const mixed = { ...exported, selection: [{ id: 'word', criticality: 'bidon' }, { id: 'inconnu' }, { id: 'word' }] };
-  assert.deepEqual(parseOrganisationImport(mixed, ['word']), { ids: ['word'], criticality: {} });
+  assert.deepEqual(parseOrganisationImport(mixed, ['word']), { ids: ['word'], criticality: {}, profile: null, orgName: '', audit: {} });
   assert.equal(parseOrganisationImport({ format: 'autre' }, ['word']), null);
   assert.equal(parseOrganisationImport(null, ['word']), null);
+});
+
+test('export JSON version 2 : profil, nom et réponses d\'audit relus, réponses invalides écartées', () => {
+  const exported = buildOrganisationExport(['word'], {}, null, {
+    profile: 'collectivite', orgName: 'Mairie de Test', audit: { mfa: 'non', dpo: 'peut-etre', inconnue: 'oui' },
+  });
+  assert.equal(exported.version, 2);
+  assert.deepEqual(exported.audit, { mfa: 'non' });
+  const parsed = parseOrganisationImport({ ...exported, audit: { mfa: 'non', dpo: 'peut-etre', inconnue: 'oui' } }, ['word']);
+  assert.equal(parsed.profile, 'collectivite');
+  assert.equal(parsed.orgName, 'Mairie de Test');
+  assert.deepEqual(parsed.audit, { mfa: 'non' });
 });
 
 test('profils : ids uniques, outils du catalogue dans l\'ordre du profil, ids inconnus ignorés', async () => {
