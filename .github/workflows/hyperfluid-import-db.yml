@@ -1,4 +1,5 @@
 name: Hyperfluid import db
+# Relance : 2026-11-12T18:57Z
 
 # Copie la base Neon vers le PostgreSQL d'Hyperfluid (pg_dump 17 via Docker).
 # Se lance quand ce fichier est poussé sur la branche hyperfluid.
