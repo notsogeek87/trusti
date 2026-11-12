@@ -1,5 +1,5 @@
 name: Hyperfluid import db
-# Relance : 2026-11-12T19:16Z
+# Relance : 2026-11-12T19:20Z
 
 # Copie la base Neon vers le PostgreSQL d'Hyperfluid (pg_dump 17 via Docker).
 # Se lance quand ce fichier est poussé sur la branche hyperfluid.
@@ -22,6 +22,7 @@ jobs:
     env:
       SRC: ${{ secrets.NEON_DATABASE_URL }}
       DST: ${{ secrets.HYPERFLUID_DATABASE_URL }}
+      DST_ENDPOINT: ${{ secrets.HYPERFLUID_DB_ENDPOINT }}
       PGIMG: postgres:17-alpine
     steps:
       - name: Vérifier les secrets
@@ -41,9 +42,13 @@ jobs:
           d = json.load(sys.stdin)
           url = d.get("database-url") or d.get("database_url")
           if not url:
+              import os
               host = d.get("host"); port = d.get("port")
+              ep = os.environ.get("DST_ENDPOINT", "").strip()
+              if ep:
+                  host, port = ep.rsplit(":", 1)
               if not host or not port:
-                  sys.exit("Bloc JSON sans adresse publique (host/port) : accès public désactivé ?")
+                  sys.exit("Adresse publique inconnue : créer le secret HYPERFLUID_DB_ENDPOINT (IP:port du Public Endpoint)")
               url = "postgres://%s:%s@%s:%s/%s" % (u.quote(d["username"], safe=""), u.quote(d["password"], safe=""), host, port, d["database"])
           print(url)')
               echo "::add-mask::$URL"
