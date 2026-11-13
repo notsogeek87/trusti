@@ -1,4 +1,4 @@
 Nouveautés :
 • Liens « Confidentialité » et « Mentions légales » en bas de la page « À propos ».
-• Politique de confidentialité mise à jour : application et données hébergées en France par Hyperfluid.
+• Politique de confidentialité mise à jour : application et données hébergées par Hyperfluid, solution française.
 • Les liens de partage utilisent la nouvelle adresse app.trusti-score.eu.
