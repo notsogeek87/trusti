@@ -54,7 +54,7 @@ public class GradeChangeWorker extends Worker {
 
     private static final String WORK_NAME = "grade_change_alerts";
     private static final String CHANNEL_ID = "grade_changes";
-    private static final String DEFAULT_API_URL = "https://trusti-alpha.vercel.app/api";
+    private static final String DEFAULT_API_URL = "https://api.trusti-score.eu/api";
     private static final String KEY_ENABLED = "enabled";
     private static final String KEY_API_URL = "apiUrl";
     private static final String KEY_TRACKED = "tracked";

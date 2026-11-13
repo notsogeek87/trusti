@@ -1,0 +1,6 @@
+# Image exécutée par l'application « trusti » sur Hyperfluid.
+# Hyperfluid ne construit pas d'image : la CI la publie sur ghcr.io.
+# Suivi par tags (hyperfluid-vX.Y.Z) : {git_version} = version du tag Git.
+[containers.trusti.image]
+repository = "ghcr.io/notsogeek87/trusti"
+tag        = "{git_version}"

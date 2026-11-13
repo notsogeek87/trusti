@@ -1,7 +1,8 @@
 /**
- * Connexion Neon (PostgreSQL), partagée par tous les modules de server/database/postgres.
+ * Connexion PostgreSQL, partagée par tous les modules de server/database/postgres.
+ * Le choix du driver (Neon pour Vercel, pg pour Hyperfluid ou un Postgres classique)
+ * est fait dans ../sql.js selon DATABASE_URL.
  */
-import { neon } from '@neondatabase/serverless';
 
 // Charger .env en développement local
 if (process.env.NODE_ENV !== 'production') {
@@ -13,5 +14,4 @@ if (process.env.NODE_ENV !== 'production') {
   }
 }
 
-
-export const sql = neon(process.env.DATABASE_URL);
+export { default as sql } from '../sql.js';

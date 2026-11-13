@@ -2,6 +2,7 @@ import React from 'react';
 import { ShieldCheck, ArrowRight, Lock, Globe, Eye, CheckCircle, BookOpen, X, Building2 } from 'lucide-react';
 import { GRADE_INFO } from '../constants/grades';
 import { STANDALONE_URLS } from '../utils/standalonePage';
+import HostingCredit from './ui/HostingCredit';
 
 /**
  * Landing Page affichée uniquement lors de la première visite
@@ -154,6 +155,7 @@ const LandingPage = ({ onClose }) => {
             <p className="text-[11px] text-slate-500 mt-6 italic">
               Basé sur 12 critères : RGPD, Cloud Act, Open Source, Localisation des données, et plus encore.
             </p>
+            <HostingCredit className="mt-2" />
           </div>
         </div>
       </div>

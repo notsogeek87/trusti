@@ -1,0 +1,97 @@
+name: Hyperfluid import db
+# Relance : 2026-11-12T19:20Z
+
+# Copie la base Neon vers le PostgreSQL d'Hyperfluid (pg_dump 17 via Docker).
+# Se lance quand ce fichier est poussé sur la branche hyperfluid.
+# ATTENTION : remplace le contenu de la base cible (--clean --if-exists).
+# Secrets requis : NEON_DATABASE_URL, HYPERFLUID_DATABASE_URL.
+# Le dépôt est public : aucun log ne doit contenir d'URL ni de données.
+on:
+  push:
+    branches: [hyperfluid]
+    paths:
+      - ".github/workflows/hyperfluid-import-db.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    env:
+      SRC: ${{ secrets.NEON_DATABASE_URL }}
+      DST: ${{ secrets.HYPERFLUID_DATABASE_URL }}
+      DST_ENDPOINT: ${{ secrets.HYPERFLUID_DB_ENDPOINT }}
+      PGIMG: postgres:17-alpine
+    steps:
+      - name: Vérifier les secrets
+        run: |
+          [ -n "$SRC" ] || { echo "Secret NEON_DATABASE_URL manquant"; exit 1; }
+          [ -n "$DST" ] || { echo "Secret HYPERFLUID_DATABASE_URL manquant"; exit 1; }
+
+      # HYPERFLUID_DATABASE_URL peut être une adresse postgres://... ou le bloc JSON
+      # « (all fields) » copié depuis la console Hyperfluid : on en tire l'adresse publique.
+      - name: Préparer l'adresse Hyperfluid
+        run: |
+          set -euo pipefail
+          case "$DST" in
+            "{"*)
+              URL=$(printf '%s' "$DST" | python3 -c '
+          import json, sys, urllib.parse as u
+          d = json.load(sys.stdin)
+          url = d.get("database-url") or d.get("database_url")
+          if not url:
+              import os
+              host = d.get("host"); port = d.get("port")
+              ep = os.environ.get("DST_ENDPOINT", "").strip()
+              if ep:
+                  host, port = ep.rsplit(":", 1)
+              if not host or not port:
+                  sys.exit("Adresse publique inconnue : créer le secret HYPERFLUID_DB_ENDPOINT (IP:port du Public Endpoint)")
+              url = "postgres://%s:%s@%s:%s/%s" % (u.quote(d["username"], safe=""), u.quote(d["password"], safe=""), host, port, d["database"])
+          print(url)')
+              echo "::add-mask::$URL"
+              { echo "DST<<EOF_DST"; echo "$URL"; echo "EOF_DST"; } >> "$GITHUB_ENV"
+              echo "Adresse construite depuis le bloc JSON"
+              ;;
+            *) echo "Adresse fournie directement" ;;
+          esac
+
+      - name: Exporter Neon
+        run: |
+          set -euo pipefail
+          docker run --rm -e URL="$SRC" "$PGIMG" sh -c 'pg_dump "$URL" --no-owner --no-acl --clean --if-exists' > "$RUNNER_TEMP/dump.sql"
+          echo "Export terminé ($(wc -c < "$RUNNER_TEMP/dump.sql") octets)"
+
+      - name: Importer dans Hyperfluid
+        run: |
+          set -uo pipefail
+          # Test de connexion d'abord, message d'erreur affiché sans adresse ni identifiants
+          if ! docker run --rm -e URL="$DST" "$PGIMG" sh -c 'psql "$URL" -Atq -c "select 1"' > "$RUNNER_TEMP/conn.log" 2>&1; then
+            echo "Connexion à Hyperfluid impossible :"
+            sed -E 's#[a-z]+://[^ ]+#<url>#g; s/[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/<ip>/g; s/port [0-9]+/port <port>/g; s/"[^"]*"/"…"/g' "$RUNNER_TEMP/conn.log" | cut -c1-200
+            exit 2
+          fi
+          echo "Connexion OK"
+          docker run --rm -i -e URL="$DST" "$PGIMG" sh -c 'psql "$URL" -q -v ON_ERROR_STOP=0' \
+            < "$RUNNER_TEMP/dump.sql" > "$RUNNER_TEMP/import.log" 2>&1 || true
+          NERR=$(grep -c "ERROR:" "$RUNNER_TEMP/import.log" || true)
+          echo "Erreurs pendant l'import : $NERR"
+          # Messages d'erreur sans valeurs (le dépôt est public)
+          grep "ERROR:" "$RUNNER_TEMP/import.log" | sed -E 's/\([^)]*\)/(…)/g' | cut -c1-200 | head -20 || true
+          rm -f "$RUNNER_TEMP/dump.sql" "$RUNNER_TEMP/import.log"
+
+      - name: Comparer le nombre de lignes
+        run: |
+          set -uo pipefail
+          q() { docker run --rm -e URL="$1" -e Q="$2" "$PGIMG" sh -c 'psql "$URL" -Atq -c "$Q"'; }
+          TABLES=$(q "$SRC" "select table_name from information_schema.tables where table_schema='public' and table_type='BASE TABLE' order by 1")
+          FAIL=0
+          for t in $TABLES; do
+            a=$(q "$SRC" "select count(*) from \"$t\"")
+            b=$(q "$DST" "select count(*) from \"$t\"" 2>/dev/null || echo "absente")
+            if [ "$a" = "$b" ]; then s="OK"; else s="DIFFERENT"; FAIL=1; fi
+            echo "$t : neon=$a hyperfluid=$b $s"
+          done
+          exit $FAIL
