@@ -1,0 +1,36 @@
+name: Hyperfluid deps (ponctuel)
+
+# Met à jour, dans les limites de package.json, les dépendances de production
+# signalées par le scan de sécurité Hyperfluid, puis commite le package-lock.json.
+on:
+  push:
+    branches: [hyperfluid]
+    paths:
+      - ".github/workflows/hyperfluid-deps.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  deps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - name: Mettre à jour undici, body-parser, qs
+        run: |
+          set -e
+          npm update undici body-parser qs --no-audit --no-fund
+          for p in undici body-parser qs; do
+            echo "$p -> $(node -p "require('./node_modules/$p/package.json').version")"
+          done
+      - name: Commiter le lock
+        run: |
+          set -e
+          if git diff --quiet package-lock.json; then echo "Rien à changer"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore(deps): undici, body-parser, qs à jour (failles signalées par Hyperfluid)"
+          git push

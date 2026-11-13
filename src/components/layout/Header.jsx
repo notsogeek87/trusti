@@ -2,6 +2,7 @@ import React from 'react';
 import { HelpCircle, PieChart, Building2 } from 'lucide-react';
 import { useIsMobile } from '../../contexts/ViewModeContext';
 import { STANDALONE_URLS } from '../../utils/standalonePage';
+import HostingCredit from '../ui/HostingCredit';
 
 const Header = ({
   onOpenStorageManager,
@@ -18,9 +19,13 @@ const Header = ({
             alt="Trusti"
             className="w-11 h-11 object-contain"
           />
-          <h1 className="text-sm font-black tracking-tight text-slate-900 leading-none">
-            Trusti
-          </h1>
+          <div className="flex flex-col min-w-0">
+            <h1 className="text-sm font-black tracking-tight text-slate-900 leading-none">
+              Trusti
+            </h1>
+            {/* Mention d'hébergement (build Hyperfluid uniquement) */}
+            <HostingCredit size="text-[10px]" className="leading-tight mt-1 whitespace-nowrap" />
+          </div>
         </div>
 
         <div className="flex items-center gap-1 md:gap-2 flex-shrink min-w-0">

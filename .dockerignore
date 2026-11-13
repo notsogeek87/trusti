@@ -1,0 +1,15 @@
+node_modules
+dist
+.git
+.github
+.env
+.env.*
+!.env.example
+android
+affiches
+play-store
+docs
+tests
+.vibe
+.claude
+*.log

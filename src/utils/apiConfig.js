@@ -1,14 +1,15 @@
 /**
  * URL de base pour les appels à l'API, unique source de vérité.
  *
- * Web (prod) : chemin relatif, same-origin sur Vercel.
+ * Web (prod) : chemin relatif, same-origin (Vercel ou Hyperfluid).
  * Web (dev) : serveur Express local.
  * Natif (APK Capacitor) : aucun backend co-localisé dans le paquet, donc
- * URL absolue vers le déploiement Vercel réel.
+ * URL absolue sur notre propre domaine api.trusti-score.eu : il pointe vers
+ * l'hébergeur du moment (DNS), sans republier l'app quand on en change.
  */
 import { Capacitor } from '@capacitor/core';
 
-const PROD_API_BASE = 'https://trusti-alpha.vercel.app/api';
+const PROD_API_BASE = 'https://api.trusti-score.eu/api';
 
 export const API_URL = Capacitor.isNativePlatform()
   ? PROD_API_BASE
