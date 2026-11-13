@@ -1,16 +1,14 @@
 name: Hyperfluid image
 
-# À chaque push sur la branche hyperfluid : tests, construction de l'image,
+# À chaque push sur main : tests, construction de l'image,
 # publication sur ghcr.io, puis création automatique du tag hyperfluid-v1.0.N.
 # Hyperfluid suit ces tags (voir hyperfluid.toml) et redéploie tout seul.
 # Un tag hyperfluid-vX.Y.Z poussé à la main reste possible : il construit aussi.
 on:
   push:
-    branches: [hyperfluid]
+    branches: [main]
     paths-ignore:
-      - ".github/workflows/hyperfluid-add-pg.yml"
       - ".github/workflows/hyperfluid-import-db.yml"
-      - ".github/workflows/hyperfluid-deps.yml"
       - "**.md"
     tags:
       - "hyperfluid-v*"
