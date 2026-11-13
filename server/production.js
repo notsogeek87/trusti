@@ -7,6 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
 import { pickDriver, resolveDatabaseUrl } from './database/sql.js';
+import { createRateLimiter, createApiCache } from './protection.js';
 
 import appsHandler from '../api/apps.js';
 import customTrustiAppsHandler from '../api/custom-trusti-apps.js';
@@ -23,7 +24,23 @@ const PORT = Number(process.env.PORT) || 3000;
 
 const app = express();
 app.disable('x-powered-by');
-app.use(express.json());
+// Derrière le proxy d'entrée Hyperfluid : req.ip = adresse du visiteur (dernier saut ajouté).
+app.set('trust proxy', 1);
+app.use(express.json({ limit: '100kb' }));
+
+// Limites de débit par IP : générale, puis plus strictes pour les routes coûteuses ou ouvertes.
+const apiLimiter = createRateLimiter({ windowMs: 60_000, max: 120 });
+const suggestLimiter = createRateLimiter({ windowMs: 10 * 60_000, max: 5 });
+const lookupLimiter = createRateLimiter({ windowMs: 10 * 60_000, max: 20 });
+app.use('/api', apiLimiter.middleware);
+app.post('/api/suggest-tool', suggestLimiter.middleware);
+app.use('/api/lookup-playstore', lookupLimiter.middleware);
+
+// Micro-cache des lectures publiques (30 s), vidé à chaque écriture.
+const apiCache = createApiCache({ ttlMs: 30_000 });
+for (const route of ['/api/apps', '/api/trusti-apps', '/api/top-apps', '/api/star-apps', '/api/custom-trusti-apps']) {
+  app.use(route, apiCache.middleware);
+}
 
 app.all('/api/apps', appsHandler);
 app.all('/api/custom-trusti-apps', customTrustiAppsHandler);
