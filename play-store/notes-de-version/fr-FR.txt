@@ -1,4 +1,4 @@
 Nouveautés :
-• Migrations en cours : une carte plus compacte, et une croix pour abandonner un parcours (annulable, relançable depuis la fiche de l'app).
-• Les apps retirées du catalogue disparaissent aussi de Mes Apps.
-• Améliorations de fiabilité.
+• Liens « Confidentialité » et « Mentions légales » en bas de la page « À propos ».
+• Politique de confidentialité mise à jour : application et données hébergées par Hyperfluid, solution française.
+• Les liens de partage utilisent la nouvelle adresse app.trusti-score.eu.
