@@ -47,7 +47,7 @@ async function getPlayStoreUrlsFromDb() {
   return rows.map(r => r.play_store_url);
 }
 
-const PROD_API_URL = 'https://trusti-alpha.vercel.app/api/apps?onboarding=true';
+const PROD_API_URL = 'https://api.trusti-score.eu/api/apps?onboarding=true';
 
 async function getPlayStoreUrlsFromPublicApi() {
   const res = await fetch(PROD_API_URL);
