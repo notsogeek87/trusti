@@ -1,5 +1,8 @@
 # Déploiement sur Hyperfluid
 
+> **Pour qui / Pourquoi** : pour comprendre comment une modification arrive en
+> production (site web et API), et ce qu'il reste de Vercel.
+
 Le site web et l'API de Trusti tournent dans une seule image Docker, exécutée par
 [Hyperfluid](https://www.hyperfluid.cloud/) avec sa base PostgreSQL interne.
 
@@ -43,4 +46,4 @@ Le projet Vercel `trusti-alpha.vercel.app` ne sert plus qu'à relayer `/api/*`
 vers Hyperfluid (`vercel.json`) pour les anciennes versions de l'APK, qui
 appelaient cette adresse en dur. `.vercelignore` empêche Vercel d'exécuter
 lui-même `api/`. À supprimer (fichiers + projet Vercel) quand ces versions
-auront disparu.
+auront disparu (voir [la décision](../architecture/2026-11-13-bascule-hyperfluid-relais-vercel.md)).
