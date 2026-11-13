@@ -4,3 +4,8 @@ node_modules
 .DS_Store
 dist-ssr
 *.local
+
+# Bascule Hyperfluid (nov. 2026) : l'API n'est plus servie par Vercel.
+# Les appels /api/* sont relayés vers Hyperfluid (rewrites dans vercel.json) ;
+# sans ce fichier, les fonctions api/*.js garderaient la priorité sur le relais.
+/api

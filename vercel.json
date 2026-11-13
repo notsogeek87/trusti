@@ -1,5 +1,11 @@
 {
   "buildCommand": "npm run icons:bundle && npm run build",
   "outputDirectory": "dist",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- src public api server index.html package.json package-lock.json vercel.json tailwind.config.js postcss.config.js"
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- src public api server index.html package.json package-lock.json vercel.json tailwind.config.js postcss.config.js",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://app.trusti-score.eu/api/:path*"
+    }
+  ]
 }
