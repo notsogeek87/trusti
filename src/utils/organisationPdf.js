@@ -69,7 +69,7 @@ export async function buildOrganisationPdf({ orgName, profileLabel, selectedApps
   // En-tête
   doc.setFont('helvetica', 'bold').setFontSize(8).setTextColor(...MUTED);
   doc.text('RAPPORT DE SOUVERAINETÉ NUMÉRIQUE', M, y + 3);
-  doc.setFont('helvetica', 'normal').text('Établi avec Trusti - trusti.lielu.eu', W - M, y + 3, { align: 'right' });
+  doc.setFont('helvetica', 'normal').text('Établi avec Trusti - app.trusti-score.eu', W - M, y + 3, { align: 'right' });
   doc.setFont('helvetica', 'bold').setFontSize(18).setTextColor(...INK);
   const title = doc.splitTextToSize(pdfText(orgName) || 'Parc applicatif de l\'organisation', W - 2 * M);
   doc.text(title, M, y + 11);

@@ -11,7 +11,7 @@
  */
 
 /** Adresse publique du site Trusti. */
-export const PUBLIC_SITE_URL = 'https://trusti.lielu.eu';
+export const PUBLIC_SITE_URL = 'https://app.trusti-score.eu';
 
 /** Paramètre d'URL désignant la fiche d'une app partagée. */
 export const SHARED_APP_PARAM = 'app';

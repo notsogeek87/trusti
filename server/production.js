@@ -28,6 +28,18 @@ app.disable('x-powered-by');
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '100kb' }));
 
+// Anciens domaines : renvoyés vers l'adresse officielle, en gardant le chemin et
+// les paramètres (liens de partage ?app=...). 301 pour la lecture, 308 sinon
+// (garde la méthode et le corps d'un POST).
+const CANONICAL_ORIGIN = 'https://app.trusti-score.eu';
+const LEGACY_HOSTS = new Set(['trusti.lielu.eu']);
+app.use((req, res, next) => {
+  const host = String(req.hostname || '').toLowerCase();
+  if (!LEGACY_HOSTS.has(host)) return next();
+  const code = req.method === 'GET' || req.method === 'HEAD' ? 301 : 308;
+  return res.redirect(code, CANONICAL_ORIGIN + req.originalUrl);
+});
+
 // Limites de débit par IP : générale, puis plus strictes pour les routes coûteuses ou ouvertes.
 const apiLimiter = createRateLimiter({ windowMs: 60_000, max: 120 });
 const suggestLimiter = createRateLimiter({ windowMs: 10 * 60_000, max: 5 });

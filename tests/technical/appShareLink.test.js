@@ -8,7 +8,7 @@ import {
   buildAppShareText,
 } from '../../src/utils/appShareLink.js';
 
-const webLocation = { origin: 'https://trusti.lielu.eu', pathname: '/' };
+const webLocation = { origin: 'https://app.trusti-score.eu', pathname: '/' };
 
 test('APK : la base de partage est toujours le site public', () => {
   assert.equal(
@@ -30,13 +30,13 @@ test('origine non http (file:, capacitor:) : repli sur le site public', () => {
 });
 
 test('lien de fiche app', () => {
-  assert.equal(buildAppShareUrl(42, { location: webLocation }), 'https://trusti.lielu.eu/?app=42');
-  assert.equal(buildAppShareUrl('7', { isNative: true }), 'https://trusti.lielu.eu/?app=7');
+  assert.equal(buildAppShareUrl(42, { location: webLocation }), 'https://app.trusti-score.eu/?app=42');
+  assert.equal(buildAppShareUrl('7', { isNative: true }), 'https://app.trusti-score.eu/?app=7');
 });
 
 test('lecture de l’ID depuis une query string ou une URL complète', () => {
   assert.equal(parseSharedAppId('?app=42'), '42');
-  assert.equal(parseSharedAppId('https://trusti.lielu.eu/?app=42&utm=x'), '42');
+  assert.equal(parseSharedAppId('https://app.trusti-score.eu/?app=42&utm=x'), '42');
   assert.equal(parseSharedAppId(buildAppShareUrl(123, { isNative: true })), '123');
 });
 

@@ -246,7 +246,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
     setTimeout(onClose, 240);
   };
 
-  // Partage de la fiche : lien public https://trusti.lielu.eu/?app=<id>,
+  // Partage de la fiche : lien public https://app.trusti-score.eu/?app=<id>,
   // qui ouvre cette fiche sur le web ou dans l'APK (menu de partage natif).
   const handleShare = () => {
     const url = buildAppShareUrl(app.id, {
