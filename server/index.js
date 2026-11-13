@@ -4,7 +4,7 @@ dotenv.config();
 
 import express from 'express';
 
-// Serveur de dev local : monte directement les fonctions serverless Vercel
+// Serveur de dev local : monte directement les handlers de l'API
 // (api/*.js) comme routes Express. Elles sont l'unique source de vérité :
 // dupliquer leur logique ici ferait diverger dev et prod à chaque évolution
 // (c'est déjà arrivé — le rate-limiting OTP n'existait que d'un côté).

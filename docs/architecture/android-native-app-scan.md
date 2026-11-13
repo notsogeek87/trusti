@@ -1,6 +1,6 @@
 # App Android native — scan automatique des apps installées
 
-Trusti reste un site web (React + Vite, servi sur Vercel). L'app Android
+Trusti reste un site web (React + Vite, servi par Hyperfluid). L'app Android
 ([Capacitor](https://capacitorjs.com), `capacitor.config.json`, `android/`,
 CI `.github/workflows/android.yml`) qui empaquette ce même site en APK existe
 déjà. Ce document décrit la couche ajoutée **par-dessus cet empaquetage**
@@ -50,7 +50,7 @@ android/                                  Projet Android natif (Capacitor)
 scripts/generate-android-catalog.js       Génère les 2 fichiers ci-dessus depuis la DB (ou apps.json en secours)
 
 src/
-  utils/apiConfig.js                      API_URL — bascule sur l'URL Vercel absolue en natif (pas de backend co-localisé dans l'APK)
+  utils/apiConfig.js                      API_URL — bascule sur l'URL absolue api.trusti-score.eu en natif (pas de backend co-localisé dans l'APK)
   utils/platform.js                       isNativeAndroid (Capacitor.isNativePlatform() && platform === 'android')
   native/InstalledApps.js                 Wrapper JS du plugin Capacitor
   native/AppUpdate.js                     Wrapper JS du plugin de mise à jour (voir ../guides/android-auto-update.md)

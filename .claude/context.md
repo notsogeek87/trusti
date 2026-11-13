@@ -10,10 +10,10 @@ Comparateur d'applications privacy-first. Évalue la souveraineté numérique de
 | Styling | Tailwind CSS | 3.4 |
 | Icônes | Lucide React | 0.344 |
 | Backend dev | Express | 5.2 |
-| Backend prod | Vercel serverless (`/api/`) | — |
+| Backend prod | Express (`server/production.js`) dans l'image Hyperfluid | — |
 | Base de données | PostgreSQL via Neon | — |
 | Email | Brevo (principal) + Resend (backup) | — |
-| Déploiement | Vercel → branch `main` | — |
+| Déploiement | Hyperfluid (image ghcr.io) → branch `main` | — |
 | Android | Capacitor (wrap du build Vite) | 8.x |
 
 ## Commandes
@@ -21,7 +21,6 @@ Comparateur d'applications privacy-first. Évalue la souveraineté numérique de
 ```bash
 npm run dev:all      # Frontend (5173) + backend (3001) simultanément
 npm run build        # Build Vite → /dist
-npm run vercel-build # Build production Vercel
 npm run cap:sync     # Build Vite puis cap sync android (avant tout build Gradle)
 ```
 
@@ -56,7 +55,7 @@ src/
     ├── apiService.js
     └── shareUtils.js
 
-api/                           # Vercel serverless (production)
+api/                           # Handlers de l'API (montés par server/)
 ├── apps.js                    # CRUD apps
 ├── send-magic-link.js         # Auth email Brevo
 ├── verify-token.js            # Validation token
@@ -76,7 +75,7 @@ server/
 DATABASE_URL=postgresql://...@neon.tech/...?sslmode=require
 BREVO_API_KEY=...
 BREVO_FROM_EMAIL=noreply@...
-FRONTEND_URL=https://trusti.vercel.app
+FRONTEND_URL=https://app.trusti-score.eu
 NODE_ENV=development
 ```
 
@@ -138,9 +137,9 @@ manuelle web) en mode purement additif, sans repasser par le welcome modal.
 - **Hooks** : préfixe `use`, custom hooks dans `/hooks/`
 - **Constantes** : UPPER_SNAKE_CASE dans `/constants/`
 - **API_URL** : centralisé dans `src/utils/apiConfig.js` (unique source de vérité,
-  ne pas redéclarer ailleurs) — `/api` en web prod (same-origin Vercel),
+  ne pas redéclarer ailleurs) — `/api` en web prod (same-origin Hyperfluid),
   `http://localhost:3001/api` en dev, et une URL **absolue**
-  (`https://trusti-alpha.vercel.app/api`) dès que `Capacitor.isNativePlatform()`
+  (`https://api.trusti-score.eu/api`) dès que `Capacitor.isNativePlatform()`
   est vrai (APK), puisque le paquet natif n'a aucun backend co-localisé
 - **Pas de router** : navigation par `activeTab` state dans `App.jsx`
 - **Mobile-first** : max-width `max-w-md`, bottom nav fixe, `scrollbar-hide`
@@ -193,5 +192,5 @@ régénérer à la main.
 ## Workflow git
 
 - Branche de dev : `claude/website-design-ux-review-HLt8T`
-- Production : `main` → Vercel autodeploy
+- Production : `main` → image Hyperfluid (workflow `hyperfluid-image.yml`)
 - Toujours merger sur `main` après validation

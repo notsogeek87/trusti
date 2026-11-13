@@ -50,7 +50,7 @@ côté admin. Réduit la maintenance manuelle du catalogue (scripts ponctuels à
 
 ### 5. Mode hors-ligne partiel
 Cache local du catalogue (IndexedDB ou fichier généré) pour consulter le scan sans
-réseau. Réduit la dépendance à Vercel/Neon, cohérent avec l'argument souveraineté.
+réseau. Réduit la dépendance au backend, cohérent avec l'argument souveraineté.
 
 ### 6. Portage
 Extension navigateur (note du site visité), version iOS, scanner de services web

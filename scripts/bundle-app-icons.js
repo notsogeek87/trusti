@@ -2,7 +2,7 @@
 /**
  * Copie les icônes du catalogue sur le domaine Trusti (public/app-icons/,
  * copié dans dist/). Utilisé :
- *  - au build Vercel (vercel.json) : le site web sert les icônes depuis son
+ *  - au build de l'image Hyperfluid (workflow hyperfluid-image) : le site web sert les icônes depuis son
  *    propre domaine, ce qui évite les blocages des réseaux d'entreprise
  *    (googleusercontent.com, cdn.jsdelivr.net…) ;
  *  - par `npm run cap:sync` : les icônes sont embarquées dans l'APK.
@@ -22,8 +22,8 @@ import { fileURLToPath } from 'url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = path.join(ROOT, 'public/app-icons');
-// Source de la liste des icônes : le site Vercel par défaut, ou un autre site Trusti
-// (ex. Hyperfluid) via la variable ICONS_SOURCE_URL.
+// Source de la liste des icônes : l'API de production par défaut, ou un autre site Trusti
+// via la variable ICONS_SOURCE_URL.
 const API_URL =
   process.env.ICONS_SOURCE_URL || 'https://api.trusti-score.eu/api/apps?onboarding=true';
 const CONCURRENCY = 16;

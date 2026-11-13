@@ -5,7 +5,9 @@ node_modules
 dist-ssr
 *.local
 
-# Bascule Hyperfluid (nov. 2026) : l'API n'est plus servie par Vercel.
+# RELAIS TEMPORAIRE (nov. 2026) : le projet Vercel ne sert plus qu'à relayer vers
+# Hyperfluid les appels des anciennes versions de l'APK (trusti-alpha.vercel.app/api).
+# Supprimer ce fichier, vercel.json et le projet Vercel quand ces versions auront disparu.
 # Les appels /api/* sont relayés vers Hyperfluid (rewrites dans vercel.json) ;
 # sans ce fichier, les fonctions api/*.js garderaient la priorité sur le relais.
 /api

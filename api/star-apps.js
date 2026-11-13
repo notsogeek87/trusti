@@ -1,4 +1,4 @@
-// Vercel Serverless Function - Star Apps Management
+// Route API - Star Apps Management
 import dbService from '../server/database/service-postgres.js';
 import { isAuthorizedAdminRequest } from '../server/adminToken.js';
 
@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key, Authorization');
 
-  // Cache CDN Vercel : les installs/lancements simultanés sont servis par l'edge
+  // Cache CDN/proxy : les installs/lancements simultanés sont servis par l'edge
   // au lieu de relancer une fonction + une requête Neon à chaque fois.
   if (req.method === 'GET') {
     res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600');

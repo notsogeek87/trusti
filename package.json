@@ -25,8 +25,7 @@
     "build": "vite build",
     "vibe:analyze": "node scripts/vibe-analyze.js",
     "vibe:check": "node scripts/vibe-check.js",
-    "preview": "vite preview",
-    "vercel-build": "vite build"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.3",

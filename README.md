@@ -107,7 +107,6 @@ Côté serveur, `server/database/service-postgres.js` est la porte d'entrée uni
 
 ### Documentation
 
-- **[docs/guides/postgres-migration.md](./docs/guides/postgres-migration.md)** - Guide de migration vers PostgreSQL
 
 ## 📝 Bonnes Pratiques Implémentées
 
@@ -123,13 +122,17 @@ Côté serveur, `server/database/service-postgres.js` est la porte d'entrée uni
 
 ## 🚢 Déploiement
 
-L'application est déployée sur **Vercel**.
+L'application (site web + API) est déployée sur **Hyperfluid** : le workflow
+`.github/workflows/hyperfluid-image.yml` publie l'image Docker sur ghcr.io à
+chaque push sur `main`, et Hyperfluid la redéploie (voir `hyperfluid.toml`).
+
+Un projet Vercel (`trusti-alpha.vercel.app`) est conservé **temporairement** : il ne fait que relayer `/api/*` vers Hyperfluid (`vercel.json`, `.vercelignore`) pour les anciennes versions de l'APK. À supprimer quand elles auront disparu.
 
 ### Variables d'environnement requises
 
 ```env
 DATABASE_URL=postgresql://...
-FRONTEND_URL=https://votreapp.vercel.app
+FRONTEND_URL=https://app.trusti-score.eu
 API_KEY=cle-pour-les-integrations-externes
 NODE_ENV=production
 ```
@@ -147,8 +150,8 @@ Faire tourner la totalité de la pile (web + API + app Android) demande donc
 deux services externes, tous requis :
 
 - une base **PostgreSQL** sur [Neon](https://neon.tech) (`DATABASE_URL`) ;
-- un déploiement **Vercel** (ou équivalent Node compatible avec `api/` et
-  `server/`) exposant ces routes à l'URL renseignée dans
+- un serveur Node exécutant l'image Docker (`Dockerfile`, `server/production.js`)
+  et exposant ces routes à l'URL renseignée dans
   `src/utils/apiConfig.js` (voir section Android ci-dessous).
 
 Sans ces trois éléments en place, ni le site web ni l'app Android ne peuvent
@@ -165,7 +168,7 @@ de développement (`npm run cap:sync`, `npm run android:open`).
 
 **⚠️ Ce n'est pas une app hors-ligne.** Le bundle embarqué dans l'APK ne
 contient aucune donnée : au runtime, la WebView interroge directement le
-backend Vercel de production (`https://trusti-alpha.vercel.app/api`, codé en
+backend de production (`https://api.trusti-score.eu/api`, codé en
 dur dans `src/utils/apiConfig.js` pour la cible native), lui-même dépendant
 de Neon (PostgreSQL). L'app ne fonctionne donc pleinement
 que tant que ce backend, non open et centralisé, reste disponible.

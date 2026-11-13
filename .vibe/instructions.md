@@ -4,9 +4,9 @@
 
 Trusti est un **comparateur d'applications privacy-first** qui évalue la souveraineté numérique des apps avec un système de notes **A-E** (A = Souverain & Privé, E = Critique).
 
-**Architecture** : React 18 + Vite (frontend) | Express/Vercel Serverless (backend) | PostgreSQL via Neon (DB) | Capacitor 8 (Android)
+**Architecture** : React 18 + Vite (frontend) | Express (backend, image Hyperfluid) | PostgreSQL via Neon (DB) | Capacitor 8 (Android)
 
-**Déploiement** : Vercel (web) + GitHub Actions (APK Android)
+**Déploiement** : Hyperfluid (web + API) + GitHub Actions (APK Android)
 
 ---
 
@@ -30,7 +30,7 @@ trusti/
 │   └── styles/
 │       └── index.css             # Tailwind + styles globaux
 │
-├── api/                          # ✅ Routes serverless Vercel (PRODUCTION)
+├── api/                          # ✅ Handlers de l'API (PRODUCTION, montés par server/)
 │   ├── apps.js                   # CRUD applications
 │   ├── send-magic-link.js        # Auth email (Brevo)
 │   ├── verify-token.js           # Validation token
@@ -87,7 +87,7 @@ npm run android:generate-catalog  # Génère le catalogue pour AndroidManifest
 ### Base de données
 ```bash
 # Note: Les scripts db:init et db:backup sont documentés mais pas dans package.json
-# Voir docs/guides/postgres-migration.md pour la migration
+# Voir docs/guides/deployment.md pour la base de données
 ```
 
 ### Tests
@@ -97,7 +97,7 @@ npm test                 # Tests unitaires (tests/technical/**/*.test.js)
 
 ### Déploiement
 ```bash
-# Vercel déploie automatiquement main via GitHub integration
+# Hyperfluid redéploie main via le workflow hyperfluid-image.yml
 # Pour Android : push sur main/staging déclenche .github/workflows/android.yml
 ```
 
@@ -115,9 +115,9 @@ npm test                 # Tests unitaires (tests/technical/**/*.test.js)
 
 ### 🟡 Attention - À faire avec précaution
 - **⚠️ Ne pas dupliquer `API_URL`** - **TOUJOURS** utiliser `src/utils/apiConfig.js` (source unique de vérité)
-  - Web prod : `/api` (same-origin Vercel)
+  - Web prod : `/api` (same-origin Hyperfluid)
   - Dev : `http://localhost:3001/api`
-  - APK natif : `https://trusti-alpha.vercel.app/api` (URL absolue)
+  - APK natif : `https://api.trusti-score.eu/api` (URL absolue)
 - **⚠️ Ne pas casser le build Capacitor** - `android/` dépend de `dist/` généré par Vite
 - **⚠️ `App.jsx` ne fait qu'assembler** - Mettre toute nouvelle logique dans un hook ou un composant
 - **⚠️ Les tokens magic link expirent en 15 min**
@@ -187,7 +187,7 @@ Rien en cours : `App.jsx`, `useAppManagement.js`, `server/index.js` et `service-
 - **`capacitor.config.json`** - Configuration Capacitor
 - **`android/`** - Projet natif généré par Capacitor
 - **`assets/`** (racine) - Sources pour les icônes Android (générées via `@capacitor/assets`)
-- **Note** : L'APK n'est pas hors-ligne, il dépend du backend Vercel en production
+- **Note** : L'APK n'est pas hors-ligne, il dépend du backend de production (Hyperfluid)
 
 ---
 

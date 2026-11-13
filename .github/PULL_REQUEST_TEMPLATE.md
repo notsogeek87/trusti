@@ -37,7 +37,7 @@ Exemples :
 ### Build & Déploiement
 - [ ] `npm run build` fonctionne ✅
 - [ ] Si frontend modifié : `npm run cap:sync` testé ✅
-- [ ] Le déploiement Vercel ne sera pas impacté
+- [ ] Le déploiement Hyperfluid (image Docker) ne sera pas impacté
 - [ ] Le build Android ne sera pas impacté (si applicable)
 
 ### Documentation

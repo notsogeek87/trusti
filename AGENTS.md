@@ -134,7 +134,7 @@ src/
 ├── utils/               # Fonctions utilitaires
 └── styles/              # Styles (Tailwind uniquement)
 
-api/                    # Routes serverless Vercel
+api/                    # Handlers de l'API (montés par server/)
 ├── *.js                # Une route = un fichier
 
 server/                 # Backend Express (dev)

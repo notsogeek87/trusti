@@ -23,8 +23,7 @@ démarrage rapide.
 
 ## 📘 Guides
 
-- [Déploiement Vercel + PostgreSQL](guides/deployment.md)
-- [Migration vers PostgreSQL (Neon)](guides/postgres-migration.md)
+- [Déploiement sur Hyperfluid](guides/deployment.md)
 - [Gestion automatique des icônes](guides/icons-management.md)
 - [Publication sur le Play Store](guides/play-store-publishing.md)
 - [Mises à jour automatiques de l'app Android](guides/android-auto-update.md)

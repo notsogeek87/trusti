@@ -12,7 +12,7 @@ import {
 } from '../../utils/appIconLoader';
 
 // Icônes copiées sur le domaine Trusti (scripts/bundle-app-icons.js), sur le
-// web (build Vercel) comme dans l'APK. Les réseaux d'entreprise bloquent souvent
+// web comme dans l'APK. Les réseaux d'entreprise bloquent souvent
 // les domaines d'origine (googleusercontent.com, jsdelivr…) : servir l'icône
 // depuis notre domaine évite ce blocage.
 // Le manifeste associe URL distante -> fichier local ; une URL modifiée en base
