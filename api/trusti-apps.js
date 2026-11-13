@@ -1,4 +1,4 @@
-// Vercel Serverless Function - TrustiApps
+// Route API - TrustiApps
 // Liste d'applications recommandées par siksik.org
 // Source: https://siksik.org/applications-alternatives-pour-android-plus-respectueuses-de-la-vie-privee/
 
@@ -189,7 +189,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 
-  // Cache CDN Vercel : les installs/lancements simultanés sont servis par l'edge
+  // Cache CDN/proxy : les installs/lancements simultanés sont servis par l'edge
   // au lieu de relancer une fonction + une requête Neon à chaque fois.
   if (req.method === 'GET') {
     res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');

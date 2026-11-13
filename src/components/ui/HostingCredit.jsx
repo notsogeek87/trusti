@@ -3,7 +3,7 @@ import React from 'react';
 /**
  * Mention d'hébergement, affichée seulement quand le build la demande
  * (VITE_HOSTED_BY=hyperfluid, posé dans le Dockerfile de l'image Hyperfluid).
- * Le build Vercel n'a pas cette variable : rien ne s'affiche.
+ * Sans cette variable (build local, relais Vercel temporaire), rien ne s'affiche.
  */
 const HOSTS = {
   hyperfluid: {

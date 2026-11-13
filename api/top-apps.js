@@ -1,4 +1,4 @@
-// Vercel Serverless Function
+// Route API
 import gplay from 'google-play-scraper';
 
 // Helper function to get category color
@@ -72,14 +72,14 @@ const findAlternative = (appId) => {
   return alternatives[appId] || null;
 };
 
-// Vercel Serverless Function Handler
+// Handler de la route
 export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
   
-  // Cache CDN Vercel : les installs/lancements simultanés sont servis par l'edge
+  // Cache CDN/proxy : les installs/lancements simultanés sont servis par l'edge
   // au lieu de relancer une fonction + une requête Neon à chaque fois.
   if (req.method === 'GET') {
     res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=86400');

@@ -1,7 +1,7 @@
 // Protections de l'API pour le serveur conteneur (Hyperfluid) :
 // - limite de débit par adresse IP (fenêtre glissante simple, en mémoire) ;
 // - micro-cache des lectures publiques (GET), vidé à chaque écriture.
-// Vercel a son propre cache CDN : ces protections ne concernent que server/production.js.
+// Ces protections ne concernent que server/production.js.
 // Un seul pod aujourd'hui : la mémoire locale suffit (à revoir si plusieurs réplicas).
 
 /**

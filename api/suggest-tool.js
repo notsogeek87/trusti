@@ -1,4 +1,4 @@
-// Vercel Serverless Function - suggestion d'un outil absent du catalogue
+// Route API - suggestion d'un outil absent du catalogue
 // (bouton « Il manque un outil » de la page ?organisation). Publique, sans
 // compte : aucune donnée personnelle n'est demandée ni conservée.
 import dbService from '../server/database/service-postgres.js';

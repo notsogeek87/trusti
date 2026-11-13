@@ -1,16 +1,16 @@
 # Référence API
 
 Pour qui / Pourquoi : point d'entrée pour tout développeur qui doit consommer
-ou modifier une route serverless Vercel du projet. Les fonctions vivent dans
-`api/` (une fonction = un fichier = une route, convention Vercel) et
+ou modifier une route de l'API du projet. Les handlers vivent dans
+`api/` (un fichier = une route) et
 s'appuient sur `server/database/service-postgres.js` pour l'accès aux
 données (façade ; les requêtes sont rangées par domaine dans
 `server/database/postgres/`, voir
-[le découpage par domaine](../architecture/2026-11-10-decoupage-par-domaine.md)). Aucun routage custom : `vercel.json` ne fait que pointer
-`buildCommand`/`outputDirectory`, donc `api/apps.js` sert automatiquement
+[le découpage par domaine](../architecture/2026-11-10-decoupage-par-domaine.md)). Les handlers sont montés comme routes Express par `server/production.js`
+(production, image Hyperfluid) et `server/index.js` (dev) : `api/apps.js` sert
 `/api/apps`, etc.
 
-En local, ces mêmes fonctions ne tournent pas nativement — voir
+En local, voir
 `npm run server` / `npm run dev:all` dans [../guides/deployment.md](../guides/deployment.md).
 
 ## Apps
@@ -113,8 +113,7 @@ configurée, elles répondent `401`. Les `GET` du catalogue restent publics.
 - Toutes les fonctions gèrent CORS elles-mêmes (`Access-Control-Allow-*` +
   réponse `200` sur `OPTIONS`) — il n'y a pas de middleware CORS partagé.
 - En développement, un serveur Express équivalent existe dans
-  `server/index.js` (`npm run server`) pour ne pas dépendre des fonctions
-  serverless Vercel en local.
+  `server/index.js` (`npm run server`) qui monte les mêmes handlers.
 
 ## `POST /api/suggest-tool`
 

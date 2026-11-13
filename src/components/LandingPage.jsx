@@ -156,6 +156,27 @@ const LandingPage = ({ onClose }) => {
               Basé sur 12 critères : RGPD, Cloud Act, Open Source, Localisation des données, et plus encore.
             </p>
             <HostingCredit className="mt-2" />
+
+            {/* Pages légales : URL absolues, pour qu'elles s'ouvrent dans le navigateur depuis l'APK */}
+            <nav aria-label="Informations légales" className="mt-3 flex items-center justify-center gap-3 text-[11px] text-slate-500">
+              <a
+                href="https://app.trusti-score.eu/privacy-policy.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline decoration-slate-600 underline-offset-2 hover:text-slate-300"
+              >
+                Confidentialité
+              </a>
+              <span aria-hidden="true">·</span>
+              <a
+                href="https://trusti-score.eu/mentions-legales.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline decoration-slate-600 underline-offset-2 hover:text-slate-300"
+              >
+                Mentions légales
+              </a>
+            </nav>
           </div>
         </div>
       </div>

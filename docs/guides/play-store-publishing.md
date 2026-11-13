@@ -74,8 +74,7 @@ même contrainte que swipernews a rencontrée.
      (au moins 2, format téléphone), icône 512×512, image de présentation
      (feature graphic) 1024×500.
    - **Politique de confidentialité** : une URL publique est obligatoire
-     (Trusti étant déployé sur Vercel, une page `/privacy` ou équivalent
-     hébergée dessus convient).
+     (`/privacy-policy.html`, servie par le site sur Hyperfluid).
    - **Formulaire "Sécurité des données"** (Data safety) : quelles données
      Trusti collecte : aucune donnée personnelle envoyée aux serveurs (plus de compte ni d'e-mail
      depuis le 2026-10-11) ; à compléter selon les autorisations du manifeste (voir la politique de confidentialité).

@@ -54,7 +54,7 @@ logSection('INFORMATIONS GÉNÉRALES');
 logItem('Nom', 'Trusti');
 logItem('Description', 'Comparateur d\'applications privacy-first (notes A-E)');
 logItem('Stack', 'React 18 + Vite + Tailwind CSS + Express + PostgreSQL (Neon) + Capacitor 8');
-logItem('Déploiement', 'Vercel (web) + GitHub Actions (APK Android)');
+logItem('Déploiement', 'Hyperfluid (web + API) + GitHub Actions (APK Android)');
 logItem('Licence', 'GPL-3.0-or-later');
 
 // Structure importante
@@ -67,7 +67,7 @@ const structure = [
   { path: 'src/hooks/', lines: 'N/A', status: 'Hooks personnalisés (use*.js)', color: colors.cyan },
   { path: 'src/constants/', lines: 'N/A', status: 'Constantes (UPPER_SNAKE_CASE)', color: colors.cyan },
   { path: 'src/utils/', lines: 'N/A', status: 'Fonctions utilitaires', color: colors.cyan },
-  { path: 'api/*.js', lines: 'N/A', status: 'Routes serverless Vercel (PROD)', color: colors.green },
+  { path: 'api/*.js', lines: 'N/A', status: 'Routes API (PROD)', color: colors.green },
   { path: 'server/index.js', lines: '~740', status: 'CRITIQUE - À découper', color: colors.red },
   { path: 'android/', lines: 'N/A', status: 'Projet Capacitor (Android)', color: colors.cyan },
   { path: 'docs/', lines: 'N/A', status: 'Documentation complète', color: colors.cyan }

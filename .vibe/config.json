@@ -6,8 +6,8 @@
     "license": "GPL-3.0-or-later",
     "primaryLanguage": "javascript",
     "framework": "react",
-    "architecture": "React + Vite frontend, Express/Vercel backend, PostgreSQL (Neon) database, Capacitor Android",
-    "deployment": "Vercel (web), GitHub Actions (APK)"
+    "architecture": "React + Vite frontend, Express backend (Hyperfluid), PostgreSQL (Neon) database, Capacitor Android",
+    "deployment": "Hyperfluid (web + API), GitHub Actions (APK)"
   },
   "workflow": {
     "preferredBranchStrategy": "feature-branch",
@@ -147,7 +147,7 @@
     "mediumPriority": [
       {
         "path": "api/*.js",
-        "description": "Routes serverless Vercel (production)",
+        "description": "Handlers de l'API (production)",
         "action": "Valider avant modification"
       },
       {
@@ -236,7 +236,6 @@
     ],
     "guides": [
       "docs/guides/deployment.md",
-      "docs/guides/postgres-migration.md",
       "docs/guides/icons-management.md",
       "docs/guides/play-store-publishing.md",
       "docs/guides/android-auto-update.md",

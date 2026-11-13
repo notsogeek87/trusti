@@ -1,5 +1,5 @@
 // Serveur de production (Hyperfluid / conteneur) : sert le build Vite (dist/)
-// et monte les mêmes handlers api/*.js que Vercel (source unique de vérité).
+// et monte les handlers api/*.js (source unique de vérité, partagée avec server/index.js).
 import * as dotenv from 'dotenv';
 dotenv.config();
 

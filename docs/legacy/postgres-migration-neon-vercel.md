@@ -1,5 +1,8 @@
 # Migration vers PostgreSQL (Neon) pour Vercel
 
+> **Historique** : Trusti n'est plus hébergé sur Vercel ni Neon (voir
+> [le guide de déploiement](../guides/deployment.md)). Conservé pour mémoire.
+
 Ce guide explique comment migrer de la base de données JSON locale vers PostgreSQL (Neon) pour le déploiement sur Vercel.
 
 ## Pourquoi PostgreSQL ?

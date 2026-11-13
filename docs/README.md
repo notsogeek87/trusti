@@ -16,6 +16,7 @@ démarrage rapide.
 - [2026-10-11 : audit de sécurité](architecture/2026-10-11-audit-securite.md)
 - [2026-10-11 : Tailwind compilé au build, fin du CDN](architecture/2026-10-11-tailwind-compile-au-build.md)
 - [2026-11-10 : découpage par domaine (App.jsx, hooks, accès aux données) — où mettre quoi](architecture/2026-11-10-decoupage-par-domaine.md)
+- [2026-11-13 : bascule sur Hyperfluid, relais Vercel temporaire](architecture/2026-11-13-bascule-hyperfluid-relais-vercel.md)
 
 ## 📡 API
 
@@ -23,8 +24,7 @@ démarrage rapide.
 
 ## 📘 Guides
 
-- [Déploiement Vercel + PostgreSQL](guides/deployment.md)
-- [Migration vers PostgreSQL (Neon)](guides/postgres-migration.md)
+- [Déploiement sur Hyperfluid](guides/deployment.md)
 - [Gestion automatique des icônes](guides/icons-management.md)
 - [Publication sur le Play Store](guides/play-store-publishing.md)
 - [Mises à jour automatiques de l'app Android](guides/android-auto-update.md)
@@ -41,3 +41,4 @@ Documentation obsolète mais conservée pour l'historique :
 - [Audit des données en dur (18/02/2026)](legacy/donnees-en-dur-audit.md)
 - [Ancienne authentification par Magic Link (Resend)](legacy/magic-link-resend.md)
 - [Ancienne authentification par code OTP (Brevo)](legacy/otp-brevo-authentication.md) — supprimée le 2026-10-11
+- [Migration vers PostgreSQL (Neon) pour Vercel](legacy/postgres-migration-neon-vercel.md) — remplacée par Hyperfluid le 2026-11-13

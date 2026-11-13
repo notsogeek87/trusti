@@ -152,7 +152,7 @@ défaut. Pour les trois pages autonomes, `src/main.jsx` écoute l'événement Ca
   distinctes en attente (réponse 429 au-delà) pour borner la table en cas de spam.
 - Relever les suggestions : `SELECT name, website, comment, count, last_at FROM tool_suggestions
   WHERE status = 'new' ORDER BY count DESC, last_at DESC`. Pas encore d'alerte automatique (le
-  secret du webhook n8n n'est pas configuré sur Vercel).
+  secret du webhook n8n n'est pas configuré sur Hyperfluid).
 
 ## Stockage et exports
 

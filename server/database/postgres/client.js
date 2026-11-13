@@ -1,6 +1,6 @@
 /**
  * Connexion PostgreSQL, partagée par tous les modules de server/database/postgres.
- * Le choix du driver (Neon pour Vercel, pg pour Hyperfluid ou un Postgres classique)
+ * Le choix du driver (pg pour Hyperfluid ou un Postgres classique, driver Neon si l'adresse est chez Neon)
  * est fait dans ../sql.js selon DATABASE_URL.
  */
 

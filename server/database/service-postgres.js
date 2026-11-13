@@ -1,5 +1,5 @@
 /**
- * Service de base de données PostgreSQL via Neon pour Vercel.
+ * Service de base de données PostgreSQL.
  *
  * Façade : le code est réparti par domaine dans server/database/postgres/
  * (lecture, écriture, relations, données associées, mise en forme).

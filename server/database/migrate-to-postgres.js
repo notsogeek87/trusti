@@ -2,7 +2,7 @@
  * Script de migration des données JSON vers PostgreSQL (Neon)
  * 
  * Ce script lit les données depuis la BDD JSON et les importe dans Postgres
- * Utiliser ce script AVANT le premier déploiement sur Vercel
+ * Script historique de migration JSON → PostgreSQL
  * 
  * Utilisation:
  * 1. Créer une base de données Postgres sur Neon (https://neon.tech)
@@ -313,10 +313,7 @@ async function migrate() {
     console.log('═══════════════════════════════════════');
     console.log('✅ MIGRATION TERMINÉE AVEC SUCCÈS');
     console.log('═══════════════════════════════════════\n');
-    console.log('🎉 Vous pouvez maintenant déployer sur Vercel!');
-    console.log('📝 N\'oubliez pas d\'ajouter DATABASE_URL dans Vercel:\n');
-    console.log('   1. Aller dans Vercel Dashboard > Project > Settings > Environment Variables');
-    console.log('   2. Ajouter DATABASE_URL avec la même valeur que votre .env\n');
+    console.log('🎉 Migration terminée.');
 
   } catch (error) {
     console.error('\n❌ MIGRATION ÉCHOUÉE:', error);
