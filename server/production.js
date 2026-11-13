@@ -8,6 +8,8 @@ import { fileURLToPath } from 'node:url';
 import express from 'express';
 import { pickDriver, resolveDatabaseUrl } from './database/sql.js';
 import { createRateLimiter, createApiCache } from './protection.js';
+import { mountMcp } from './mcp.js';
+import pg from 'pg';
 
 import appsHandler from '../api/apps.js';
 import customTrustiAppsHandler from '../api/custom-trusti-apps.js';
@@ -39,6 +41,16 @@ app.use((req, res, next) => {
   const code = req.method === 'GET' || req.method === 'HEAD' ? 301 : 308;
   return res.redirect(code, CANONICAL_ORIGIN + req.originalUrl);
 });
+
+// Administration de la base depuis Claude (connecteur MCP). Inactif sans MCP_TOKEN.
+let mcpPool;
+const mcpLimiter = createRateLimiter({ windowMs: 60_000, max: 120 });
+app.use('/mcp', mcpLimiter.middleware);
+if (mountMcp(app, {
+  getPool: () => (mcpPool ??= new pg.Pool({ connectionString: resolveDatabaseUrl(), max: 2 })),
+})) {
+  console.log('Point d\'accès MCP actif sur /mcp');
+}
 
 // Limites de débit par IP : générale, puis plus strictes pour les routes coûteuses ou ouvertes.
 const apiLimiter = createRateLimiter({ windowMs: 60_000, max: 120 });
