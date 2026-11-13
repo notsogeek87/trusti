@@ -67,8 +67,14 @@ jobs:
           yes | "$sdkmanager" --licenses > /dev/null
           "$sdkmanager" "platforms;android-36" "build-tools;36.0.0" > /dev/null
 
+      - name: Logo Hyperfluid (mention d'hébergement)
+        run: sh scripts/fetch-hosting-logo.sh
+
       - name: Synchronise les assets web dans le projet natif
         run: npm run cap:sync
+        env:
+          # Mention « Hébergé en France par Hyperfluid » : l'API de l'app est chez Hyperfluid.
+          VITE_HOSTED_BY: hyperfluid
 
       # Base de départ 1.0.0 (le littéral de android/app/build.gradle reste à
       # "1.0"/versionCode 1, réservé aux builds locaux/debug), + numéro de run

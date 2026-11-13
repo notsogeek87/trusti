@@ -33,7 +33,13 @@ jobs:
 
       - run: npm ci --no-audit --no-fund --loglevel=error
 
+      - name: Logo Hyperfluid (mention d'hébergement)
+        run: sh scripts/fetch-hosting-logo.sh
+
       - run: npm run cap:sync
+        env:
+          # Mention « Hébergé en France par Hyperfluid » : l'API de l'app est chez Hyperfluid.
+          VITE_HOSTED_BY: hyperfluid
 
       # versionCode (BUILD_NUMBER) et tag de release croissent à chaque run. Le tag DOIT être
       # <appVersionBase>.<run_number> (ex. v1.0.152) : un tag « v1.0-25 » serait lu comme une

@@ -55,11 +55,7 @@ jobs:
         run: npm run icons:bundle
 
       - name: Logo Hyperfluid (mention d'hébergement)
-        run: |
-          mkdir -p public/hosting
-          curl -fsSL --max-time 30 https://www.hyperfluid.cloud/images/hyperfluid-icon.svg -o public/hosting/hyperfluid.svg \
-            && grep -q "<svg" public/hosting/hyperfluid.svg \
-            || { echo "Logo indisponible : la mention s'affichera sans logo"; rm -f public/hosting/hyperfluid.svg; }
+        run: sh scripts/fetch-hosting-logo.sh
 
       - name: Construire l'image
         run: docker build -t "ghcr.io/notsogeek87/trusti:${VERSION}" .
