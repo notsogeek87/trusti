@@ -33,6 +33,11 @@ disparaissent :
 et laisse passer le relais. Tout le reste de ce qui était propre à Vercel est retiré :
 Vercel Web Analytics (`index.html`), script `vercel-build`, docs et commentaires.
 
+Depuis le 14 novembre 2026, `vercel.json` contient `"git": { "deploymentEnabled": false }` :
+Vercel ne déploie plus à chaque push et ne publie donc plus de « deployments » ni de
+statut « Vercel » sur GitHub. Le déploiement de production existant continue de servir
+le relais. Pour le modifier, redéployer à la main (`vercel --prod`).
+
 ## Conséquences
 
 - La politique de confidentialité (`public/privacy-policy.html`, et `confidentialite.html`
