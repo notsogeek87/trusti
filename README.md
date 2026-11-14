@@ -125,8 +125,6 @@ L'application (site web + API) est déployée sur **Hyperfluid** : le workflow
 `.github/workflows/hyperfluid-image.yml` publie l'image Docker sur ghcr.io à
 chaque push sur `main`, et Hyperfluid la redéploie (voir `hyperfluid.toml`).
 
-Un projet Vercel (`trusti-alpha.vercel.app`) est conservé **temporairement** : il ne fait que relayer `/api/*` vers Hyperfluid (`vercel.json`, `.vercelignore`) pour les anciennes versions de l'APK. À supprimer quand elles auront disparu.
-
 ### Variables d'environnement requises
 
 ```env
