@@ -87,16 +87,15 @@ exemple depuis n8n. Sans `API_KEY`, toute écriture est refusée.
 
 ## 🗄️ Base de données
 
-Le projet utilise **PostgreSQL** hébergé sur [Neon](https://neon.tech).
+Le projet utilise **PostgreSQL**, hébergé chez **Hyperfluid** depuis le 13 novembre 2026
+(auparavant Neon : voir [docs/legacy/](./docs/legacy/)). N'importe quel PostgreSQL
+convient : il suffit de renseigner `DATABASE_URL`.
 
 ### Scripts disponibles
 
 ```bash
 # Créer les tables et index
 npm run db:init
-
-# Migrer vers PostgreSQL
-npm run db:migrate-to-postgres
 
 # Fiabiliser nom, icône et URL Play Store de toutes les apps (--dry-run pour simuler)
 npm run db:backfill-playstore -- --dry-run
@@ -118,7 +117,7 @@ Côté serveur, `server/database/service-postgres.js` est la porte d'entrée uni
 ✅ Structure de dossiers claire et scalable
 ✅ Nommage cohérent et explicite
 ✅ Écritures de l'API protégées par clé (`x-api-key`), sans compte utilisateur
-✅ Base de données PostgreSQL avec Neon
+✅ Base de données PostgreSQL (hébergée chez Hyperfluid)
 
 ## 🚢 Déploiement
 
@@ -149,12 +148,12 @@ Voir [.env.example](./.env.example) pour un modèle.
 Faire tourner la totalité de la pile (web + API + app Android) demande donc
 deux services externes, tous requis :
 
-- une base **PostgreSQL** sur [Neon](https://neon.tech) (`DATABASE_URL`) ;
+- une base **PostgreSQL** (`DATABASE_URL`), quel que soit l'hébergeur ;
 - un serveur Node exécutant l'image Docker (`Dockerfile`, `server/production.js`)
   et exposant ces routes à l'URL renseignée dans
   `src/utils/apiConfig.js` (voir section Android ci-dessous).
 
-Sans ces trois éléments en place, ni le site web ni l'app Android ne peuvent
+Sans ces deux éléments en place, ni le site web ni l'app Android ne peuvent
 afficher de données réelles (recherche, notes, comparaisons) : il n'y a pas
 de mode hors-ligne avec données locales.
 
@@ -170,7 +169,7 @@ de développement (`npm run cap:sync`, `npm run android:open`).
 contient aucune donnée : au runtime, la WebView interroge directement le
 backend de production (`https://api.trusti-score.eu/api`, codé en
 dur dans `src/utils/apiConfig.js` pour la cible native), lui-même dépendant
-de Neon (PostgreSQL). L'app ne fonctionne donc pleinement
+de la base PostgreSQL hébergée chez Hyperfluid. L'app ne fonctionne donc pleinement
 que tant que ce backend, non open et centralisé, reste disponible.
 
 ### Permissions déclarées (`AndroidManifest.xml`)
