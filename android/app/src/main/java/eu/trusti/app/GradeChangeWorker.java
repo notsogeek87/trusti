@@ -202,15 +202,13 @@ public class GradeChangeWorker extends Worker {
         if (pending.size() == 1) {
             JSONObject change = pending.get(0);
             boolean down = isDown(change);
-            title = change.optString("name") + (down ? " baisse : " : " progresse : ")
-                + change.optString("previousGrade") + " → " + change.optString("grade");
-            text = down
-                ? "Sa note de respect de tes données a baissé. Ouvre Trusti pour voir pourquoi et les alternatives."
-                : "Bonne nouvelle : sa note de respect de tes données s'est améliorée.";
+            title = context.getString(down ? R.string.notif_grade_down_title : R.string.notif_grade_up_title,
+                change.optString("name"), change.optString("previousGrade"), change.optString("grade"));
+            text = context.getString(down ? R.string.notif_grade_down_text : R.string.notif_grade_up_text);
             // Même ouverture que les suggestions : Trusti affiche directement la fiche de l'app.
             open.putExtra(AlternativeNudgeWorker.EXTRA_APP_ID, change.optString("appId"));
         } else {
-            title = pending.size() + " de tes apps ont changé de note";
+            title = context.getString(R.string.notif_grades_changed, pending.size());
             StringBuilder lines = new StringBuilder();
             for (JSONObject change : pending) {
                 if (lines.length() > 0) lines.append("\n");
@@ -238,8 +236,8 @@ public class GradeChangeWorker extends Worker {
     private static void createChannel(Context context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
         NotificationChannel channel = new NotificationChannel(
-            CHANNEL_ID, "Changements de note", NotificationManager.IMPORTANCE_DEFAULT);
-        channel.setDescription("Quand la note d'une de tes apps change.");
+            CHANNEL_ID, context.getString(R.string.channel_grades_name), NotificationManager.IMPORTANCE_DEFAULT);
+        channel.setDescription(context.getString(R.string.channel_grades_desc));
         context.getSystemService(NotificationManager.class).createNotificationChannel(channel);
     }
 

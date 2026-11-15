@@ -36,6 +36,8 @@ sealed interface ManualCheckResult {
 class AppUpdateViewModel(
     private val updateManager: UpdateManager,
     private val updatesEnabled: Boolean,
+    // Textes des erreurs renvoyées à la page web (langue du téléphone, voir res/values-*)
+    private val resources: android.content.res.Resources,
 ) : ViewModel() {
     val state = updateManager.state
 
@@ -96,7 +98,7 @@ class AppUpdateViewModel(
                     val update = updateManager.checkForUpdate(force = true)
                     if (update != null) ManualCheckResult.Available(update.versionName) else ManualCheckResult.UpToDate
                 } catch (e: UpdateException) {
-                    ManualCheckResult.Failed(updateErrorMessage(e.error))
+                    ManualCheckResult.Failed(updateErrorMessage(resources, e.error))
                 }
             onResult(result)
         }
@@ -160,7 +162,7 @@ class AppUpdateViewModel(
                                         apkAssetNamePattern = ".*\\.apk",
                                     ),
                             )
-                        return AppUpdateViewModel(manager, updatesEnabled(context)) as T
+                        return AppUpdateViewModel(manager, updatesEnabled(context), context.applicationContext.resources) as T
                     }
                 },
             )[AppUpdateViewModel::class.java]

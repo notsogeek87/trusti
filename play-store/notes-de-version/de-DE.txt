@@ -1,0 +1,3 @@
+Neu:
+• In Meine Apps zeigt die Suche jetzt auch Apps aus dem Katalog, in einem eigenen Abschnitt.
+• Das + fügt die App überall zu Meine Apps hinzu (der Filter „Zum Testen“ entfällt).

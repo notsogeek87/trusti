@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- Textes natifs (notifications, mise à jour). values = français ; values-en / values-de : traductions. -->
+<resources>
+    <string name="notif_grade_down_title">%1$s sinkt: %2$s → %3$s</string>
+    <string name="notif_grade_up_title">%1$s steigt: %2$s → %3$s</string>
+    <string name="notif_grade_down_text">Die Note dieser App für den Umgang mit deinen Daten ist gesunken. Öffne Trusti, um den Grund und Alternativen zu sehen.</string>
+    <string name="notif_grade_up_text">Gute Nachricht: Die Note dieser App für den Umgang mit deinen Daten hat sich verbessert.</string>
+    <string name="notif_grades_changed">%1$d deiner Apps haben eine neue Note</string>
+    <string name="channel_grades_name">Notenänderungen</string>
+    <string name="channel_grades_desc">Wenn sich die Note einer deiner Apps ändert.</string>
+    <string name="notif_nudge_title">%1$s hat die Note %2$s</string>
+    <string name="notif_nudge_text">%1$s (%2$s) kann dasselbe und geht besser mit deinen Daten um. Willst du es sehen?</string>
+    <string name="notif_nudge_see">Alternative ansehen</string>
+    <string name="notif_nudge_stop">Nicht mehr vorschlagen</string>
+    <string name="channel_nudges_name">Vorschläge für Alternativen</string>
+    <string name="channel_nudges_desc">Ab und zu eine besser bewertete Alternative zu einer deiner Apps.</string>
+    <string name="update_available">Update verfügbar</string>
+    <string name="update_ready_intro">Trusti-Version %1$s ist bereit.</string>
+    <string name="update_step_install">Tippe auf „Installieren“: Das Update wird heruntergeladen.</string>
+    <string name="update_step_allow">Wenn Android fragt, ob Trusti Apps installieren darf, aktiviere die Option und geh dann zurück.</string>
+    <string name="update_step_confirm">Bestätige mit „Aktualisieren“, wenn Android es anbietet.</string>
+    <string name="update_install">Installieren</string>
+    <string name="update_later">Später</string>
+    <string name="update_downloading">Wird heruntergeladen…</string>
+    <string name="update_downloaded">Update heruntergeladen</string>
+    <string name="update_only_install">Jetzt nur noch installieren.</string>
+    <string name="update_step_install_confirm">Tippe auf „Installieren“ und bestätige dann mit „Aktualisieren“.</string>
+    <string name="update_need_permission">Android muss Trusti zuerst erlauben, Apps zu installieren.</string>
+    <string name="update_step_settings">Tippe auf „Installieren“: Die Android-Einstellungen öffnen sich.</string>
+    <string name="update_step_source">Aktiviere „Aus dieser Quelle zulassen“ und geh dann zurück.</string>
+    <string name="update_step_again">Tippe erneut auf „Installieren“ und bestätige.</string>
+    <string name="update_failed_title">Update nicht möglich</string>
+    <string name="update_ok">OK</string>
+    <string name="update_data_kept">Deine Daten bleiben erhalten.</string>
+    <string name="update_err_network">Netzwerk nicht verfügbar. Versuch es später erneut.</string>
+    <string name="update_err_rate">Zu viele Anfragen an GitHub. Versuch es später erneut.</string>
+    <string name="update_err_no_release">Keine veröffentlichte Version gefunden.</string>
+    <string name="update_err_no_apk">Kein kompatibles APK in der neuesten Version.</string>
+    <string name="update_err_not_allowed">Erlaube Trusti, unbekannte Apps zu installieren.</string>
+    <string name="update_err_other">Das Update ist fehlgeschlagen: %1$s</string>
+</resources>

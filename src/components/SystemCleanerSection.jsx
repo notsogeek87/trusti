@@ -4,7 +4,7 @@ import { Eraser, ShieldAlert, RefreshCcw, CheckCircle2 } from 'lucide-react';
 import SystemCleaner from '../native/SystemCleaner';
 import { CLEANER_FILTERS } from '../cleaner/filters';
 import { formatBytes } from '../utils/storageStats';
-import { t } from '../i18n/index.js';
+import { getLanguage, t } from '../i18n/index.js';
 
 /**
  * Nettoyeur de stockage (page Espace de stockage, Android natif uniquement).
@@ -56,7 +56,7 @@ const SystemCleanerSection = () => {
       setScan({ byId: Object.fromEntries(results.map((r) => [r.id, r])), truncated });
     } catch (error) {
       setScan(null);
-      setFeedback({ type: 'error', message: error?.message || t('cleaner.section.scanFailed') });
+      setFeedback({ type: 'error', message: (getLanguage() === 'fr' && error?.message) || t('cleaner.section.scanFailed') });
     } finally {
       setScanning(false);
     }
@@ -97,7 +97,7 @@ const SystemCleanerSection = () => {
       });
       setScan(null); // les chiffres ne sont plus valables : nouvelle analyse nécessaire
     } catch (error) {
-      setFeedback({ type: 'error', message: error?.message || t('cleaner.section.deleteFailed') });
+      setFeedback({ type: 'error', message: (getLanguage() === 'fr' && error?.message) || t('cleaner.section.deleteFailed') });
     } finally {
       setDeleting(false);
     }

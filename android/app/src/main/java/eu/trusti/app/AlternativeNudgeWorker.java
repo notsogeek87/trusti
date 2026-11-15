@@ -134,9 +134,8 @@ public class AlternativeNudgeWorker extends Worker {
     private static void notify(Context context, JSONObject candidate) {
         createChannel(context);
         String appId = candidate.optString("appId");
-        String title = candidate.optString("appName") + " est noté " + candidate.optString("appGrade");
-        String text = candidate.optString("altName") + " (" + candidate.optString("altGrade")
-            + ") fait la même chose et respecte mieux tes données. Tu veux voir ?";
+        String title = context.getString(R.string.notif_nudge_title, candidate.optString("appName"), candidate.optString("appGrade"));
+        String text = context.getString(R.string.notif_nudge_text, candidate.optString("altName"), candidate.optString("altGrade"));
 
         Intent open = new Intent(context, MainActivity.class)
             .putExtra(EXTRA_APP_ID, appId)
@@ -156,8 +155,8 @@ public class AlternativeNudgeWorker extends Worker {
             .setContentIntent(openIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .addAction(0, "Voir l'alternative", openIntent)
-            .addAction(0, "Ne plus proposer", dismissIntent);
+            .addAction(0, context.getString(R.string.notif_nudge_see), openIntent)
+            .addAction(0, context.getString(R.string.notif_nudge_stop), dismissIntent);
 
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, builder.build());
     }
@@ -165,8 +164,8 @@ public class AlternativeNudgeWorker extends Worker {
     private static void createChannel(Context context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
         NotificationChannel channel = new NotificationChannel(
-            CHANNEL_ID, "Suggestions d'alternatives", NotificationManager.IMPORTANCE_DEFAULT);
-        channel.setDescription("De temps en temps, une alternative mieux notée à une de tes apps.");
+            CHANNEL_ID, context.getString(R.string.channel_nudges_name), NotificationManager.IMPORTANCE_DEFAULT);
+        channel.setDescription(context.getString(R.string.channel_nudges_desc));
         context.getSystemService(NotificationManager.class).createNotificationChannel(channel);
     }
 }

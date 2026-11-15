@@ -11,7 +11,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import android.content.res.Resources
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import eu.trusti.app.R
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -34,16 +38,15 @@ fun UpdatePrompt(viewModel: AppUpdateViewModel) {
         is UpdateState.UpdateAvailable ->
             AlertDialog(
                 onDismissRequest = viewModel::onDismiss,
-                title = { Text("Mise à jour disponible") },
+                title = { Text(stringResource(R.string.update_available)) },
                 text = {
                     UpdateSteps(
-                        intro = "La version ${s.update.versionName} de Trusti est prête.",
+                        intro = stringResource(R.string.update_ready_intro, s.update.versionName ?: ""),
                         steps =
                             listOf(
-                                "Touchez « Installer » : la mise à jour se télécharge.",
-                                "Si Android demande d'autoriser Trusti à installer des applications, " +
-                                    "activez l'option, puis revenez en arrière.",
-                                "Confirmez avec « Mettre à jour » quand Android le propose.",
+                                stringResource(R.string.update_step_install),
+                                stringResource(R.string.update_step_allow),
+                                stringResource(R.string.update_step_confirm),
                             ),
                     )
                 },
@@ -57,7 +60,7 @@ fun UpdatePrompt(viewModel: AppUpdateViewModel) {
         is UpdateState.Downloading ->
             AlertDialog(
                 onDismissRequest = {},
-                title = { Text("Téléchargement…") },
+                title = { Text(stringResource(R.string.update_downloading)) },
                 text = {
                     LinearProgressIndicator(
                         progress = { (s.progress.percentage ?: 0) / 100f },
@@ -69,21 +72,21 @@ fun UpdatePrompt(viewModel: AppUpdateViewModel) {
         is UpdateState.Downloaded ->
             AlertDialog(
                 onDismissRequest = viewModel::onDismiss,
-                title = { Text("Mise à jour téléchargée") },
+                title = { Text(stringResource(R.string.update_downloaded)) },
                 text = {
                     if (viewModel.canInstallPackages()) {
                         UpdateSteps(
-                            intro = "Il ne reste qu'à l'installer.",
-                            steps = listOf("Touchez « Installer », puis confirmez avec « Mettre à jour »."),
+                            intro = stringResource(R.string.update_only_install),
+                            steps = listOf(stringResource(R.string.update_step_install_confirm)),
                         )
                     } else {
                         UpdateSteps(
-                            intro = "Android doit d'abord autoriser Trusti à installer des applications.",
+                            intro = stringResource(R.string.update_need_permission),
                             steps =
                                 listOf(
-                                    "Touchez « Installer » : les réglages Android s'ouvrent.",
-                                    "Activez « Autoriser depuis cette source », puis revenez en arrière.",
-                                    "Touchez de nouveau « Installer » et confirmez.",
+                                    stringResource(R.string.update_step_settings),
+                                    stringResource(R.string.update_step_source),
+                                    stringResource(R.string.update_step_again),
                                 ),
                         )
                     }
@@ -99,10 +102,10 @@ fun UpdatePrompt(viewModel: AppUpdateViewModel) {
             if (userStarted) {
                 AlertDialog(
                     onDismissRequest = viewModel::onDismiss,
-                    title = { Text("Mise à jour impossible") },
-                    text = { Text(updateErrorMessage(s.error)) },
+                    title = { Text(stringResource(R.string.update_failed_title)) },
+                    text = { Text(updateErrorMessage(LocalContext.current.resources, s.error)) },
                     confirmButton = {
-                        TextButton(onClick = viewModel::onDismiss) { Text("OK") }
+                        TextButton(onClick = viewModel::onDismiss) { Text(stringResource(R.string.update_ok)) }
                     },
                 )
             }
@@ -125,7 +128,7 @@ private fun UpdateSteps(
             )
         }
         Text(
-            "Vos données sont conservées.",
+            stringResource(R.string.update_data_kept),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 12.dp),
@@ -133,12 +136,12 @@ private fun UpdateSteps(
     }
 }
 
-internal fun updateErrorMessage(error: UpdateError): String =
+internal fun updateErrorMessage(resources: Resources, error: UpdateError): String =
     when (error) {
-        is UpdateError.NetworkError -> "Réseau indisponible. Réessayez plus tard."
-        is UpdateError.RateLimit -> "Trop de requêtes vers GitHub. Réessayez plus tard."
-        UpdateError.ReleaseNotFound -> "Aucune version publiée trouvée."
-        is UpdateError.ApkNotFound -> "Aucun APK compatible dans la dernière version."
-        UpdateError.InstallationNotAllowed -> "Autorisez l'installation d'applications inconnues pour Trusti."
-        else -> "La mise à jour a échoué : ${error.message}"
+        is UpdateError.NetworkError -> resources.getString(R.string.update_err_network)
+        is UpdateError.RateLimit -> resources.getString(R.string.update_err_rate)
+        UpdateError.ReleaseNotFound -> resources.getString(R.string.update_err_no_release)
+        is UpdateError.ApkNotFound -> resources.getString(R.string.update_err_no_apk)
+        UpdateError.InstallationNotAllowed -> resources.getString(R.string.update_err_not_allowed)
+        else -> resources.getString(R.string.update_err_other, error.message ?: "")
     }

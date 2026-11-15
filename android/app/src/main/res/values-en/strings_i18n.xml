@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- Textes natifs (notifications, mise à jour). values = français ; values-en / values-de : traductions. -->
+<resources>
+    <string name="notif_grade_down_title">%1$s goes down: %2$s → %3$s</string>
+    <string name="notif_grade_up_title">%1$s goes up: %2$s → %3$s</string>
+    <string name="notif_grade_down_text">Its grade for respecting your data has gone down. Open Trusti to see why and the alternatives.</string>
+    <string name="notif_grade_up_text">Good news: its grade for respecting your data has improved.</string>
+    <string name="notif_grades_changed">%1$d of your apps have changed grade</string>
+    <string name="channel_grades_name">Grade changes</string>
+    <string name="channel_grades_desc">When the grade of one of your apps changes.</string>
+    <string name="notif_nudge_title">%1$s is rated %2$s</string>
+    <string name="notif_nudge_text">%1$s (%2$s) does the same thing and respects your data better. Want to see?</string>
+    <string name="notif_nudge_see">See the alternative</string>
+    <string name="notif_nudge_stop">Don\'t suggest again</string>
+    <string name="channel_nudges_name">Alternative suggestions</string>
+    <string name="channel_nudges_desc">From time to time, a better-rated alternative to one of your apps.</string>
+    <string name="update_available">Update available</string>
+    <string name="update_ready_intro">Trusti version %1$s is ready.</string>
+    <string name="update_step_install">Tap \"Install\": the update downloads.</string>
+    <string name="update_step_allow">If Android asks you to allow Trusti to install apps, turn the option on, then go back.</string>
+    <string name="update_step_confirm">Confirm with \"Update\" when Android offers it.</string>
+    <string name="update_install">Install</string>
+    <string name="update_later">Later</string>
+    <string name="update_downloading">Downloading…</string>
+    <string name="update_downloaded">Update downloaded</string>
+    <string name="update_only_install">All that is left is to install it.</string>
+    <string name="update_step_install_confirm">Tap \"Install\", then confirm with \"Update\".</string>
+    <string name="update_need_permission">Android must first allow Trusti to install apps.</string>
+    <string name="update_step_settings">Tap \"Install\": Android settings open.</string>
+    <string name="update_step_source">Turn on \"Allow from this source\", then go back.</string>
+    <string name="update_step_again">Tap \"Install\" again and confirm.</string>
+    <string name="update_failed_title">Update not possible</string>
+    <string name="update_ok">OK</string>
+    <string name="update_data_kept">Your data is kept.</string>
+    <string name="update_err_network">Network unavailable. Try again later.</string>
+    <string name="update_err_rate">Too many requests to GitHub. Try again later.</string>
+    <string name="update_err_no_release">No published version found.</string>
+    <string name="update_err_no_apk">No compatible APK in the latest version.</string>
+    <string name="update_err_not_allowed">Allow installing unknown apps for Trusti.</string>
+    <string name="update_err_other">The update failed: %1$s</string>
+</resources>

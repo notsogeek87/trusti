@@ -1,0 +1,3 @@
+What's new:
+• In My apps, search also shows catalogue apps, in a separate section.
+• The + adds the app to My apps everywhere (the "To test" filter is gone).
