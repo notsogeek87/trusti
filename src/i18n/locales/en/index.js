@@ -12,5 +12,7 @@ import main from './main.js';
 import appDetail from './appDetail.js';
 import modals from './modals.js';
 import migration from './migration.js';
+import storage from './storage.js';
+import cleaner from './cleaner.js';
 
-export default { appDetail, cards, categories, common, grades, header, hygiene, main, migration, modals, myApps, onboarding, ui };
+export default { appDetail, cards, categories, cleaner, common, grades, header, hygiene, main, migration, modals, myApps, onboarding, storage, ui };

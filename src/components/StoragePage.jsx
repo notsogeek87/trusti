@@ -22,6 +22,7 @@ import SystemCleanerSection from './SystemCleanerSection';
 import AlternativeNudgesSection from './AlternativeNudgesSection';
 import AppIconImage from './ui/AppIconImage';
 import { categoryLabel } from '../constants/categories';
+import { t } from '../i18n/index.js';
 
 const StatTile = ({ value, label }) => (
   <div className="bg-slate-50 rounded-2xl p-3 text-center">
@@ -75,7 +76,7 @@ const ConfirmableAction = ({ icon: Icon, label, description, tone, onConfirm, di
             : `bg-white ${toneClasses}`
         }`}
       >
-        {armed ? 'Confirmer — action irréversible' : 'Vider'}
+        {armed ? t('storage.page.confirmIrreversible') : t('storage.page.empty')}
       </button>
     </div>
   );
@@ -128,7 +129,7 @@ const StoragePage = ({
     } catch (error) {
       // Enregistrement annulé par l'utilisateur : pas une erreur à afficher.
       if (error?.message?.toLowerCase().includes('annul')) return;
-      setImportFeedback({ type: 'error', message: "Échec de l'export." });
+      setImportFeedback({ type: 'error', message: t('storage.page.exportFailed') });
     }
   };
 
@@ -142,10 +143,10 @@ const StoragePage = ({
       const { notesImported } = importExportData(parsed);
       setImportFeedback({
         type: 'success',
-        message: `${notesImported} note${notesImported > 1 ? 's' : ''} importée${notesImported > 1 ? 's' : ''} ✓`,
+        message: t('storage.page.notesImported', { count: notesImported }),
       });
     } catch (error) {
-      setImportFeedback({ type: 'error', message: error.message || "Échec de l'import." });
+      setImportFeedback({ type: 'error', message: error.message || t('storage.page.importFailed') });
     }
   };
 
@@ -241,7 +242,7 @@ const StoragePage = ({
     if (!app.packageName) return;
     requestUninstall(app.packageName).catch((error) => {
       console.error('Désinstallation impossible:', error);
-      window.alert("Impossible d'ouvrir la désinstallation. Réessayez depuis les paramètres du téléphone.");
+      window.alert(t('storage.page.uninstallFailed'));
     });
   };
 
@@ -253,18 +254,18 @@ const StoragePage = ({
     try {
       const res = await AppUpdate.checkForUpdate();
       if (res.status === 'available') {
-        setUpdateFeedback({ type: 'info', message: res.version ? `La version ${res.version} est disponible.` : 'Une mise à jour est disponible.' });
+        setUpdateFeedback({ type: 'info', message: res.version ? t('storage.page.updateVersion', { version: res.version }) : t('storage.page.updateAvailable') });
       } else if (res.status === 'upToDate') {
-        setUpdateFeedback({ type: 'success', message: `Trusti est à jour (version ${res.currentVersion}).` });
+        setUpdateFeedback({ type: 'success', message: t('storage.page.upToDate', { version: res.currentVersion }) });
       } else if (res.status === 'busy') {
-        setUpdateFeedback({ type: 'info', message: 'Une mise à jour est déjà en cours.' });
+        setUpdateFeedback({ type: 'info', message: t('storage.page.updateRunning') });
       } else if (res.status === 'disabled') {
-        setUpdateFeedback({ type: 'info', message: 'Les mises à jour automatiques ne sont pas actives sur cette version.' });
+        setUpdateFeedback({ type: 'info', message: t('storage.page.updatesOff') });
       } else {
-        setUpdateFeedback({ type: 'error', message: res.message || 'La recherche a échoué. Réessayez plus tard.' });
+        setUpdateFeedback({ type: 'error', message: res.message || t('storage.page.searchFailed') });
       }
     } catch {
-      setUpdateFeedback({ type: 'error', message: 'La recherche a échoué. Réessayez plus tard.' });
+      setUpdateFeedback({ type: 'error', message: t('storage.page.searchFailed') });
     } finally {
       setUpdateChecking(false);
     }
@@ -292,7 +293,7 @@ const StoragePage = ({
           <div className="w-9 h-9 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0">
             <PieChart size={18} className="text-indigo-600" />
           </div>
-          <h1 className="text-base font-black text-slate-900">Espace de stockage</h1>
+          <h1 className="text-base font-black text-slate-900">{t('storage.page.title')}</h1>
         </div>
       </header>
 
@@ -301,12 +302,10 @@ const StoragePage = ({
         {isNativeAndroid && (
           <section className="bg-white rounded-2xl border border-slate-100 p-4">
             <h2 className="text-xs font-black uppercase tracking-wide text-slate-400 mb-2">
-              Mises à jour
+              {t('storage.page.updates')}
             </h2>
             <p className="text-xs text-slate-500 mb-3">
-              Trusti cherche une nouvelle version à chaque ouverture. Vous pouvez aussi lancer
-              la recherche ici : touchez « Installer », autorisez l'installation d'apps inconnues
-              si Android le demande, puis confirmez « Mettre à jour ». Vos données sont conservées.
+              {t('storage.page.updatesBody')}
             </p>
             <button
               type="button"
@@ -315,7 +314,7 @@ const StoragePage = ({
               className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-900 hover:bg-slate-700 disabled:opacity-60 text-white text-xs font-bold rounded-xl transition-all active:scale-[0.98]"
             >
               <RefreshCcw size={14} className={updateChecking ? 'animate-spin' : ''} />
-              {updateChecking ? 'Recherche…' : 'Rechercher une mise à jour'}
+              {updateChecking ? t('storage.page.checking') : t('storage.page.checkUpdate')}
             </button>
             {updateFeedback && (
               <p className={`mt-2 text-xs flex items-center gap-1.5 ${updateFeedback.type === 'error' ? 'text-rose-600' : updateFeedback.type === 'success' ? 'text-emerald-600' : 'text-slate-600'}`}>
@@ -339,12 +338,10 @@ const StoragePage = ({
         {/* Export / import des données locales — en tête de page pour rester visible immédiatement. */}
         <section className="bg-white rounded-2xl border border-slate-100 p-4">
           <h2 className="text-xs font-black uppercase tracking-wide text-slate-400 mb-2">
-            Exporter / importer mes données
+            {t('storage.page.exportImport')}
           </h2>
           <p className="text-xs text-slate-500 mb-3">
-            Pour l'instant, seules vos notes par app ({getNotesCount()}) sont
-            concernées. Utile avant une réinstallation, ou en complément de la
-            sauvegarde Android classique.
+            {t('storage.page.exportImportBody', { count: getNotesCount() })}
           </p>
           <div className="grid grid-cols-2 gap-2">
             <button
@@ -352,14 +349,14 @@ const StoragePage = ({
               onClick={handleExportData}
               className="flex items-center justify-center gap-2 py-2.5 bg-slate-900 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-all active:scale-[0.98]"
             >
-              <Download size={14} /> Exporter
+              <Download size={14} /> {t('storage.page.export')}
             </button>
             <button
               type="button"
               onClick={() => importInputRef.current?.click()}
               className="flex items-center justify-center gap-2 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl transition-all active:scale-[0.98]"
             >
-              <Upload size={14} /> Importer
+              <Upload size={14} /> {t('storage.page.import')}
             </button>
             <input
               ref={importInputRef}
@@ -381,19 +378,17 @@ const StoragePage = ({
             par les apps elles-mêmes (détail par note dans la section suivante). */}
         <section className="bg-white rounded-2xl border border-slate-100 p-4">
           <h2 className="text-xs font-black uppercase tracking-wide text-slate-400 mb-2">
-            Données Trusti sur cet appareil
+            {t('storage.page.onDevice')}
           </h2>
           <p className="text-xs text-slate-500 mb-3">
-            Vos apps suivies et migrations sont enregistrées uniquement ici, pas
-            sur nos serveurs. L'espace total correspond au poids réel de vos
-            applications installées (APK + données + cache).
+            {t('storage.page.onDeviceBody')}
           </p>
           <div className="grid grid-cols-3 gap-2">
-            <StatTile value={myAppsCount} label="Apps suivies" />
+            <StatTile value={myAppsCount} label={t('storage.page.tracked')} />
             <StatTile value={migrationsCount} label="Migrations" />
             <StatTile
               value={usageAccessGranted && appSizes ? formatBytes(totalDeviceBytes) : '—'}
-              label="Espace total (apps)"
+              label={t('storage.page.totalSpace')}
             />
           </div>
         </section>
@@ -404,29 +399,26 @@ const StoragePage = ({
         {/* Espace réel occupé par les apps installées, par note TrustiScore */}
         <section className="bg-white rounded-2xl border border-slate-100 p-4">
           <h2 className="text-xs font-black uppercase tracking-wide text-slate-400 mb-2">
-            Espace utilisé par vos apps
+            {t('storage.page.usedByApps')}
           </h2>
 
           {!isNativeAndroid && (
             <p className="text-xs text-slate-500">
-              Disponible uniquement dans l'app Android Trusti installée sur
-              votre téléphone.
+              {t('storage.page.androidOnly')}
             </p>
           )}
 
           {isNativeAndroid && (installedPackages === null || usageAccessGranted === null) && (
             <div className="flex items-center gap-2 text-xs text-slate-400 py-3">
               <div className="w-4 h-4 rounded-full border-2 border-slate-300 border-t-indigo-500 animate-spin" />
-              Analyse en cours…
+              {t('storage.page.analysing')}
             </div>
           )}
 
           {isNativeAndroid && installedPackages !== null && usageAccessGranted === false && (
             <div>
               <p className="text-xs text-slate-500 mb-3">
-                Android protège cette information : pour afficher la taille
-                réelle de chaque app (et le camembert par note TrustiScore),
-                autorisez l'accès à l'utilisation pour Trusti.
+                {t('storage.page.usageAccess')}
               </p>
               <button
                 type="button"
@@ -434,14 +426,14 @@ const StoragePage = ({
                 className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2"
               >
                 <ShieldAlert size={15} />
-                Autoriser dans les réglages
+                {t('storage.page.allowInSettings')}
               </button>
               <button
                 type="button"
                 onClick={checkAccessAndLoadSizes}
                 className="w-full mt-2 py-2 text-indigo-500 text-xs font-bold"
               >
-                J'ai autorisé, actualiser
+                {t('storage.page.allowedRefresh')}
               </button>
             </div>
           )}
@@ -451,11 +443,11 @@ const StoragePage = ({
               {isLoadingSizes || appSizes === null || isLoadingMyAppsData ? (
                 <div className="flex items-center gap-2 text-xs text-slate-400 py-3">
                   <div className="w-4 h-4 rounded-full border-2 border-slate-300 border-t-indigo-500 animate-spin" />
-                  Calcul de la taille de vos apps…
+                  {t('storage.page.computing')}
                 </div>
               ) : gradeStorageEntries.length === 0 ? (
                 <p className="text-xs text-slate-400 py-2">
-                  Aucune taille disponible pour vos apps installées.
+                  {t('storage.page.noSize')}
                 </p>
               ) : (
                 <div className="mb-5">
@@ -472,7 +464,7 @@ const StoragePage = ({
                 <>
                   <div className="flex items-center justify-between mb-2 mt-1 gap-2">
                     <h3 className="text-xs font-black uppercase tracking-wide text-slate-400 truncate">
-                      Applications installées ({displayedInstalledApps.length})
+                      {t('storage.page.installedApps', { count: displayedInstalledApps.length })}
                     </h3>
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                       {gradeFilter && (
@@ -481,7 +473,7 @@ const StoragePage = ({
                           onClick={() => setGradeFilter(null)}
                           className="flex items-center gap-1 pl-2.5 pr-1.5 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[11px] font-bold"
                         >
-                          Note {gradeFilter}
+                          {t('storage.page.gradeChip', { grade: gradeFilter })}
                           <X size={12} />
                         </button>
                       )}
@@ -494,7 +486,7 @@ const StoragePage = ({
                   </div>
 
                   {displayedInstalledApps.length === 0 && (
-                    <p className="text-xs text-slate-400 py-2">Aucune app avec cette note installée.</p>
+                    <p className="text-xs text-slate-400 py-2">{t('storage.page.noneWithGrade')}</p>
                   )}
 
                   <div className="space-y-2">
@@ -526,8 +518,8 @@ const StoragePage = ({
                             handleUninstall(app);
                           }}
                           className="p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-all flex-shrink-0"
-                          title={`Désinstaller ${app.name}`}
-                          aria-label={`Désinstaller ${app.name}`}
+                          title={t('storage.page.uninstallApp', { name: app.name })}
+                          aria-label={t('storage.page.uninstallApp', { name: app.name })}
                         >
                           <Trash2 size={16} />
                         </button>
@@ -543,37 +535,37 @@ const StoragePage = ({
         {/* Réinitialisation des données Trusti */}
         <section>
           <h2 className="text-xs font-black uppercase tracking-wide text-slate-400 mb-2">
-            Réinitialisation
+            {t('storage.page.reset')}
           </h2>
           <div className="space-y-3">
             <ConfirmableAction
               icon={Smartphone}
               tone="warning"
-              label="Vider Mes Apps"
-              description="Retire toutes les apps de votre sélection, sans toucher à votre historique de migrations."
+              label={t('storage.page.clearMyApps')}
+              description={t('storage.page.clearMyAppsBody')}
               disabled={myAppsCount === 0}
               onConfirm={onClearMyApps}
             />
             <ConfirmableAction
               icon={RefreshCcw}
               tone="warning"
-              label="Vider l'historique de migrations"
-              description="Réinitialise le statut « migré » de vos apps. Elles restent dans Mes Apps."
+              label={t('storage.page.clearHistory')}
+              description={t('storage.page.clearHistoryBody')}
               disabled={migrationsCount === 0}
               onConfirm={onClearMigrations}
             />
             <ConfirmableAction
               icon={Trash2}
               tone="danger"
-              label="Tout réinitialiser"
-              description="Efface toutes les données stockées sur cet appareil (apps, migrations, préférences) et recharge l'app."
+              label={t('storage.page.resetAll')}
+              description={t('storage.page.resetAllBody')}
               onConfirm={handleResetAll}
             />
           </div>
 
           <div className="mt-4 flex items-start gap-2 text-[11px] text-slate-400">
             <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" />
-            <p>Ces actions sont locales à cet appareil et irréversibles une fois confirmées.</p>
+            <p>{t('storage.page.localWarning')}</p>
           </div>
         </section>
       </main>

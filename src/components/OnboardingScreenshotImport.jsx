@@ -5,6 +5,8 @@ import { loadOnboardingCatalog } from '../utils/onboardingCatalog';
 import { buildAppIndex, matchAppsFromText } from '../utils/screenshotAppMatcher';
 import { isIOSWeb } from '../utils/platform';
 import { useBackHandler } from '../hooks/useBackHandler';
+import { t } from '../i18n/index.js';
+import BoldText from './ui/BoldText';
 
 // Onboarding web uniquement : sur iPhone, aucune API ne liste les apps
 // installées. On fait importer une capture de Réglages → Apps, dont le texte
@@ -13,14 +15,14 @@ import { useBackHandler } from '../hooks/useBackHandler';
 // téléphone (pas de l'écran d'accueil, où les noms d'apps sont tronqués ou
 // rangés dans des dossiers).
 const HOWTO_PATH_CLASS = 'block text-xs text-slate-500 mt-1';
-const HOWTO_STEPS = [
+const howtoSteps = () => [
   <>
-    Ouvre les <strong>réglages</strong> de ton téléphone, puis la liste de tes <strong>applications</strong>.
-    <span className={HOWTO_PATH_CLASS}><strong>iPhone :</strong> Réglages → Apps (tout en bas). iOS 17 ou avant : Réglages → Général → Stockage iPhone</span>
-    <span className={HOWTO_PATH_CLASS}><strong>Android :</strong> Paramètres → Applications (ou Applis → Voir toutes les applis)</span>
+    <BoldText text={t('onboarding.screenshot.step1')} />
+    <span className={HOWTO_PATH_CLASS}><BoldText text={t('onboarding.screenshot.step1iPhone')} /></span>
+    <span className={HOWTO_PATH_CLASS}><BoldText text={t('onboarding.screenshot.step1Android')} /></span>
   </>,
-  <>Fais une capture d'écran de <strong>cette liste</strong>. Fais défiler et recommence jusqu'en bas de la liste.</>,
-  <>Reviens ici et choisis tes captures.</>,
+  <BoldText text={t('onboarding.screenshot.step2')} />,
+  <>{t('onboarding.screenshot.step3')}</>,
 ];
 
 // iCloud n'apparaît pas dans Réglages → Apps (il est dans le compte Apple),
@@ -131,24 +133,24 @@ const OnboardingScreenshotImport = ({ onConfirm, onManual, onBack, initialApps =
           <button
             onClick={onBack}
             className="mb-4 -ml-1 p-1 text-slate-400 hover:text-slate-700 transition-colors"
-            aria-label="Retour"
+            aria-label={t('onboarding.screenshot.back')}
           >
             <ChevronLeft size={20} />
           </button>
           <div className="w-16 h-16 bg-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-xl shadow-indigo-200">
             <ImagePlus size={30} className="text-white" />
           </div>
-          <h1 className="text-xl font-black text-slate-900 mb-2 text-center">Importe ta liste d'apps</h1>
+          <h1 className="text-xl font-black text-slate-900 mb-2 text-center">{t('onboarding.screenshot.title')}</h1>
           <p className="text-slate-500 text-sm leading-relaxed mb-4 text-center">
-            Une capture d'écran suffit, Trusti reconnaît tes apps tout seul.
+            {t('onboarding.screenshot.subtitle')}
           </p>
 
           <p className="text-xs font-bold text-amber-800 bg-amber-50 rounded-2xl px-3 py-2.5 mb-6 text-center leading-snug">
-            La capture doit être prise dans les <strong>réglages</strong> du téléphone, pas sur l'écran d'accueil.
+            <BoldText text={t('onboarding.screenshot.settingsOnly')} />
           </p>
 
           <ol className="space-y-3 mb-6">
-            {HOWTO_STEPS.map((content, i) => (
+            {howtoSteps().map((content, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 text-xs font-black flex items-center justify-center shrink-0">
                   {i + 1}
@@ -161,26 +163,26 @@ const OnboardingScreenshotImport = ({ onConfirm, onManual, onBack, initialApps =
           <div className="flex items-start gap-2 bg-emerald-50 rounded-2xl px-3 py-2.5 mb-6">
             <Lock size={14} className="text-emerald-600 shrink-0 mt-0.5" />
             <p className="text-xs text-emerald-800 leading-snug">
-              La capture est lue directement sur ton téléphone. Elle n'est jamais envoyée.
+              {t('onboarding.screenshot.local')}
             </p>
           </div>
 
           <PickScreenshotsButton onFiles={readScreenshots} primary>
-            Choisir mes captures
+            {t('onboarding.screenshot.choose')}
           </PickScreenshotsButton>
           {matches.length > 0 && (
             <button
               onClick={() => setPhase('results')}
               className="w-full mt-3 py-2 text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
             >
-              Revoir mes {matches.length} app{matches.length !== 1 ? 's' : ''} reconnue{matches.length !== 1 ? 's' : ''}
+              {t('onboarding.screenshot.review', { count: matches.length })}
             </button>
           )}
           <button
             onClick={() => onManual([])}
             className="w-full mt-3 text-xs text-slate-400 hover:text-slate-600 transition-colors"
           >
-            Choisir mes apps à la main plutôt
+            {t('onboarding.screenshot.manualInstead')}
           </button>
         </div>
       </div>
@@ -199,15 +201,15 @@ const OnboardingScreenshotImport = ({ onConfirm, onManual, onBack, initialApps =
             <ImagePlus size={36} className="text-white" />
           </div>
           <h1 className="text-xl font-black text-slate-900 mb-3">
-            {total > 1 ? `Lecture de la capture ${Math.min(index + 1, total)}/${total}` : 'Lecture de ta capture'}
+            {total > 1 ? t('onboarding.screenshot.readingN', { n: Math.min(index + 1, total), total }) : t('onboarding.screenshot.readingOne')}
           </h1>
           <div className="w-56 h-1.5 bg-indigo-100 rounded-full overflow-hidden mx-auto">
             <div className="h-full bg-indigo-500 rounded-full transition-all duration-300" style={{ width: `${preparing ? 4 : percent}%` }} />
           </div>
           <p className="text-xs text-slate-400 mt-3">
             {preparing
-              ? 'Préparation de la lecture, plus rapide les fois suivantes...'
-              : 'Tout se passe sur ton téléphone, ça prend quelques secondes.'}
+              ? t('onboarding.screenshot.preparing')
+              : t('onboarding.screenshot.onDevice')}
           </p>
         </div>
       </div>
@@ -220,7 +222,7 @@ const OnboardingScreenshotImport = ({ onConfirm, onManual, onBack, initialApps =
       <div className="min-h-screen bg-transparent flex flex-col items-center justify-center px-6 text-center">
         <style>{ANIM_CSS}</style>
         <div style={{ animation: 'onbFadeUp 0.4s ease-out' }} className="w-full max-w-xs">
-          <h1 className="text-xl font-black text-slate-900 mb-3">La lecture n'a pas fonctionné</h1>
+          <h1 className="text-xl font-black text-slate-900 mb-3">{t('onboarding.screenshot.failed')}</h1>
           <p className="text-slate-500 text-sm leading-relaxed mb-8">
             Vérifie ta connexion internet (nécessaire la première fois), puis réessaie. Tu peux aussi choisir tes apps à la main.
           </p>
@@ -228,13 +230,13 @@ const OnboardingScreenshotImport = ({ onConfirm, onManual, onBack, initialApps =
             onClick={() => readScreenshots(lastFiles)}
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-indigo-200 transition-all active:scale-95"
           >
-            Réessayer
+            {t('onboarding.screenshot.retry')}
           </button>
           <button
             onClick={() => onManual(selectedApps())}
             className="w-full mt-3 text-xs text-slate-400 hover:text-slate-600 transition-colors"
           >
-            Choisir mes apps à la main
+            {t('onboarding.screenshot.manual')}
           </button>
         </div>
       </div>
@@ -254,15 +256,15 @@ const OnboardingScreenshotImport = ({ onConfirm, onManual, onBack, initialApps =
           {matches.length > 0 ? (
             <>
               <h2 className="text-lg font-black text-slate-900 leading-snug">
-                {matches.length} app{matches.length !== 1 ? 's' : ''} reconnue{matches.length !== 1 ? 's' : ''}
+                {t('onboarding.screenshot.recognised', { count: matches.length })}
               </h2>
-              <p className="text-xs text-slate-400 mt-1">Décoche celles qui ne sont pas à toi</p>
+              <p className="text-xs text-slate-400 mt-1">{t('onboarding.screenshot.untick')}</p>
             </>
           ) : (
             <>
-              <h2 className="text-lg font-black text-slate-900 leading-snug">Aucune app reconnue</h2>
+              <h2 className="text-lg font-black text-slate-900 leading-snug">{t('onboarding.screenshot.none')}</h2>
               <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
-                Vérifie que la capture montre bien la liste de Réglages → Apps, ou choisis tes apps à la main.
+                {t('onboarding.screenshot.noneBody')}
               </p>
             </>
           )}
@@ -285,14 +287,14 @@ const OnboardingScreenshotImport = ({ onConfirm, onManual, onBack, initialApps =
 
         <div className="mt-8">
           <PickScreenshotsButton onFiles={readScreenshots}>
-            Ajouter d'autres captures
+            {t('onboarding.screenshot.more')}
           </PickScreenshotsButton>
           <button
             onClick={() => onManual(selectedApps())}
             className="w-full flex items-center justify-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors py-2"
           >
             <ListChecks size={14} />
-            Il en manque ? Compléter à la main
+            {t('onboarding.screenshot.missing')}
           </button>
         </div>
       </div>
@@ -303,7 +305,7 @@ const OnboardingScreenshotImport = ({ onConfirm, onManual, onBack, initialApps =
             onClick={() => (count > 0 ? onConfirm(selectedApps()) : onManual([]))}
             className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98]"
           >
-            {count > 0 ? 'Voir mon score' : 'Choisir à la main'}
+            {count > 0 ? t('onboarding.screenshot.seeScore') : t('onboarding.screenshot.chooseManual')}
             <ArrowRight size={16} />
           </button>
         </div>

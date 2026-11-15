@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 /**
  * Filtres du nettoyeur de stockage (SystemCleaner), inspirés de SD Maid SE.
  *
@@ -25,22 +26,22 @@
 export const CLEANER_FILTERS = [
   {
     id: 'incomplete-downloads',
-    label: 'Téléchargements incomplets',
-    description: 'Fichiers .crdownload, .part ou .download laissés par un téléchargement interrompu.',
+    get label() { return t('cleaner.filters.incomplete-downloads.label'); },
+    get description() { return t('cleaner.filters.incomplete-downloads.description'); },
     defaultSelected: true,
     rules: [{ exts: ['crdownload', 'part', 'partial', 'download', 'opdownload'], minAgeDays: 1 }],
   },
   {
     id: 'temp-files',
-    label: 'Fichiers temporaires',
-    description: 'Fichiers .tmp et .temp de plus de 7 jours, hors données des apps.',
+    get label() { return t('cleaner.filters.temp-files.label'); },
+    get description() { return t('cleaner.filters.temp-files.description'); },
     defaultSelected: true,
     rules: [{ exts: ['tmp', 'temp'], minAgeDays: 7 }],
   },
   {
     id: 'orphan-thumbnails',
-    label: 'Miniatures de galerie',
-    description: 'Cache de miniatures (.thumbnails) régénéré automatiquement par la galerie.',
+    get label() { return t('cleaner.filters.orphan-thumbnails.label'); },
+    get description() { return t('cleaner.filters.orphan-thumbnails.description'); },
     defaultSelected: true,
     rules: [
       { under: 'dcim/.thumbnails/', anyFile: true },
@@ -50,8 +51,8 @@ export const CLEANER_FILTERS = [
   },
   {
     id: 'whatsapp-statuses',
-    label: 'Statuts WhatsApp en cache',
-    description: 'Statuts WhatsApp déjà consultés (de plus de 30 jours) conservés dans le cache de l\'app.',
+    get label() { return t('cleaner.filters.whatsapp-statuses.label'); },
+    get description() { return t('cleaner.filters.whatsapp-statuses.description'); },
     defaultSelected: true,
     rules: [
       { under: 'android/media/com.whatsapp/whatsapp/media/.statuses/', anyFile: true, minAgeDays: 30 },
@@ -60,22 +61,22 @@ export const CLEANER_FILTERS = [
   },
   {
     id: 'old-apks',
-    label: 'Anciens APK téléchargés',
-    description: 'Fichiers .apk, .apks et .xapk du dossier Téléchargements de plus de 30 jours.',
+    get label() { return t('cleaner.filters.old-apks.label'); },
+    get description() { return t('cleaner.filters.old-apks.description'); },
     defaultSelected: false,
     rules: [{ under: 'download/', exts: ['apk', 'apks', 'xapk'], minAgeDays: 30 }],
   },
   {
     id: 'ota-leftovers',
-    label: 'Restes de mises à jour système',
-    description: 'Archives de mise à jour (update.zip, ota…) du dossier Téléchargements de plus de 30 jours.',
+    get label() { return t('cleaner.filters.ota-leftovers.label'); },
+    get description() { return t('cleaner.filters.ota-leftovers.description'); },
     defaultSelected: false,
     rules: [{ under: 'download/', exts: ['zip'], nameRegex: '^(ota|update)[-_.a-z0-9]*\\.zip$', minAgeDays: 30 }],
   },
   {
     id: 'logs-and-reports',
-    label: 'Journaux et rapports de bug',
-    description: 'Fichiers .log, .trace et dossier bugreports de plus de 30 jours, hors données des apps.',
+    get label() { return t('cleaner.filters.logs-and-reports.label'); },
+    get description() { return t('cleaner.filters.logs-and-reports.description'); },
     defaultSelected: false,
     rules: [
       { exts: ['log', 'trace'], minAgeDays: 30 },
@@ -84,8 +85,8 @@ export const CLEANER_FILTERS = [
   },
   {
     id: 'empty-directories',
-    label: 'Dossiers vides',
-    description: 'Dossiers sans aucun contenu depuis plus de 30 jours (hors données des apps).',
+    get label() { return t('cleaner.filters.empty-directories.label'); },
+    get description() { return t('cleaner.filters.empty-directories.description'); },
     defaultSelected: false,
     rules: [{ emptyDirs: true, minAgeDays: 30 }],
   },

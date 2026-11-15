@@ -4,6 +4,7 @@ import { Eraser, ShieldAlert, RefreshCcw, CheckCircle2 } from 'lucide-react';
 import SystemCleaner from '../native/SystemCleaner';
 import { CLEANER_FILTERS } from '../cleaner/filters';
 import { formatBytes } from '../utils/storageStats';
+import { t } from '../i18n/index.js';
 
 /**
  * Nettoyeur de stockage (page Espace de stockage, Android natif uniquement).
@@ -55,7 +56,7 @@ const SystemCleanerSection = () => {
       setScan({ byId: Object.fromEntries(results.map((r) => [r.id, r])), truncated });
     } catch (error) {
       setScan(null);
-      setFeedback({ type: 'error', message: error?.message || "L'analyse a échoué." });
+      setFeedback({ type: 'error', message: error?.message || t('cleaner.section.scanFailed') });
     } finally {
       setScanning(false);
     }
@@ -92,11 +93,11 @@ const SystemCleanerSection = () => {
       const { deleted, failed, freedBytes } = await SystemCleaner.deleteFilters({ ids: selectedTotals.ids });
       setFeedback({
         type: failed > 0 && deleted === 0 ? 'error' : 'success',
-        message: `${formatBytes(freedBytes)} libérés (${deleted} élément${deleted > 1 ? 's' : ''})${failed > 0 ? `, ${failed} ignoré${failed > 1 ? 's' : ''} (modifiés ou protégés)` : ''}.`,
+        message: t('cleaner.section.freed', { size: formatBytes(freedBytes), count: deleted, ignored: failed > 0 ? t('cleaner.section.ignored', { count: failed }) : '' }),
       });
       setScan(null); // les chiffres ne sont plus valables : nouvelle analyse nécessaire
     } catch (error) {
-      setFeedback({ type: 'error', message: error?.message || 'La suppression a échoué.' });
+      setFeedback({ type: 'error', message: error?.message || t('cleaner.section.deleteFailed') });
     } finally {
       setDeleting(false);
     }
@@ -108,18 +109,16 @@ const SystemCleanerSection = () => {
   return (
     <section className="bg-white rounded-2xl border border-slate-100 p-4">
       <h2 className="text-xs font-black uppercase tracking-wide text-slate-400 mb-2">
-        Nettoyer le stockage
+        {t('cleaner.section.title')}
       </h2>
       <p className="text-xs text-slate-500 mb-3">
-        Repère les fichiers inutiles (téléchargements interrompus, temporaires, miniatures…).
-        L'analyse se fait uniquement sur votre téléphone et ne supprime rien : vous choisissez
-        ensuite les catégories à nettoyer.
+        {t('cleaner.section.intro')}
       </p>
 
       {access === null && (
         <div className="flex items-center gap-2 text-xs text-slate-400 py-3">
           <div className="w-4 h-4 rounded-full border-2 border-slate-300 border-t-indigo-500 animate-spin" />
-          Vérification…
+          {t('cleaner.section.checking')}
         </div>
       )}
 
@@ -130,7 +129,7 @@ const SystemCleanerSection = () => {
           className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2"
         >
           <ShieldAlert size={15} />
-          Autoriser l'accès aux fichiers
+          {t('cleaner.section.allowAccess')}
         </button>
       )}
 
@@ -142,7 +141,7 @@ const SystemCleanerSection = () => {
           className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-900 hover:bg-slate-700 disabled:opacity-60 text-white text-xs font-bold rounded-xl transition-all active:scale-[0.98]"
         >
           <RefreshCcw size={14} className={scanning ? 'animate-spin' : ''} />
-          {scanning ? 'Analyse en cours…' : scan ? 'Analyser à nouveau' : 'Analyser'}
+          {scanning ? t('cleaner.section.analysing') : scan ? t('cleaner.section.analyseAgain') : t('cleaner.section.analyse')}
         </button>
       )}
 
@@ -167,7 +166,7 @@ const SystemCleanerSection = () => {
                   <p className="text-sm font-bold text-slate-800">{filter.label}</p>
                   <p className="text-xs text-slate-500 mt-0.5">{filter.description}</p>
                   <p className="text-xs font-bold text-slate-600 mt-1">
-                    {empty ? 'Rien à nettoyer' : `${result.count} élément${result.count > 1 ? 's' : ''} · ${formatBytes(result.bytes)}`}
+                    {empty ? t('cleaner.section.nothing') : t('cleaner.section.items', { count: result.count, size: formatBytes(result.bytes) })}
                   </p>
                   {!empty && result.preview?.length > 0 && (
                     <p className="text-[11px] text-slate-400 mt-1 truncate">
@@ -180,7 +179,7 @@ const SystemCleanerSection = () => {
           })}
           {scan.truncated && (
             <p className="text-xs text-amber-600">
-              Le stockage est très volumineux : l'analyse a été limitée. Relancez-la après un premier nettoyage.
+              {t('cleaner.section.truncated')}
             </p>
           )}
           <button
@@ -193,10 +192,10 @@ const SystemCleanerSection = () => {
           >
             <Eraser size={14} />
             {deleting
-              ? 'Suppression…'
+              ? t('cleaner.section.deleting')
               : armed
-                ? 'Confirmer — suppression définitive'
-                : `Nettoyer ${selectedTotals.count} élément${selectedTotals.count > 1 ? 's' : ''} (${formatBytes(selectedTotals.bytes)})`}
+                ? t('cleaner.section.confirm')
+                : t('cleaner.section.clean', { count: selectedTotals.count, size: formatBytes(selectedTotals.bytes) })}
           </button>
         </div>
       )}
