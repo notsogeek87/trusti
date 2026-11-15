@@ -1,3 +1,4 @@
 Neu:
-• In Meine Apps zeigt die Suche jetzt auch Apps aus dem Katalog, in einem eigenen Abschnitt.
-• Das + fügt die App überall zu Meine Apps hinzu (der Filter „Zum Testen“ entfällt).
+• Trusti gibt es jetzt auf Englisch und Deutsch: Wähle die Sprache oben auf dem Bildschirm. Standardmäßig folgt die App der Sprache deines Handys.
+• Benachrichtigungen und das Update-Fenster folgen ebenfalls der Sprache deines Handys.
+• Die Beschreibungen der Apps sind vorerst noch auf Französisch.

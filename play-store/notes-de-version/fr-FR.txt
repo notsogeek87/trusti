@@ -1,3 +1,4 @@
 Nouveautés :
-• Dans Mes Apps, la recherche affiche aussi les apps du catalogue, dans une section à part.
-• Le + ajoute l'app à Mes Apps partout (le filtre « À tester » disparaît).
+• Trusti parle maintenant anglais et allemand : choisissez la langue en haut de l'écran. Par défaut, l'app suit la langue de votre téléphone.
+• Les notifications et la fenêtre de mise à jour suivent aussi la langue du téléphone.
+• Les descriptions des apps restent en français pour l'instant.
