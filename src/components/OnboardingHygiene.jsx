@@ -3,6 +3,7 @@ import { ArrowRight, CheckCircle2, Circle, KeyRound } from 'lucide-react';
 import { HYGIENE_CHECKS } from '../constants/dataHygiene';
 import { computeHygiene, detectPasswordManagers } from '../utils/passwordManagers';
 import { getHygieneState, saveHygieneState } from '../utils/hygieneStorage';
+import { t } from '../i18n/index.js';
 
 // Étape "Hygiène numérique" de fin de scan (onboarding et re-scan manuel),
 // juste après le récapitulatif du TrustiScore : l'utilisateur coche les
@@ -36,13 +37,13 @@ const OnboardingHygiene = ({ apps, ctaLabel, onDone }) => {
             <KeyRound size={26} className="text-white" />
           </div>
           <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2">
-            Hygiène numérique
+            {t('onboarding.hygiene.eyebrow')}
           </p>
           <h2 className="text-lg font-black text-slate-900 leading-snug">
-            Et vos comptes, bien protégés ?
+            {t('onboarding.hygiene.title')}
           </h2>
           <p className="text-xs text-slate-500 mt-1.5 mb-5 leading-relaxed">
-            Cochez ce qui est déjà en place. Vos réponses restent sur ce téléphone.
+            {t('onboarding.hygiene.intro')}
           </p>
         </div>
 
@@ -65,7 +66,7 @@ const OnboardingHygiene = ({ apps, ctaLabel, onDone }) => {
                   <span className="text-[13px] font-semibold leading-snug text-slate-700">
                     {item.label}
                     {locked && (
-                      <span className="block text-[11px] font-medium text-emerald-600">{dedicated.name} détecté</span>
+                      <span className="block text-[11px] font-medium text-emerald-600">{t('onboarding.hygiene.detected', { name: dedicated.name })}</span>
                     )}
                   </span>
                 </button>
@@ -75,7 +76,7 @@ const OnboardingHygiene = ({ apps, ctaLabel, onDone }) => {
         </ul>
 
         <p className="text-center text-xs font-bold text-slate-500 mb-6">
-          Bilan : {hygiene.done}/{hygiene.total}
+          {t('onboarding.hygiene.score', { done: hygiene.done, total: hygiene.total })}
         </p>
 
         <button

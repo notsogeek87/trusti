@@ -4,6 +4,7 @@ import ScoreIndicator from './ui/ScoreIndicator';
 import OnboardingHygiene from './OnboardingHygiene';
 import { GRADE_INFO, PHONE_GRADE_LABEL } from '../constants/grades';
 import { computeTrustiSummary } from '../utils/trustiScore';
+import { t } from '../i18n/index.js';
 
 // Écran de récapitulatif affiché après un scan (natif) ou une sélection
 // (manuelle/web), avant d'arriver sur "Mes Apps" : combien d'apps par
@@ -15,7 +16,7 @@ const OnboardingSummary = ({ apps, onDetails }) => {
   const phoneGradeLabel = PHONE_GRADE_LABEL;
   const { counts, total, overallGrade } = useMemo(() => computeTrustiSummary(apps), [apps]);
   const [showHygiene, setShowHygiene] = useState(false);
-  const detailsLabel = `Détails de mes ${total} app${total !== 1 ? 's' : ''}`;
+  const detailsLabel = t('onboarding.summary.details', { count: total });
 
   if (showHygiene) {
     return <OnboardingHygiene apps={apps} ctaLabel={detailsLabel} onDone={onDetails} />;
@@ -33,7 +34,7 @@ const OnboardingSummary = ({ apps, onDetails }) => {
         {overallGrade && (
           <>
             <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 mb-3">
-              TrustiScore de ton téléphone
+              {t('onboarding.summary.phoneScore')}
             </p>
             <div className="flex justify-center mb-3">
               <ScoreIndicator grade={overallGrade} size="large" />
@@ -60,7 +61,7 @@ const OnboardingSummary = ({ apps, onDetails }) => {
           onClick={() => setShowHygiene(true)}
           className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-indigo-200 transition-all active:scale-95"
         >
-          Continuer
+          {t('onboarding.summary.continue')}
           <ArrowRight size={18} />
         </button>
       </div>

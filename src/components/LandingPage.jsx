@@ -3,6 +3,7 @@ import { ShieldCheck, ArrowRight, Lock, Globe, Eye, CheckCircle, BookOpen, X, Bu
 import { GRADE_INFO } from '../constants/grades';
 import { STANDALONE_URLS } from '../utils/standalonePage';
 import HostingCredit from './ui/HostingCredit';
+import { t } from '../i18n/index.js';
 
 /**
  * Landing Page affichée uniquement lors de la première visite
@@ -16,7 +17,7 @@ const LandingPage = ({ onClose }) => {
       <button
         onClick={onClose}
         className="fixed top-4 right-4 z-50 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-all text-white"
-        aria-label="Fermer"
+        aria-label={t('onboarding.landing.close')}
       >
         <X size={24} />
       </button>
@@ -34,9 +35,12 @@ const LandingPage = ({ onClose }) => {
                 poster="/assets/poster.png"
               >
                 <source src="/assets/intro.mp4" type="video/mp4" />
-                Votre navigateur ne supporte pas la lecture de vidéos.
+                {t('onboarding.landing.noVideo')}
               </video>
             </div>
+            {t('onboarding.landing.videoNote') && (
+              <p className="mt-2 text-[11px] text-slate-500">{t('onboarding.landing.videoNote')}</p>
+            )}
           </div>
 
           <div className="max-w-md animate-in slide-in-from-bottom duration-700 delay-300">
@@ -48,13 +52,12 @@ const LandingPage = ({ onClose }) => {
             </div>
 
             <h1 className="text-4xl font-black mb-4 text-white leading-tight">
-              Reprenez votre souveraineté numérique européenne
+              {t('onboarding.landing.title')}
             </h1>
 
               <p className="text-base leading-relaxed text-slate-400 font-medium mb-8">
-                Trusti évalue la confiance que vous pouvez accorder à vos applications.
-                Découvrez quelles apps respectent vraiment votre <span className="text-white font-bold">souveraineté numérique</span> et
-                protègent votre <span className="text-white font-bold">vie privée</span>.
+                {t('onboarding.landing.intro1')} <span className="text-white font-bold">{t('onboarding.landing.sovereignty')}</span>{' '}
+                {t('onboarding.landing.intro2')} <span className="text-white font-bold">{t('onboarding.landing.privacy')}</span>{t('onboarding.landing.intro3')}
               </p>
 
             {/* Fonctionnalités clés */}
@@ -65,10 +68,10 @@ const LandingPage = ({ onClose }) => {
                 </div>
                 <div>
                   <h3 className="text-white font-bold text-sm mb-1">
-                    Souveraineté européenne
+                    {t('onboarding.landing.f1Title')}
                   </h3>
                   <p className="text-slate-400 text-xs">
-                    Données hébergées en Europe, conformité RGPD
+                    {t('onboarding.landing.f1Body')}
                   </p>
                 </div>
               </div>
@@ -79,10 +82,10 @@ const LandingPage = ({ onClose }) => {
                 </div>
                 <div>
                   <h3 className="text-white font-bold text-sm mb-1">
-                    Vie privée protégée
+                    {t('onboarding.landing.f2Title')}
                   </h3>
                   <p className="text-slate-400 text-xs">
-                    Protection contre le Cloud Act et surveillance
+                    {t('onboarding.landing.f2Body')}
                   </p>
                 </div>
               </div>
@@ -93,10 +96,10 @@ const LandingPage = ({ onClose }) => {
                 </div>
                 <div>
                   <h3 className="text-white font-bold text-sm mb-1">
-                    Évaluations transparentes
+                    {t('onboarding.landing.f3Title')}
                   </h3>
                   <p className="text-slate-400 text-xs">
-                    Scores basés sur 12 critères objectifs
+                    {t('onboarding.landing.f3Body')}
                   </p>
                 </div>
               </div>
@@ -105,7 +108,7 @@ const LandingPage = ({ onClose }) => {
             {/* Échelle des notes */}
             <div className="bg-slate-800/50 rounded-2xl p-6 mb-8 border border-slate-700">
               <h3 className="font-black text-xs uppercase tracking-widest mb-4 text-slate-400 text-center">
-                Échelle des notes
+                {t('onboarding.landing.scale')}
               </h3>
 
               <div className="space-y-3">
@@ -127,18 +130,18 @@ const LandingPage = ({ onClose }) => {
               onClick={onClose}
               className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl hover:scale-105"
             >
-              Commencer l'exploration
+              {t('onboarding.landing.start')}
               <ArrowRight size={20} />
             </button>
 
             <a
-              href="https://trusti-score.lielu.eu/"
+              href={t('common.siteUrl')}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full mt-4 bg-slate-800 hover:bg-slate-700 border-2 border-indigo-500/30 hover:border-indigo-500 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 group"
             >
               <BookOpen size={20} className="text-indigo-400 group-hover:text-indigo-300" />
-              En savoir plus sur le TrustiScore
+              {t('onboarding.landing.learnMore')}
               <ArrowRight size={18} className="text-indigo-400 group-hover:text-indigo-300 group-hover:translate-x-1 transition-transform" />
             </a>
 
@@ -148,33 +151,33 @@ const LandingPage = ({ onClose }) => {
               className="w-full mt-4 bg-slate-800 hover:bg-slate-700 border-2 border-emerald-500/30 hover:border-emerald-500 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 group"
             >
               <Building2 size={20} className="text-emerald-400 group-hover:text-emerald-300" />
-              Organisations
+              {t('onboarding.landing.organisations')}
               <ArrowRight size={18} className="text-emerald-400 group-hover:text-emerald-300 group-hover:translate-x-1 transition-transform" />
             </a>
 
             <p className="text-[11px] text-slate-500 mt-6 italic">
-              Basé sur 12 critères : RGPD, Cloud Act, Open Source, Localisation des données, et plus encore.
+              {t('onboarding.landing.basis')}
             </p>
             <HostingCredit className="mt-2" />
 
             {/* Pages légales : URL absolues, pour qu'elles s'ouvrent dans le navigateur depuis l'APK */}
-            <nav aria-label="Informations légales" className="mt-3 flex items-center justify-center gap-3 text-[11px] text-slate-500">
+            <nav aria-label={t('onboarding.landing.legalNav')} className="mt-3 flex items-center justify-center gap-3 text-[11px] text-slate-500">
               <a
-                href="https://app.trusti-score.eu/privacy-policy.html"
+                href={t('onboarding.legal.privacyUrl')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline decoration-slate-600 underline-offset-2 hover:text-slate-300"
               >
-                Confidentialité
+                {t('onboarding.landing.privacyLink')}
               </a>
               <span aria-hidden="true">·</span>
               <a
-                href="https://trusti-score.eu/mentions-legales.html"
+                href={t('onboarding.legal.legalUrl')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline decoration-slate-600 underline-offset-2 hover:text-slate-300"
               >
-                Mentions légales
+                {t('onboarding.landing.legalLink')}
               </a>
             </nav>
           </div>

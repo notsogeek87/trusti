@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 /**
  * Contenu pédagogique "Hygiène numérique" : bonnes pratiques de gestion des
  * mots de passe, gestionnaires recommandés et cases du bilan de sécurité.
@@ -13,21 +14,21 @@ export const RECOMMENDED_MANAGERS = [
     key: 'bitwarden',
     name: 'Bitwarden',
     packageId: 'com.x8bit.bitwarden',
-    pitch: 'Open source, synchronisé sur tous tes appareils, gratuit pour l\'essentiel.',
+    get pitch() { return t('hygiene.managers.bitwarden.pitch'); },
     url: 'https://play.google.com/store/apps/details?id=com.x8bit.bitwarden',
   },
   {
     key: 'keepassdx',
     name: 'KeePassDX',
     packageId: 'com.kunzisoft.keepass.free',
-    pitch: '100 % local, sans compte : tes mots de passe restent dans un fichier que tu contrôles.',
+    get pitch() { return t('hygiene.managers.keepassdx.pitch'); },
     url: 'https://play.google.com/store/apps/details?id=com.kunzisoft.keepass.free',
   },
   {
     key: 'proton-pass',
     name: 'Proton Pass',
     packageId: 'proton.android.pass',
-    pitch: 'Chiffré de bout en bout, éditeur suisse, intégré à l\'écosystème Proton.',
+    get pitch() { return t('hygiene.managers.proton-pass.pitch'); },
     url: 'https://play.google.com/store/apps/details?id=proton.android.pass',
   },
 ];
@@ -54,33 +55,33 @@ export const ECOSYSTEM_MANAGER_PATTERN = /google[ -]?password|gestionnaire de mo
 export const BEST_PRACTICES = [
   {
     id: 'unique',
-    title: 'Un mot de passe différent par compte',
-    text: 'Si un site se fait pirater, les voleurs essaient le même mot de passe ailleurs. Un mot de passe unique limite les dégâts à un seul compte.',
+    get title() { return t('hygiene.practices.unique.title'); },
+    get text() { return t('hygiene.practices.unique.text'); },
   },
   {
     id: 'long',
-    title: 'Long plutôt que compliqué',
-    text: 'Une phrase de passe de 4 mots au hasard ou plus (ou 16 caractères et plus) résiste mieux qu\'un mot court plein de symboles.',
+    get title() { return t('hygiene.practices.long.title'); },
+    get text() { return t('hygiene.practices.long.text'); },
   },
   {
     id: 'manager',
-    title: 'Un gestionnaire plutôt que ta mémoire',
-    text: 'Un gestionnaire génère et retient des mots de passe uniques à ta place. Tu n\'as plus à retenir qu\'un seul mot de passe maître, long et solide.',
+    get title() { return t('hygiene.practices.manager.title'); },
+    get text() { return t('hygiene.practices.manager.text'); },
   },
   {
     id: '2fa',
-    title: 'Active la double authentification (2FA)',
-    text: 'Un code temporaire en plus du mot de passe bloque la plupart des piratages. Préfère une application d\'authentification au SMS, et protège d\'abord ta messagerie.',
+    get title() { return t('hygiene.practices.2fa.title'); },
+    get text() { return t('hygiene.practices.2fa.text'); },
   },
   {
     id: 'passkeys',
-    title: 'Adopte les passkeys quand c\'est possible',
-    text: 'Une passkey remplace le mot de passe par une clé stockée sur ton appareil : impossible à hameçonner ou à réutiliser. Beaucoup de gestionnaires savent les gérer.',
+    get title() { return t('hygiene.practices.passkeys.title'); },
+    get text() { return t('hygiene.practices.passkeys.text'); },
   },
   {
     id: 'share',
-    title: 'Ne communique jamais un mot de passe',
-    text: 'Aucun service sérieux ne te le demande par e-mail, SMS ou téléphone. En cas de doute, passe par le site officiel.',
+    get title() { return t('hygiene.practices.share.title'); },
+    get text() { return t('hygiene.practices.share.text'); },
   },
 ];
 
@@ -89,23 +90,23 @@ export const BEST_PRACTICES = [
 export const HYGIENE_CHECKS = [
   {
     id: 'manager',
-    label: 'J\'utilise un gestionnaire de mots de passe',
+    get label() { return t('hygiene.checks.manager.label'); },
     auto: true,
   },
   {
     id: '2fa-mail',
-    label: 'La double authentification est active sur ma messagerie',
+    get label() { return t('hygiene.checks.2fa-mail.label'); },
   },
   {
     id: 'screen-lock',
-    label: 'Mon écran est verrouillé (code, empreinte ou visage)',
+    get label() { return t('hygiene.checks.screen-lock.label'); },
   },
   {
     id: 'backup',
-    label: 'Mes données importantes sont sauvegardées',
+    get label() { return t('hygiene.checks.backup.label'); },
   },
   {
     id: 'updates',
-    label: 'Mon téléphone et mes apps sont à jour',
+    get label() { return t('hygiene.checks.updates.label'); },
   },
 ];

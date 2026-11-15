@@ -6,5 +6,7 @@ import ui from './ui.js';
 import grades from './grades.js';
 import myApps from './myApps.js';
 import cards from './cards.js';
+import onboarding from './onboarding.js';
+import hygiene from './hygiene.js';
 
-export default { cards, categories, common, grades, header, myApps, ui };
+export default { cards, categories, common, grades, header, hygiene, myApps, onboarding, ui };

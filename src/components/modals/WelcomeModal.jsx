@@ -1,4 +1,6 @@
 import React from 'react';
+import { t } from '../../i18n/index.js';
+import LanguageSwitcher from '../ui/LanguageSwitcher';
 
 /**
  * Modal de bienvenue affiché lors de la première visite
@@ -6,7 +8,8 @@ import React from 'react';
 const WelcomeModal = ({ onFirstTimeYes, onFirstTimeNo }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-300 px-4">
-      <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-indigo-500/30 max-w-sm w-full overflow-hidden animate-in zoom-in duration-500">
+      <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-indigo-500/30 max-w-sm w-full overflow-hidden animate-in zoom-in duration-500">
+        <LanguageSwitcher className="absolute top-3 right-3 text-slate-300 hover:bg-white/10 hover:text-white" />
         {/* En-tête avec logo */}
         <div className="bg-gradient-to-r from-indigo-600/20 via-purple-600/20 to-indigo-600/20 p-6 text-center border-b border-indigo-500/20">
           <div className="flex justify-center mb-3">
@@ -17,10 +20,10 @@ const WelcomeModal = ({ onFirstTimeYes, onFirstTimeNo }) => {
             />
           </div>
           <h2 className="text-xl font-bold text-white mb-1.5">
-            Bienvenue sur Trusti !
+            {t('onboarding.welcome.title')}
           </h2>
           <p className="text-slate-300 text-sm">
-            Votre compagnon pour une souveraineté numérique
+            {t('onboarding.welcome.subtitle')}
           </p>
         </div>
 
@@ -28,10 +31,10 @@ const WelcomeModal = ({ onFirstTimeYes, onFirstTimeNo }) => {
         <div className="p-6">
           <div className="mb-6 text-center">
             <p className="text-base text-white font-medium mb-1.5">
-              Est-ce votre première visite ?
+              {t('onboarding.welcome.question')}
             </p>
             <p className="text-sm text-slate-400">
-              Je peux vous guider à travers les fonctionnalités
+              {t('onboarding.welcome.offer')}
             </p>
           </div>
 
@@ -43,7 +46,7 @@ const WelcomeModal = ({ onFirstTimeYes, onFirstTimeNo }) => {
             >
               <span className="flex items-center justify-center gap-2">
                 <span>✨</span>
-                <span>Oui, c'est ma première fois</span>
+                <span>{t('onboarding.welcome.yes')}</span>
               </span>
             </button>
 
@@ -54,7 +57,7 @@ const WelcomeModal = ({ onFirstTimeYes, onFirstTimeNo }) => {
               >
                 <span className="flex items-center justify-center gap-1.5">
                   <span>👍</span>
-                  <span>Non, je connais déjà Trusti</span>
+                  <span>{t('onboarding.welcome.no')}</span>
                 </span>
               </button>
             )}
@@ -64,7 +67,7 @@ const WelcomeModal = ({ onFirstTimeYes, onFirstTimeNo }) => {
         {/* Pied de page */}
         <div className="px-6 pb-6 pt-3 border-t border-slate-700/50">
           <p className="text-xs text-slate-500 text-center">
-            Vous pourrez toujours accéder à l'aide depuis le menu
+            {t('onboarding.welcome.helpLater')}
           </p>
         </div>
       </div>

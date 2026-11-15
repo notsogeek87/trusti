@@ -2,6 +2,7 @@ import React from 'react';
 import { X, KeyRound, ExternalLink, CheckCircle2, Circle } from 'lucide-react';
 import { BEST_PRACTICES, HYGIENE_CHECKS } from '../../constants/dataHygiene';
 import { GRADE_COLORS } from '../../constants/grades';
+import { t } from '../../i18n/index.js';
 
 /**
  * Fiche "Bonnes pratiques" : bilan cochable, rappels sur les mots de passe et
@@ -16,25 +17,25 @@ const DataHygieneModal = ({ hygiene, managerDetected, managerSuggestions, ecosys
           <button
             onClick={onClose}
             className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors p-1 z-10"
-            aria-label="Fermer"
+            aria-label={t('hygiene.modal.close')}
           >
             <X size={20} />
           </button>
 
           <div className="flex items-center gap-2 mb-3 text-indigo-400">
             <KeyRound size={20} />
-            <h4 className="font-black text-xs uppercase tracking-widest">Hygiène numérique</h4>
+            <h4 className="font-black text-xs uppercase tracking-widest">{t('hygiene.modal.eyebrow')}</h4>
           </div>
           <h3 className="text-xl font-black mb-2 text-white leading-tight">
-            Protéger vos comptes au quotidien
+            {t('hygiene.modal.title')}
           </h3>
           <p className="text-[13px] leading-relaxed text-slate-400 font-medium mb-6">
-            Un bon score de confiance ne suffit pas : la façon dont vous protégez vos accès compte autant. Quelques réflexes suffisent.
+            {t('hygiene.modal.intro')}
           </p>
 
           <h4 className="font-black text-[11px] uppercase tracking-widest mb-3 text-slate-500 flex items-center gap-2">
             <div className="h-px bg-slate-800 flex-grow"></div>
-            Mon bilan · {hygiene.done}/{hygiene.total}
+            {t('hygiene.modal.myScore', { done: hygiene.done, total: hygiene.total })}
             <div className="h-px bg-slate-800 flex-grow"></div>
           </h4>
           <div className="w-full h-1.5 rounded-full overflow-hidden bg-slate-800 mb-3">
@@ -58,7 +59,7 @@ const DataHygieneModal = ({ hygiene, managerDetected, managerSuggestions, ecosys
                     <Icon size={20} className={`shrink-0 mt-0.5 ${checked ? 'text-emerald-400' : 'text-slate-600'}`} />
                     <span className={`text-[13px] font-semibold leading-snug ${checked ? 'text-slate-300' : 'text-white'}`}>
                       {item.label}
-                      {locked && <span className="block text-[11px] font-medium text-slate-500">Détecté dans tes apps</span>}
+                      {locked && <span className="block text-[11px] font-medium text-slate-500">{t('hygiene.modal.detectedInApps')}</span>}
                     </span>
                   </button>
                 </li>
@@ -68,7 +69,7 @@ const DataHygieneModal = ({ hygiene, managerDetected, managerSuggestions, ecosys
 
           <h4 className="font-black text-[11px] uppercase tracking-widest mb-5 text-slate-500 flex items-center gap-2">
             <div className="h-px bg-slate-800 flex-grow"></div>
-            Les bons réflexes
+            {t('hygiene.modal.habits')}
             <div className="h-px bg-slate-800 flex-grow"></div>
           </h4>
           <div className="space-y-5 mb-8">
@@ -87,12 +88,12 @@ const DataHygieneModal = ({ hygiene, managerDetected, managerSuggestions, ecosys
 
           <h4 className="font-black text-[11px] uppercase tracking-widest mb-4 text-slate-500 flex items-center gap-2">
             <div className="h-px bg-slate-800 flex-grow"></div>
-            Gestionnaires conseillés
+            {t('hygiene.modal.managers')}
             <div className="h-px bg-slate-800 flex-grow"></div>
           </h4>
           {ecosystemManager && (
             <p className="text-[12px] leading-relaxed text-amber-300/90 font-medium mb-4">
-              Tu utilises {ecosystemManager.name}, lié à un écosystème. Un gestionnaire indépendant te laisse changer de téléphone ou de navigateur sans tout perdre.
+              {t('hygiene.modal.ecosystem', { name: ecosystemManager.name })}
             </p>
           )}
           <div className="space-y-3">
@@ -127,7 +128,7 @@ const DataHygieneModal = ({ hygiene, managerDetected, managerSuggestions, ecosys
             ))}
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-4 leading-relaxed">
-            Liens officiels (Play Store), sans affiliation. Tout ce que tu coches ici reste sur ton appareil.
+            {t('hygiene.modal.footer')}
           </p>
         </div>
       </div>
