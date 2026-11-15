@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { X } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
-import { API_URL } from '../../utils/apiConfig';
+import { API_URL, appsUrl } from '../../utils/apiConfig';
 import AppIconImage from '../ui/AppIconImage';
 import { categoryLabel } from '../../constants/categories';
 import { t } from '../../i18n/index.js';
@@ -31,7 +31,7 @@ const ImportAppsModal = ({ appIds = [], migrations = [], onConfirm, onClose }) =
         return;
       }
       try {
-        const url = `${API_URL}/apps?ids=${encodeURIComponent(allIds.join(','))}&_t=${Date.now()}`;
+        const url = appsUrl(`ids=${encodeURIComponent(allIds.join(','))}&_t=${Date.now()}`);
         const response = await fetch(url);
         const data = await response.json();
         const appsArray = data.success ? data.apps : [];

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { TABS } from '../constants/tabs';
-import { API_URL } from '../utils/apiConfig';
+import { API_URL, appsUrl } from '../utils/apiConfig';
 import { cachedFetchJSON } from '../utils/fetchCache';
 import { normalizeApiApps } from '../utils/appListing';
 
@@ -10,7 +10,7 @@ const FULL_LOAD_BATCH_SIZE = 50;
 // Tri par grade (même ordre que l'affichage du catalogue) : chaque page
 // s'ajoute à la fin sans réordonner les cartes déjà visibles, et l'offset
 // pointe toujours dans le même ordre.
-const pageUrl = (limit, offset) => `${API_URL}/apps?limit=${limit}&offset=${offset}&sortBy=grade`;
+const pageUrl = (limit, offset) => appsUrl(`limit=${limit}&offset=${offset}&sortBy=grade`);
 
 /**
  * Catalogue des apps, chargé par pages (défilement infini). Il est chargé en

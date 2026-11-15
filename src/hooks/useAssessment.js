@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { API_URL } from '../utils/apiConfig';
+import { API_URL, appsUrl } from '../utils/apiConfig';
 
 /**
  * Charge le détail d'évaluation TrustiScore d'une app (GET /api/apps?assessment_for=:id).
@@ -21,7 +21,7 @@ export function useAssessment(appId) {
     const controller = new AbortController();
     setState({ status: 'loading', assessment: null });
 
-    fetch(`${API_URL}/apps?assessment_for=${encodeURIComponent(appId)}`, { signal: controller.signal })
+    fetch(appsUrl(`assessment_for=${encodeURIComponent(appId)}`), { signal: controller.signal })
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))))
       .then((data) => {
         const assessment = data?.assessment || null;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Check, ChevronRight, ChevronLeft, Sparkles, ShieldCheck, ArrowRight, ImagePlus, Search, X, Hand } from 'lucide-react';
-import { API_URL } from '../utils/apiConfig';
+import { API_URL, appsUrl } from '../utils/apiConfig';
 import { pickBestAlternative } from '../utils/alternatives';
 import { isNativeAndroid, isIOSWeb } from '../utils/platform';
 import { loadOnboardingCatalog } from '../utils/onboardingCatalog';
@@ -370,7 +370,7 @@ const OnboardingApps = ({ onComplete, onExit }) => {
       if (cache.current[idx] === undefined) cache.current[idx] = [];
 
       stepData.categories.forEach(cat => {
-        fetch(`${API_URL}/apps?onboarding=true&categories=${encodeURIComponent(cat)}`)
+        fetch(appsUrl(`onboarding=true&categories=${encodeURIComponent(cat)}`))
           .then(r => r.json())
           .then(data => {
             if (!data.success || data.apps.length === 0) return;

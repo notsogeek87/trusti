@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { API_URL } from '../utils/apiConfig';
+import { API_URL, appsUrl } from '../utils/apiConfig';
 import { cachedFetchJSON } from '../utils/fetchCache';
 import { isNativeAndroid } from '../utils/platform';
 import AlternativeNudges from '../native/AlternativeNudges';
@@ -33,7 +33,7 @@ export const useGradeChanges = ({ myApps, ready, active, alertsEnabled }) => {
     if (!active || catalogChanges || myApps.size === 0) return undefined;
     let cancelled = false;
     const since = sinceForState(state);
-    cachedFetchJSON(`${API_URL}/apps?grade_changes_since=${since}`, { ttl: CACHE_TTL })
+    cachedFetchJSON(appsUrl(`grade_changes_since=${since}`), { ttl: CACHE_TTL })
       .then((data) => {
         if (cancelled || !Array.isArray(data?.changes)) return;
         setCatalogChanges(data.changes);

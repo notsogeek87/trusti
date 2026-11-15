@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { API_URL } from '../utils/apiConfig';
+import { API_URL, appsUrl } from '../utils/apiConfig';
 
 /**
  * Charge le catalogue des apps « usage pro » (GET /api/apps?pro=true) pour la
@@ -13,7 +13,7 @@ export function useProCatalog() {
   useEffect(() => {
     const controller = new AbortController();
     setState({ status: 'loading', apps: [] });
-    fetch(`${API_URL}/apps?pro=true`, { signal: controller.signal })
+    fetch(appsUrl(`pro=true`), { signal: controller.signal })
       .then(res => (res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))))
       .then(data => {
         if (!data?.success || !Array.isArray(data.apps)) throw new Error('Réponse invalide');

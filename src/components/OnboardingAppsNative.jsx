@@ -3,7 +3,7 @@ import { ScanSearch, ShieldCheck, ArrowRight, ListChecks, Globe, Lock, Eye } fro
 import InstalledApps from '../native/InstalledApps';
 import { AppTile, ANIM_CSS, computeReplacementMap } from './OnboardingApps';
 import OnboardingSummary from './OnboardingSummary';
-import { API_URL } from '../utils/apiConfig';
+import { API_URL, appsUrl } from '../utils/apiConfig';
 import { extractPackageId } from '../utils/androidPackage';
 
 // Id de la fiche « Android » (système d'exploitation) dans la base Trusti.
@@ -197,7 +197,7 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection, autoStart = false
     setRevealedCount(0);
     try {
       const installedPromise = InstalledApps.getInstalledPackages();
-      const catalogRes = await fetch(`${API_URL}/apps?onboarding=true`).then(r => r.json());
+      const catalogRes = await fetch(appsUrl(`onboarding=true`)).then(r => r.json());
       if (!catalogRes.success) throw new Error('catalog fetch failed');
 
       const installedRes = await installedPromise;

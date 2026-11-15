@@ -2,8 +2,29 @@
 import dbService from '../server/database/service-postgres.js';
 import { isAuthorizedAdminRequest } from '../server/adminToken.js';
 import { parseSince } from '../server/gradeChanges.js';
+import { normalizeContentLang, translateApiBody } from '../server/contentTranslations.js';
 
+/**
+ * ?lang=en|de : les textes venant de la base (raison, description, évaluation, guides)
+ * sont servis dans cette langue quand une traduction existe, en français sinon
+ * (server/contentTranslations.js). Sans lang, ou lang=fr, rien ne change.
+ */
 export default async function handler(req, res) {
+  const lang = req.method === 'GET' ? normalizeContentLang(req.query?.lang) : null;
+  if (!lang) return handleApps(req, res);
+
+  const pending = [];
+  const json = res.json.bind(res);
+  res.json = (body) => {
+    pending.push(translateApiBody(body, lang, req.query).then(json, () => json(body)));
+    return res;
+  };
+  const result = await handleApps(req, res);
+  await Promise.all(pending);
+  return result;
+}
+
+async function handleApps(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');

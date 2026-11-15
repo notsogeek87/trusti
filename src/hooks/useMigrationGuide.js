@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { API_URL } from '../utils/apiConfig';
+import { API_URL, appsUrl } from '../utils/apiConfig';
 import { cachedFetchJSON } from '../utils/fetchCache';
 
 const CACHE_TTL = 60 * 60 * 1000; // 1 h ; hors connexion, la dernière version lue reste utilisable
@@ -22,7 +22,7 @@ export function useMigrationGuide(fromId, toId) {
     }
     let cancelled = false;
     setState({ status: 'loading', guide: null });
-    const url = `${API_URL}/apps?migration_guide_from=${encodeURIComponent(fromId)}&migration_guide_to=${encodeURIComponent(toId)}`;
+    const url = appsUrl(`migration_guide_from=${encodeURIComponent(fromId)}&migration_guide_to=${encodeURIComponent(toId)}`);
     cachedFetchJSON(url, { ttl: CACHE_TTL })
       .then((data) => { if (!cancelled) setState({ status: 'ready', guide: data?.guide || null }); })
       .catch(() => { if (!cancelled) setState({ status: 'ready', guide: null }); });

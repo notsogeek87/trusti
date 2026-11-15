@@ -3,7 +3,7 @@ import { ChevronLeft, X, CheckCircle, Route, PlusCircle, ShieldCheck, ArrowRight
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { GRADE_INFO } from '../../constants/grades';
 import { useIsMobile } from '../../contexts/ViewModeContext';
-import { API_URL } from '../../utils/apiConfig';
+import { API_URL, appsUrl } from '../../utils/apiConfig';
 import { isNativeAndroid } from '../../utils/platform';
 import { extractPackageId } from '../../utils/androidPackage';
 import InstalledApps from '../../native/InstalledApps';
@@ -142,7 +142,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
       // Charger les apps manquantes
       setIsLoadingRelations(true);
       try {
-        const response = await fetch(`${API_URL}/apps?ids=${missingIds.join(',')}`);
+        const response = await fetch(appsUrl(`ids=${missingIds.join(',')}`));
         const data = await response.json();
         
         if (data.success && data.apps) {

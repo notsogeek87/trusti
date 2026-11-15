@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { TABS } from '../constants/tabs';
-import { API_URL } from '../utils/apiConfig';
+import { API_URL, appsUrl } from '../utils/apiConfig';
 import { parseShareParams, clearShareParams, getSharedAppIdFromUrl } from '../utils/shareUtils';
 import { t } from '../i18n/index.js';
 
@@ -16,7 +16,7 @@ export const useShareLinks = ({ openAppDetail, closeStorageManager, addMyApps, i
   // on la charge par son ID.
   const openSharedApp = useCallback(async (appId) => {
     try {
-      const response = await fetch(`${API_URL}/apps?ids=${encodeURIComponent(appId)}`);
+      const response = await fetch(appsUrl(`ids=${encodeURIComponent(appId)}`));
       const data = await response.json();
       const found = data.success && Array.isArray(data.apps) ? data.apps[0] : null;
       if (!found) {

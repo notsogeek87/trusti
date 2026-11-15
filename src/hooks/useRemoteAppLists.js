@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { TABS } from '../constants/tabs';
-import { API_URL } from '../utils/apiConfig';
+import { API_URL, appsUrl } from '../utils/apiConfig';
 import { cachedFetchJSON } from '../utils/fetchCache';
 import { normalizeApiApps, normalizeApp } from '../utils/appListing';
 
@@ -19,7 +19,7 @@ export const useAwardsApps = (activeTab) => {
     const loadAwardsApps = async () => {
       setIsLoadingAwards(true);
       try {
-        const data = await cachedFetchJSON(`${API_URL}/apps?awards=true`, { ttl: AWARDS_TTL });
+        const data = await cachedFetchJSON(appsUrl(`awards=true`), { ttl: AWARDS_TTL });
         setAwardsApps(normalizeApiApps(data));
       } catch (error) {
         console.error('❌ Erreur lors du chargement des apps Awards:', error);
@@ -55,7 +55,7 @@ export const useMyAppsData = ({ activeTab, myApps, needsMyAppsData, onMissingApp
       setIsLoadingMyApps(true);
       try {
         const ids = Array.from(myApps);
-        const data = await cachedFetchJSON(`${API_URL}/apps?ids=${encodeURIComponent(ids.join(','))}`);
+        const data = await cachedFetchJSON(appsUrl(`ids=${encodeURIComponent(ids.join(','))}`));
         const loaded = normalizeApiApps(data);
         setMyAppsData(loaded);
 
@@ -98,7 +98,7 @@ export const useAppSearch = (searchTerm) => {
     const performSearch = async () => {
       setIsSearching(true);
       try {
-        const response = await fetch(`${API_URL}/apps?search=${encodeURIComponent(searchTerm)}`);
+        const response = await fetch(appsUrl(`search=${encodeURIComponent(searchTerm)}`));
         const data = await response.json();
         if (cancelled) return;
         if (data.success) setSearchResults(data.apps.map(normalizeApp));

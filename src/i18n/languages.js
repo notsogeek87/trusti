@@ -6,6 +6,6 @@
  */
 export const DEFAULT_LANGUAGE = 'fr';
 export const LANGUAGES = ['fr', 'en', 'de'];
-export const ENABLED_LANGUAGES = ['fr'];
+export const ENABLED_LANGUAGES = ['fr', 'en', 'de'];
 
 export const LANGUAGE_NAMES = { fr: 'Français', en: 'English', de: 'Deutsch' };

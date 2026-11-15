@@ -1,4 +1,4 @@
-import { API_URL } from './apiConfig';
+import { API_URL, appsUrl } from './apiConfig';
 
 // Catalogue complet de l'onboarding, chargé une seule fois par session et
 // partagé entre l'import par capture d'écran et la recherche du mode manuel.
@@ -9,7 +9,7 @@ let catalogPromise = null;
  */
 export function loadOnboardingCatalog() {
   if (!catalogPromise) {
-    catalogPromise = fetch(`${API_URL}/apps?onboarding=true`)
+    catalogPromise = fetch(appsUrl(`onboarding=true`))
       .then(r => r.json())
       .then(data => {
         if (!data.success) throw new Error('catalog fetch failed');
