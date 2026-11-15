@@ -7,6 +7,7 @@ import { GRADES } from '../constants/grades.js';
 import { PRO_FAMILIES, OTHER_FAMILY, CRITICALITY_LEVELS, DEFAULT_CRITICALITY } from '../constants/proFamilies.js';
 import { pickRecommendedAlternative, isStrictlyBetterGrade } from './alternatives.js';
 import { sanitizeAuditAnswers } from './auditChecklist.js';
+import { t } from '../i18n/index.js';
 
 const GRADE_POINTS = { A: 4, B: 3, C: 2, D: 1, E: 0 };
 const WEAK_GRADES = new Set(['D', 'E']);
@@ -163,7 +164,7 @@ function csvCell(value) {
 /** Export CSV (séparateur « ; », lisible par un tableur français). */
 export function toCsv(selectedApps, criticality = {}, plan = []) {
   const alternativeOf = new Map(plan.map(p => [p.app.id, p.alternative]));
-  const header = ['Outil', 'Éditeur', 'Catégorie', 'Famille', 'Note TrustiScore', 'Criticité', 'Alternative proposée', 'Note de l\'alternative'];
+  const header = ['tool', 'editor', 'category', 'family', 'grade', 'criticality', 'alternative', 'altGrade'].map(k => t(`org.pdf.csv.${k}`));
   const rows = (selectedApps || []).map(app => {
     const level = CRITICALITY_LEVELS.find(l => l.id === (criticality[app.id] || DEFAULT_CRITICALITY));
     const alt = alternativeOf.get(app.id);

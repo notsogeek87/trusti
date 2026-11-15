@@ -8,13 +8,14 @@ import { GRADES, GRADE_COLORS } from '../constants/grades.js';
 import { CRITICALITY_LEVELS, DEFAULT_CRITICALITY } from '../constants/proFamilies.js';
 import { familyForCategory } from './organisationAssessment.js';
 import { AUDIT_WEIGHTS } from '../constants/auditChecklist.js';
+import { formatDate, t } from '../i18n/index.js';
 
 const ORG_GRADE_LABEL = {
-  A: 'Parc très souverain',
-  B: 'Parc plutôt souverain',
-  C: 'Parc hybride, à surveiller',
-  D: 'Forte dépendance, risque élevé',
-  E: 'Dépendance critique',
+  get A() { return t('org.pdf.grade.A'); },
+  get B() { return t('org.pdf.grade.B'); },
+  get C() { return t('org.pdf.grade.C'); },
+  get D() { return t('org.pdf.grade.D'); },
+  get E() { return t('org.pdf.grade.E'); },
 };
 const DARK_TEXT = new Set(['B', 'C', 'D']);
 const INK = [27, 42, 58];
@@ -22,7 +23,7 @@ const MUTED = [91, 107, 125];
 const LINE = [220, 232, 239];
 
 // Caractères hors Latin-1 acceptés par les polices standard du PDF (WinAnsi).
-const WIN_ANSI_EXTRA = '€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ';
+const WIN_ANSI_EXTRA = '€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ'; // i18n-ignore
 
 /** Texte compatible avec les polices standard du PDF (espaces invisibles retirés). */
 export function pdfText(value) {
@@ -52,7 +53,7 @@ const levelLabel = id => (CRITICALITY_LEVELS.find(l => l.id === (id || DEFAULT_C
 export function reportFilename(orgName, date = new Date()) {
   const slug = pdfText(orgName).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
-  return `trusti-rapport${slug ? `-${slug}` : ''}-${date.toISOString().slice(0, 10)}.pdf`;
+  return `${t('org.pdf.file')}${slug ? `-${slug}` : ''}-${date.toISOString().slice(0, 10)}.pdf`;
 }
 
 /**
@@ -68,14 +69,14 @@ export async function buildOrganisationPdf({ orgName, profileLabel, selectedApps
 
   // En-tête
   doc.setFont('helvetica', 'bold').setFontSize(8).setTextColor(...MUTED);
-  doc.text('RAPPORT DE SOUVERAINETÉ NUMÉRIQUE', M, y + 3);
-  doc.setFont('helvetica', 'normal').text('Établi avec Trusti - app.trusti-score.eu', W - M, y + 3, { align: 'right' });
+  doc.text(t('org.pdf.heading'), M, y + 3);
+  doc.setFont('helvetica', 'normal').text(t('org.pdf.madeWith'), W - M, y + 3, { align: 'right' });
   doc.setFont('helvetica', 'bold').setFontSize(18).setTextColor(...INK);
-  const title = doc.splitTextToSize(pdfText(orgName) || 'Parc applicatif de l\'organisation', W - 2 * M);
+  const title = doc.splitTextToSize(pdfText(orgName) || t('org.pdf.defaultTitle'), W - 2 * M);
   doc.text(title, M, y + 11);
   y += 11 + (title.length - 1) * 7;
   doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(...MUTED);
-  const dateLabel = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  const dateLabel = formatDate(date, { day: 'numeric', month: 'long', year: 'numeric' });
   doc.text(pdfText(`${profileLabel ? `${profileLabel} - ` : ''}${dateLabel}`), M, y + 6);
   y += 10;
   doc.setDrawColor(...INK).setLineWidth(0.6).line(M, y, W - M, y);
@@ -90,19 +91,19 @@ export async function buildOrganisationPdf({ orgName, profileLabel, selectedApps
   const textX = M + 26;
   doc.setFontSize(14).setTextColor(...INK).text(pdfText(`Note ${g} : ${ORG_GRADE_LABEL[g]}`), textX, y + 6);
   doc.setFont('helvetica', 'normal').setFontSize(9.5).setTextColor(...MUTED);
-  const subtitle = `Note du parc pondérée par la criticité de ${summary.total} outil${summary.total > 1 ? 's' : ''}`
-    + (summary.rawGrade !== g ? ` (sans pondération : ${summary.rawGrade})` : '') + '.';
+  const subtitle = t('org.pdf.subtitle', { count: summary.total })
+    + (summary.rawGrade !== g ? t('org.pdf.unweighted', { grade: summary.rawGrade }) : '') + '.';
   doc.text(doc.splitTextToSize(pdfText(subtitle), W - M - textX)[0], textX, y + 12);
   // Répartition : une pastille par note (lettre dedans), suivie du nombre d'outils
   let x = textX;
   const chipY = y + 16;
-  doc.setFont('helvetica', 'bold').setFontSize(7).setTextColor(...MUTED).text('RÉPARTITION', x, chipY + 4.2);
-  x += doc.getTextWidth('RÉPARTITION') + 3;
+  doc.setFont('helvetica', 'bold').setFontSize(7).setTextColor(...MUTED).text(t('org.pdf.breakdown'), x, chipY + 4.2);
+  x += doc.getTextWidth(t('org.pdf.breakdown')) + 3;
   GRADES.forEach(grade => {
     const count = summary.counts[grade] || 0;
     doc.setFillColor(...gradeRgb(grade)).setDrawColor(...INK).setLineWidth(0.25).roundedRect(x, chipY, 6, 6, 1.2, 1.2, 'FD');
     doc.setFont('helvetica', 'bold').setFontSize(8.5).setTextColor(...gradeTextRgb(grade)).text(grade, x + 3, chipY + 4.3, { align: 'center' });
-    const label = `${count} outil${count > 1 ? 's' : ''}`;
+    const label = t('org.pdf.tools', { count });
     doc.setFont('helvetica', count > 0 ? 'bold' : 'normal').setFontSize(9).setTextColor(...(count > 0 ? INK : MUTED)).text(label, x + 7.5, chipY + 4.3);
     x += 7.5 + doc.getTextWidth(label) + 4;
   });
@@ -110,10 +111,10 @@ export async function buildOrganisationPdf({ orgName, profileLabel, selectedApps
 
   // Indicateurs
   const indicators = [
-    ['OUTILS NOTÉS D OU E', percent(summary.weakShare)],
-    ['OUTILS VITAUX À RISQUE', String(summary.criticalWeak.length)],
-    ['PREMIER ÉDITEUR', summary.topEditor ? `${summary.topEditor.name} (${percent(summary.topEditor.share)})` : 'Aucune concentration'],
-    ['ÉDITEURS EUROPÉENS', summary.europeanShare === null ? 'Non renseigné' : percent(summary.europeanShare)],
+    [t('org.pdf.weak'), percent(summary.weakShare)],
+    [t('org.pdf.criticalWeak'), String(summary.criticalWeak.length)],
+    [t('org.pdf.topEditor'), summary.topEditor ? `${summary.topEditor.name} (${percent(summary.topEditor.share)})` : t('org.pdf.noConcentration')],
+    [t('org.pdf.european'), summary.europeanShare === null ? t('org.pdf.notSpecified') : percent(summary.europeanShare)],
   ];
   const gap = 3;
   const boxW = (W - 2 * M - gap * 3) / 4;
@@ -149,14 +150,14 @@ export async function buildOrganisationPdf({ orgName, profileLabel, selectedApps
 
   // Plan d'action
   if (plan.length > 0) {
-    sectionTitle('Plan d\'action prioritaire');
+    sectionTitle(t('org.pdf.actionPlan'));
     autoTable(doc, {
       ...tableStyles,
       startY: y,
-      head: [['#', 'OUTIL ACTUEL', 'NOTE', 'CRITICITÉ', 'ALTERNATIVE PROPOSÉE', 'NOTE']],
+      head: [['#', t('org.pdf.colCurrent'), t('org.pdf.colGrade'), t('org.pdf.colCriticality'), t('org.pdf.colAlternative'), t('org.pdf.colGrade')]],
       body: plan.map(({ app, alternative, criticality: level }, i) => [
         String(i + 1), pdfText(app.name), app.grade, levelLabel(level),
-        alternative ? pdfText(alternative.name) : 'aucune au catalogue', alternative ? alternative.grade : '',
+        alternative ? pdfText(alternative.name) : t('org.pdf.noneInCatalogue'), alternative ? alternative.grade : '',
       ]),
       columnStyles: { 0: { cellWidth: 8, textColor: MUTED }, 1: { fontStyle: 'bold' }, 2: { cellWidth: 12 }, 3: { cellWidth: 24 }, 5: { cellWidth: 12 } },
       didParseCell: colorGrades([2, 5]),
@@ -166,16 +167,15 @@ export async function buildOrganisationPdf({ orgName, profileLabel, selectedApps
 
   // Questionnaire d'audit : points de vigilance (seulement s'il a été rempli)
   if (audit && audit.answered > 0) {
-    sectionTitle('Pratiques : points de vigilance');
+    sectionTitle(t('org.pdf.practices'));
     doc.setFont('helvetica', 'normal').setFontSize(8.5).setTextColor(...MUTED);
-    doc.text(pdfText(`Questionnaire d'audit : ${audit.answered} réponse${audit.answered > 1 ? 's' : ''} sur ${audit.total} questions, `
-      + `${audit.risks.length} point${audit.risks.length > 1 ? 's' : ''} de vigilance, ${audit.unknown.length} à vérifier.`), M, y + 3);
+    doc.text(pdfText(t('org.pdf.auditLine', { answered: audit.answered, total: audit.total, risks: audit.risks.length, unknown: audit.unknown.length })), M, y + 3);
     y += 5;
     if (audit.risks.length > 0) {
       autoTable(doc, {
         ...tableStyles,
         startY: y,
-        head: [['#', 'PRIORITÉ', 'THÈME', 'RECOMMANDATION']],
+        head: [['#', t('org.pdf.colPriority'), t('org.pdf.colTheme'), t('org.pdf.colRecommendation')]],
         body: audit.risks.map((q, i) => [String(i + 1), pdfText(AUDIT_WEIGHTS[q.weight]?.label || ''), pdfText(q.theme), pdfText(q.recommendation)]),
         columnStyles: { 0: { cellWidth: 8, textColor: MUTED }, 1: { cellWidth: 22, fontStyle: 'bold' }, 2: { cellWidth: 38 } },
       });
@@ -185,7 +185,7 @@ export async function buildOrganisationPdf({ orgName, profileLabel, selectedApps
       autoTable(doc, {
         ...tableStyles,
         startY: y,
-        head: [['À VÉRIFIER']],
+        head: [[t('org.pdf.colToCheck')]],
         body: audit.unknown.map(q => [pdfText(q.label)]),
       });
       y = doc.lastAutoTable.finalY + 6;
@@ -195,11 +195,11 @@ export async function buildOrganisationPdf({ orgName, profileLabel, selectedApps
 
   // Qui peut vous aider
   if (help.length > 0) {
-    sectionTitle('Qui peut vous aider ?');
+    sectionTitle(t('org.pdf.whoCanHelp'));
     autoTable(doc, {
       ...tableStyles,
       startY: y,
-      head: [['DISPOSITIF', 'POUR QUOI FAIRE', 'ADRESSE']],
+      head: [[t('org.pdf.colScheme'), t('org.pdf.colWhatFor'), t('org.pdf.colAddress')]],
       body: help.map(h => [pdfText(h.label), pdfText(h.description), pdfText(h.url.replace(/^https:\/\//, ''))]),
       columnStyles: { 0: { cellWidth: 40, fontStyle: 'bold' }, 2: { cellWidth: 46, textColor: MUTED } },
     });
@@ -207,13 +207,13 @@ export async function buildOrganisationPdf({ orgName, profileLabel, selectedApps
   }
 
   // Annexe
-  sectionTitle('Annexe : outils évalués');
+  sectionTitle(t('org.pdf.annex'));
   const sortedApps = [...selectedApps].sort((a, b) =>
     familyForCategory(a.category).label.localeCompare(familyForCategory(b.category).label, 'fr') || String(a.name).localeCompare(String(b.name), 'fr'));
   autoTable(doc, {
     ...tableStyles,
     startY: y,
-    head: [['OUTIL', 'ÉDITEUR', 'FAMILLE', 'CRITICITÉ', 'NOTE']],
+    head: [[t('org.pdf.colTool'), t('org.pdf.colEditor'), t('org.pdf.colFamily'), t('org.pdf.colCriticality'), t('org.pdf.colGrade')]],
     body: sortedApps.map(app => [
       pdfText(app.name), pdfText(app.developer) || '-', pdfText(familyForCategory(app.category).label), levelLabel(criticality[app.id]), app.grade,
     ]),
@@ -224,10 +224,7 @@ export async function buildOrganisationPdf({ orgName, profileLabel, selectedApps
 
   // Méthode
   const method = doc.setFont('helvetica', 'normal').setFontSize(8).splitTextToSize(pdfText(
-    'Les notes TrustiScore (A à E) évaluent la souveraineté numérique de chaque outil sur cinq critères : contrôle technique, '
-    + 'conformité, gouvernance et juridiction, localisation des données, transparence. Certaines notes sont provisoires '
-    + '(sources à confirmer) ; le détail de chaque note est consultable sur la fiche de l\'outil dans Trusti. '
-    + 'Ce rapport est une aide à la décision, pas un audit de conformité.'), W - 2 * M);
+    t('org.pdf.methodNote')), W - 2 * M);
   if (y + method.length * 3.6 > doc.internal.pageSize.getHeight() - 18) { doc.addPage(); y = M; }
   doc.setTextColor(...MUTED).text(method, M, y);
 
@@ -237,8 +234,8 @@ export async function buildOrganisationPdf({ orgName, profileLabel, selectedApps
     doc.setPage(i);
     const H = doc.internal.pageSize.getHeight();
     doc.setFont('helvetica', 'normal').setFontSize(7.5).setTextColor(...MUTED);
-    doc.text(pdfText(`${pdfText(orgName) || 'Rapport Trusti'} - ${dateLabel}`), M, H - 8);
-    doc.text(`Page ${i} / ${pages}`, W - M, H - 8, { align: 'right' });
+    doc.text(pdfText(`${pdfText(orgName) || t('org.pdf.footerTitle')} - ${dateLabel}`), M, H - 8);
+    doc.text(t('org.pdf.page', { i, n: pages }), W - M, H - 8, { align: 'right' });
   }
   return doc;
 }
