@@ -4,6 +4,7 @@ import ScoreIndicator from '../ui/ScoreIndicator';
 import { shareText } from '../../utils/shareUtils';
 import AppIconImage from '../ui/AppIconImage';
 import { categoryLabel } from '../../constants/categories';
+import { t } from '../../i18n/index.js';
 
 /**
  * Modal de partage des migrations
@@ -32,18 +33,18 @@ const ShareModal = ({ migratedApps, customMigrations, allApps = [], sortedAppIds
       `${app?.name} → ${customAlt || app?.alternative}`
     ).join('\n• ');
 
-    return `✅ Mes migrations Trusti:\n\n• ${migrations}`;
+    return `${t('modals.migrations.shareHeader')}\n\n• ${migrations}`;
   };
 
   const handleShare = () => {
-    shareText('Mes migrations Trusti', generateShareText());
+    shareText(t('modals.migrations.shareTitle'), generateShareText());
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl max-h-[80vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between">
-          <h2 className="text-xl font-black text-slate-900">Migrations effectuées</h2>
+          <h2 className="text-xl font-black text-slate-900">{t('modals.migrations.title')}</h2>
           <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600">
             <X size={24} />
           </button>
@@ -53,7 +54,7 @@ const ShareModal = ({ migratedApps, customMigrations, allApps = [], sortedAppIds
           {migratedList.length > 0 ? (
             <div className="space-y-4">
               <h3 className="font-black text-sm uppercase tracking-widest text-emerald-800 mb-4 flex items-center gap-2">
-                <span className="text-lg">✅</span> {migratedList.length} app{migratedList.length > 1 ? 's' : ''} migrée{migratedList.length > 1 ? 's' : ''}
+                <span className="text-lg">✅</span> {t('modals.migrations.count', { count: migratedList.length })}
               </h3>
               
               <div className="space-y-3">
@@ -78,7 +79,7 @@ const ShareModal = ({ migratedApps, customMigrations, allApps = [], sortedAppIds
                     
                     <div className="flex items-center justify-center mb-3">
                       <div className="h-px bg-emerald-200 flex-grow"></div>
-                      <span className="text-emerald-600 text-xs font-black px-2">MIGRÉ VERS</span>
+                      <span className="text-emerald-600 text-xs font-black px-2">{t('modals.migrations.migratedTo')}</span>
                       <div className="h-px bg-emerald-200 flex-grow"></div>
                     </div>
                     
@@ -108,21 +109,21 @@ const ShareModal = ({ migratedApps, customMigrations, allApps = [], sortedAppIds
                   onClick={handleShare}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
                 >
-                  <span>🔗</span> Partager
+                  <span>🔗</span> {t('modals.common.share')}
                 </button>
                 <button
                   onClick={onClose}
                   className="w-full bg-slate-50 hover:bg-slate-100 text-slate-900 py-3 rounded-xl font-bold text-sm transition-colors"
                 >
-                  Fermer
+                  {t('modals.common.close')}
                 </button>
               </div>
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-slate-500 font-medium">Aucune migration effectuée</p>
+              <p className="text-slate-500 font-medium">{t('modals.migrations.empty')}</p>
               <p className="text-xs text-slate-400 mt-2">
-                Marquez les apps comme migrées pour les afficher ici
+                {t('modals.migrations.emptyHint')}
               </p>
             </div>
           )}

@@ -6,7 +6,8 @@
  *   --files     : affiche aussi les lignes.
  *
  * Heuristique : chaîne ou texte JSX contenant une lettre accentuée française ou un mot
- * français courant. Les commentaires, console.* et imports sont ignorés.
+ * français courant. Les commentaires, console.* et imports sont ignorés, ainsi que les
+ * lignes marquées `i18n-ignore` (valeur technique, pas un texte affiché).
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -39,10 +40,15 @@ function stripComments(src) {
 let total = 0;
 const rows = [];
 for (const file of START.flatMap((s) => walk(s))) {
-  const lines = stripComments(readFileSync(file, 'utf-8')).split('\n');
+  const raw = readFileSync(file, 'utf-8');
+  const rawLines = raw.split('\n');
+  const lines = stripComments(raw).split('\n');
   const hits = [];
-  lines.forEach((line, i) => {
-    if (/^\s*(import|export \* from)|console\.(log|warn|error|info|debug)|throw new Error/.test(line)) return;
+  lines.forEach((rawLine, i) => {
+    let line = rawLine;
+    if (/^\s*(import|export \* from)|console\.(log|warn|error|info|debug)|throw new Error/.test(line) || /i18n-ignore/.test(rawLines[i] || '')) return;
+    // Classes CSS (« font-sans »…) : pas du texte
+    line = line.replace(/className=(?:"[^"]*"|\{`[^`]*`\})/g, '');
     const strings = [
       ...line.matchAll(/'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)"|`((?:[^`\\]|\\.)*)`/g),
     ].map((m) => m[1] ?? m[2] ?? m[3]);

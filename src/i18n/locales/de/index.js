@@ -8,5 +8,9 @@ import myApps from './myApps.js';
 import cards from './cards.js';
 import onboarding from './onboarding.js';
 import hygiene from './hygiene.js';
+import main from './main.js';
+import appDetail from './appDetail.js';
+import modals from './modals.js';
+import migration from './migration.js';
 
-export default { cards, categories, common, grades, header, hygiene, myApps, onboarding, ui };
+export default { appDetail, cards, categories, common, grades, header, hygiene, main, migration, modals, myApps, onboarding, ui };

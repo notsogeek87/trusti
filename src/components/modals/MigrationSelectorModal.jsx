@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import AppIconImage from '../ui/AppIconImage';
 import { categoryLabel } from '../../constants/categories';
+import { t } from '../../i18n/index.js';
 
 /**
  * Modal de sélection d'une alternative de migration
@@ -47,7 +48,7 @@ const MigrationSelectorModal = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl max-h-[80vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between">
-          <h2 className="text-lg font-black text-slate-900">Choisir une alternative</h2>
+          <h2 className="text-lg font-black text-slate-900">{t('modals.selector.title')}</h2>
           <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600">
             <X size={24} />
           </button>
@@ -56,13 +57,13 @@ const MigrationSelectorModal = ({
         <div className="p-6">
           <div className="space-y-4">
             <p className="text-sm text-slate-600 font-medium">
-              Sélectionnez une alternative pour remplacer{' '}
+              {t('modals.selector.intro')}{' '}
               <span className="font-black text-slate-900">{currentApp?.name}</span>
             </p>
             
             {currentCategory && (
               <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-2 text-xs text-indigo-700">
-                📂 Catégorie : <span className="font-bold">{currentCategory}</span>
+                📂 {t('modals.common.category')} <span className="font-bold">{categoryLabel(currentCategory)}</span>
               </div>
             )}
             
@@ -70,10 +71,10 @@ const MigrationSelectorModal = ({
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center">
                 <div className="text-4xl mb-3">🔍</div>
                 <p className="text-sm font-bold text-slate-700 mb-1">
-                  Aucune alternative disponible
+                  {t('modals.selector.none')}
                 </p>
                 <p className="text-xs text-slate-500">
-                  Pas d'alternative de grade A/B dans la catégorie <span className="font-bold">{currentCategory}</span> pour le moment
+                  {t('modals.selector.noneHintBefore')} <span className="font-bold">{categoryLabel(currentCategory)}</span> {t('modals.selector.noneHintAfter')}
                 </p>
               </div>
             ) : (
@@ -125,7 +126,7 @@ const MigrationSelectorModal = ({
               onClick={onClose}
               className="w-full mt-6 bg-slate-100 hover:bg-slate-200 text-slate-900 py-3 rounded-xl font-bold text-sm transition-colors"
             >
-              Fermer
+              {t('modals.common.close')}
             </button>
           </div>
         </div>

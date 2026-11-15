@@ -4,6 +4,7 @@ import ScoreIndicator from '../ui/ScoreIndicator';
 import { shareText } from '../../utils/shareUtils';
 import AppIconImage from '../ui/AppIconImage';
 import { categoryLabel } from '../../constants/categories';
+import { t } from '../../i18n/index.js';
 
 /**
  * Modal de partage des TrustiApp
@@ -22,21 +23,21 @@ const TrustiShareModal = ({ selectedApps, customMigrations = new Map(), allApps 
   const generateShareText = () => {
     const appsList = selectedApps.map(app => {
       const alt = app.grade !== 'A' ? getChosenAlternative(app) : null;
-      return alt ? `${app.name} → ${alt.name}` : `${app.name} (Grade ${app.grade})`;
+      return alt ? `${app.name} → ${alt.name}` : t('modals.trustiApps.gradeLine', { name: app.name, grade: app.grade });
     }).join('\n• ');
 
-    return `⭐ Mes TrustiApp:\n\n• ${appsList}`;
+    return `${t('modals.trustiApps.shareHeader')}\n\n• ${appsList}`;
   };
 
   const handleShare = () => {
-    shareText('Mes TrustiApp', generateShareText());
+    shareText(t('modals.trustiApps.title'), generateShareText());
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl max-h-[80vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between">
-          <h2 className="text-xl font-black text-slate-900">Mes TrustiApp</h2>
+          <h2 className="text-xl font-black text-slate-900">{t('modals.trustiApps.title')}</h2>
           <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600">
             <X size={24} />
           </button>
@@ -46,7 +47,7 @@ const TrustiShareModal = ({ selectedApps, customMigrations = new Map(), allApps 
           {selectedApps.length > 0 ? (
             <div className="space-y-4">
               <h3 className="font-black text-sm uppercase tracking-widest text-emerald-800 mb-4 flex items-center gap-2">
-                <span className="text-lg">⭐</span> {selectedApps.length} app{selectedApps.length > 1 ? 's' : ''} sélectionnée{selectedApps.length > 1 ? 's' : ''}
+                <span className="text-lg">⭐</span> {t('modals.trustiApps.count', { count: selectedApps.length })}
               </h3>
               
               <div className="space-y-3">
@@ -86,21 +87,21 @@ const TrustiShareModal = ({ selectedApps, customMigrations = new Map(), allApps 
                   onClick={handleShare}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
                 >
-                  <span>🔗</span> Partager
+                  <span>🔗</span> {t('modals.common.share')}
                 </button>
                 <button
                   onClick={onClose}
                   className="w-full bg-slate-50 hover:bg-slate-100 text-slate-900 py-3 rounded-xl font-bold text-sm transition-colors"
                 >
-                  Fermer
+                  {t('modals.common.close')}
                 </button>
               </div>
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-slate-500 font-medium">Aucune app sélectionnée</p>
+              <p className="text-slate-500 font-medium">{t('modals.trustiApps.empty')}</p>
               <p className="text-xs text-slate-400 mt-2">
-                Cliquez sur le + pour ajouter des apps
+                {t('modals.trustiApps.emptyHint')}
               </p>
             </div>
           )}

@@ -2,7 +2,7 @@ import { isNativeAndroid } from './platform';
 import SaveFile from '../native/SaveFile';
 
 /** Message de rejet du plugin natif quand l'utilisateur ferme le sélecteur. */
-export const SAVE_CANCELLED = 'Enregistrement annulé';
+export const SAVE_CANCELLED = 'Enregistrement annulé'; // i18n-ignore : marqueur interne, jamais affiché
 
 /** true si l'erreur correspond à une annulation volontaire (pas une panne). */
 export const isSaveCancelled = err => String(err?.message || err || '').includes(SAVE_CANCELLED);

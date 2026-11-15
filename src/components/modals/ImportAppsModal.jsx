@@ -4,6 +4,7 @@ import ScoreIndicator from '../ui/ScoreIndicator';
 import { API_URL } from '../../utils/apiConfig';
 import AppIconImage from '../ui/AppIconImage';
 import { categoryLabel } from '../../constants/categories';
+import { t } from '../../i18n/index.js';
 
 /**
  * Modal d'import : s'affiche quand l'utilisateur ouvre un lien de partage
@@ -60,7 +61,7 @@ const ImportAppsModal = ({ appIds = [], migrations = [], onConfirm, onClose }) =
     .map(({ id, customAlt }) => {
       const app = appsById.get(String(id));
       if (!app) return null;
-      return { app, altName: customAlt || app.alternative || 'Alternative recommandée' };
+      return { app, altName: customAlt || app.alternative || t('modals.import.recommended') };
     })
     .filter(Boolean);
 
@@ -82,7 +83,7 @@ const ImportAppsModal = ({ appIds = [], migrations = [], onConfirm, onClose }) =
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl max-h-[85vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-slate-100 p-6 flex items-center justify-between">
-          <h2 className="text-xl font-black text-slate-900">Sélection partagée</h2>
+          <h2 className="text-xl font-black text-slate-900">{t('modals.import.title')}</h2>
           <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600">
             <X size={24} />
           </button>
@@ -91,25 +92,25 @@ const ImportAppsModal = ({ appIds = [], migrations = [], onConfirm, onClose }) =
         <div className="p-6">
           {isLoading ? (
             <div className="text-center py-8">
-              <p className="text-slate-500 font-medium">Chargement…</p>
+              <p className="text-slate-500 font-medium">{t('modals.import.loading')}</p>
             </div>
           ) : totalCount === 0 ? (
             <div className="text-center py-8">
-              <p className="text-slate-500 font-medium">Aucune app à importer</p>
-              <p className="text-xs text-slate-400 mt-2">Le lien est peut-être incomplet ou expiré.</p>
+              <p className="text-slate-500 font-medium">{t('modals.import.empty')}</p>
+              <p className="text-xs text-slate-400 mt-2">{t('modals.import.emptyHint')}</p>
             </div>
           ) : (
             <div className="space-y-6">
               <p className="text-sm text-slate-600">
-                Quelqu'un a partagé <span className="font-black text-slate-900">{totalCount}</span>{' '}
-                élément{totalCount > 1 ? 's' : ''} avec toi. Ajoute-les à ta liste en un clic.
+                {t('modals.import.sharedBefore')} <span className="font-black text-slate-900">{totalCount}</span>{' '}
+                {t('modals.import.sharedAfter', { count: totalCount })}
               </p>
 
               {/* Apps sélectionnées */}
               {selectedApps.length > 0 && (
                 <div className="space-y-3">
                   <h3 className="font-black text-xs uppercase tracking-widest text-emerald-800 flex items-center gap-2">
-                    <span className="text-lg">⭐</span> {selectedApps.length} app{selectedApps.length > 1 ? 's' : ''}
+                    <span className="text-lg">⭐</span> {t('modals.import.apps', { count: selectedApps.length })}
                   </h3>
                   {selectedApps.map((app) => (
                     <div key={app.id} className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
@@ -130,7 +131,7 @@ const ImportAppsModal = ({ appIds = [], migrations = [], onConfirm, onClose }) =
               {migrationRows.length > 0 && (
                 <div className="space-y-3">
                   <h3 className="font-black text-xs uppercase tracking-widest text-indigo-800 flex items-center gap-2">
-                    <span className="text-lg">✅</span> {migrationRows.length} migration{migrationRows.length > 1 ? 's' : ''}
+                    <span className="text-lg">✅</span> {t('modals.import.migrations', { count: migrationRows.length })}
                   </h3>
                   {migrationRows.map(({ app, altName }) => (
                     <div key={`mig-${app.id}`} className="bg-indigo-50 rounded-lg p-4 border border-indigo-100">
@@ -153,13 +154,13 @@ const ImportAppsModal = ({ appIds = [], migrations = [], onConfirm, onClose }) =
                   onClick={() => onConfirm({ appIds: selectedApps.map((a) => a.id), migrations })}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
                 >
-                  <span>➕</span> Ajouter à Mes Apps
+                  <span>➕</span> {t('modals.import.add')}
                 </button>
                 <button
                   onClick={onClose}
                   className="w-full bg-slate-50 hover:bg-slate-100 text-slate-900 py-3 rounded-xl font-bold text-sm transition-colors"
                 >
-                  Ignorer
+                  {t('modals.import.ignore')}
                 </button>
               </div>
             </div>

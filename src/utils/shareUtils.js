@@ -5,6 +5,7 @@
 import { Share } from '@capacitor/share';
 import { isNativeAndroid } from './platform';
 import { getShareBaseUrl, parseSharedAppId, SHARED_APP_PARAM } from './appShareLink';
+import { t } from '../i18n/index.js';
 
 /**
  * Partage du texte (et éventuellement un lien) via le vrai menu de partage
@@ -36,7 +37,7 @@ export const shareText = async (title, text, url) => {
     const payload = url ? `${text}\n\n${url}` : text;
     try {
       await navigator.clipboard.writeText(payload);
-      alert('Copié dans le presse-papiers ✓');
+      alert(t('main.share.copied'));
     } catch (err) {
       console.error('Erreur lors de la copie', err);
     }

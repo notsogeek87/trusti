@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { TABS } from '../constants/tabs';
 import { API_URL } from '../utils/apiConfig';
 import { parseShareParams, clearShareParams, getSharedAppIdFromUrl } from '../utils/shareUtils';
+import { t } from '../i18n/index.js';
 
 /**
  * Liens de partage reçus au chargement : `?app=<id>` ouvre la fiche de l'app,
@@ -19,7 +20,7 @@ export const useShareLinks = ({ openAppDetail, closeStorageManager, addMyApps, i
       const data = await response.json();
       const found = data.success && Array.isArray(data.apps) ? data.apps[0] : null;
       if (!found) {
-        toast.error("Cette app n'existe plus dans Trusti.");
+        toast.error(t('main.share.appGone'));
         return;
       }
       closeStorageManager();
@@ -31,7 +32,7 @@ export const useShareLinks = ({ openAppDetail, closeStorageManager, addMyApps, i
       });
     } catch (error) {
       console.error("Erreur lors de l'ouverture de l'app partagée:", error);
-      toast.error("Impossible d'ouvrir l'app partagée. Vérifie ta connexion.");
+      toast.error(t('main.share.openFailed'));
     }
   }, [openAppDetail, closeStorageManager, toast]);
 

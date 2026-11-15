@@ -19,6 +19,7 @@ import AppIconImage from '../ui/AppIconImage';
 import { shareText } from '../../utils/shareUtils';
 import { buildAppShareUrl, buildAppShareText } from '../../utils/appShareLink';
 import { categoryLabel } from '../../constants/categories';
+import { formatDate, t } from '../../i18n/index.js';
 
 const ANIM_STYLES = `
   @keyframes detailSlideUp {
@@ -106,7 +107,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
     if (!packageName) return;
     requestUninstall(packageName).catch((error) => {
       console.error('Désinstallation impossible:', error);
-      window.alert("Impossible d'ouvrir la désinstallation. Réessayez depuis les paramètres du téléphone.");
+      window.alert(t('appDetail.detail.uninstallFailed'));
     });
   };
 
@@ -189,50 +190,19 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
   };
 
   // Formater la date de mise à jour
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Non disponible';
+  const formatUpdateDate = (dateString) => {
+    if (!dateString) return t('common.unavailable');
     try {
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat('fr-FR', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric'
-      }).format(date);
+      return formatDate(new Date(dateString), { day: '2-digit', month: 'long', year: 'numeric' });
     } catch {
-      return 'Non disponible';
+      return t('common.unavailable');
     }
   };
 
   // Traduire/formater les noms de permissions
   const formatPermissionName = (permission) => {
     // Mapper les permissions Android communes vers du texte français
-    const permissionMap = {
-      'ACCESS_FINE_LOCATION': 'Localisation précise',
-      'ACCESS_COARSE_LOCATION': 'Localisation approximative',
-      'CAMERA': 'Appareil photo',
-      'RECORD_AUDIO': 'Microphone',
-      'READ_CONTACTS': 'Lecture des contacts',
-      'WRITE_CONTACTS': 'Modification des contacts',
-      'READ_CALENDAR': 'Lecture du calendrier',
-      'WRITE_CALENDAR': 'Modification du calendrier',
-      'READ_SMS': 'Lecture des SMS',
-      'SEND_SMS': 'Envoi de SMS',
-      'READ_PHONE_STATE': 'État du téléphone',
-      'CALL_PHONE': 'Passer des appels',
-      'READ_CALL_LOG': 'Historique des appels',
-      'WRITE_CALL_LOG': 'Modification de l\'historique d\'appels',
-      'READ_EXTERNAL_STORAGE': 'Lecture du stockage',
-      'WRITE_EXTERNAL_STORAGE': 'Écriture sur le stockage',
-      'INTERNET': 'Accès Internet',
-      'ACCESS_NETWORK_STATE': 'État du réseau',
-      'ACCESS_WIFI_STATE': 'État du Wi-Fi',
-      'BLUETOOTH': 'Bluetooth',
-      'VIBRATE': 'Vibration',
-      'WAKE_LOCK': 'Empêcher la mise en veille',
-      'GET_ACCOUNTS': 'Comptes sur l\'appareil',
-      'USE_FINGERPRINT': 'Empreinte digitale',
-      'BODY_SENSORS': 'Capteurs corporels'
-    };
+    const permissionMap = t('appDetail.detail.permissionNames');
     
     return permissionMap[permission] || permission.replace(/_/g, ' ').toLowerCase();
   };
@@ -273,7 +243,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
     >
       {isTeamPick && (
         <span className="absolute -top-3 left-3 inline-flex items-center gap-1 bg-gradient-to-r from-yellow-300 to-amber-400 text-amber-950 text-[10px] font-black uppercase tracking-tight px-2.5 py-1 rounded-full shadow-md">
-          <Star size={11} fill="currentColor" className="motion-safe:animate-sparkle" /> Migration facile ✨
+          <Star size={11} fill="currentColor" className="motion-safe:animate-sparkle" /> {t('appDetail.detail.easySwitch')}
         </span>
       )}
       <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 bg-slate-100">
@@ -289,7 +259,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
         <h4 className="font-black text-sm text-slate-900">{relatedApp.name}</h4>
         <p className="text-[11px] text-slate-500 line-clamp-1">{relatedApp.reason}</p>
         {isTeamPick && relatedApp.teamPickReason && (
-          <p className="text-[11px] text-slate-700 mt-1.5 bg-white/70 rounded-lg px-2 py-1">🙌 <b>On l'adore :</b> {relatedApp.teamPickReason}</p>
+          <p className="text-[11px] text-slate-700 mt-1.5 bg-white/70 rounded-lg px-2 py-1">🙌 <b>{t('appDetail.detail.weLoveIt')}</b> {relatedApp.teamPickReason}</p>
         )}
       </div>
       <div className="shrink-0"><ScoreIndicator grade={relatedApp.grade} /></div>
@@ -325,20 +295,20 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
           {/* closeAsCross : fiche affichée en panneau (ex. kit de démarrage), une croix « Fermer » plutôt qu'un retour */}
           <button
             onClick={handleClose}
-            aria-label={closeAsCross ? 'Fermer la fiche' : 'Retour'}
-            title={closeAsCross ? 'Fermer' : undefined}
+            aria-label={closeAsCross ? t('appDetail.detail.closeSheet') : t('appDetail.detail.back')}
+            title={closeAsCross ? t('appDetail.detail.close') : undefined}
             className={closeAsCross
               ? 'w-10 h-10 -ml-1 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors active:scale-90'
               : 'w-12 h-12 -ml-3 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors active:scale-90'}
           >
             {closeAsCross ? <X size={20} /> : <ChevronLeft size={24} />}
           </button>
-          <div className="text-[11px] font-black uppercase text-slate-400 tracking-widest">Détails</div>
+          <div className="text-[11px] font-black uppercase text-slate-400 tracking-widest">{t('appDetail.detail.details')}</div>
           <div className="flex items-center gap-1 -mr-2">
             <button
               onClick={handleShare}
-              aria-label={`Partager la fiche de ${app.name}`}
-              title="Partager"
+              aria-label={t('appDetail.detail.shareAria', { name: app.name })}
+              title={t('appDetail.detail.share')}
               className="w-12 h-12 flex items-center justify-center rounded-full text-slate-400 hover:text-indigo-600 transition-colors active:scale-90"
             >
               <Share2 size={22} />
@@ -347,7 +317,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
             {onToggleMyApp && (
               <button
                 onClick={(e) => onToggleMyApp(e, app.id)}
-                aria-label={isInMyApps ? 'Retirer de Mes Apps' : 'Ajouter à Mes Apps'}
+                aria-label={isInMyApps ? t('appDetail.detail.removeMyApps') : t('appDetail.detail.addMyApps')}
                 className={`w-12 h-12 flex items-center justify-center rounded-full transition-colors ${isInMyApps ? 'text-indigo-600 bg-indigo-50' : 'text-slate-200 hover:text-indigo-400'}`}
               >
                 {isInMyApps ? <CheckCircle size={24} /> : <PlusCircle size={24} />}
@@ -393,13 +363,13 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                   onClick={() => setIsNoteOpen(false)}
                   className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 hover:text-slate-600 mb-1.5"
                 >
-                  <StickyNote size={12} /> Ma note
+                  <StickyNote size={12} /> {t('appDetail.detail.myNote')}
                 </button>
                 <textarea
                   autoFocus
                   value={noteText}
                   onChange={(e) => setNoteText(e.target.value)}
-                  placeholder="Note personnelle..."
+                  placeholder={t('appDetail.detail.notePlaceholder')}
                   rows={2}
                   className="w-full text-xs text-slate-600 placeholder:text-slate-300 bg-slate-50/70 rounded-lg p-2.5 border border-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-200 resize-none"
                 />
@@ -410,7 +380,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                 onClick={() => setIsNoteOpen(true)}
                 className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-300 hover:text-slate-500 transition-colors"
               >
-                <StickyNote size={12} /> Ajouter une note
+                <StickyNote size={12} /> {t('appDetail.detail.addNote')}
               </button>
             )}
           </div>
@@ -419,16 +389,16 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
           {isInstalledOnDevice && (
             <div className="bg-red-50 rounded-2xl p-4 border border-red-200 mb-4">
               <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 mb-2 flex items-center gap-2">
-                <Trash2 size={16} className="text-red-600" /> Installée sur cet appareil
+                <Trash2 size={16} className="text-red-600" /> {t('appDetail.detail.installed')}
               </h3>
               <p className="text-xs text-slate-500 mb-3 leading-relaxed">
-                Trusti a détecté cette application sur votre téléphone. Vous pouvez la désinstaller directement.
+                {t('appDetail.detail.installedBody')}
               </p>
               <button
                 onClick={handleUninstall}
                 className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition-all active:scale-[0.98]"
               >
-                <Trash2 size={14} /> Désinstaller
+                <Trash2 size={14} /> {t('appDetail.detail.uninstall')}
               </button>
             </div>
           )}
@@ -437,7 +407,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
           {(app.playStoreUrl || app.appleStoreUrl || app.fDroidUrl || app.website) && (
             <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl p-4 border border-emerald-200 mb-4">
               <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 mb-3 flex items-center gap-2">
-                <ExternalLink size={16} className="text-emerald-600" /> Télécharger
+                <ExternalLink size={16} className="text-emerald-600" /> {t('appDetail.detail.download')}
               </h3>
               <div className="grid grid-cols-2 gap-2">
                 {app.playStoreUrl && (
@@ -465,7 +435,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                   <a href={app.website} target="_blank" rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 bg-white hover:bg-purple-100 text-purple-700 font-bold text-xs py-2.5 px-3 rounded-xl transition-all border-2 border-purple-200 hover:border-purple-400 shadow-sm">
                     <span className="text-lg">🌐</span>
-                    Site Web
+                    {t('appDetail.detail.website')}
                   </a>
                 )}
               </div>
@@ -476,7 +446,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
           {!isMobile && (
             <button onClick={handleClose}
               className="w-full py-3 bg-slate-900 hover:bg-slate-700 text-white rounded-xl font-black text-sm uppercase tracking-widest transition-colors active:scale-[0.98]">
-              ← Retour
+              {t('appDetail.detail.backArrow')}
             </button>
           )}
         </div>
@@ -490,7 +460,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
             return (
               <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm mb-4">
                 <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 mb-3 flex items-center gap-2">
-                  <ShieldCheck size={16} className="text-indigo-600" /> Pourquoi cette note ?
+                  <ShieldCheck size={16} className="text-indigo-600" /> {t('appDetail.detail.whyGrade')}
                 </h3>
                 {info && (
                   <div className="mb-3 pb-3 border-b border-slate-100">
@@ -502,18 +472,18 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                 )}
                 <p className="text-sm text-slate-600 leading-relaxed">{app.reason}</p>
                 <a
-                  href="https://trusti-score.lielu.eu/"
+                  href={t('common.siteUrl')}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 mt-2 text-xs text-indigo-600 hover:text-indigo-800 font-semibold transition-colors"
                 >
                   <ExternalLink size={12} />
-                  En savoir plus sur notre méthodologie
+                  {t('appDetail.detail.methodology')}
                 </a>
                 {app.updatedAt && (
                   <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-400">
                     <Calendar size={12} />
-                    <span>Analyse mise à jour le {formatDate(app.updatedAt)}</span>
+                    <span>{t('appDetail.detail.updatedOn', { date: formatUpdateDate(app.updatedAt) })}</span>
                   </div>
                 )}
               </div>
@@ -529,7 +499,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
               {!isLoadingRelations && (
                 <div className="absolute -top-2 -right-2 z-10">
                   <div className="bg-indigo-600 text-white text-xs font-black px-2.5 py-1 rounded-full shadow-lg animate-bounce">
-                    {alternatives.length} alternative{alternatives.length > 1 ? 's' : ''}
+                    {t('appDetail.detail.alternatives', { count: alternatives.length })}
                   </div>
                 </div>
               )}
@@ -538,11 +508,11 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                 <div className="relative">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 flex items-center gap-2">
-                      <ArrowRight size={16} className="text-indigo-600 animate-pulse" /> Alternatives
+                      <ArrowRight size={16} className="text-indigo-600 animate-pulse" /> {t('appDetail.detail.alternativesTitle')}
                     </h3>
                     {!isLoadingRelations && (
                       <div className="bg-emerald-100 text-emerald-700 text-[11px] font-black px-2 py-0.5 rounded-full">
-                        Meilleures notes
+                        {t('appDetail.detail.betterGrades')}
                       </div>
                     )}
                   </div>
@@ -557,7 +527,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
                       onClick={() => setShowMigrationGuide(true)}
                       className="w-full mt-3 min-h-[48px] flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-3 px-3 rounded-xl transition-all active:scale-[0.98]"
                     >
-                      <Route size={14} /> Migrer pas à pas
+                      <Route size={14} /> {t('appDetail.detail.migrateSteps')}
                     </button>
                   )}
                 </div>
@@ -571,7 +541,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
               onClick={() => onChangeAlternative(app.id)}
               className="w-full mb-4 min-h-[48px] flex items-center justify-center gap-2 bg-white border-2 border-indigo-200 text-indigo-700 font-bold text-sm py-3 px-4 rounded-xl transition-all active:scale-[0.98]"
             >
-              <ArrowRight size={16} /> Changer d'alternative
+              <ArrowRight size={16} /> {t('appDetail.detail.changeAlternative')}
             </button>
           )}
 
@@ -581,11 +551,11 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
               <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl p-4 border-2 border-orange-200 shadow-sm">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 flex items-center gap-2">
-                    <ShieldCheck size={16} className="text-orange-600" /> Remplace
+                    <ShieldCheck size={16} className="text-orange-600" /> {t('appDetail.detail.replaces')}
                   </h3>
                   {!isLoadingRelations && (
                     <div className="bg-orange-100 text-orange-700 text-[11px] font-black px-2 py-0.5 rounded-full">
-                      {replacedApps.length} app{replacedApps.length > 1 ? 's' : ''}
+                      {t('appDetail.detail.apps', { count: replacedApps.length })}
                     </div>
                   )}
                 </div>
@@ -603,7 +573,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
           {app.permissions && app.permissions.length > 0 && (
             <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm mb-4">
               <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 mb-3 flex items-center gap-2">
-                <Shield size={16} className="text-orange-600" /> Permissions demandées
+                <Shield size={16} className="text-orange-600" /> {t('appDetail.detail.permissions')}
               </h3>
               <div className={isMobile ? 'grid grid-cols-1 gap-1.5' : 'grid grid-cols-2 gap-1.5'}>
                 {app.permissions.map((permission, index) => (
@@ -630,7 +600,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
           {isMobile && (
             <button onClick={handleClose}
               className="w-full py-4 bg-slate-900 text-white rounded-xl font-black text-sm uppercase tracking-widest active:scale-[0.98] transition-transform">
-              Retour
+              {t('appDetail.detail.back')}
             </button>
           )}
         </div>

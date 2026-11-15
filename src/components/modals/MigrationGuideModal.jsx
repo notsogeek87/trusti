@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { X, Check, ExternalLink, Info, AlertTriangle, Trash2, ChevronLeft, ChevronRight, PartyPopper } from 'lucide-react';
 import RichText from '../ui/RichText';
 import ScoreIndicator from '../ui/ScoreIndicator';
-import { MIGRATION_STEPS, CLEANUP_TIPS } from '../../constants/migrationGuide';
+import { MIGRATION_STEPS, getCleanupTips } from '../../constants/migrationGuide';
+import { categoryLabel } from '../../constants/categories';
 import { getDataTips, getMigrationCandidates, computeProgress } from '../../utils/migrationGuide';
 import { getMigrationGuideState, saveMigrationGuideState } from '../../utils/migrationGuideStorage';
 import { useMigrationGuide } from '../../hooks/useMigrationGuide';
@@ -10,6 +11,7 @@ import { extractPackageId } from '../../utils/androidPackage';
 import { isNativeAndroid } from '../../utils/platform';
 import InstalledApps from '../../native/InstalledApps';
 import { requestUninstall } from '../../utils/uninstallWatcher';
+import { t } from '../../i18n/index.js';
 
 const TipList = ({ title, tips }) => (
   <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
@@ -29,8 +31,8 @@ const TipList = ({ title, tips }) => (
 // « danger » (mots de passe en clair, perte d'accès…) passent en rouge, les autres en ambre.
 // La source officielle reste en pied de bloc, pour qui veut vérifier.
 const NOTE_STYLES = {
-  danger: { box: 'bg-rose-50 border-rose-200', title: 'text-rose-800', text: 'text-rose-900', Icon: AlertTriangle, label: 'Attention' },
-  info: { box: 'bg-amber-50 border-amber-200', title: 'text-amber-800', text: 'text-amber-900', Icon: Info, label: 'À savoir' },
+  danger: { box: 'bg-rose-50 border-rose-200', title: 'text-rose-800', text: 'text-rose-900', Icon: AlertTriangle, get label() { return t('migration.modal.attention'); } },
+  info: { box: 'bg-amber-50 border-amber-200', title: 'text-amber-800', text: 'text-amber-900', Icon: Info, get label() { return t('migration.modal.goodToKnow'); } },
 };
 
 const NoteBox = ({ level, notes }) => {
@@ -85,7 +87,7 @@ const GuideSection = ({ title, section }) => {
       {section.source && (
         <a href={section.source} target="_blank" rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-[10px] text-slate-400 hover:text-indigo-600">
-          <ExternalLink size={10} /> Source : aide officielle
+          <ExternalLink size={10} /> {t('migration.modal.source')}
         </a>
       )}
     </div>
@@ -163,7 +165,7 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
 
   const handleUninstall = () => {
     requestUninstall(oldPackage).catch(() => {
-      window.alert("Impossible d'ouvrir la désinstallation. Réessayez depuis les paramètres du téléphone.");
+      window.alert(t('migration.modal.uninstallFailed'));
     });
   };
 
@@ -181,10 +183,10 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
       <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl max-h-[85vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-slate-100 p-5 flex items-center justify-between z-10">
           <div className="min-w-0">
-            <h2 className="text-base font-black text-slate-900 truncate">Migrer depuis {app.name}</h2>
-            {!finished && <p className="text-[11px] font-bold text-slate-400">{completed}/{total} étapes faites</p>}
+            <h2 className="text-base font-black text-slate-900 truncate">{t('migration.modal.title', { name: app.name })}</h2>
+            {!finished && <p className="text-[11px] font-bold text-slate-400">{t('migration.modal.progress', { completed, total })}</p>}
           </div>
-          <button onClick={onClose} aria-label="Fermer" className="p-2 text-slate-400 hover:text-slate-600">
+          <button onClick={onClose} aria-label={t('migration.modal.close')} className="p-2 text-slate-400 hover:text-slate-600">
             <X size={22} />
           </button>
         </div>
@@ -192,17 +194,17 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
         {finished ? (
           <div className="p-6 text-center space-y-3">
             <PartyPopper size={40} className="mx-auto text-emerald-500" />
-            <p className="font-black text-slate-900">Migration terminée !</p>
+            <p className="font-black text-slate-900">{t('migration.modal.done')}</p>
             <p className="text-xs text-slate-500 leading-relaxed">
-              {app.name} est désormais remplacée par {alt.name} dans « Mes Apps ».
+              {t('migration.modal.doneBody', { old: app.name, new: alt.name })}
             </p>
             <button onClick={onClose} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-sm">
-              Fermer
+              {t('migration.modal.close')}
             </button>
           </div>
         ) : (
           <div className="p-5 space-y-4">
-            <ol className="flex gap-1.5" aria-label="Progression">
+            <ol className="flex gap-1.5" aria-label={t('migration.modal.progressAria')}>
               {MIGRATION_STEPS.map((s, i) => (
                 <li key={s.id} className="flex-1">
                   <button
@@ -212,7 +214,7 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
                     className={`w-full rounded-full transition-all ${i === stepIndex
                       ? `h-2 ${done[s.id] ? 'bg-emerald-600 ring-2 ring-emerald-200' : 'bg-indigo-500 ring-2 ring-indigo-200'}`
                       : `h-1.5 ${done[s.id] ? 'bg-emerald-300' : 'bg-slate-200'}`}`}
-                    aria-label={`Étape ${i + 1} : ${s.title}`}
+                    aria-label={t('migration.modal.stepAria', { n: i + 1, title: s.title })}
                     aria-current={i === stepIndex ? 'step' : undefined}
                   />
                 </li>
@@ -234,9 +236,9 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
                       <p className="font-black text-sm text-slate-900">{c.name}</p>
                       <p className="text-xs text-slate-500">
                         {c.isTeamPick
-                          ? <span className="font-bold text-amber-700">⭐ Migration facile · </span>
-                          : i === 0 ? 'Recommandée · ' : ''}
-                        {c.category}
+                          ? <span className="font-bold text-amber-700">{t('migration.modal.easy')}</span>
+                          : i === 0 ? t('migration.modal.recommended') : ''}
+                        {categoryLabel(c.category)}
                       </p>
                     </div>
                     <ScoreIndicator grade={c.grade} />
@@ -248,10 +250,10 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
             {step.id === 'install' && (
               <div className="space-y-3">
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Installez <span className="font-bold text-slate-800">{alt.name}</span> avant de toucher à {app.name}.
+                  {t('migration.modal.installBefore')} <span className="font-bold text-slate-800">{alt.name}</span> {t('migration.modal.installAfter', { name: app.name })}
                 </p>
                 <div className="grid grid-cols-2 gap-2">
-                  {[['Play Store', alt.playStoreUrl], ['F-Droid', alt.fDroidUrl], ['Site officiel', alt.website]]
+                  {[['Play Store', alt.playStoreUrl], ['F-Droid', alt.fDroidUrl], [t('migration.modal.officialSite'), alt.website]]
                     .filter(([, url]) => url)
                     .map(([label, url]) => (
                       <a key={label} href={url} target="_blank" rel="noopener noreferrer"
@@ -261,36 +263,36 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
                     ))}
                 </div>
                 {altInstalled
-                  ? <p className="text-xs font-bold text-emerald-600">✓ Détectée sur votre téléphone</p>
-                  : <StepCheck checked={!!done.install} onChange={v => setDone('install', v)}>J'ai installé {alt.name}</StepCheck>}
+                  ? <p className="text-xs font-bold text-emerald-600">{t('migration.modal.detected')}</p>
+                  : <StepCheck checked={!!done.install} onChange={v => setDone('install', v)}>{t('migration.modal.installedCheck', { name: alt.name })}</StepCheck>}
               </div>
             )}
 
             {step.id === 'transfer' && (
               <div className="space-y-3">
                 {migrationGuide.status === 'loading' ? (
-                  <div className="h-40 bg-slate-50 rounded-xl border border-slate-100 animate-pulse" aria-label="Chargement du guide" />
+                  <div className="h-40 bg-slate-50 rounded-xl border border-slate-100 animate-pulse" aria-label={t('migration.modal.loadingGuide')} />
                 ) : (
                   <>
-                    <GuideSection title={`1. Récupérer vos données de ${app.name}`} section={tips.export} />
-                    <GuideSection title={`2. Les mettre dans ${alt.name}`} section={tips.import} />
+                    <GuideSection title={t('migration.modal.exportTitle', { name: app.name })} section={tips.export} />
+                    <GuideSection title={t('migration.modal.importTitle', { name: alt.name })} section={tips.import} />
                   </>
                 )}
-                <StepCheck checked={!!done.transfer} onChange={v => setDone('transfer', v)}>Mes données sont transférées</StepCheck>
+                <StepCheck checked={!!done.transfer} onChange={v => setDone('transfer', v)}>{t('migration.modal.transferredCheck')}</StepCheck>
               </div>
             )}
 
             {step.id === 'cleanup' && (
               <div className="space-y-3">
-                <TipList title="Avant de partir" tips={CLEANUP_TIPS} />
+                <TipList title={t('migration.modal.beforeLeaving')} tips={getCleanupTips()} />
                 {oldInstalled && (
                   <button onClick={handleUninstall}
                     className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 rounded-xl">
-                    <Trash2 size={14} /> Désinstaller {app.name}
+                    <Trash2 size={14} /> {t('migration.modal.uninstall', { name: app.name })}
                   </button>
                 )}
                 <StepCheck checked={!!done.cleanup} onChange={v => setDone('cleanup', v)}>
-                  {oldInstalled || !isNativeAndroid ? `J'ai quitté ${app.name}` : `${app.name} est désinstallée`}
+                  {oldInstalled || !isNativeAndroid ? t('migration.modal.leftCheck', { name: app.name }) : t('migration.modal.uninstalledCheck', { name: app.name })}
                 </StepCheck>
               </div>
             )}
@@ -305,14 +307,14 @@ const MigrationGuideModal = ({ app, alternatives = [], onComplete, onClose }) =>
               {isLast ? (
                 <button onClick={handleFinish} disabled={!done.cleanup}
                   className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 text-white py-3 rounded-xl font-bold text-sm">
-                  Terminer la migration
+                  {t('migration.modal.finish')}
                 </button>
               ) : (
                 // Passer à la suite valide l'étape quittée : le fil se remplit au fur et à
                 // mesure. La case de l'étape reste décochable si l'on revient en arrière.
                 <button onClick={() => { setDone(step.id, true); setStepIndex(stepIndex + 1); }}
                   className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1">
-                  C'est fait, étape suivante <ChevronRight size={16} />
+                  {t('migration.modal.next')} <ChevronRight size={16} />
                 </button>
               )}
             </div>

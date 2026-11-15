@@ -50,6 +50,7 @@ import TrustiShareModal from './components/modals/TrustiShareModal';
 import ImportAppsModal from './components/modals/ImportAppsModal';
 import MigrationSelectorModal from './components/modals/MigrationSelectorModal';
 import WelcomeModal from './components/modals/WelcomeModal';
+import { t } from './i18n/index.js';
 
 /**
  * Composant principal de l'application Trusti : assemble l'état (hooks) et
@@ -176,8 +177,8 @@ const App = () => {
   const abandonMigration = (app) => {
     const previous = removeMigrationGuideState(app.id);
     setMigrationGuidesVersion(v => v + 1);
-    toast.success('Migration abandonnée', {
-      label: 'Annuler',
+    toast.success(t('main.app.migrationAbandoned'), {
+      label: t('main.app.undo'),
       onClick: () => {
         saveMigrationGuideState(app.id, previous);
         setMigrationGuidesVersion(v => v + 1);
@@ -240,8 +241,8 @@ const App = () => {
     const wasInMyApps = myApps.has(id);
     toggleMyApp(e, id);
     if (wasInMyApps) {
-      toast.success('App retirée de Mes Apps', {
-        label: 'Annuler',
+      toast.success(t('main.app.removedFromMyApps'), {
+        label: t('main.app.undo'),
         onClick: () => toggleMyApp({ stopPropagation: () => {} }, id),
       });
     }

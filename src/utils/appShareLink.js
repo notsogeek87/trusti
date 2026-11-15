@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 /**
  * Liens de partage publics (fiche d'une app, sélection d'apps).
  *
@@ -71,9 +72,9 @@ export const parseSharedAppId = (urlOrSearch) => {
  * @returns {{ title: string, text: string }}
  */
 export const buildAppShareText = (app) => {
-  const title = `${app.name} sur Trusti`;
+  const title = t('main.share.appTitle', { name: app.name });
   const text = app.grade
-    ? `${app.name} obtient la note ${app.grade} au TrustiScore (souveraineté numérique). Découvre sa fiche et ses alternatives :`
-    : `Découvre la fiche de ${app.name} et ses alternatives sur Trusti :`;
+    ? t('main.share.appTextGrade', { name: app.name, grade: app.grade })
+    : t('main.share.appText', { name: app.name });
   return { title, text };
 };
