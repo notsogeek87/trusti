@@ -27,6 +27,7 @@ import {
   buildOrganisationExport,
   parseOrganisationImport,
 } from '../../utils/organisationAssessment';
+import { t } from '../../i18n/index.js';
 
 function normalize(text) {
   return String(text || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
@@ -100,7 +101,7 @@ const OrganisationPage = () => {
   }, [detailApp]);
 
   useEffect(() => {
-    document.title = 'Évaluer mon organisation · Trusti';
+    document.title = t('org.page.k001');
   }, []);
 
   const appsById = useMemo(() => new Map(apps.map(a => [a.id, a])), [apps]);
@@ -136,7 +137,7 @@ const OrganisationPage = () => {
     });
   }, []);
   const resetAudit = useCallback(() => {
-    if (window.confirm('Effacer toutes les réponses au questionnaire ?')) setAudit({});
+    if (window.confirm(t('org.page.k002'))) setAudit({});
   }, []);
 
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
@@ -152,7 +153,7 @@ const OrganisationPage = () => {
     const suggested = !q && profile ? profileApps(profile, appsById) : [];
     if (suggested.length === 0) return families;
     const label = ORG_PROFILES.find(p => p.id === profile).label;
-    return [{ family: { id: 'profil', label: `Outils fréquents : ${label}` }, apps: suggested }, ...families];
+    return [{ family: { id: 'profil', label: t('org.page.frequentTools', { label }) }, apps: suggested }, ...families];
   }, [apps, search, profile, appsById]);
   const profileLabel = ORG_PROFILES.find(p => p.id === profile)?.label || null;
 
@@ -185,8 +186,8 @@ const OrganisationPage = () => {
   const clearAll = useCallback(() => {
     const name = orgName.trim();
     const question = name
-      ? `Supprimer l'organisation « ${name} » et son évaluation ? Cette action est définitive.`
-      : 'Supprimer cette organisation et son évaluation ? Cette action est définitive.';
+      ? t('org.page.deleteNamed', { name })
+      : t('org.page.k003');
     if (!window.confirm(question)) return;
     setSelectedIds([]);
     setCriticality({});
@@ -202,7 +203,7 @@ const OrganisationPage = () => {
   const today = new Date().toISOString().slice(0, 10);
   const reportExportError = err => {
     console.error('Export', err);
-    window.alert('Le fichier n\'a pas pu être enregistré. Réessayez.');
+    window.alert(t('org.page.k004'));
   };
   const exportCsv = () => downloadCsv(toCsv(selectedApps, criticality, plan), `trusti-organisation-${today}.csv`).catch(reportExportError);
   const exportJson = () => downloadJSON(buildOrganisationExport(selectedIds, criticality, summary, { profile, orgName, audit }), `trusti-organisation-${today}.json`).catch(reportExportError);
@@ -234,9 +235,9 @@ const OrganisationPage = () => {
         if (ORG_PROFILES.some(p => p.id === parsed.profile)) setProfile(parsed.profile);
         if (parsed.orgName) setOrgName(parsed.orgName);
         setAudit(parsed.audit);
-        setMessage(`${parsed.ids.length} outil${parsed.ids.length > 1 ? 's' : ''} importé${parsed.ids.length > 1 ? 's' : ''}.`);
+        setMessage(t('org.page.imported', { count: parsed.ids.length }));
       })
-      .catch(() => setMessage('Ce fichier n\'est pas une évaluation Trusti enregistrée.'));
+      .catch(() => setMessage(t('org.page.k005')));
   };
 
   return (
@@ -244,11 +245,11 @@ const OrganisationPage = () => {
       <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-white/60">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
           <a href={STANDALONE_URLS.ORGANISATIONS} className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-indigo-600 shrink-0">
-            <ArrowLeft size={16} /> Organisations
+            <ArrowLeft size={16} /> {t('org.page.k006')}
           </a>
           <span className="text-slate-300">/</span>
           <span className="flex items-center gap-2 font-black text-indigo-600 truncate">
-            <Building2 size={18} className="shrink-0" /> Évaluer mon organisation
+            <Building2 size={18} className="shrink-0" /> {t('org.page.k007')}
           </span>
         </div>
       </header>
@@ -256,21 +257,20 @@ const OrganisationPage = () => {
       <main className="max-w-6xl mx-auto px-4 pt-6 pb-24 lg:pb-6">
         {!isSynthese && (
         <div className="mb-5">
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-800">Quelle est la souveraineté numérique de votre parc applicatif ?</h1>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-800">{t('org.page.k008')}</h1>
           <p className="mt-2 text-slate-600 max-w-3xl">
-            Cochez les outils utilisés dans votre entreprise, votre collectivité ou votre association. Trusti calcule une note globale,
-            repère les outils à risque et propose des alternatives mieux notées.
+            {t('org.page.k009')}
           </p>
           <p className="mt-2 flex items-center gap-1.5 text-xs font-bold text-emerald-700">
-            <Lock size={13} /> Votre sélection reste dans ce navigateur : elle n'est jamais envoyée à Trusti.
+            <Lock size={13} /> {t('org.page.k010')}
           </p>
         </div>
         )}
 
         {status === 'ready' && !isSynthese && (
           <section className="mb-5 bg-white/80 rounded-2xl border border-white p-4 shadow-sm">
-            <p className="text-sm font-black text-slate-800 mb-2">Votre structure</p>
-            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Type de structure">
+            <p className="text-sm font-black text-slate-800 mb-2">{t('org.page.k011')}</p>
+            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('org.page.k012')}>
               {ORG_PROFILES.map(p => (
                 <button
                   key={p.id}
@@ -286,28 +286,28 @@ const OrganisationPage = () => {
               ))}
             </div>
             <p className="mt-2 text-xs text-slate-500">
-              {profile ? 'Les outils les plus courants pour ce type de structure sont proposés en tête de liste.' : 'Facultatif : met en avant les outils les plus courants pour votre type de structure.'}
+              {profile ? t('org.page.k013') : t('org.page.k014')}
             </p>
             <label className="mt-3 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-sm font-bold text-slate-700">
-              <span className="shrink-0">Nom de l'organisation <span className="font-normal text-slate-400">(pour le rapport, facultatif)</span></span>
+              <span className="shrink-0">{t('org.page.k015')} <span className="font-normal text-slate-400">{t('org.page.k016')}</span></span>
               <input
                 type="text"
                 value={orgName}
                 onChange={e => setOrgName(e.target.value.slice(0, 120))}
-                placeholder="Ex. : Mairie de Saint-Clément"
+                placeholder={t('org.page.k017')}
                 className="flex-1 min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-normal outline-none focus:border-indigo-400"
               />
             </label>
           </section>
         )}
 
-        {status === 'loading' && <LoadingSpinner message="Chargement des outils professionnels…" />}
+        {status === 'loading' && <LoadingSpinner message={t('org.page.k018')} />}
 
         {status === 'error' && (
           <div className="bg-white/90 rounded-2xl p-5 text-sm shadow-sm">
-            <p className="font-black text-slate-800">Impossible de charger le catalogue.</p>
-            <p className="text-slate-600 mb-3">Vérifiez votre connexion puis réessayez.</p>
-            <button type="button" onClick={retry} className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-black">Réessayer</button>
+            <p className="font-black text-slate-800">{t('org.page.k019')}</p>
+            <p className="text-slate-600 mb-3">{t('org.page.k020')}</p>
+            <button type="button" onClick={retry} className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-black">{t('org.page.k021')}</button>
           </div>
         )}
 
@@ -315,8 +315,8 @@ const OrganisationPage = () => {
           <div className="max-w-3xl mx-auto">
             <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-wider text-slate-400">Synthèse de votre parc</p>
-                <h1 className="text-2xl sm:text-3xl font-black text-slate-800 break-words">{orgName.trim() || 'Votre organisation'}</h1>
+                <p className="text-xs font-black uppercase tracking-wider text-slate-400">{t('org.page.k022')}</p>
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-800 break-words">{orgName.trim() || t('org.page.yourOrg')}</h1>
                 <p className="mt-1 text-sm text-slate-500">
                   {profileLabel ? `${profileLabel} · ` : ''}{summary.total} outil{summary.total > 1 ? 's' : ''} évalué{summary.total > 1 ? 's' : ''}
                 </p>
@@ -327,14 +327,14 @@ const OrganisationPage = () => {
                 onClick={() => showView('saisie')}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm font-black text-indigo-600 hover:border-indigo-400 shadow-sm"
               >
-                <Pencil size={16} /> Modifier mes outils
+                <Pencil size={16} /> {t('org.page.k023')}
               </button>
               <button
                 type="button"
                 onClick={clearAll}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm font-black text-rose-600 hover:border-rose-400 shadow-sm"
               >
-                <Trash2 size={16} /> Supprimer l'organisation
+                <Trash2 size={16} /> {t('org.page.k024')}
               </button>
               </div>
             </div>
@@ -361,7 +361,7 @@ const OrganisationPage = () => {
               <OrganisationHelp profile={profile} />
             </div>
             <p className="mt-4 flex items-center gap-1.5 text-xs font-bold text-emerald-700">
-              <Lock size={13} /> Votre évaluation reste dans ce navigateur : elle n'est jamais envoyée à Trusti.
+              <Lock size={13} /> {t('org.page.k025')}
             </p>
           </div>
         )}
@@ -376,7 +376,7 @@ const OrganisationPage = () => {
                     type="search"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
-                    placeholder={`Rechercher parmi ${apps.length} outils`}
+                    placeholder={t('org.page.searchAmong', { count: apps.length })}
                     className="w-full bg-transparent outline-none text-sm"
                   />
                 </label>
@@ -385,7 +385,7 @@ const OrganisationPage = () => {
                   onClick={() => fileInput.current?.click()}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 text-sm font-bold text-slate-600 hover:border-indigo-300"
                 >
-                  <Upload size={15} /> Ouvrir une évaluation
+                  <Upload size={15} /> {t('org.page.k026')}
                 </button>
                 <input ref={fileInput} type="file" accept="application/json,.json" className="hidden" onChange={importFile} />
                 <button
@@ -393,7 +393,7 @@ const OrganisationPage = () => {
                   onClick={() => setSuggesting(true)}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 text-sm font-bold text-slate-600 hover:border-indigo-300"
                 >
-                  <MessageSquarePlus size={15} /> Il manque un outil
+                  <MessageSquarePlus size={15} /> {t('org.page.k027')}
                 </button>
               </div>
               {message && (
@@ -401,9 +401,8 @@ const OrganisationPage = () => {
               )}
               <FamilyPicker groups={groups} selectedIds={selectedSet} onToggle={toggle} onSuggest={() => setSuggesting(true)} />
               <p className="mt-4 text-xs text-slate-500">
-                Les notes TrustiScore portent sur la souveraineté numérique (gouvernance, localisation des données, conformité,
-                contrôle technique, transparence). Un outil manque ?{' '}
-                <button type="button" onClick={() => setSuggesting(true)} className="font-bold text-purple-600 hover:underline">Proposez-le</button>.
+                {t('org.page.gradesAbout')}{' '}
+                <button type="button" onClick={() => setSuggesting(true)} className="font-bold text-purple-600 hover:underline">{t('org.page.k028')}</button>.
               </p>
             </div>
 
@@ -415,7 +414,7 @@ const OrganisationPage = () => {
                   onClick={() => showView('synthese')}
                   className="hidden lg:flex mb-3 w-full items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-black hover:bg-indigo-700 shadow-sm"
                 >
-                  <CheckCircle2 size={16} /> Terminer et voir la synthèse
+                  <CheckCircle2 size={16} /> {t('org.page.k029')}
                 </button>
               )}
               <OrganisationResult
@@ -448,7 +447,7 @@ const OrganisationPage = () => {
             <span className="flex-1 text-sm font-bold text-slate-700">
               {summary.total} outil{summary.total > 1 ? 's' : ''} évalué{summary.total > 1 ? 's' : ''}
             </span>
-            <button type="button" onClick={() => showView('synthese')} className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-black shrink-0">Voir la synthèse</button>
+            <button type="button" onClick={() => showView('synthese')} className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-black shrink-0">{t('org.page.k030')}</button>
           </div>
         </div>
       )}
