@@ -77,7 +77,6 @@ const App = () => {
     activeTab,
     searchTerm,
     myApps,
-    favoriteApps,
     migratedApps,
     customMigrations,
     selectedApp,
@@ -95,7 +94,6 @@ const App = () => {
     setActiveTab,
     setSearchTerm,
     toggleMyApp,
-    toggleFavorite,
     addMyApps,
     removeMyApps,
     clearMyApps,
@@ -379,7 +377,6 @@ const App = () => {
                 <CategoryFilterBar
                   selectedCategory={selectedCategory}
                   onSelectCategory={setSelectedCategory}
-                  favoritesCount={favoriteApps.size}
                   isLoading={isLoadingApps}
                 />
               )}
@@ -457,11 +454,9 @@ const App = () => {
                 isSearching={isSearching}
                 activeTab={activeTab}
                 myApps={myApps}
-                favoriteApps={favoriteApps}
                 migratedApps={migratedApps}
                 customMigrations={customMigrations}
                 onToggleMyApp={handleToggleMyApp}
-                onToggleFavorite={toggleFavorite}
                 onToggleMigrate={toggleMigrate}
                 onSelectApp={openAppDetail}
                 selectedCategory={selectedCategory}

@@ -1,12 +1,11 @@
 import React from 'react';
-import { Star } from 'lucide-react';
-import { CATEGORIES, FAVORITES_FILTER } from '../constants/categories';
+import { CATEGORIES } from '../constants/categories';
 import InlineSpinner from './ui/InlineSpinner';
 
-const ALL_CATEGORIES = ['Toutes', FAVORITES_FILTER, ...CATEGORIES];
+const ALL_CATEGORIES = ['Toutes', ...CATEGORIES];
 
 /** En-tête de l'onglet Applications : titre et sélecteur de catégorie (défilement horizontal). */
-const CategoryFilterBar = ({ selectedCategory, onSelectCategory, favoritesCount, isLoading }) => (
+const CategoryFilterBar = ({ selectedCategory, onSelectCategory, isLoading }) => (
   <div className="mb-3 text-center">
     <div className="flex items-center justify-center gap-2 mb-0.5">
       <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
@@ -33,13 +32,7 @@ const CategoryFilterBar = ({ selectedCategory, onSelectCategory, favoritesCount,
                     }
                   `}
                 >
-                  {category === FAVORITES_FILTER && (
-                    <Star size={11} className={isSelected ? 'fill-current' : ''} />
-                  )}
                   {category}
-                  {category === FAVORITES_FILTER && favoritesCount > 0 && (
-                    <span>({favoritesCount})</span>
-                  )}
                 </button>
               );
             })}

@@ -16,13 +16,10 @@ const addToSet = (prev, ids) => {
 
 /**
  * Choix de l'utilisateur, sauvegardés en local (voir useAuth) : apps suivies
- * (« Mes Apps »), favoris du catalogue, apps migrées et alternatives choisies.
+ * (« Mes Apps »), apps migrées et alternatives choisies.
  */
 export const useUserSelections = (saveUserData, getUserData) => {
   const [myApps, setMyApps] = useState(new Set());
-  // Favoris du catalogue (« + » sur une app hors Mes Apps) : filtre « À tester »,
-  // indépendant de « Mes Apps »
-  const [favoriteApps, setFavoriteApps] = useState(new Set());
   const [migratedApps, setMigratedApps] = useState(new Set());
   const [customMigrations, setCustomMigrations] = useState(new Map());
   const [isInitialized, setIsInitialized] = useState(false);
@@ -33,7 +30,6 @@ export const useUserSelections = (saveUserData, getUserData) => {
 
     const userData = getUserData ? getUserData('apps') : null;
     setMyApps(new Set(userData?.myApps || []));
-    setFavoriteApps(new Set(userData?.favoriteApps || []));
     setMigratedApps(new Set(userData?.migratedApps || []));
     setCustomMigrations(new Map(userData?.customMigrations || []));
 
@@ -49,22 +45,15 @@ export const useUserSelections = (saveUserData, getUserData) => {
     if (isInitialized && saveUserData) {
       saveUserData('apps', {
         myApps: Array.from(myApps),
-        favoriteApps: Array.from(favoriteApps),
         migratedApps: Array.from(migratedApps),
         customMigrations: Array.from(customMigrations.entries()),
       });
     }
-  }, [isInitialized, myApps, favoriteApps, migratedApps, customMigrations]);
+  }, [isInitialized, myApps, migratedApps, customMigrations]);
 
   const toggleMyApp = (e, id) => {
     e.stopPropagation();
     setMyApps(prev => toggleInSet(prev, id));
-  };
-
-  // Favoris du catalogue : n'affecte jamais « Mes Apps »
-  const toggleFavorite = (e, id) => {
-    e.stopPropagation();
-    setFavoriteApps(prev => toggleInSet(prev, id));
   };
 
   const toggleMigrate = (e, id) => {
@@ -92,14 +81,12 @@ export const useUserSelections = (saveUserData, getUserData) => {
     const stale = new Set(ids.map(String));
     const keep = (set) => new Set(Array.from(set).filter(id => !stale.has(String(id))));
     setMyApps(keep);
-    setFavoriteApps(keep);
     setMigratedApps(keep);
   };
 
-  // Vide « Mes Apps » et les favoris, sans toucher à l'historique de migrations
+  // Vide « Mes Apps », sans toucher à l'historique de migrations
   const clearMyApps = () => {
     setMyApps(new Set());
-    setFavoriteApps(new Set());
   };
 
   // Vide l'historique de migrations sans retirer les apps de « Mes Apps »
@@ -132,12 +119,10 @@ export const useUserSelections = (saveUserData, getUserData) => {
 
   return {
     myApps,
-    favoriteApps,
     migratedApps,
     customMigrations,
     isInitialized,
     toggleMyApp,
-    toggleFavorite,
     toggleMigrate,
     addMyApps,
     removeMyApps,

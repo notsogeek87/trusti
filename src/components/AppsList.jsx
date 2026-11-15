@@ -3,7 +3,7 @@ import AppCard from './AppCard';
 import LoadingSpinner from './ui/LoadingSpinner';
 import { buildAwardsPodiums } from '../utils/awards';
 import { TABS } from '../constants/tabs';
-import { getMainCategory, getPodiumCategory, FAVORITES_FILTER } from '../constants/categories';
+import { getMainCategory, getPodiumCategory } from '../constants/categories';
 import { useIsMobile } from '../contexts/ViewModeContext';
 
 /**
@@ -18,11 +18,9 @@ const AppsList = ({
   apps,
   activeTab,
   myApps,
-  favoriteApps = new Set(),
   migratedApps,
   customMigrations,
   onToggleMyApp,
-  onToggleFavorite,
   onToggleMigrate,
   onSelectApp,
   selectedCategory = 'Toutes',
@@ -37,24 +35,17 @@ const AppsList = ({
   const isMobile = useIsMobile();
   const loadMoreSentinelRef = useRef(null);
 
-  // Filtrer par catégorie dans l'onglet APPLICATIONS — "À tester" est un cas
-  // particulier : il filtre par favoris plutôt que par catégorie réelle.
+  // Filtrer par catégorie dans l'onglet APPLICATIONS
   let displayApps = apps;
-  if (activeTab === TABS.APPLICATIONS && selectedCategory === FAVORITES_FILTER) {
-    displayApps = apps.filter(app => favoriteApps.has(app.id));
-  } else if (activeTab === TABS.APPLICATIONS && selectedCategory !== 'Toutes') {
+  if (activeTab === TABS.APPLICATIONS && selectedCategory !== 'Toutes') {
     displayApps = apps.filter(app => {
       const normalizedCat = normalizeCategory(app.category);
       return normalizedCat === selectedCategory;
     });
   }
 
-  // Dans le catalogue (APPLICATIONS), le "+" ajoute/retire un favori — jamais
-  // "Mes Apps". Ailleurs (Awards), il continue d'ajouter à "Mes Apps".
-  const getToggleProps = (app) =>
-    activeTab === TABS.APPLICATIONS
-      ? { isInMyApps: favoriteApps.has(app.id), onToggleMyApp: onToggleFavorite }
-      : { isInMyApps: myApps.has(app.id), onToggleMyApp };
+  // Le « + » ajoute / retire de « Mes Apps », quel que soit l'onglet
+  const getToggleProps = (app) => ({ isInMyApps: myApps.has(app.id), onToggleMyApp });
   
   // Pour l'onglet APPLICATIONS, utiliser la pagination serveur
   // Désactiver la pagination pendant une recherche
@@ -135,13 +126,7 @@ const AppsList = ({
   // Affichage normal pour les autres onglets
   return (
     <div className={isMobile ? 'space-y-4' : 'grid grid-cols-2 xl:grid-cols-3 gap-4'}>
-      {displayApps.length === 0 && activeTab === TABS.APPLICATIONS && selectedCategory === FAVORITES_FILTER && (
-        <div className="text-center py-8 px-4">
-          <p className="text-slate-500 text-sm mb-2">Aucune app à tester pour l'instant</p>
-          <p className="text-slate-400 text-xs">Tapez sur le + d'une app du catalogue pour la mettre de côté</p>
-        </div>
-      )}
-      {displayApps.length === 0 && activeTab === TABS.APPLICATIONS && selectedCategory !== 'Toutes' && selectedCategory !== FAVORITES_FILTER && (
+      {displayApps.length === 0 && activeTab === TABS.APPLICATIONS && selectedCategory !== 'Toutes' && (
         <div className="text-center py-8 px-4">
           <p className="text-slate-500 text-sm mb-2">Aucune application dans cette catégorie</p>
           <p className="text-slate-400 text-xs">Essayez une autre catégorie ou utilisez la recherche</p>
