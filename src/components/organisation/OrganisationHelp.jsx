@@ -1,6 +1,7 @@
 import React from 'react';
 import { ExternalLink, LifeBuoy } from 'lucide-react';
 import { helpForProfile } from '../../constants/orgHelp';
+import { t } from '../../i18n/index.js';
 
 /** « Qui peut vous aider » : dispositifs publics, gratuits ou mutualisés. */
 const OrganisationHelp = ({ profile }) => {
@@ -12,8 +13,8 @@ const OrganisationHelp = ({ profile }) => {
           <LifeBuoy size={18} aria-hidden="true" />
         </span>
         <div className="min-w-0">
-          <h3 id="aide-titre" className="font-black text-slate-800">Qui peut vous aider ?</h3>
-          <p className="text-xs text-slate-500">Dispositifs publics ou mutualisés, sans lien commercial avec Trusti.</p>
+          <h3 id="aide-titre" className="font-black text-slate-800">{t('org.misc.k037')}</h3>
+          <p className="text-xs text-slate-500">{t('org.misc.k038')}</p>
         </div>
       </div>
       <ul className="flex flex-col divide-y divide-slate-100">

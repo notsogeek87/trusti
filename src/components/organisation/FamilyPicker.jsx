@@ -3,6 +3,7 @@ import { Check, Landmark } from 'lucide-react';
 import { isPublicService } from '../../constants/publicServices';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import ProAppIcon from './ProAppIcon';
+import { t } from '../../i18n/index.js';
 
 const AppChip = React.memo(({ app, selected, onToggle }) => (
   <button
@@ -15,8 +16,8 @@ const AppChip = React.memo(({ app, selected, onToggle }) => (
     <ProAppIcon app={app} />
     <span className="flex-1 min-w-0 text-sm font-bold text-slate-800 truncate" title={app.name}>{app.name}</span>
     {isPublicService(app) && (
-      <span title="Service opéré par l'État" className="flex items-center gap-0.5 shrink-0 text-[10px] font-black uppercase text-blue-700 bg-blue-50 rounded px-1.5 py-0.5">
-        <Landmark size={11} aria-hidden="true" /> État
+      <span title={t('org.misc.k033')} className="flex items-center gap-0.5 shrink-0 text-[10px] font-black uppercase text-blue-700 bg-blue-50 rounded px-1.5 py-0.5">
+        <Landmark size={11} aria-hidden="true" /> {t('org.misc.k034')}
       </span>
     )}
     <ScoreIndicator grade={app.grade} />
@@ -56,10 +57,10 @@ const FamilyPicker = ({ groups, selectedIds, onToggle, onSuggest }) => {
   if (groups.length === 0) {
     return (
       <div className="text-sm text-slate-500 bg-white/80 rounded-2xl p-4">
-        <p>Aucun outil ne correspond à cette recherche.</p>
+        <p>{t('org.misc.k035')}</p>
         {onSuggest && (
           <button type="button" onClick={onSuggest} className="mt-2 font-bold text-purple-600 hover:underline">
-            Proposer cet outil pour le catalogue
+            {t('org.misc.k036')}
           </button>
         )}
       </div>

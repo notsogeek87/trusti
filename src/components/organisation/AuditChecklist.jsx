@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { AlertTriangle, ChevronDown, ChevronUp, ClipboardList, HelpCircle, RotateCcw } from 'lucide-react';
-import { AUDIT_ANSWERS, AUDIT_THEMES, AUDIT_WEIGHTS } from '../../constants/auditChecklist';
+import { AUDIT_ANSWERS, AUDIT_THEMES, AUDIT_WEIGHTS, auditThemeLabel } from '../../constants/auditChecklist';
 import { ORG_PROFILES } from '../../constants/orgProfiles';
 import { questionsForProfile, computeAuditResult } from '../../utils/auditChecklist';
+import { t } from '../../i18n/index.js';
 
 const WEIGHT_STYLES = {
   haute: 'bg-rose-50 text-rose-700',
@@ -43,16 +44,16 @@ const AuditChecklist = ({ profile, answers, onAnswer, onReset, onProfileChange }
           <ClipboardList size={18} aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
-          <h3 id="audit-titre" className="font-black text-slate-800">Questionnaire d'audit</h3>
+          <h3 id="audit-titre" className="font-black text-slate-800">{t('org.misc.k023')}</h3>
           <p className="text-xs text-slate-500">
-            Les pratiques comptent autant que les outils : comptes, sauvegardes, contrats, données sensibles.
+            {t('org.misc.k024')}
           </p>
         </div>
       </div>
 
       {!profile && onProfileChange && (
         <div className="mt-3">
-          <p className="text-xs font-bold text-slate-600 mb-1.5">Type de structure, pour ajouter les questions qui lui sont propres :</p>
+          <p className="text-xs font-bold text-slate-600 mb-1.5">{t('org.misc.k025')}</p>
           <div className="flex flex-wrap gap-1.5">
             {ORG_PROFILES.map(p => (
               <button
@@ -78,13 +79,13 @@ const AuditChecklist = ({ profile, answers, onAnswer, onReset, onProfileChange }
       {result.answered > 0 && (
         <div className="mt-4 flex flex-col gap-3">
           {result.risks.length === 0 && result.unknown.length === 0 ? (
-            <p className="text-sm font-bold text-emerald-700 bg-emerald-50 rounded-xl px-3 py-2">Aucun point de vigilance sur les questions répondues.</p>
+            <p className="text-sm font-bold text-emerald-700 bg-emerald-50 rounded-xl px-3 py-2">{t('org.misc.k026')}</p>
           ) : null}
           {result.risks.length > 0 && (
             <div>
               <p className="flex items-center gap-1.5 text-sm font-black text-slate-800 mb-2">
                 <AlertTriangle size={15} className="text-rose-600" aria-hidden="true" />
-                {result.risks.length} point{result.risks.length > 1 ? 's' : ''} de vigilance
+                {t('org.misc.risks', { count: result.risks.length })}
               </p>
               <ol className="flex flex-col gap-2">
                 {result.risks.map(q => (
@@ -93,7 +94,7 @@ const AuditChecklist = ({ profile, answers, onAnswer, onReset, onProfileChange }
                       {AUDIT_WEIGHTS[q.weight].label}
                     </span>
                     <p className="mt-1 text-sm font-bold text-slate-700">{q.recommendation}</p>
-                    <p className="mt-0.5 text-xs text-slate-400">{q.theme}</p>
+                    <p className="mt-0.5 text-xs text-slate-400">{auditThemeLabel(q.theme)}</p>
                   </li>
                 ))}
               </ol>
@@ -102,7 +103,7 @@ const AuditChecklist = ({ profile, answers, onAnswer, onReset, onProfileChange }
           {result.unknown.length > 0 && (
             <div>
               <p className="flex items-center gap-1.5 text-sm font-black text-slate-800 mb-1">
-                <HelpCircle size={15} className="text-slate-400" aria-hidden="true" /> À vérifier
+                <HelpCircle size={15} className="text-slate-400" aria-hidden="true" /> {t('org.misc.k028')}
               </p>
               <ul className="list-disc pl-5 text-sm text-slate-600 space-y-0.5">
                 {result.unknown.map(q => <li key={q.id}>{q.label}</li>)}
@@ -120,11 +121,11 @@ const AuditChecklist = ({ profile, answers, onAnswer, onReset, onProfileChange }
           className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-black hover:bg-indigo-700"
         >
           {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          {open ? 'Masquer les questions' : result.answered === 0 ? 'Répondre au questionnaire' : 'Modifier mes réponses'}
+          {open ? t('org.misc.k029') : result.answered === 0 ? t('org.misc.k030') : t('org.misc.k031')}
         </button>
         {result.answered > 0 && (
           <button type="button" onClick={onReset} className="flex items-center gap-1 px-3 py-2 text-xs font-bold text-slate-400 hover:text-rose-600">
-            <RotateCcw size={13} /> Effacer les réponses
+            <RotateCcw size={13} /> {t('org.misc.k032')}
           </button>
         )}
       </div>
@@ -136,7 +137,7 @@ const AuditChecklist = ({ profile, answers, onAnswer, onReset, onProfileChange }
             if (themed.length === 0) return null;
             return (
               <fieldset key={theme}>
-                <legend className="text-xs font-black uppercase tracking-wider text-indigo-600 mb-2">{theme}</legend>
+                <legend className="text-xs font-black uppercase tracking-wider text-indigo-600 mb-2">{auditThemeLabel(theme)}</legend>
                 <ul className="flex flex-col divide-y divide-slate-100">
                   {themed.map(q => (
                     <li key={q.id} className="py-2.5 first:pt-0 flex flex-col gap-1.5">

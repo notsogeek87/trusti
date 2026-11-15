@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ArrowLeft, ArrowRight, BarChart3, Building2, ClipboardCheck, Rocket, Trash2 } from 'lucide-react';
 import { STANDALONE_URLS } from '../../utils/standalonePage';
 import { loadOrganisationState, clearOrganisationState } from '../../utils/organisationStorage';
+import { t } from '../../i18n/index.js';
 
 /**
  * Rubrique « Organisations » (adresse « ?organisations ») : propose les deux parcours.
@@ -14,9 +15,9 @@ const PATHS = [
   {
     id: 'evaluate',
     Icon: ClipboardCheck,
-    title: 'Évaluer mon organisation',
-    description: 'Vous disposez déjà d\'un environnement numérique ? Évaluez vos logiciels, mesurez leur niveau de confiance et identifiez les pistes d\'amélioration.',
-    cta: 'Évaluer mon organisation',
+    title: t('org.misc.k001'),
+    description: t('org.misc.k002'),
+    cta: t('org.misc.k001'),
     href: STANDALONE_URLS.EVALUATE_ORGANISATION,
     accent: {
       icon: 'bg-emerald-50 text-emerald-600 border-emerald-100',
@@ -27,9 +28,9 @@ const PATHS = [
   {
     id: 'create',
     Icon: Rocket,
-    title: 'Créer mon organisation',
-    description: 'Vous lancez une nouvelle association, entreprise ou structure ? Construisez dès le départ un environnement numérique responsable, souverain et fiable avec Trusti.',
-    cta: 'Créer mon organisation',
+    title: t('org.misc.k003'),
+    description: t('org.misc.k004'),
+    cta: t('org.misc.k003'),
     href: STANDALONE_URLS.CREATE_ORGANISATION,
     accent: {
       icon: 'bg-indigo-50 text-indigo-600 border-indigo-100',
@@ -46,15 +47,15 @@ const OrganisationsPage = () => {
 
   const deleteSaved = () => {
     const question = savedName
-      ? `Supprimer l'organisation « ${savedName} » et son évaluation ? Cette action est définitive.`
-      : 'Supprimer cette organisation et son évaluation ? Cette action est définitive.';
+      ? t('org.page.deleteNamed', { name: savedName })
+      : t('org.misc.k005');
     if (!window.confirm(question)) return;
     clearOrganisationState();
     setSaved(null);
   };
 
   useEffect(() => {
-    document.title = 'Organisations · Trusti';
+    document.title = t('org.misc.k006');
   }, []);
 
   return (
@@ -62,11 +63,11 @@ const OrganisationsPage = () => {
       <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-white/60">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
           <a href="/" className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-indigo-600">
-            <ArrowLeft size={16} /> Trusti
+            <ArrowLeft size={16} /> {t('org.misc.k007')}
           </a>
           <span className="text-slate-300">/</span>
           <span className="flex items-center gap-2 font-black text-indigo-600 truncate">
-            <Building2 size={18} className="shrink-0" /> Organisations
+            <Building2 size={18} className="shrink-0" /> {t('org.misc.k008')}
           </span>
         </div>
       </header>
@@ -74,10 +75,10 @@ const OrganisationsPage = () => {
       <main className="max-w-5xl mx-auto px-4 pt-8 pb-16 sm:pt-12">
         <div className="text-center mb-8 sm:mb-10">
           <h1 className="text-2xl sm:text-4xl font-black text-slate-800 leading-tight">
-            Votre organisation, un numérique de confiance
+            {t('org.misc.k009')}
           </h1>
           <p className="mt-3 text-slate-600 max-w-2xl mx-auto sm:text-lg">
-            Trusti vous accompagne pour évaluer votre environnement numérique actuel ou construire celui de demain.
+            {t('org.misc.k010')}
           </p>
         </div>
 
@@ -91,7 +92,7 @@ const OrganisationsPage = () => {
                 <BarChart3 size={24} aria-hidden="true" />
               </span>
               <span className="flex-1 min-w-0">
-                <span className="block font-black text-slate-800 break-words">{savedName || 'Votre organisation'}</span>
+                <span className="block font-black text-slate-800 break-words">{savedName || t('org.page.yourOrg')}</span>
                 <span className="block text-sm text-slate-500">
                   Évaluation enregistrée : {savedCount} outil{savedCount > 1 ? 's' : ''}. Voir la synthèse, la note et les exports.
                 </span>
@@ -101,8 +102,8 @@ const OrganisationsPage = () => {
             <button
               type="button"
               onClick={deleteSaved}
-              aria-label={`Supprimer l'organisation ${savedName || 'enregistrée'}`}
-              title="Supprimer l'organisation"
+              aria-label={savedName ? t('org.misc.deleteNamedAria', { name: savedName }) : t('org.misc.deleteSavedAria')}
+              title={t('org.misc.k011')}
               className="shrink-0 px-4 sm:px-5 border-l border-emerald-100 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-r-3xl transition-colors"
             >
               <Trash2 size={20} aria-hidden="true" />
