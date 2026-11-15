@@ -5,6 +5,7 @@ import { t } from '../i18n/index.js';
  * Catégories principales simplifiées pour le mobile
  * Ordonnées par pertinence/popularité
  */
+// i18n-ignore-start : noms de catégories = clés en base, traduits à l'affichage par categoryLabel()
 export const CATEGORIES = [
   'Messagerie',
   'Réseaux sociaux',
@@ -254,6 +255,7 @@ export const SPLIT_SUBCATEGORIES = {
 
 // Bloqueur de pub : rangé sous « Sécurité & VPN » dans le filtre du catalogue.
 CATEGORY_MAPPING['Sécurité / Bloqueurs de pub'] = 'Sécurité & VPN';
+// i18n-ignore-end
 
 /**
  * Catégorie principale (filtre du catalogue) d'une catégorie détaillée. Une

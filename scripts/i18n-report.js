@@ -7,7 +7,8 @@
  *
  * Heuristique : chaîne ou texte JSX contenant une lettre accentuée française ou un mot
  * français courant. Les commentaires, console.* et imports sont ignorés, ainsi que les
- * lignes marquées `i18n-ignore` (valeur technique, pas un texte affiché).
+ * lignes marquées `i18n-ignore` (valeur technique, pas un texte affiché) et les blocs
+ * entre `i18n-ignore-start` et `i18n-ignore-end` (données : noms de catégories, mots-clés…).
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -24,7 +25,7 @@ const FRENCH = /[éèêàùûôîçœÉÈÀÇ]|\b(?:les|des|une|vous|votre|vos|p
 function walk(p, out = []) {
   const st = statSync(p);
   if (st.isDirectory()) {
-    if (/node_modules|[/\\]i18n$/.test(p)) return out;
+    if (/node_modules|[/\\](i18n|models)$/.test(p)) return out;
     for (const f of readdirSync(p)) walk(join(p, f), out);
   } else if (/\.(jsx?|mjs)$/.test(p) && !/\.test\.js$/.test(p)) out.push(p);
   return out;
@@ -44,8 +45,12 @@ for (const file of START.flatMap((s) => walk(s))) {
   const rawLines = raw.split('\n');
   const lines = stripComments(raw).split('\n');
   const hits = [];
+  let ignoring = false;
   lines.forEach((rawLine, i) => {
     let line = rawLine;
+    if (/i18n-ignore-start/.test(rawLines[i] || '')) ignoring = true;
+    if (/i18n-ignore-end/.test(rawLines[i] || '')) { ignoring = false; return; }
+    if (ignoring) return;
     if (/^\s*(import|export \* from)|console\.(log|warn|error|info|debug)|throw new Error/.test(line) || /i18n-ignore/.test(rawLines[i] || '')) return;
     // Classes CSS (« font-sans »…) : pas du texte
     line = line.replace(/className=(?:"[^"]*"|\{`[^`]*`\})/g, '');

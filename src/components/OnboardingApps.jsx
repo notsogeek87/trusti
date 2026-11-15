@@ -9,6 +9,7 @@ import { useBackHandler } from '../hooks/useBackHandler';
 import OnboardingSummary from './OnboardingSummary';
 import OnboardingScreenshotImport from './OnboardingScreenshotImport';
 import AppIconImage from './ui/AppIconImage';
+import { t } from '../i18n/index.js';
 
 const GOOD_GRADES = ['A', 'B', 'C'];
 
@@ -42,30 +43,31 @@ export function computeReplacementMap(apps) {
   return map;
 }
 
-// Étapes guidées par catégorie
+// Étapes guidées par catégorie (`categories` : clés en base, pas du texte affiché)
+// i18n-ignore-start
 const STEPS = [
   {
     id: 'messagerie',
     emoji: '💬',
-    question: 'Pour communiquer avec tes proches ?',
+    get question() { return t('onboarding.apps.q.messagerie'); },
     categories: ['Messagerie', 'Email', 'Visioconférence', 'Communication', 'Téléphone & SMS'],
   },
   {
     id: 'social',
     emoji: '📱',
-    question: 'Sur quels réseaux sociaux tu es ?',
+    get question() { return t('onboarding.apps.q.social'); },
     categories: ['Réseaux sociaux', 'Rencontres'],
   },
   {
     id: 'media',
     emoji: '🎵',
-    question: 'Pour la musique et les vidéos ?',
+    get question() { return t('onboarding.apps.q.media'); },
     categories: ['Multimédia', 'Streaming Musical', 'Streaming Vidéo', 'Podcasts', 'Lecteurs Multimédia'],
   },
   {
     id: 'work',
     emoji: '💼',
-    question: 'Pour travailler et t\'organiser ?',
+    get question() { return t('onboarding.apps.q.work'); },
     categories: [
       'Bureautique', 'Productivité / Documents', 'Productivité / Tableur', 'Productivité / Tout-en-un',
       'Productivité / Notes', 'Prise de Notes', 'Productivité / Tâches', 'Productivité / Calendrier',
@@ -75,22 +77,23 @@ const STEPS = [
   {
     id: 'ia',
     emoji: '🤖',
-    question: 'Quelles intelligences artificielles utilises-tu ?',
+    get question() { return t('onboarding.apps.q.ia'); },
     categories: ['IA'],
   },
   {
     id: 'navigation',
     emoji: '🗺️',
-    question: 'Pour te déplacer ?',
+    get question() { return t('onboarding.apps.q.navigation'); },
     categories: ['Navigation', 'Navigation GPS', 'Cartographie', 'Transport & Voyage', 'Transport & Mobilité'],
   },
   {
     id: 'finance',
     emoji: '💳',
-    question: 'Pour gérer ton argent ?',
+    get question() { return t('onboarding.apps.q.finance'); },
     categories: ['Finance', 'Banque & Finance', 'Paiement Mobile'],
   },
 ];
+// i18n-ignore-end
 
 // step -1 = intro
 // step 0..N-1 = catégories
@@ -168,15 +171,15 @@ export const AppTile = ({ app, selected, onToggle, replacedBy, isChosenAlternati
     </span>
     <span className={`w-2 h-2 rounded-full ${GRADE_DOT[app.grade] || 'bg-slate-300'}`} title={`TrustiScore ${app.grade}`} />
     {replacedBy && (
-      <span className={`flex items-center gap-0.5 text-[9px] font-bold leading-none ${selected ? 'text-amber-100' : 'text-amber-600'}`} title={`Déjà remplacée par ${replacedBy.name}`}>
+      <span className={`flex items-center gap-0.5 text-[9px] font-bold leading-none ${selected ? 'text-amber-100' : 'text-amber-600'}`} title={t('onboarding.apps.replacedBy', { name: replacedBy.name })}>
         <ArrowRight size={9} strokeWidth={3} />
         <span className="truncate max-w-[64px]">{replacedBy.name}</span>
       </span>
     )}
     {isChosenAlternative && (
-      <span className={`flex items-center gap-0.5 text-[9px] font-bold leading-none ${selected ? 'text-emerald-100' : 'text-emerald-600'}`} title="Déjà utilisée à la place d'une app moins respectueuse trouvée dans le scan">
+      <span className={`flex items-center gap-0.5 text-[9px] font-bold leading-none ${selected ? 'text-emerald-100' : 'text-emerald-600'}`} title={t('onboarding.apps.chosenAltTitle')}>
         <Sparkles size={9} />
-        <span>Déjà migré</span>
+        <span>{t('onboarding.apps.alreadySwitched')}</span>
       </span>
     )}
   </button>
@@ -194,9 +197,9 @@ const ImportScreenshotCard = ({ onClick }) => (
         <ImagePlus size={18} className="text-slate-500" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-bold text-slate-700 text-sm leading-tight">Ou importer une capture d'écran</p>
+        <p className="font-bold text-slate-700 text-sm leading-tight">{t('onboarding.apps.orScreenshot')}</p>
         <p className="text-[11px] text-slate-400 mt-0.5">
-          {isIOSWeb ? 'Réglages → Apps' : 'Ta liste d\'apps dans les réglages'}
+          {isIOSWeb ? t('onboarding.apps.iosSettings') : t('onboarding.apps.androidSettings')}
         </p>
       </div>
       <ChevronRight size={16} className="text-slate-400 shrink-0" />
@@ -213,15 +216,15 @@ const ManualChoiceCard = ({ onClick }) => (
     className="relative w-full text-left bg-white border-2 border-indigo-500 rounded-3xl p-4 pt-5 shadow-xl shadow-indigo-100 transition-all active:scale-[0.98] hover:shadow-indigo-200"
   >
     <span className="absolute -top-3 left-4 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wide px-2.5 py-1 rounded-full shadow">
-      Recommandé
+      {t('onboarding.apps.recommended')}
     </span>
     <div className="flex items-center gap-3">
       <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shrink-0">
         <Hand size={24} className="text-white" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-black text-slate-900 text-base leading-tight">Choisir mes apps</p>
-        <p className="text-xs text-slate-500 mt-0.5">6 thèmes, tu touches les apps que tu utilises</p>
+        <p className="font-black text-slate-900 text-base leading-tight">{t('onboarding.apps.chooseApps')}</p>
+        <p className="text-xs text-slate-500 mt-0.5">{t('onboarding.apps.chooseAppsHint')}</p>
       </div>
       <ChevronRight size={20} className="text-indigo-500 shrink-0" />
     </div>
@@ -462,10 +465,9 @@ const OnboardingApps = ({ onComplete, onExit }) => {
           <div className="w-20 h-20 bg-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-200">
             <Sparkles size={36} className="text-white" />
           </div>
-          <h1 className="text-2xl font-black text-slate-900 mb-3">Personnalise ton espace</h1>
+          <h1 className="text-2xl font-black text-slate-900 mb-3">{t('onboarding.apps.introTitle')}</h1>
           <p className="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto mb-8">
-            En <strong className="text-slate-700">30 secondes</strong>, dis-nous quelles apps tu utilises.
-            On te montrera leur score de confidentialité.
+            {t('onboarding.apps.introBefore')} <strong className="text-slate-700">{t('onboarding.apps.introStrong')}</strong>{t('onboarding.apps.introAfter')}
           </p>
           {CAN_IMPORT_SCREENSHOT ? (
             // Web : la sélection à la main d'abord, la capture en option secondaire
@@ -474,21 +476,21 @@ const OnboardingApps = ({ onComplete, onExit }) => {
                 <ManualChoiceCard onClick={goNext} />
                 <ImportScreenshotCard onClick={() => setImporting(true)} />
               </div>
-              <p className="text-center text-xs text-slate-400 mt-4">Tu pourras ajouter ou retirer des apps à tout moment.</p>
+              <p className="text-center text-xs text-slate-400 mt-4">{t('onboarding.apps.anytime')}</p>
             </div>
           ) : (
             <button
               onClick={goNext}
               className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-indigo-200 transition-all active:scale-95 mx-auto"
             >
-              C'est parti <ChevronRight size={18} />
+              {t('onboarding.apps.letsGo')} <ChevronRight size={18} />
             </button>
           )}
           <button
             onClick={() => onComplete(selected)}
             className="mt-4 text-xs text-slate-400 hover:text-slate-600 transition-colors"
           >
-            Passer cette étape
+            {t('onboarding.apps.skipStep')}
           </button>
         </div>
       </div>
@@ -520,21 +522,21 @@ const OnboardingApps = ({ onComplete, onExit }) => {
 
           {/* Titre */}
           <h2 className="text-2xl font-black mb-2">
-            {count === 0 ? 'Prêt à explorer !' : `${count} app${count !== 1 ? 's' : ''} ajoutée${count !== 1 ? 's' : ''} !`}
+            {count === 0 ? t('onboarding.apps.readyTitle') : t('onboarding.apps.added', { count })}
           </h2>
           <p className="text-white/70 text-sm mb-10 max-w-xs leading-relaxed">
             {count === 0
-              ? 'Tu pourras ajouter des apps à tout moment depuis le catalogue.'
-              : 'TrustiScore va analyser chaque app et te proposer des alternatives plus respectueuses de ta vie privée.'}
+              ? t('onboarding.apps.readyBody')
+              : t('onboarding.apps.analysisBody')}
           </p>
 
           {/* Ce qui va se passer */}
           {count > 0 && (
             <div className="w-full max-w-xs space-y-3 mb-10" style={{ animation: 'onbFadeUp 0.4s 0.1s ease-out both' }}>
               {[
-                { emoji: '🔍', text: 'Analyse de ta vie privée par app' },
-                { emoji: '⭐', text: 'Score de A à E pour chaque app' },
-                { emoji: '✅', text: 'Alternatives recommandées si besoin' },
+                { emoji: '🔍', text: t('onboarding.apps.next1') },
+                { emoji: '⭐', text: t('onboarding.apps.next2') },
+                { emoji: '✅', text: t('onboarding.apps.next3') },
               ].map(({ emoji, text }) => (
                 <div key={text} className="flex items-center gap-3 bg-white/10 rounded-2xl px-4 py-3 text-left">
                   <span className="text-xl">{emoji}</span>
@@ -550,7 +552,7 @@ const OnboardingApps = ({ onComplete, onExit }) => {
             className="flex items-center gap-2 bg-white text-indigo-700 hover:bg-indigo-50 px-8 py-4 rounded-2xl font-black text-base shadow-xl transition-all active:scale-95"
             style={{ animation: 'onbFadeUp 0.4s 0.2s ease-out both' }}
           >
-            {count === 0 ? 'Explorer le catalogue' : 'Voir mon score de confidentialité'}
+            {count === 0 ? t('onboarding.apps.exploreCatalogue') : t('onboarding.apps.seeScore')}
             <ArrowRight size={18} />
           </button>
 
@@ -599,7 +601,7 @@ const OnboardingApps = ({ onComplete, onExit }) => {
           <h2 className="text-lg font-black text-slate-900 leading-snug">
             {currentStepData.question}
           </h2>
-          <p className="text-xs text-slate-400 mt-1">Sélectionne tout ce que tu utilises</p>
+          <p className="text-xs text-slate-400 mt-1">{t('onboarding.apps.selectAll')}</p>
         </div>
 
         {/* Recherche dans tout le catalogue : plus rapide que parcourir les grilles */}
@@ -609,14 +611,14 @@ const OnboardingApps = ({ onComplete, onExit }) => {
             type="search"
             value={query}
             onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Chercher une app (ex : WhatsApp)"
+            placeholder={t('onboarding.apps.searchPlaceholder')}
             className="w-full pl-10 pr-10 py-3 rounded-2xl bg-white border border-slate-200 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-indigo-400 shadow-sm"
           />
           {query && (
             <button
               onClick={() => setQuery('')}
               className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600"
-              aria-label="Effacer la recherche"
+              aria-label={t('onboarding.apps.clearSearch')}
             >
               <X size={16} />
             </button>
@@ -627,7 +629,7 @@ const OnboardingApps = ({ onComplete, onExit }) => {
         {isSearching ? (
           catalogError ? (
             <p className="text-center text-sm text-slate-400 py-12">
-              Recherche indisponible, vérifie ta connexion
+              {t('onboarding.apps.searchUnavailable')}
             </p>
           ) : !catalog ? (
             <div className="flex justify-center py-12">
@@ -648,7 +650,7 @@ const OnboardingApps = ({ onComplete, onExit }) => {
             </div>
           ) : (
             <p className="text-center text-sm text-slate-400 py-12">
-              Aucune app trouvée pour « {query.trim()} »
+              {t('onboarding.apps.noResult', { query: query.trim() })}
             </p>
           )
         ) : isLoadingStep ? (
@@ -670,7 +672,7 @@ const OnboardingApps = ({ onComplete, onExit }) => {
           </div>
         ) : (
           <p className="text-center text-sm text-slate-400 py-12">
-            Aucune app dans cette catégorie pour l'instant
+            {t('onboarding.apps.emptyCategory')}
           </p>
         )}
       </div>
@@ -683,15 +685,15 @@ const OnboardingApps = ({ onComplete, onExit }) => {
             className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98]"
           >
             {selected.size > 0
-              ? `Continuer (${selected.size} sélectionnée${selected.size !== 1 ? 's' : ''})`
-              : 'Passer cette catégorie'}
+              ? t('onboarding.apps.continueCount', { count: selected.size })
+              : t('onboarding.apps.skipCategory')}
             <ChevronRight size={16} />
           </button>
           <button
             onClick={goToSuccess}
             className="w-full py-2 text-xs text-slate-400 hover:text-slate-600 transition-colors"
           >
-            Terminer maintenant
+            {t('onboarding.apps.finishNow')}
           </button>
         </div>
       </div>

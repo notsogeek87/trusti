@@ -15,6 +15,7 @@ export const MIGRATION_STEPS = [
 
 // Conseils d'export / d'import selon la catégorie de l'app remplacée. Le
 // premier motif (sous-chaîne, insensible à la casse) qui correspond gagne.
+// i18n-ignore-start : motifs `match` = noms de catégories en base
 export const DATA_TIPS = [
   {
     match: ['messagerie', 'communication', 'visioconf'],
@@ -67,6 +68,7 @@ export const DATA_TIPS = [
     get import() { return t('migration.tips.9.import'); },
   },
 ];
+// i18n-ignore-end
 
 // Conseils génériques quand aucune catégorie ne correspond.
 export const DEFAULT_DATA_TIPS = {

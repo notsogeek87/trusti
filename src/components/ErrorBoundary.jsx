@@ -36,7 +36,7 @@ class ErrorBoundary extends React.Component {
           gap: '16px',
           padding: '24px',
           textAlign: 'center',
-          fontFamily: 'Nunito, system-ui, sans-serif',
+          fontFamily: 'Nunito, system-ui, sans-serif', // i18n-ignore
         }}>
           <h1 style={{ fontSize: '20px', fontWeight: 700 }}>{t('myApps.error.title')}</h1>
           <p style={{ color: '#5B6B7D', maxWidth: '400px' }}>

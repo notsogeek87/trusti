@@ -22,6 +22,7 @@ const PUBLISHER_PREFIXES = ['microsoft', 'google'];
 // système Android aux mêmes noms ("Messages", "Contacts"…), qui ne sont PAS
 // celles de l'iPhone : une ligne qui porte un de ces noms est ignorée, sauf
 // si elle correspond à une vraie app Apple du catalogue (IOS_BUILTIN_ALIASES).
+// i18n-ignore-start : mots-clés de reconnaissance, pas du texte affiché
 const IOS_BUILTIN_NAMES = [
   'messages', 'contacts', 'calendrier', 'calendar', 'fichiers', 'files', 'horloge', 'clock',
   'photos', 'gallery', 'maison', 'home', 'mail', 'notes', 'rappels', 'reminders', 'meteo',
@@ -33,6 +34,7 @@ const IOS_BUILTIN_NAMES = [
   'mots de passe', 'tv', 'apple tv', 'itunes store', 'forme', 'fitness', 'loupe', 'magnifier',
   'image playground', 'aperçu', 'apercu', 'preview', 'jeux', 'games', 'ecouter', 'clips',
 ];
+// i18n-ignore-end
 
 // App intégrée d'iOS → nom exact de l'app Apple correspondante dans le catalogue.
 const IOS_BUILTIN_ALIASES = {

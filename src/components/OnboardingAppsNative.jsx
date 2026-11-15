@@ -10,6 +10,7 @@ import { extractPackageId } from '../utils/androidPackage';
 const ANDROID_OS_ID = 'android-os';
 import AppIconImage from './ui/AppIconImage';
 import { useBackHandler } from '../hooks/useBackHandler';
+import { t } from '../i18n/index.js';
 
 const rand = (min, max) => Math.random() * (max - min) + min;
 
@@ -158,10 +159,10 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection, autoStart = false
       return;
     }
     const t1 = setTimeout(
-      () => setScanHint("Forcément, s'il y a beaucoup d'applications, c'est un peu plus long..."),
+      () => setScanHint(t('onboarding.native.hintLong')),
       2000
     );
-    const t2 = setTimeout(() => setScanHint('Promis, c\'est bientôt fini !'), 7000);
+    const t2 = setTimeout(() => setScanHint(t('onboarding.native.hintSoon')), 7000);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
@@ -280,10 +281,9 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection, autoStart = false
           <div className="w-20 h-20 bg-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-200">
             <ShieldCheck size={36} className="text-white" />
           </div>
-          <h1 className="text-2xl font-black text-slate-900 mb-3">Découvre ce que tes apps savent de toi</h1>
+          <h1 className="text-2xl font-black text-slate-900 mb-3">{t('onboarding.native.introTitle')}</h1>
           <p className="text-slate-500 text-sm leading-relaxed mb-6">
-            Trusti évalue plus de 100 apps populaires sur 12 critères objectifs, pour te donner
-            une note claire et te dire ce qu'elles font vraiment de tes données.
+            {t('onboarding.native.introBody')}
           </p>
 
           <div className="space-y-3 text-left mb-8">
@@ -291,19 +291,19 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection, autoStart = false
               <div className="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
                 <Globe size={16} className="text-indigo-600" />
               </div>
-              <p className="text-xs text-slate-600 leading-snug pt-1.5">Hébergement des données en Europe, conformité RGPD</p>
+              <p className="text-xs text-slate-600 leading-snug pt-1.5">{t('onboarding.native.f1')}</p>
             </div>
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
                 <Lock size={16} className="text-indigo-600" />
               </div>
-              <p className="text-xs text-slate-600 leading-snug pt-1.5">Protection contre le Cloud Act et la surveillance</p>
+              <p className="text-xs text-slate-600 leading-snug pt-1.5">{t('onboarding.native.f2')}</p>
             </div>
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
                 <Eye size={16} className="text-indigo-600" />
               </div>
-              <p className="text-xs text-slate-600 leading-snug pt-1.5">Scores transparents, basés sur des critères objectifs</p>
+              <p className="text-xs text-slate-600 leading-snug pt-1.5">{t('onboarding.native.f3')}</p>
             </div>
           </div>
 
@@ -312,9 +312,9 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection, autoStart = false
             className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-indigo-200 transition-all active:scale-95"
           >
             <ScanSearch size={18} />
-            Scanner mon téléphone
+            {t('onboarding.native.scan')}
           </button>
-          <p className="text-xs text-slate-400 mt-3">On repère tes apps installées automatiquement, rien à saisir</p>
+          <p className="text-xs text-slate-400 mt-3">{t('onboarding.native.scanHint')}</p>
         </div>
       </div>
     );
@@ -330,14 +330,13 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection, autoStart = false
           <div className="w-20 h-20 bg-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-200">
             <ScanSearch size={36} className="text-white" />
           </div>
-          <h1 className="text-2xl font-black text-slate-900 mb-3">On scanne ton téléphone</h1>
+          <h1 className="text-2xl font-black text-slate-900 mb-3">{t('onboarding.native.scanningTitle')}</h1>
           <p className="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto mb-6">
-            Trusti repère automatiquement les apps installées qu'on connaît, pour t'éviter
-            de tout sélectionner à la main.
+            {t('onboarding.native.scanningBody')}
           </p>
           <ScanProgressBar />
           <p key={scanHint || 'default'} className="text-xs text-slate-400 mt-3" style={{ animation: 'onbFadeUp 0.3s ease-out' }}>
-            {scanHint || 'Analyse en cours, ça ne prend que quelques secondes...'}
+            {scanHint || t('onboarding.native.scanningDefault')}
           </p>
         </div>
       </div>
@@ -350,23 +349,23 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection, autoStart = false
       <div className="min-h-screen bg-transparent flex flex-col items-center justify-center px-6 text-center">
         <style>{ANIM_CSS}</style>
         <div style={{ animation: 'onbFadeUp 0.4s ease-out' }}>
-          <h1 className="text-xl font-black text-slate-900 mb-3">Le scan n'a pas fonctionné</h1>
+          <h1 className="text-xl font-black text-slate-900 mb-3">{t('onboarding.native.errorTitle')}</h1>
           <p className="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto mb-8">
-            Pas de souci, tu peux sélectionner tes apps à la main à la place.
+            {t('onboarding.native.errorBody')}
           </p>
           <div className="flex flex-col gap-3 items-center">
             <button
               onClick={runScan}
               className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-indigo-200 transition-all active:scale-95"
             >
-              Réessayer
+              {t('onboarding.native.retry')}
             </button>
             {onManualSelection && (
               <button
                 onClick={onManualSelection}
                 className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
               >
-                Sélection manuelle
+                {t('onboarding.native.manual')}
               </button>
             )}
           </div>
@@ -444,10 +443,10 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection, autoStart = false
         </div>
 
         <h2 className="text-white font-black text-xl mt-6" style={{ animation: 'onbFadeUp 0.4s ease-out' }}>
-          On prépare ton espace...
+          {t('onboarding.native.preparing')}
         </h2>
         <p className="text-indigo-100 text-sm mt-2 max-w-xs">
-          Scores et alternatives plus respectueuses de ta vie privée arrivent
+          {t('onboarding.native.preparingBody')}
         </p>
       </div>
     );
@@ -478,17 +477,17 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection, autoStart = false
           {matches.length > 0 ? (
             <>
               <h2 className="text-lg font-black text-slate-900 leading-snug">
-                {matches.length} app{matches.length !== 1 ? 's' : ''} reconnue{matches.length !== 1 ? 's' : ''} sur ton téléphone
+                {t('onboarding.native.found', { count: matches.length })}
               </h2>
-              <p className="text-xs text-slate-400 mt-1">Toutes tes apps comptent dans ton score, sans filtre</p>
+              <p className="text-xs text-slate-400 mt-1">{t('onboarding.native.allCount')}</p>
             </>
           ) : (
             <>
               <h2 className="text-lg font-black text-slate-900 leading-snug">
-                Aucune app connue détectée
+                {t('onboarding.native.noneFound')}
               </h2>
               <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
-                Ton catalogue local d'apps reconnues est peut-être limité. Tu peux choisir tes apps à la main.
+                {t('onboarding.native.noneFoundBody')}
               </p>
             </>
           )}
@@ -514,7 +513,7 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection, autoStart = false
             className="mt-8 w-full flex items-center justify-center gap-2 text-xs font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
           >
             <ListChecks size={14} />
-            {matches.length > 0 ? 'Ajouter d\'autres apps à la main' : 'Sélectionner mes apps à la main'}
+            {matches.length > 0 ? t('onboarding.native.addMore') : t('onboarding.native.selectManual')}
           </button>
         )}
       </div>
@@ -525,7 +524,7 @@ const OnboardingAppsNative = ({ onComplete, onManualSelection, autoStart = false
             onClick={handleFinish}
             className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98]"
           >
-            {count > 0 ? 'Voir mon score' : 'Continuer'}
+            {count > 0 ? t('onboarding.native.seeScore') : t('onboarding.native.continue')}
             <ArrowRight size={16} />
           </button>
         </div>
