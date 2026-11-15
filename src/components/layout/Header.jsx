@@ -3,6 +3,8 @@ import { HelpCircle, PieChart, Building2 } from 'lucide-react';
 import { useIsMobile } from '../../contexts/ViewModeContext';
 import { STANDALONE_URLS } from '../../utils/standalonePage';
 import HostingCredit from '../ui/HostingCredit';
+import LanguageSwitcher from '../ui/LanguageSwitcher';
+import { t } from '../../i18n';
 
 const Header = ({
   onOpenStorageManager,
@@ -33,18 +35,20 @@ const Header = ({
           <a
             href={STANDALONE_URLS.ORGANISATIONS}
             className="flex items-center gap-1.5 p-1.5 md:px-3 md:py-2 rounded-full text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all"
-            aria-label="Organisations"
-            title="Évaluer ou créer mon organisation"
+            aria-label={t('header.organisations')}
+            title={t('header.organisationsTitle')}
           >
             <Building2 size={18} className="shrink-0" />
-            {!isMobile && <span className="text-xs font-black whitespace-nowrap">Organisations</span>}
+            {!isMobile && <span className="text-xs font-black whitespace-nowrap">{t('header.organisations')}</span>}
           </a>
+
+          <LanguageSwitcher />
 
           <button
             onClick={onOpenStorageManager}
             className="p-1.5 md:p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all"
-            aria-label="Gérer mon espace de stockage"
-            title="Gérer mon espace de stockage"
+            aria-label={t('header.storage')}
+            title={t('header.storage')}
           >
             <PieChart size={18} />
           </button>
@@ -52,8 +56,8 @@ const Header = ({
           <button
             onClick={onShowLandingPage}
             className="p-1.5 md:p-2.5 rounded-full transition-all duration-300 shadow-sm bg-indigo-500 text-white hover:bg-indigo-600"
-            aria-label="Aide et explications"
-            title="À propos de Trusti"
+            aria-label={t('header.help')}
+            title={t('header.about')}
           >
             <HelpCircle size={20} />
           </button>

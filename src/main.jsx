@@ -1,13 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
+import { initI18n } from './i18n/index.js'
 
 // Empêcher le navigateur de réinitialiser le scroll lors des pushState/popState
 if ('scrollRestoration' in window.history) {
   window.history.scrollRestoration = 'manual';
 }
-import { ToastProvider } from './contexts/ToastContext.jsx'
-import ErrorBoundary from './components/ErrorBoundary.jsx'
 import './styles/index.css'
 
 import { App as CapacitorApp } from '@capacitor/app'
@@ -38,18 +36,31 @@ if (StandalonePage && isNativeAndroid) {
   })
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <ErrorBoundary>
-      {StandalonePage ? (
-        <React.Suspense fallback={null}>
-          <StandalonePage />
-        </React.Suspense>
-      ) : (
-        <ToastProvider>
-          <App />
-        </ToastProvider>
-      )}
-    </ErrorBoundary>
-  </React.StrictMode>,
-)
+// La langue est fixée avant de charger l'app : les textes calculés au chargement
+// des modules (constantes, catégories…) sont ainsi déjà dans la bonne langue.
+async function boot() {
+  await initI18n()
+  const [{ default: App }, { ToastProvider }, { default: ErrorBoundary }] = await Promise.all([
+    import('./App.jsx'),
+    import('./contexts/ToastContext.jsx'),
+    import('./components/ErrorBoundary.jsx'),
+  ])
+
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    <React.StrictMode>
+      <ErrorBoundary>
+        {StandalonePage ? (
+          <React.Suspense fallback={null}>
+            <StandalonePage />
+          </React.Suspense>
+        ) : (
+          <ToastProvider>
+            <App />
+          </ToastProvider>
+        )}
+      </ErrorBoundary>
+    </React.StrictMode>,
+  )
+}
+
+boot()
