@@ -5,5 +5,6 @@ import categories from './categories.js';
 import ui from './ui.js';
 import grades from './grades.js';
 import myApps from './myApps.js';
+import cards from './cards.js';
 
-export default { categories, common, grades, header, myApps, ui };
+export default { cards, categories, common, grades, header, myApps, ui };

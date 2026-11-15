@@ -1,5 +1,6 @@
 import React from 'react';
 import { Route, ChevronRight, X } from 'lucide-react';
+import { t } from '../i18n/index.js';
 
 /**
  * Carte « Migrations en cours » de « Mes Apps » : parcours de migration guidée commencés
@@ -16,9 +17,9 @@ import { Route, ChevronRight, X } from 'lucide-react';
 const MigrationsInProgressCard = ({ items, onResume, onAbandon }) => {
   if (!items || items.length === 0) return null;
   return (
-    <section className="bg-white rounded-2xl border border-slate-100 shadow-sm px-3 py-2 mb-3" aria-label="Migrations en cours">
+    <section className="bg-white rounded-2xl border border-slate-100 shadow-sm px-3 py-2 mb-3" aria-label={t('cards.migrations.title')}>
       <h3 className="flex items-center gap-1.5 font-black text-[10px] uppercase tracking-wider text-slate-400">
-        <Route size={11} className="text-indigo-500" /> Migrations en cours
+        <Route size={11} className="text-indigo-500" /> {t('cards.migrations.title')}
       </h3>
       <ul className="divide-y divide-slate-100">
         {items.map(({ app, altName, completed, total }) => (
@@ -27,7 +28,7 @@ const MigrationsInProgressCard = ({ items, onResume, onAbandon }) => {
               type="button"
               onClick={() => onResume(app)}
               className="min-w-0 flex-1 flex items-center gap-2 py-1.5 text-left"
-              aria-label={`Reprendre la migration de ${app.name} (${completed} étape${completed > 1 ? 's' : ''} sur ${total})`}
+              aria-label={t('cards.migrations.resumeAria', { name: app.name, count: completed, total })}
             >
               <span className="min-w-0 flex-1 text-sm font-bold text-slate-800 truncate">
                 {app.name}{altName ? ` → ${altName}` : ''}
@@ -38,7 +39,7 @@ const MigrationsInProgressCard = ({ items, onResume, onAbandon }) => {
                 ))}
               </span>
               <span className="shrink-0 inline-flex items-center text-xs font-bold text-indigo-600">
-                Reprendre <ChevronRight size={14} />
+                {t('cards.migrations.resume')} <ChevronRight size={14} />
               </span>
             </button>
             {onAbandon && (
@@ -46,8 +47,8 @@ const MigrationsInProgressCard = ({ items, onResume, onAbandon }) => {
                 type="button"
                 onClick={() => onAbandon(app)}
                 className="shrink-0 p-2 -mr-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100"
-                aria-label={`Abandonner la migration de ${app.name}`}
-                title="Abandonner cette migration"
+                aria-label={t('cards.migrations.abandonAria', { name: app.name })}
+                title={t('cards.migrations.abandon')}
               >
                 <X size={16} />
               </button>

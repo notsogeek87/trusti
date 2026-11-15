@@ -1,10 +1,11 @@
 import React from 'react';
 import { TrendingDown, TrendingUp, ChevronRight } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
+import { formatDate, t } from '../i18n/index.js';
 
-const formatDate = (iso) => {
+const formatDay = (iso) => {
   const date = new Date(`${iso}T00:00:00`);
-  return Number.isNaN(date.getTime()) ? iso : date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+  return Number.isNaN(date.getTime()) ? iso : formatDate(date, { day: 'numeric', month: 'long' });
 };
 
 /**
@@ -20,13 +21,13 @@ const GradeChangesCard = ({ changes, apps, onSelectApp, onDismiss }) => {
   const byId = new Map((apps || []).map(app => [String(app.id), app]));
 
   return (
-    <section className="bg-white rounded-2xl border border-indigo-100 shadow-sm p-4 mb-4" aria-label="Notes mises à jour">
+    <section className="bg-white rounded-2xl border border-indigo-100 shadow-sm p-4 mb-4" aria-label={t('cards.gradeChanges.aria')}>
       <div className="flex items-center justify-between gap-2 mb-2">
         <h3 className="font-black text-xs uppercase tracking-tight text-slate-800">
-          {changes.length > 1 ? `${changes.length} notes ont changé` : 'Une note a changé'}
+          {t('cards.gradeChanges.changed', { count: changes.length })}
         </h3>
         <button onClick={onDismiss} className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 px-2 py-1">
-          J'ai vu
+          {t('cards.gradeChanges.seen')}
         </button>
       </div>
       <ul className="divide-y divide-slate-100">
@@ -48,11 +49,11 @@ const GradeChangesCard = ({ changes, apps, onSelectApp, onDismiss }) => {
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-bold text-slate-800 truncate">{app?.name || change.name}</span>
                   <span className="block text-[11px] text-slate-500 truncate">
-                    {down ? 'En baisse' : 'En hausse'} le {formatDate(change.date)}
-                    {showAlt && ` · alternative : ${app.alternative}`}
+                    {t(down ? 'cards.gradeChanges.down' : 'cards.gradeChanges.up', { date: formatDay(change.date) })}
+                    {showAlt && t('cards.gradeChanges.alternative', { name: app.alternative })}
                   </span>
                 </span>
-                <span className="flex items-center gap-1 shrink-0" aria-label={`de ${change.previousGrade} à ${change.grade}`}>
+                <span className="flex items-center gap-1 shrink-0" aria-label={t('cards.gradeChanges.fromTo', { from: change.previousGrade, to: change.grade })}>
                   <ScoreIndicator grade={change.previousGrade} />
                   <ChevronRight size={12} className="text-slate-300" />
                   <ScoreIndicator grade={change.grade} />

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Bell, BellOff, TrendingDown } from 'lucide-react';
 import AlternativeNudges from '../native/AlternativeNudges';
+import { t } from '../i18n/index.js';
 
 const Toggle = ({ enabled, label, onClick }) => (
   <button
@@ -63,30 +64,29 @@ const AlternativeNudgesSection = ({ enabled, onToggle, gradeAlertsEnabled, onTog
   return (
     <section className="bg-white rounded-2xl border border-slate-100 p-4">
       <h2 className="text-xs font-black uppercase tracking-wide text-slate-400 mb-2">
-        Notifications
+        {t('cards.notifications.title')}
       </h2>
       <div className="space-y-4">
         <Row
           enabled={enabled}
           Icon={enabled ? Bell : BellOff}
-          title="Suggestions d'alternatives"
-          description="Au plus une fois par semaine, une alternative mieux notée à une de vos apps notées C, D ou E. Calculé sur votre téléphone, rien n'est envoyé."
+          title={t('cards.notifications.nudgesTitle')}
+          description={t('cards.notifications.nudgesBody')}
           onToggle={toggleWithPermission(enabled, onToggle)}
         />
         {onToggleGradeAlerts && (
           <Row
             enabled={gradeAlertsEnabled}
             Icon={TrendingDown}
-            title="Changements de note"
-            description="Quand la note d'une de vos apps baisse ou monte. Trusti télécharge la liste publique des changements et la compare sur votre téléphone : vos apps ne sont pas envoyées."
+            title={t('cards.notifications.gradeTitle')}
+            description={t('cards.notifications.gradeBody')}
             onToggle={toggleWithPermission(gradeAlertsEnabled, onToggleGradeAlerts)}
           />
         )}
       </div>
       {blocked && (
         <p className="mt-2 text-xs text-rose-600">
-          Les notifications de Trusti sont bloquées : autorisez-les dans les réglages Android
-          (Applis &gt; Trusti &gt; Notifications).
+          {t('cards.notifications.blocked')}
         </p>
       )}
     </section>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { CheckCircle2, ScanSearch, X } from 'lucide-react';
 import { useBackHandler } from '../../hooks/useBackHandler';
+import { t } from '../../i18n/index.js';
 
 // Proposé juste après une désinstallation, ou à la réouverture de l'app :
 // un vrai call-to-action plutôt qu'un toast discret, pour que « Mes Apps »
@@ -8,9 +9,9 @@ import { useBackHandler } from '../../hooks/useBackHandler';
 const RescanPrompt = ({
   onScan,
   onDismiss,
-  title = 'App désinstallée',
-  message = 'Mettez à jour Mes Apps pour refléter votre téléphone.',
-  scanLabel = 'Relancer un scan',
+  title = t('cards.rescan.uninstalledTitle'),
+  message = t('cards.rescan.uninstalledBody'),
+  scanLabel = t('cards.rescan.scan'),
   dismissLabel,
   Icon = CheckCircle2,
 }) => {
@@ -33,7 +34,7 @@ const RescanPrompt = ({
           </div>
           <button
             onClick={onDismiss}
-            aria-label="Fermer"
+            aria-label={t('cards.rescan.close')}
             className="w-8 h-8 -mt-1 -mr-1 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 shrink-0"
           >
             <X size={18} />

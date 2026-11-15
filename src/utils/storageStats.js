@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 // Toutes les données Trusti sont stockées en localStorage sous des clés
 // préfixées "trusti_" (voir useAuth, onboardingStorage,
 // myAppsSort). On s'appuie sur ce préfixe commun pour mesurer l'espace
@@ -40,8 +41,8 @@ export const clearAllTrustiStorage = () => {
 };
 
 export const formatBytes = (bytes) => {
-  if (bytes < 1024) return `${bytes} o`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
-  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
-  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} Go`;
+  if (bytes < 1024) return `${bytes} ${t('common.units.B')}`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} ${t('common.units.KB')}`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} ${t('common.units.MB')}`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} ${t('common.units.GB')}`;
 };

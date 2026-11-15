@@ -1,6 +1,7 @@
 import React from 'react';
 import { GRADE_COLORS } from '../../constants/grades';
 import { formatBytes } from '../../utils/storageStats';
+import { t } from '../../i18n/index.js';
 
 // Couleurs hex des grades (GRADE_COLORS ne donne que des classes Tailwind
 // `bg-[#...]`, inutilisables comme valeur `stroke` SVG) — mêmes valeurs,
@@ -57,7 +58,7 @@ const GradeStorageDonut = ({ entries, totalBytes, selectedGrade = null, onSelect
   return (
     <div className="flex flex-col items-center">
       <div className="w-full flex items-center gap-3">
-      <svg viewBox="0 0 200 200" className="w-32 h-32 flex-shrink-0" role="img" aria-label="Répartition de l'espace de stockage par note TrustiScore">
+      <svg viewBox="0 0 200 200" className="w-32 h-32 flex-shrink-0" role="img" aria-label={t('cards.donut.aria')}>
         {/* Piste de fond : visible si aucune app avec taille connue */}
         {totalBytes === 0 && (
           <circle cx={CENTER} cy={CENTER} r={RADIUS} fill="none" stroke="#DCE8EF" strokeWidth={STROKE} />
@@ -121,7 +122,7 @@ const GradeStorageDonut = ({ entries, totalBytes, selectedGrade = null, onSelect
             />
             <span className="text-xs font-bold text-slate-700 w-3.5 flex-shrink-0">{seg.grade}</span>
             <span className="text-[10px] text-slate-400 truncate flex-1 min-w-0">
-              {seg.count} app{seg.count > 1 ? 's' : ''}
+              {t('cards.donut.apps', { count: seg.count })}
             </span>
             <span className="text-[11px] font-bold text-slate-700 whitespace-nowrap flex-shrink-0">
               {formatBytes(seg.bytes)}
@@ -136,8 +137,8 @@ const GradeStorageDonut = ({ entries, totalBytes, selectedGrade = null, onSelect
 
       {active && (
         <p className="mt-2 text-[11px] text-slate-500 text-center">
-          Note <span className="font-black">{active.grade}</span> : {active.count} app{active.count > 1 ? 's' : ''},{' '}
-          {formatBytes(active.bytes)} ({Math.round(active.fraction * 100)}% de l'espace occupé par vos apps)
+          {t('cards.donut.grade')} <span className="font-black">{active.grade}</span>{t('common.colon')}
+          {t('cards.donut.detail', { apps: t('cards.donut.apps', { count: active.count }), size: formatBytes(active.bytes), pct: Math.round(active.fraction * 100) })}
         </p>
       )}
     </div>

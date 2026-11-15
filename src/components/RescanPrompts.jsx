@@ -1,6 +1,7 @@
 import React from 'react';
 import { RefreshCw } from 'lucide-react';
 import RescanPrompt from './ui/RescanPrompt';
+import { t } from '../i18n/index.js';
 
 /**
  * Propositions de re-scan : après une désinstallation (prioritaire), ou à la
@@ -14,10 +15,10 @@ const RescanPrompts = ({ showAfterUninstall, showOnReopen, onScan, onDismissAfte
     return (
       <RescanPrompt
         Icon={RefreshCw}
-        title="Tes apps ont changé ?"
-        message="Relance un scan pour garder ton TrustiScore à jour."
-        scanLabel="Oui, relancer le scan"
-        dismissLabel="Non, voir Mes Apps"
+        title={t('cards.rescan.changedTitle')}
+        message={t('cards.rescan.changedBody')}
+        scanLabel={t('cards.rescan.changedScan')}
+        dismissLabel={t('cards.rescan.changedDismiss')}
         onScan={onScan}
         onDismiss={onDismissOnReopen}
       />

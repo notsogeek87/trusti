@@ -3,6 +3,7 @@ import { KeyRound } from 'lucide-react';
 import DataHygieneModal from './modals/DataHygieneModal';
 import { computeHygiene, detectPasswordManagers, buildManagerSuggestions } from '../utils/passwordManagers';
 import { getHygieneState, saveHygieneState } from '../utils/hygieneStorage';
+import { t } from '../i18n/index.js';
 
 // Pastille "Mots de passe" en pied de la carte bilan de "Mes Apps" (à côté
 // du compteur de migrations) : score du bilan (x/5), en orange quand aucun
@@ -28,14 +29,14 @@ const DataHygieneCard = ({ myApps, catalogApps }) => {
   let status;
   let needsAttention = false;
   if (dedicated) {
-    status = `${dedicated.name} détecté`;
+    status = t('cards.hygiene.detected', { name: dedicated.name });
   } else if (state.checks.manager) {
-    status = 'Gestionnaire déclaré';
+    status = t('cards.hygiene.declared');
   } else if (ecosystem) {
-    status = `${ecosystem.name} : un gestionnaire indépendant est conseillé`;
+    status = t('cards.hygiene.ecosystem', { name: ecosystem.name });
     needsAttention = true;
   } else {
-    status = 'Aucun gestionnaire de mots de passe';
+    status = t('cards.hygiene.none');
     needsAttention = true;
   }
 
@@ -45,7 +46,7 @@ const DataHygieneCard = ({ myApps, catalogApps }) => {
     : needsAttention
       ? 'bg-amber-400/15 text-amber-200 border-amber-300/30'
       : 'bg-white/10 text-slate-100 border-white/20';
-  const label = 'Hygiène';
+  const label = t('cards.hygiene.label');
 
   return (
     <>
@@ -53,7 +54,7 @@ const DataHygieneCard = ({ myApps, catalogApps }) => {
         type="button"
         onClick={() => setIsOpen(true)}
         title={status}
-        aria-label={`${label} ${hygiene.done} sur ${hygiene.total} : ${status}`}
+        aria-label={t('cards.hygiene.aria', { label, done: hygiene.done, total: hygiene.total, status })}
         className={`shrink-0 inline-flex items-center gap-1.5 pl-2 pr-2.5 py-1 rounded-full border text-[11px] font-bold transition-colors hover:brightness-95 ${tone}`}
       >
         <KeyRound size={12} />
