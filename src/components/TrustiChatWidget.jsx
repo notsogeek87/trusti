@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, MessageCircle } from 'lucide-react';
 
+// i18n-ignore-start : composant désactivé (voir App.jsx), à traduire s'il est réactivé
 const TrustiChatWidget = ({ onOpenLandingPage }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -216,3 +217,4 @@ const TrustiChatWidget = ({ onOpenLandingPage }) => {
 };
 
 export default TrustiChatWidget;
+// i18n-ignore-end

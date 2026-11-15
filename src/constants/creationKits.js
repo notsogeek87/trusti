@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 /**
  * Kits de démarrage de l'assistant « Créer mon organisation » (page ?creer-organisation).
  *
@@ -25,52 +26,49 @@
 export const KITS_REVIEWED_AT = '2026-11';
 
 export const CREATION_TYPES = [
-  { id: 'association', label: 'Association', hint: 'Loi 1901, collectif, club, fédération locale…', evaluationProfile: 'association' },
-  { id: 'tpe', label: 'Petite entreprise ou indépendant', hint: 'Micro-entreprise, TPE, startup, profession libérale…', evaluationProfile: 'entreprise' },
-  { id: 'collectivite', label: 'Mairie ou collectivité', hint: 'Commune, intercommunalité, syndicat, CCAS…', evaluationProfile: 'collectivite' },
+  { id: 'association', label: t('org.kits.k001'), hint: t('org.kits.k002'), evaluationProfile: 'association' },
+  { id: 'tpe', label: t('org.kits.k003'), hint: t('org.kits.k004'), evaluationProfile: 'entreprise' },
+  { id: 'collectivite', label: t('org.kits.k005'), hint: t('org.kits.k006'), evaluationProfile: 'collectivite' },
 ];
 
 export const CREATION_SIZES = [
-  { id: 'solo', label: 'Seul·e pour l\'instant', hint: '1 personne', level: 1 },
-  { id: 'petite', label: 'Petite équipe', hint: '2 à 10 personnes', level: 2 },
-  { id: 'moyenne', label: 'Équipe plus large', hint: '11 à 50 personnes', level: 3 },
+  { id: 'solo', label: t('org.kits.k007'), hint: t('org.kits.k008'), level: 1 },
+  { id: 'petite', label: t('org.kits.k009'), hint: t('org.kits.k010'), level: 2 },
+  { id: 'moyenne', label: t('org.kits.k011'), hint: t('org.kits.k012'), level: 3 },
 ];
 
 export const CREATION_APPROACHES = [
   {
     id: 'simple',
-    label: 'Simple et européen',
-    hint: 'Des services en ligne prêts à l\'emploi, rien à installer.',
+    label: t('org.kits.k013'),
+    hint: t('org.kits.k014'),
   },
   {
     id: 'confidentiel',
-    label: 'Confidentialité maximale',
-    hint: 'Des outils chiffrés de bout en bout, pour des échanges ou des données sensibles.',
+    label: t('org.kits.k015'),
+    hint: t('org.kits.k016'),
   },
   {
     id: 'libre',
-    label: 'Libre et autonome',
-    hint: 'Des logiciels libres sur votre propre serveur. Il faut quelqu\'un pour les installer et les maintenir.',
+    label: t('org.kits.k017'),
+    hint: t('org.kits.k018'),
   },
 ];
 
-const MAIRIE_EMAIL_WHY = 'Messagerie d\'un fournisseur français, données hébergées en France, à l\'adresse de la commune. '
-  + 'Commune de moins de 3 500 habitants : demandez d\'abord à votre opérateur public de services numériques la messagerie de la Suite territoriale (ANCT).';
-const OLVID_ELUS_WHY = 'Messagerie chiffrée française, sans numéro de téléphone, certifiée par l\'ANSSI : à proposer aux élus et aux agents à la place des groupes WhatsApp.';
-const METIERS_NOTE = 'Gardez votre éditeur actuel s\'il vous convient, mais avant tout renouvellement exigez par contrat l\'export complet de vos données dans un format ouvert. '
-  + 'Alternatives : les logiciels libres OpenMairie (élections, cimetière, urbanisme…) ou l\'offre mutualisée de votre opérateur public de services numériques.';
-const ACTES_NOTE = 'Les logiciels libres de Libriciel (i-Parapheur, S²LOW, webdelib) sont souvent fournis par votre opérateur public de services numériques ou votre centre de gestion.';
-const DEMARCHES_WHY = 'Logiciel libre de l\'État pour mettre en ligne les formulaires de la commune (inscriptions, demandes, dossiers). '
-  + 'Fermé aux nouvelles collectivités depuis 2021 sur le site de l\'État : il leur est proposé par l\'ADULLACT, réservé à ses adhérents.';
-const HABITANTS_WHY = 'Application d\'information et d\'alerte des habitants, éditeur français : abonnement pour la commune, gratuite pour les habitants, sans compte à créer.';
-const HABITANTS_NOTE = 'Une application d\'information des habitants (PanneauPocket, IntraMuros, Illiwap…) plutôt qu\'une page Facebook, qui impose Facebook à ceux qui veulent suivre la commune.';
-const SITE_NOTE = 'Site chez un hébergeur français ou européen, mesure d\'audience sans cookies publicitaires (Matomo). Des offres mutualisées existent souvent via votre département ou votre opérateur public de services numériques.';
+const MAIRIE_EMAIL_WHY = t('org.kits.k019');
+const OLVID_ELUS_WHY = t('org.kits.k020');
+const METIERS_NOTE = t('org.kits.k021');
+const ACTES_NOTE = t('org.kits.k022');
+const DEMARCHES_WHY = t('org.kits.k023');
+const HABITANTS_WHY = t('org.kits.k024');
+const HABITANTS_NOTE = t('org.kits.k025');
+const SITE_NOTE = t('org.kits.k026');
 
 export const COST_LABELS = {
-  libre: 'Libre, sans licence',
-  gratuit: 'Gratuit',
-  freemium: 'Offre gratuite limitée',
-  payant: 'Abonnement',
+  libre: t('org.kits.k027'),
+  gratuit: t('org.kits.costFree'),
+  freemium: t('org.kits.k028'),
+  payant: t('org.kits.costPaid'),
 };
 
 /**
@@ -82,13 +80,13 @@ export const COST_LABELS = {
 export const KIT_NEEDS = [
   {
     id: 'email',
-    label: 'E-mail à votre nom',
-    step: 'Démarrer',
+    label: t('org.kits.k029'),
+    step: 'Démarrer', // i18n-ignore
     minSize: 1,
     picks: {
-      simple: { appId: '1769804133553', cost: 'freemium', why: 'Messagerie d\'un hébergeur suisse, données en Suisse. Une adresse à votre nom de domaine est incluse gratuitement (seul le domaine est payant) ; au-delà, abonnement.' },
-      confidentiel: { appId: 'tutanota', cost: 'payant', why: 'Messagerie chiffrée de bout en bout, hébergée en Allemagne. L\'adresse à votre nom de domaine demande une offre payante.' },
-      libre: { appId: 'mailo', cost: 'payant', why: 'L\'e-mail est délicat à héberger soi-même : confiez-le à un fournisseur français, données hébergées en France.' },
+      simple: { appId: '1769804133553', cost: 'freemium', why: t('org.kits.k030') },
+      confidentiel: { appId: 'tutanota', cost: 'payant', why: t('org.kits.k031') },
+      libre: { appId: 'mailo', cost: 'payant', why: t('org.kits.k032') },
     },
     typePicks: {
       collectivite: {
@@ -100,165 +98,165 @@ export const KIT_NEEDS = [
   },
   {
     id: 'stockage',
-    label: 'Fichiers partagés',
-    step: 'Démarrer',
+    label: t('org.kits.k033'),
+    step: 'Démarrer', // i18n-ignore
     minSize: 1,
     picks: {
-      simple: { appId: '1769805814704', cost: 'freemium', why: 'Stockage et partage de fichiers hébergés en Suisse, chez le même fournisseur que l\'e-mail. 15 Go gratuits.' },
-      confidentiel: { appId: '7214caf9-78e9-4769-9fc7-f1ef5f3f2efb', cost: 'freemium', why: 'Stockage chiffré de bout en bout, éditeur suisse. 5 Go gratuits.' },
-      libre: { appId: 'nextcloud', cost: 'libre', why: 'Fichiers, agenda et contacts sur votre serveur.' },
+      simple: { appId: '1769805814704', cost: 'freemium', why: t('org.kits.k034') },
+      confidentiel: { appId: '7214caf9-78e9-4769-9fc7-f1ef5f3f2efb', cost: 'freemium', why: t('org.kits.k035') },
+      libre: { appId: 'nextcloud', cost: 'libre', why: t('org.kits.k036') },
     },
   },
   {
     id: 'bureautique',
-    label: 'Documents et tableurs',
-    step: 'Démarrer',
+    label: t('org.kits.k037'),
+    step: 'Démarrer', // i18n-ignore
     minSize: 1,
     picks: {
-      simple: { appId: 'libreoffice', cost: 'libre', why: 'Suite bureautique libre, sans abonnement, qui ouvre les fichiers Word et Excel.' },
-      confidentiel: { appId: 'cryptpad', cost: 'freemium', why: 'Documents collaboratifs chiffrés dans le navigateur, éditeur français.' },
-      libre: { appId: 'libreoffice', cost: 'libre', why: 'Suite bureautique libre, sans abonnement, qui ouvre les fichiers Word et Excel.' },
+      simple: { appId: 'libreoffice', cost: 'libre', why: t('org.kits.k038') },
+      confidentiel: { appId: 'cryptpad', cost: 'freemium', why: t('org.kits.k039') },
+      libre: { appId: 'libreoffice', cost: 'libre', why: t('org.kits.k040') },
     },
   },
   {
     id: 'motsdepasse',
-    label: 'Mots de passe',
-    step: 'Sécuriser',
+    label: t('org.kits.k041'),
+    step: 'Sécuriser', // i18n-ignore
     minSize: 1,
     picks: {
-      simple: { appId: '1769804898711', cost: 'freemium', why: 'Gestionnaire open source. Partage des accès de la structure gratuit à 2 personnes, payant au-delà.' },
-      confidentiel: { appId: 'keepassxc', cost: 'libre', why: 'Coffre-fort libre, stocké chez vous, sans service en ligne.' },
-      libre: { appId: 'passbolt', cost: 'libre', why: 'Gestionnaire de mots de passe d\'équipe libre et auto-hébergeable, éditeur luxembourgeois.' },
+      simple: { appId: '1769804898711', cost: 'freemium', why: t('org.kits.k042') },
+      confidentiel: { appId: 'keepassxc', cost: 'libre', why: t('org.kits.k043') },
+      libre: { appId: 'passbolt', cost: 'libre', why: t('org.kits.k044') },
     },
   },
   {
     id: 'messagerie',
-    label: 'Discussion d\'équipe',
-    step: 'Travailler ensemble',
+    label: t('org.kits.k045'),
+    step: 'Travailler ensemble', // i18n-ignore
     minSize: 2,
     picks: {
-      simple: { appId: '0678b7ca-7f61-43f9-ba27-c93d800166d5', cost: 'freemium', why: 'Messagerie chiffrée française, sans numéro de téléphone.' },
-      confidentiel: { appId: '0678b7ca-7f61-43f9-ba27-c93d800166d5', cost: 'freemium', why: 'Messagerie chiffrée française, sans numéro de téléphone.' },
-      libre: { appId: 'element', cost: 'libre', why: 'Messagerie d\'équipe sur le protocole ouvert Matrix, auto-hébergeable.' },
+      simple: { appId: '0678b7ca-7f61-43f9-ba27-c93d800166d5', cost: 'freemium', why: t('org.kits.k047') },
+      confidentiel: { appId: '0678b7ca-7f61-43f9-ba27-c93d800166d5', cost: 'freemium', why: t('org.kits.k048') },
+      libre: { appId: 'element', cost: 'libre', why: t('org.kits.k049') },
     },
     typePicks: {
       collectivite: {
         simple: { appId: '0678b7ca-7f61-43f9-ba27-c93d800166d5', cost: 'freemium', why: OLVID_ELUS_WHY },
         confidentiel: { appId: '0678b7ca-7f61-43f9-ba27-c93d800166d5', cost: 'freemium', why: OLVID_ELUS_WHY },
-        libre: { appId: 'element', cost: 'libre', why: 'Messagerie d\'équipe sur le protocole ouvert Matrix, auto-hébergeable : à proposer aux élus et aux agents à la place des groupes WhatsApp.' },
+        libre: { appId: 'element', cost: 'libre', why: t('org.kits.k050') },
       },
     },
   },
   {
     id: 'visio',
-    label: 'Visioconférence',
-    step: 'Travailler ensemble',
+    label: t('org.kits.k051'),
+    step: 'Travailler ensemble', // i18n-ignore
     minSize: 2,
     picks: {
-      simple: { appId: 'ca417378-a0f2-42e4-8dac-19683938cd68', cost: 'gratuit', why: 'Visio d\'Infomaniak, sans limite de durée. Les invités rejoignent par un simple lien, sans compte.' },
-      confidentiel: { appId: 'ca417378-a0f2-42e4-8dac-19683938cd68', cost: 'gratuit', why: 'Visio d\'Infomaniak, sans limite de durée. Les invités rejoignent par un simple lien, sans compte.' },
-      libre: { appId: 'bigbluebutton', cost: 'libre', why: 'Visio libre auto-hébergeable, pensée pour les réunions et les formations.' },
+      simple: { appId: 'ca417378-a0f2-42e4-8dac-19683938cd68', cost: 'gratuit', why: t('org.kits.k053') },
+      confidentiel: { appId: 'ca417378-a0f2-42e4-8dac-19683938cd68', cost: 'gratuit', why: t('org.kits.k054') },
+      libre: { appId: 'bigbluebutton', cost: 'libre', why: t('org.kits.k055') },
     },
   },
   {
     id: 'agenda',
-    label: 'Planifier les réunions',
-    step: 'Travailler ensemble',
+    label: t('org.kits.k056'),
+    step: 'Travailler ensemble', // i18n-ignore
     minSize: 2,
     picks: {
-      simple: { appId: 'doodle', cost: 'freemium', why: 'Sondages de dates pour les réunions et les assemblées, éditeur suisse. Version gratuite avec publicités.' },
-      confidentiel: { appId: 'doodle', cost: 'freemium', why: 'Sondages de dates pour les réunions et les assemblées, éditeur suisse. Version gratuite avec publicités.' },
-      libre: { note: 'Inclus dans Nextcloud (agenda partagé).' },
+      simple: { appId: 'doodle', cost: 'freemium', why: t('org.kits.k058') },
+      confidentiel: { appId: 'doodle', cost: 'freemium', why: t('org.kits.k059') },
+      libre: { note: t('org.kits.k060') },
     },
   },
   {
     id: 'adherents',
-    label: 'Adhérents, cotisations et comptes',
-    step: 'Gérer',
+    label: t('org.kits.k061'),
+    step: 'Gérer', // i18n-ignore
     minSize: 1,
     types: ['association'],
     picks: {
-      simple: { appId: 'dolibarr', cost: 'libre', why: 'Logiciel de gestion libre : adhérents, cotisations, dons et comptabilité simple. Existe en version hébergée payante chez des hébergeurs partenaires.' },
-      confidentiel: { appId: 'dolibarr', cost: 'libre', why: 'Logiciel de gestion libre : adhérents, cotisations, dons et comptabilité simple.' },
-      libre: { appId: 'dolibarr', cost: 'libre', why: 'Logiciel de gestion libre : adhérents, cotisations, dons et comptabilité simple.' },
+      simple: { appId: 'dolibarr', cost: 'libre', why: t('org.kits.k062') },
+      confidentiel: { appId: 'dolibarr', cost: 'libre', why: t('org.kits.k063') },
+      libre: { appId: 'dolibarr', cost: 'libre', why: t('org.kits.k064') },
     },
   },
   {
     id: 'newsletter',
-    label: 'Lettre d\'information',
-    step: 'Communiquer',
+    label: t('org.kits.k065'),
+    step: 'Communiquer', // i18n-ignore
     minSize: 1,
     types: ['association'],
     picks: {
-      simple: { appId: 'brevo', cost: 'freemium', why: 'Lettres d\'information aux adhérents, éditeur français. Gratuit jusqu\'à 300 e-mails par jour.' },
-      confidentiel: { appId: 'brevo', cost: 'freemium', why: 'Lettres d\'information aux adhérents, éditeur français. Gratuit jusqu\'à 300 e-mails par jour.' },
-      libre: { appId: 'brevo', cost: 'freemium', why: 'Lettres d\'information aux adhérents, éditeur français. Gratuit jusqu\'à 300 e-mails par jour.' },
+      simple: { appId: 'brevo', cost: 'freemium', why: t('org.kits.k066') },
+      confidentiel: { appId: 'brevo', cost: 'freemium', why: t('org.kits.k067') },
+      libre: { appId: 'brevo', cost: 'freemium', why: t('org.kits.k068') },
     },
   },
   {
     id: 'compta',
-    label: 'Facturation et comptabilité',
-    step: 'Gérer',
+    label: t('org.kits.k069'),
+    step: 'Gérer', // i18n-ignore
     minSize: 1,
     types: ['tpe'],
     picks: {
-      simple: { appId: 'pennylane', cost: 'payant', why: 'Facturation et comptabilité en ligne, éditeur français.' },
-      confidentiel: { appId: 'dolibarr', cost: 'libre', why: 'Devis, factures et comptabilité dans un logiciel libre que vous maîtrisez.' },
-      libre: { appId: 'dolibarr', cost: 'libre', why: 'Devis, factures et comptabilité sur votre serveur.' },
+      simple: { appId: 'pennylane', cost: 'payant', why: t('org.kits.k070') },
+      confidentiel: { appId: 'dolibarr', cost: 'libre', why: t('org.kits.k071') },
+      libre: { appId: 'dolibarr', cost: 'libre', why: t('org.kits.k072') },
     },
   },
   {
     id: 'signature',
-    label: 'Signature électronique',
-    step: 'Gérer',
+    label: t('org.kits.k073'),
+    step: 'Gérer', // i18n-ignore
     minSize: 1,
     types: ['tpe'],
     picks: {
-      simple: { appId: 'yousign', cost: 'freemium', why: 'Signature électronique de devis et contrats, éditeur français. Gratuit jusqu\'à 2 demandes de signature par mois.' },
-      confidentiel: { appId: 'yousign', cost: 'freemium', why: 'Signature électronique de devis et contrats, éditeur français. Gratuit jusqu\'à 2 demandes de signature par mois.' },
-      libre: { appId: 'yousign', cost: 'freemium', why: 'Signature électronique de devis et contrats, éditeur français. Gratuit jusqu\'à 2 demandes de signature par mois.' },
+      simple: { appId: 'yousign', cost: 'freemium', why: t('org.kits.k074') },
+      confidentiel: { appId: 'yousign', cost: 'freemium', why: t('org.kits.k075') },
+      libre: { appId: 'yousign', cost: 'freemium', why: t('org.kits.k076') },
     },
   },
   {
     id: 'crm',
-    label: 'Suivi des clients',
-    step: 'Gérer',
+    label: t('org.kits.k077'),
+    step: 'Gérer', // i18n-ignore
     minSize: 2,
     types: ['tpe'],
     picks: {
-      simple: { appId: 'twenty', cost: 'payant', why: 'CRM open source pour suivre clients et prospects. Version hébergée payante, gratuite si vous l\'hébergez.' },
-      confidentiel: { appId: 'twenty', cost: 'payant', why: 'CRM open source pour suivre clients et prospects. Version hébergée payante, gratuite si vous l\'hébergez.' },
-      libre: { appId: 'dolibarr', cost: 'libre', why: 'Le module « Tiers » de Dolibarr suit clients et prospects.' },
+      simple: { appId: 'twenty', cost: 'payant', why: t('org.kits.k078') },
+      confidentiel: { appId: 'twenty', cost: 'payant', why: t('org.kits.k079') },
+      libre: { appId: 'dolibarr', cost: 'libre', why: t('org.kits.k080') },
     },
   },
   {
     id: 'metiers',
-    label: 'Logiciels métiers (état civil, élections, finances, paie)',
-    step: 'Gérer',
+    label: t('org.kits.k081'),
+    step: 'Gérer', // i18n-ignore
     minSize: 1,
     types: ['collectivite'],
     picks: {
       simple: { note: METIERS_NOTE },
       confidentiel: { note: METIERS_NOTE },
-      libre: { appId: 'openmairie', cost: 'libre', why: 'Logiciels libres conçus par et pour les collectivités : élections, cimetière, urbanisme, courrier. À installer par un prestataire ou votre opérateur public de services numériques.', note: METIERS_NOTE },
+      libre: { appId: 'openmairie', cost: 'libre', why: t('org.kits.k082'), note: METIERS_NOTE },
     },
   },
   {
     id: 'actes',
-    label: 'Délibérations, parapheur et contrôle de légalité',
-    step: 'Gérer',
+    label: t('org.kits.k083'),
+    step: 'Gérer', // i18n-ignore
     minSize: 1,
     types: ['collectivite'],
     picks: {
-      simple: { appId: 'i-parapheur', cost: 'libre', why: 'Parapheur électronique libre de Libriciel (coopérative française), relié à la télétransmission des actes.', note: ACTES_NOTE },
-      confidentiel: { appId: 'i-parapheur', cost: 'libre', why: 'Parapheur électronique libre de Libriciel (coopérative française), relié à la télétransmission des actes.', note: ACTES_NOTE },
-      libre: { appId: 'i-parapheur', cost: 'libre', why: 'Parapheur électronique libre de Libriciel (coopérative française), relié à la télétransmission des actes.', note: ACTES_NOTE },
+      simple: { appId: 'i-parapheur', cost: 'libre', why: t('org.kits.k084'), note: ACTES_NOTE },
+      confidentiel: { appId: 'i-parapheur', cost: 'libre', why: t('org.kits.k085'), note: ACTES_NOTE },
+      libre: { appId: 'i-parapheur', cost: 'libre', why: t('org.kits.k086'), note: ACTES_NOTE },
     },
   },
   {
     id: 'demarches',
-    label: 'Démarches en ligne des habitants',
-    step: 'Communiquer',
+    label: t('org.kits.k087'),
+    step: 'Communiquer', // i18n-ignore
     minSize: 1,
     types: ['collectivite'],
     picks: {
@@ -269,8 +267,8 @@ export const KIT_NEEDS = [
   },
   {
     id: 'habitants',
-    label: 'Informer les habitants',
-    step: 'Communiquer',
+    label: t('org.kits.k088'),
+    step: 'Communiquer', // i18n-ignore
     minSize: 1,
     types: ['collectivite'],
     picks: {
@@ -281,71 +279,77 @@ export const KIT_NEEDS = [
   },
   {
     id: 'site',
-    label: 'Site web de la commune',
-    step: 'Communiquer',
+    label: t('org.kits.k089'),
+    step: 'Communiquer', // i18n-ignore
     minSize: 1,
     types: ['collectivite'],
     picks: {
       simple: { note: SITE_NOTE },
       confidentiel: { note: SITE_NOTE },
-      libre: { appId: 'matomo', cost: 'libre', why: 'Mesure d\'audience libre et auto-hébergeable : les statistiques du site restent sur votre serveur.', note: SITE_NOTE },
+      libre: { appId: 'matomo', cost: 'libre', why: t('org.kits.k090'), note: SITE_NOTE },
     },
   },
   {
     id: 'notes',
-    label: 'Notes',
-    step: 'Organiser',
+    label: t('org.kits.k091'),
+    step: 'Organiser', // i18n-ignore
     minSize: 1,
     picks: {
-      simple: { appId: '4cc90381-be9a-483b-8d5c-59b471737e6f', cost: 'libre', why: 'Prise de notes libre, avec synchronisation chiffrée de bout en bout possible.' },
-      confidentiel: { appId: '4cc90381-be9a-483b-8d5c-59b471737e6f', cost: 'libre', why: 'Prise de notes libre, avec chiffrement de bout en bout de la synchronisation.' },
-      libre: { appId: '4cc90381-be9a-483b-8d5c-59b471737e6f', cost: 'libre', why: 'Prise de notes libre, synchronisable avec Nextcloud.' },
+      simple: { appId: '4cc90381-be9a-483b-8d5c-59b471737e6f', cost: 'libre', why: t('org.kits.k092') },
+      confidentiel: { appId: '4cc90381-be9a-483b-8d5c-59b471737e6f', cost: 'libre', why: t('org.kits.k093') },
+      libre: { appId: '4cc90381-be9a-483b-8d5c-59b471737e6f', cost: 'libre', why: t('org.kits.k094') },
     },
   },
   {
     id: 'taches',
-    label: 'Tâches et projets',
-    step: 'Organiser',
+    label: t('org.kits.k095'),
+    step: 'Organiser', // i18n-ignore
     minSize: 3,
     picks: {
-      simple: { appId: 'e688f70b-cb20-4ff2-84bd-7e75ef2a0f66', cost: 'payant', why: 'Listes de tâches et tableaux partagés, libre. Version hébergée payante, gratuite si vous l\'hébergez.' },
-      confidentiel: { appId: 'e688f70b-cb20-4ff2-84bd-7e75ef2a0f66', cost: 'libre', why: 'Listes de tâches et tableaux partagés, libre et auto-hébergeable.' },
-      libre: { appId: 'openproject', cost: 'libre', why: 'Gestion de projet libre, éditeur allemand.' },
+      simple: { appId: 'e688f70b-cb20-4ff2-84bd-7e75ef2a0f66', cost: 'payant', why: t('org.kits.k096') },
+      confidentiel: { appId: 'e688f70b-cb20-4ff2-84bd-7e75ef2a0f66', cost: 'libre', why: t('org.kits.k097') },
+      libre: { appId: 'openproject', cost: 'libre', why: t('org.kits.k098') },
     },
   },
   {
     id: 'wiki',
-    label: 'Documentation interne',
-    step: 'Organiser',
+    label: t('org.kits.k099'),
+    step: 'Organiser', // i18n-ignore
     minSize: 3,
     picks: {
-      simple: { appId: 'xwiki', cost: 'payant', why: 'Wiki libre pour les procédures et la mémoire de la structure, éditeur français. Version hébergée payante.' },
-      confidentiel: { appId: 'cryptpad', cost: 'freemium', why: 'Le même outil que vos documents, chiffré de bout en bout.' },
-      libre: { appId: 'bookstack', cost: 'libre', why: 'Wiki libre et simple à héberger.' },
+      simple: { appId: 'xwiki', cost: 'payant', why: t('org.kits.k100') },
+      confidentiel: { appId: 'cryptpad', cost: 'freemium', why: t('org.kits.k101') },
+      libre: { appId: 'bookstack', cost: 'libre', why: t('org.kits.k102') },
     },
   },
   {
     id: 'ia',
-    label: 'Assistant IA',
-    step: 'Organiser',
+    label: t('org.kits.k103'),
+    step: 'Organiser', // i18n-ignore
     minSize: 1,
     picks: {
-      simple: { appId: '1770752284146', cost: 'freemium', why: 'Assistant IA d\'un éditeur français.' },
-      confidentiel: { appId: '1769540682080', cost: 'freemium', why: 'Assistant IA de Proton, axé sur la confidentialité.' },
-      libre: { appId: '1770752500004', cost: 'libre', why: 'Fait tourner des modèles d\'IA ouverts sur vos propres machines.' },
+      simple: { appId: '1770752284146', cost: 'freemium', why: t('org.kits.k104') },
+      confidentiel: { appId: '1769540682080', cost: 'freemium', why: t('org.kits.k105') },
+      libre: { appId: '1770752500004', cost: 'libre', why: t('org.kits.k106') },
     },
   },
   {
     id: 'sauvegarde',
-    label: 'Sauvegardes',
-    step: 'Sécuriser',
+    label: t('org.kits.k107'),
+    step: 'Sécuriser', // i18n-ignore
     minSize: 1,
     approaches: ['libre'],
     picks: {
-      libre: { appId: 'borgbackup', cost: 'libre', why: 'Indispensable en auto-hébergement : sauvegardes chiffrées et dédupliquées du serveur.' },
+      libre: { appId: 'borgbackup', cost: 'libre', why: t('org.kits.k108') },
     },
   },
 ];
 
 /** Ordre d'affichage des étapes de mise en place. */
+// Étapes : clés de regroupement (traduites à l'affichage par kitStepLabel)
+// i18n-ignore-start
 export const KIT_STEPS = ['Démarrer', 'Sécuriser', 'Travailler ensemble', 'Gérer', 'Communiquer', 'Organiser'];
+// i18n-ignore-end
+
+/** Libellé affiché d'une étape du kit. */
+export const kitStepLabel = (step) => t('org.kits.steps')?.[step] || step;

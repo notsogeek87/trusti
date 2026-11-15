@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 /**
  * Profils d'organisation de la page « Évaluer mon organisation ».
  *
@@ -9,7 +10,7 @@
 export const ORG_PROFILES = [
   {
     id: 'association',
-    label: 'Association',
+    label: t('org.profiles.association.label'),
     appIds: [
       'windows',
       '1769803097037', '1769879213451', '1769805796367', 'google-docs', '71a420ff-f3fd-4dac-8ab0-76047e4fd8aa',
@@ -19,7 +20,7 @@ export const ORG_PROFILES = [
   },
   {
     id: 'collectivite',
-    label: 'Mairie, collectivité, administration',
+    label: t('org.profiles.collectivite.label'),
     appIds: [
       'windows',
       'outlook', 'microsoft-teams', '1780761664182', 'microsoft-excel', 'microsoft-powerpoint', 'microsoft-sharepoint',
@@ -34,7 +35,7 @@ export const ORG_PROFILES = [
   },
   {
     id: 'entreprise',
-    label: 'Entreprise, PME',
+    label: t('org.profiles.entreprise.label'),
     appIds: [
       'windows',
       'outlook', 'microsoft-teams', '1780761664182', 'microsoft-excel', 'microsoft-powerpoint', 'onedrive',
@@ -45,7 +46,7 @@ export const ORG_PROFILES = [
   },
   {
     id: 'sante',
-    label: 'Santé, médico-social',
+    label: t('org.profiles.sante.label'),
     appIds: [
       'windows',
       'outlook', '1769803097037', '1769879213451', 'microsoft-teams', 'zoom', '1780761664182', 'microsoft-excel',
@@ -55,7 +56,7 @@ export const ORG_PROFILES = [
   },
   {
     id: 'enseignement',
-    label: 'Enseignement, formation',
+    label: t('org.profiles.enseignement.label'),
     appIds: [
       'windows',
       'moodle', 'microsoft-teams', 'zoom', 'bigbluebutton', 'google-docs', '1769805796367', '1769803097037',

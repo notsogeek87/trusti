@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 /**
  * Questionnaire d'audit de terrain de la page « Évaluer mon organisation ».
  *
@@ -12,16 +13,18 @@
  */
 
 export const AUDIT_ANSWERS = [
-  { id: 'oui', label: 'Oui' },
-  { id: 'non', label: 'Non' },
-  { id: 'nsp', label: 'Je ne sais pas' },
+  { id: 'oui', label: t('org.audit.k001') },
+  { id: 'non', label: t('org.audit.k002') },
+  { id: 'nsp', label: t('org.audit.k003') },
 ];
 
 export const AUDIT_WEIGHTS = {
-  haute: { label: 'Prioritaire', rank: 0 },
-  moyenne: { label: 'À prévoir', rank: 1 },
+  haute: { label: t('org.audit.k004'), rank: 0 },
+  moyenne: { label: t('org.audit.k005'), rank: 1 },
 };
 
+// Thèmes : clés de regroupement (traduits à l'affichage par auditThemeLabel)
+// i18n-ignore-start
 export const AUDIT_THEMES = [
   'Comptes et accès',
   'Postes et sauvegardes',
@@ -30,178 +33,182 @@ export const AUDIT_THEMES = [
   'Contrats et réversibilité',
   'Organisation',
 ];
+// i18n-ignore-end
 
 export const AUDIT_QUESTIONS = [
   // Comptes et accès
   {
     id: 'mfa',
-    theme: 'Comptes et accès',
-    label: 'La double authentification est-elle activée sur la messagerie et les outils en ligne ?',
+    theme: 'Comptes et accès', // i18n-ignore
+    label: t('org.audit.k006'),
     riskAnswer: 'non',
     weight: 'haute',
-    recommendation: 'Activer la double authentification, en commençant par la messagerie : c\'est la porte d\'entrée de la plupart des piratages.',
+    recommendation: t('org.audit.k007'),
   },
   {
     id: 'comptes-partages',
-    theme: 'Comptes et accès',
-    label: 'Des identifiants sont-ils partagés entre plusieurs personnes (un même mot de passe pour tout le service) ?',
+    theme: 'Comptes et accès', // i18n-ignore
+    label: t('org.audit.k008'),
     riskAnswer: 'oui',
     weight: 'haute',
-    recommendation: 'Un compte par personne ; les accès communs sont rangés dans un gestionnaire de mots de passe d\'équipe.',
+    recommendation: t('org.audit.k009'),
   },
   {
     id: 'gestionnaire-mdp',
-    theme: 'Comptes et accès',
-    label: 'Les mots de passe sont-ils rangés dans un gestionnaire de mots de passe (pas dans un carnet ou un tableur) ?',
+    theme: 'Comptes et accès', // i18n-ignore
+    label: t('org.audit.k010'),
     riskAnswer: 'non',
     weight: 'moyenne',
-    recommendation: 'Mettre en place un gestionnaire de mots de passe (Bitwarden, Passbolt, KeePassXC…) et y ranger les accès de la structure.',
+    recommendation: t('org.audit.k011'),
   },
   {
     id: 'departs',
-    theme: 'Comptes et accès',
-    label: 'Les accès d\'une personne qui part (agent, élu en fin de mandat, bénévole, salarié) sont-ils retirés le jour de son départ ?',
+    theme: 'Comptes et accès', // i18n-ignore
+    label: t('org.audit.k012'),
     riskAnswer: 'non',
     weight: 'haute',
-    recommendation: 'Tenir la liste des accès de chaque personne et la passer en revue à chaque départ, et après chaque élection.',
+    recommendation: t('org.audit.k013'),
   },
   // Postes et sauvegardes
   {
     id: 'mises-a-jour',
-    theme: 'Postes et sauvegardes',
-    label: 'Tous les ordinateurs ont-ils un système encore maintenu, qui reçoit les mises à jour de sécurité ?',
-    help: 'Windows 10 ne reçoit plus de correctifs gratuits depuis le 14 octobre 2025.',
+    theme: 'Postes et sauvegardes', // i18n-ignore
+    label: t('org.audit.k014'),
+    help: t('org.audit.k015'),
     riskAnswer: 'non',
     weight: 'haute',
-    recommendation: 'Mettre à jour ou remplacer les postes dont le système n\'est plus maintenu ; un poste récent sous Linux est aussi une option.',
+    recommendation: t('org.audit.k016'),
   },
   {
     id: 'appareils-perso',
-    theme: 'Postes et sauvegardes',
-    label: 'Des données de la structure sont-elles traitées sur des ordinateurs ou téléphones personnels ?',
+    theme: 'Postes et sauvegardes', // i18n-ignore
+    label: t('org.audit.k017'),
     riskAnswer: 'oui',
     weight: 'moyenne',
-    recommendation: 'Fournir les outils nécessaires, ou fixer des règles minimales pour les appareils personnels (verrouillage, mises à jour, pas de copie locale).',
+    recommendation: t('org.audit.k018'),
   },
   {
     id: 'sauvegarde',
-    theme: 'Postes et sauvegardes',
-    label: 'Existe-t-il une sauvegarde régulière des données, dont une copie déconnectée ou hors des locaux ?',
+    theme: 'Postes et sauvegardes', // i18n-ignore
+    label: t('org.audit.k019'),
     riskAnswer: 'non',
     weight: 'haute',
-    recommendation: 'Règle 3-2-1 : trois copies, sur deux supports, dont une hors des locaux et déconnectée, pour résister à un rançongiciel.',
+    recommendation: t('org.audit.k020'),
   },
   {
     id: 'restauration',
-    theme: 'Postes et sauvegardes',
-    label: 'Une restauration de sauvegarde a-t-elle été testée au cours des douze derniers mois ?',
+    theme: 'Postes et sauvegardes', // i18n-ignore
+    label: t('org.audit.k021'),
     riskAnswer: 'non',
     weight: 'moyenne',
-    recommendation: 'Tester une restauration au moins une fois par an : une sauvegarde jamais relue n\'est pas une sauvegarde.',
+    recommendation: t('org.audit.k022'),
   },
   // Messagerie et échanges
   {
     id: 'nom-de-domaine',
-    theme: 'Messagerie et échanges',
-    label: 'La structure a-t-elle son propre nom de domaine pour son site et ses adresses e-mail ?',
-    help: 'Exemple : contact@mairie-saint-clement.fr plutôt que mairie.saintclement@orange.fr.',
+    theme: 'Messagerie et échanges', // i18n-ignore
+    label: t('org.audit.k023'),
+    help: t('org.audit.k024'),
     riskAnswer: 'non',
     weight: 'moyenne',
-    recommendation: 'Réserver un nom de domaine à son nom : les habitants, clients ou adhérents reconnaissent l\'expéditeur et les adresses survivent aux changements de fournisseur.',
+    recommendation: t('org.audit.k025'),
   },
   {
     id: 'messagerie-gratuite',
-    theme: 'Messagerie et échanges',
-    label: 'Des adresses e-mail gratuites grand public (Gmail, Orange, Free, Laposte.net…) servent-elles au travail ?',
+    theme: 'Messagerie et échanges', // i18n-ignore
+    label: t('org.audit.k026'),
     riskAnswer: 'oui',
     weight: 'moyenne',
-    recommendation: 'Passer à une messagerie professionnelle chez un fournisseur européen, au nom de domaine de la structure.',
+    recommendation: t('org.audit.k027'),
   },
   {
     id: 'elus-adresse-perso',
-    theme: 'Messagerie et échanges',
+    theme: 'Messagerie et échanges', // i18n-ignore
     profiles: ['collectivite'],
-    label: 'Des élus utilisent-ils leur adresse e-mail personnelle pour les affaires de la commune ?',
+    label: t('org.audit.k028'),
     riskAnswer: 'oui',
     weight: 'moyenne',
-    recommendation: 'Donner une adresse de la commune à chaque élu : les échanges restent à la commune à la fin du mandat.',
+    recommendation: t('org.audit.k029'),
   },
   {
     id: 'messagerie-instantanee',
-    theme: 'Messagerie et échanges',
-    label: 'Les échanges de travail passent-ils par WhatsApp, Messenger ou des SMS ?',
+    theme: 'Messagerie et échanges', // i18n-ignore
+    label: t('org.audit.k030'),
     riskAnswer: 'oui',
     weight: 'moyenne',
-    recommendation: 'Proposer une messagerie chiffrée européenne (Olvid, Element…) pour les échanges de travail, en particulier les groupes d\'élus ou de bureau.',
+    recommendation: t('org.audit.k031'),
   },
   {
     id: 'site-traceurs',
-    theme: 'Messagerie et échanges',
-    label: 'Le site web affiche-t-il des services de Google ou de Meta (statistiques, vidéos, cartes, boutons de partage) ?',
+    theme: 'Messagerie et échanges', // i18n-ignore
+    label: t('org.audit.k032'),
     riskAnswer: 'oui',
     weight: 'moyenne',
-    recommendation: 'Remplacer les services tiers du site (Matomo pour les statistiques, cartes OpenStreetMap, vidéos hébergées) et ne les charger qu\'après consentement.',
+    recommendation: t('org.audit.k033'),
   },
   // Données personnelles
   {
     id: 'dpo',
-    theme: 'Données personnelles',
+    theme: 'Données personnelles', // i18n-ignore
     profiles: ['collectivite'],
-    label: 'Un délégué à la protection des données (DPO) est-il désigné ?',
-    help: 'Obligatoire pour toute collectivité, quelle que soit sa taille.',
+    label: t('org.audit.k034'),
+    help: t('org.audit.k035'),
     riskAnswer: 'non',
     weight: 'haute',
-    recommendation: 'Désigner un DPO : il est souvent mutualisé par le centre de gestion, l\'intercommunalité ou l\'opérateur public de services numériques.',
+    recommendation: t('org.audit.k036'),
   },
   {
     id: 'registre',
-    theme: 'Données personnelles',
-    label: 'Un registre des traitements de données personnelles est-il tenu à jour ?',
+    theme: 'Données personnelles', // i18n-ignore
+    label: t('org.audit.k037'),
     riskAnswer: 'non',
     weight: 'moyenne',
-    recommendation: 'Tenir le registre des traitements (modèles et guides gratuits sur cnil.fr).',
+    recommendation: t('org.audit.k038'),
   },
   {
     id: 'donnees-sensibles',
-    theme: 'Données personnelles',
+    theme: 'Données personnelles', // i18n-ignore
     profiles: ['collectivite', 'sante', 'enseignement', 'association'],
-    label: 'Les données sensibles (état civil, aide sociale, santé, mineurs) sont-elles dans des outils notés A ou B, avec un accès limité aux seules personnes concernées ?',
+    label: t('org.audit.k039'),
     riskAnswer: 'non',
     weight: 'haute',
-    recommendation: 'Recenser les outils qui contiennent des données sensibles, restreindre leurs accès et les passer en priorité vers des outils notés A ou B.',
+    recommendation: t('org.audit.k040'),
   },
   // Contrats et réversibilité
   {
     id: 'export-donnees',
-    theme: 'Contrats et réversibilité',
-    label: 'Pouvez-vous exporter toutes les données de vos logiciels principaux dans un format ouvert (CSV, ODS, PDF…) ?',
+    theme: 'Contrats et réversibilité', // i18n-ignore
+    label: t('org.audit.k041'),
     riskAnswer: 'non',
     weight: 'haute',
-    recommendation: 'Vérifier l\'export complet dans chaque logiciel vital et l\'exiger au contrat avant le prochain renouvellement : sans export, changer d\'éditeur est presque impossible.',
+    recommendation: t('org.audit.k042'),
   },
   {
     id: 'contrats-hebergement',
-    theme: 'Contrats et réversibilité',
-    label: 'Les contrats indiquent-ils où sont hébergées les données et comment elles sont restituées en fin de contrat ?',
+    theme: 'Contrats et réversibilité', // i18n-ignore
+    label: t('org.audit.k043'),
     riskAnswer: 'non',
     weight: 'moyenne',
-    recommendation: 'Demander à chaque éditeur le lieu d\'hébergement, les sous-traitants et la procédure de restitution, et les faire inscrire au contrat.',
+    recommendation: t('org.audit.k044'),
   },
   // Organisation
   {
     id: 'referent',
-    theme: 'Organisation',
-    label: 'Une personne est-elle chargée de suivre le numérique (référent interne ou prestataire identifié) ?',
+    theme: 'Organisation', // i18n-ignore
+    label: t('org.audit.k045'),
     riskAnswer: 'non',
     weight: 'moyenne',
-    recommendation: 'Désigner un référent numérique, même à temps partiel, qui tient l\'inventaire des outils et des accès.',
+    recommendation: t('org.audit.k046'),
   },
   {
     id: 'incident',
-    theme: 'Organisation',
-    label: 'Savez-vous quoi faire et qui appeler en cas de piratage ou de rançongiciel ?',
+    theme: 'Organisation', // i18n-ignore
+    label: t('org.audit.k047'),
     riskAnswer: 'non',
     weight: 'moyenne',
-    recommendation: 'Écrire la marche à suivre (débrancher du réseau, ne pas payer, prévenir le prestataire, l\'assurance et 17Cyber) et la garder aussi sur papier.',
+    recommendation: t('org.audit.k048'),
   },
 ];
+
+/** Libellé affiché d'un thème du questionnaire. */
+export const auditThemeLabel = (theme) => t('org.audit.themes')?.[theme] || theme;

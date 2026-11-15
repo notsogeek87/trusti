@@ -15,5 +15,7 @@ import migration from './migration.js';
 import storage from './storage.js';
 import cleaner from './cleaner.js';
 import technical from './technical.js';
+import assessment from './assessment.js';
+import org from './org.js';
 
-export default { appDetail, cards, categories, cleaner, common, grades, header, hygiene, main, migration, modals, myApps, onboarding, storage, technical, ui };
+export default { appDetail, assessment, cards, categories, cleaner, common, grades, header, hygiene, main, migration, modals, myApps, onboarding, org, storage, technical, ui };
