@@ -35,5 +35,42 @@ export default {
     overridden: "Die Berechnung ergab {computed}; die endgültige Note {grade} wurde vom Trusti-Team festgelegt.",
     unverifiedSources: "Einige Informationen sind noch nicht anhand einer Quelle geprüft und müssen noch bestätigt werden.",
     disclaimer: "Das sind **nicht abschließende** Anhaltspunkte: Sie beleuchten die Note, ohne sie vollständig zu erklären. Die vollständige Bewertung stützt sich auf weitere Informationen, die hier nicht alle angezeigt werden.",
+    levels: {
+      conformite: {
+        "0": "Nicht konform",
+        "1": "Lückenhaft",
+        "2": "Minimal",
+        "3": "DSGVO-Basis",
+        "4": "DSGVO+Zertif.",
+      },
+      controle: {
+        "0": "Gefangen",
+        "1": "Starke Abh.",
+        "2": "Geringe Abh.",
+        "3": "Teilweise offen",
+        "4": "Vollständig offen",
+      },
+      gouvernance: {
+        "0": "CLOUD Act",
+        "1": "Garantien",
+        "2": "Tochter",
+        "3": "EU gemischt",
+        "4": "FR/EU",
+      },
+      localisation: {
+        "0": "Weltweit",
+        "1": "<50 % EU",
+        "2": "≥70 % EU",
+        "3": "≥90 % EU",
+        "4": "100 % EU",
+      },
+      transparence: {
+        "0": "Keine Infos",
+        "1": "Undurchsichtig",
+        "2": "Standard",
+        "3": "Klare AGB",
+        "4": "Ausführliche Berichte",
+      },
+    },
   },
 };

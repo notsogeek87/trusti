@@ -35,5 +35,42 @@ export default {
     overridden: "The calculation gave {computed}; the final grade {grade} was set by the Trusti team.",
     unverifiedSources: "Some information has not yet been checked against a source and remains to be confirmed.",
     disclaimer: "These are **non-exhaustive** pointers: they shed light on the grade without fully explaining it. The full assessment relies on other information that is not all shown here.",
+    levels: {
+      conformite: {
+        "0": "Non-compliant",
+        "1": "Incomplete",
+        "2": "Minimal",
+        "3": "Basic GDPR",
+        "4": "GDPR+Certif.",
+      },
+      controle: {
+        "0": "Locked in",
+        "1": "Strong dep.",
+        "2": "Minor dep.",
+        "3": "Partly open",
+        "4": "Fully open",
+      },
+      gouvernance: {
+        "0": "CLOUD Act",
+        "1": "Safeguards",
+        "2": "Subsidiary",
+        "3": "Mixed EU",
+        "4": "FR/EU",
+      },
+      localisation: {
+        "0": "Worldwide",
+        "1": "<50% EU",
+        "2": "≥70% EU",
+        "3": "≥90% EU",
+        "4": "100% EU",
+      },
+      transparence: {
+        "0": "No info",
+        "1": "Opaque",
+        "2": "Standard",
+        "3": "Clear terms",
+        "4": "Detailed reports",
+      },
+    },
   },
 };

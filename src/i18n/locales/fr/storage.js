@@ -46,5 +46,6 @@ export default {
     resetAllBody: "Efface toutes les données stockées sur cet appareil (apps, migrations, préférences) et recharge l'app.",
     localWarning: "Ces actions sont locales à cet appareil et irréversibles une fois confirmées.",
     reset: "Réinitialisation",
+    migrations: "Migrations",
   },
 };

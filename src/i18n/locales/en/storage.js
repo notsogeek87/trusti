@@ -46,5 +46,6 @@ export default {
     resetAllBody: "Erases all data stored on this device (apps, switches, preferences) and reloads the app.",
     localWarning: "These actions only affect this device and cannot be undone once confirmed.",
     reset: "Reset",
+    migrations: "Switches",
   },
 };

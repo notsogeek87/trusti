@@ -385,7 +385,7 @@ const StoragePage = ({
           </p>
           <div className="grid grid-cols-3 gap-2">
             <StatTile value={myAppsCount} label={t('storage.page.tracked')} />
-            <StatTile value={migrationsCount} label="Migrations" />
+            <StatTile value={migrationsCount} label={t('storage.page.migrations')} />
             <StatTile
               value={usageAccessGranted && appSizes ? formatBytes(totalDeviceBytes) : '—'}
               label={t('storage.page.totalSpace')}

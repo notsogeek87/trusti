@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CheckCircle, X } from 'lucide-react';
 import { API_URL } from '../../utils/apiConfig';
-import { t } from '../../i18n/index.js';
+import { getLanguage, t } from '../../i18n/index.js';
 
 /**
  * « Il manque un outil » : suggestion d'un outil absent du catalogue
@@ -37,7 +37,8 @@ const SuggestToolDialog = ({ initialName = '', onClose }) => {
         body: JSON.stringify(form),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.success) throw new Error(data.error || t('org.misc.k013'));
+      // Messages du serveur en français : affichés tels quels en FR seulement
+      if (!res.ok || !data.success) throw new Error((getLanguage() === 'fr' && data.error) || t('org.misc.k013'));
       setStatus('sent');
     } catch (err) {
       setStatus('error');

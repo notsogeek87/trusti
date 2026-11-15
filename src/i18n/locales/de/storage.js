@@ -46,5 +46,6 @@ export default {
     resetAllBody: "Löscht alle auf diesem Gerät gespeicherten Daten (Apps, Wechsel, Einstellungen) und lädt die App neu.",
     localWarning: "Diese Aktionen betreffen nur dieses Gerät und lassen sich nach der Bestätigung nicht rückgängig machen.",
     reset: "Zurücksetzen",
+    migrations: "Wechsel",
   },
 };

@@ -16,6 +16,11 @@ const CRITERION_META = {
 };
 const FALLBACK_META = { Icon: HelpCircle, help: null };
 
+// Titre du niveau atteint : grille fixe (critère × points), traduite ici ; sinon celui de la base.
+const levelTitle = (c) => (CRITERION_META[c.key] && Number.isInteger(c.points) && c.points >= 0 && c.points <= 4
+  ? t(`assessment.detail.levels.${c.key}.${c.points}`)
+  : c.levelTitle);
+
 // Couleur de la pastille selon le niveau (le texte du niveau reste affiché à côté).
 const tileTone = points => {
   if (points === null || points === undefined) return 'bg-slate-100 text-slate-400';
@@ -79,7 +84,7 @@ const CriterionItem = ({ c }) => {
             <span className="text-xs font-black text-slate-800">{CRITERION_META[c.key] ? t(`assessment.detail.criteria.${c.key}`) : c.name}</span>
             <LevelBar points={c.points} />
           </div>
-          {c.levelTitle && <p className="text-[11px] font-semibold text-indigo-700 mt-0.5">{c.levelTitle}</p>}
+          {c.levelTitle && <p className="text-[11px] font-semibold text-indigo-700 mt-0.5">{levelTitle(c)}</p>}
           {c.rationale && <p className="text-xs text-slate-600 leading-relaxed mt-0.5">{c.rationale}</p>}
           <p className="text-[11px] text-slate-400 mt-0.5 flex flex-wrap items-center">
             <ConfidenceSignal confidence={c.confidence} />
