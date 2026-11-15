@@ -13,6 +13,7 @@ import {
   CREATION_SIZES,
   CREATION_APPROACHES,
   COST_LABELS,
+  kitStepLabel,
   KITS_REVIEWED_AT,
 } from '../../constants/creationKits';
 import { buildStarterKit, mergeKitIntoSelection } from '../../utils/creationKit';
@@ -20,6 +21,7 @@ import { computeOrganisationSummary, buildActionPlan } from '../../utils/organis
 import { downloadOrganisationPdf } from '../../utils/organisationPdf';
 import { loadOrganisationState, saveOrganisationState } from '../../utils/organisationStorage';
 import { helpForProfile } from '../../constants/orgHelp';
+import { t } from '../../i18n/index.js';
 
 /**
  * Assistant « Créer mon organisation » (adresse « ?creer-organisation »), V1.
@@ -29,28 +31,28 @@ import { helpForProfile } from '../../constants/orgHelp';
  * Aucun compte, aucune donnée envoyée.
  */
 const QUESTIONS = [
-  { key: 'type', title: 'Quel type de structure créez-vous ?', options: CREATION_TYPES },
-  { key: 'size', title: 'Combien serez-vous à utiliser les outils ?', options: CREATION_SIZES },
-  { key: 'approach', title: 'Quelle approche vous ressemble ?', options: CREATION_APPROACHES },
+  { key: 'type', title: t('org.create.k001'), options: CREATION_TYPES },
+  { key: 'size', title: t('org.create.k002'), options: CREATION_SIZES },
+  { key: 'approach', title: t('org.create.k003'), options: CREATION_APPROACHES },
 ];
 
 const KIT_GRADE_LABEL = {
-  A: 'Un environnement numérique de grande confiance',
-  B: 'Un environnement numérique de confiance',
-  C: 'Un environnement correct, à surveiller',
-  D: 'Un environnement à risque',
-  E: 'Un environnement très exposé',
+  A: t('org.create.k004'),
+  B: t('org.create.k005'),
+  C: t('org.create.k006'),
+  D: t('org.create.k007'),
+  E: t('org.create.k008'),
 };
 
 const PageHeader = () => (
   <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-white/60">
     <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3 min-w-0">
       <a href={STANDALONE_URLS.ORGANISATIONS} className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-indigo-600 shrink-0">
-        <ArrowLeft size={16} /> Organisations
+        <ArrowLeft size={16} /> {t('org.create.k009')}
       </a>
       <span className="text-slate-300">/</span>
       <span className="flex items-center gap-2 font-black text-indigo-600 min-w-0">
-        <Rocket size={18} className="shrink-0" /> <span className="truncate">Créer mon organisation</span>
+        <Rocket size={18} className="shrink-0" /> <span className="truncate">{t('org.create.k010')}</span>
       </span>
     </div>
   </header>
@@ -69,15 +71,15 @@ const Intro = ({ onStart }) => (
     </div>
 
     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-black uppercase tracking-wide">
-      <Sparkles size={14} aria-hidden="true" /> Première version
+      <Sparkles size={14} aria-hidden="true" /> {t('org.create.k011')}
     </span>
 
     <h1 className="mt-5 text-2xl sm:text-4xl font-black text-slate-800 leading-tight">
-      Votre organisation mérite un numérique de confiance.
+      {t('org.create.k012')}
     </h1>
     <div className="mt-5 space-y-3 text-slate-600 sm:text-lg max-w-2xl mx-auto">
-      <p>Trois questions, et Trusti vous propose un kit d'outils de départ : un outil par besoin, avec sa note de confiance et l'ordre dans lequel les mettre en place.</p>
-      <p className="text-sm text-slate-500">Pour l'instant : associations, petites entreprises et mairies. Aucun compte, rien n'est envoyé.</p>
+      <p>{t('org.create.k013')}</p>
+      <p className="text-sm text-slate-500">{t('org.create.k014')}</p>
     </div>
 
     <button
@@ -85,12 +87,12 @@ const Intro = ({ onStart }) => (
       onClick={onStart}
       className="mt-10 inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-3.5 px-8 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl group"
     >
-      Composer mon kit
+      {t('org.create.k015')}
       <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
     </button>
     <div className="mt-4">
       <a href={STANDALONE_URLS.ORGANISATIONS} className="text-sm font-bold text-slate-500 hover:text-indigo-600">
-        Retour aux organisations
+        {t('org.create.k016')}
       </a>
     </div>
   </div>
@@ -100,7 +102,7 @@ const Question = ({ index, question, value, onPick, onBack }) => (
   <div className="bg-white/80 rounded-3xl border border-white shadow-sm px-5 py-8 sm:px-10 sm:py-10">
     <div className="flex items-center justify-between gap-3 mb-4">
       <button type="button" onClick={onBack} className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-indigo-600">
-        <ArrowLeft size={16} /> Retour
+        <ArrowLeft size={16} /> {t('org.create.k017')}
       </button>
       <span className="text-xs font-black uppercase tracking-wider text-slate-400">Question {index + 1} sur {QUESTIONS.length}</span>
     </div>
@@ -134,8 +136,8 @@ const Question = ({ index, question, value, onPick, onBack }) => (
     </div>
     {question.key === 'type' && (
       <p className="mt-5 text-sm text-slate-500">
-        Santé, enseignement : bientôt. En attendant, vous pouvez{' '}
-        <a href={STANDALONE_URLS.EVALUATE_ORGANISATION} className="font-bold text-indigo-600 hover:underline">évaluer vos outils actuels</a>.
+        {t('org.create.soonBefore')}{' '}
+        <a href={STANDALONE_URLS.EVALUATE_ORGANISATION} className="font-bold text-indigo-600 hover:underline">{t('org.create.k018')}</a>.
       </p>
     )}
   </div>
@@ -144,9 +146,9 @@ const Question = ({ index, question, value, onPick, onBack }) => (
 /** Liens officiels d'un outil (site web en premier : certains outils n'ont pas d'appli). */
 const AppLinks = ({ app }) => {
   const links = [
-    ['Site web', app.website],
-    ['Google Play', app.playStoreUrl],
-    ['App Store', app.appleStoreUrl],
+    [t('org.create.k019'), app.website],
+    [t('org.create.k020'), app.playStoreUrl],
+    [t('org.create.k021'), app.appleStoreUrl],
   ].filter(([, url]) => typeof url === 'string' && /^https?:\/\//i.test(url.trim()));
   if (links.length === 0) return null;
   return (
@@ -214,7 +216,7 @@ const KitResult = ({ answers, kit, catalog, onRestart, detailApp, openApp, close
   const downloadPdf = () => {
     setPdfStatus('working');
     downloadOrganisationPdf({
-      orgName: 'Kit de démarrage',
+      orgName: t('org.create.k022'),
       profileLabel: typeOption?.label || null,
       selectedApps: kit.apps,
       criticality: {},
@@ -261,12 +263,12 @@ const KitResult = ({ answers, kit, catalog, onRestart, detailApp, openApp, close
     <div className="flex flex-col gap-4 min-w-0">
       <div className="flex items-center justify-between gap-3">
         <button type="button" onClick={onRestart} className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-indigo-600">
-          <ArrowLeft size={16} /> Modifier mes réponses
+          <ArrowLeft size={16} /> {t('org.create.k023')}
         </button>
       </div>
 
       <div>
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-800">Votre kit de démarrage</h1>
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-800">{t('org.create.k024')}</h1>
         <div className="mt-2 flex flex-wrap gap-2">
           {labels.map(l => (
             <span key={l} className="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-xs font-bold text-slate-600">{l}</span>
@@ -280,11 +282,11 @@ const KitResult = ({ answers, kit, catalog, onRestart, detailApp, openApp, close
             <span className="text-4xl font-black">{summary.overallGrade}</span>
           </div>
           <div className="min-w-0">
-            <p className="text-[11px] font-black uppercase tracking-wider text-slate-400">Trusti Score du kit</p>
+            <p className="text-[11px] font-black uppercase tracking-wider text-slate-400">{t('org.create.k025')}</p>
             <p className="font-black text-slate-800">{KIT_GRADE_LABEL[summary.overallGrade]}</p>
             <p className="text-xs text-slate-500">
-              {summary.total} outil{summary.total > 1 ? 's' : ''} :{' '}
-              {GRADES.filter(g => summary.counts[g] > 0).map(g => `${summary.counts[g]} noté${summary.counts[g] > 1 ? 's' : ''} ${g}`).join(', ')}
+              {t('org.create.toolsCount', { count: summary.total })}{t('common.colon')}
+              {GRADES.filter(g => summary.counts[g] > 0).map(g => t('org.create.ratedCount', { count: summary.counts[g], grade: g })).join(', ')}
             </p>
           </div>
         </section>
@@ -292,7 +294,7 @@ const KitResult = ({ answers, kit, catalog, onRestart, detailApp, openApp, close
 
       {kit.steps.map(({ step, items }) => (
         <section key={step} className="bg-white/90 rounded-2xl p-5 shadow-sm">
-          <h2 className="text-xs font-black uppercase tracking-wider text-indigo-600 mb-3">{step}</h2>
+          <h2 className="text-xs font-black uppercase tracking-wider text-indigo-600 mb-3">{kitStepLabel(step)}</h2>
           <ol className="flex flex-col gap-3">
             {items.map(item => {
               position += 1;
@@ -307,7 +309,7 @@ const KitResult = ({ answers, kit, catalog, onRestart, detailApp, openApp, close
                         <button
                           type="button"
                           onClick={() => openApp(item.app)}
-                          aria-label={`Voir la fiche détaillée de ${item.app.name}`}
+                          aria-label={t('org.create.seeSheet', { name: item.app.name })}
                           aria-current={active ? 'true' : undefined}
                           className="group w-full text-left rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
                         >
@@ -324,7 +326,7 @@ const KitResult = ({ answers, kit, catalog, onRestart, detailApp, openApp, close
                           <span className="block mt-1 text-sm text-slate-600">{item.why}</span>
                           <span className="block mt-1 text-[11px] font-bold text-slate-400">{COST_LABELS[item.cost]}</span>
                           <span className="block mt-1 text-xs font-bold text-indigo-600 group-hover:underline">
-                            {active ? 'Fiche affichée' : 'Voir la fiche détaillée'}
+                            {active ? t('org.create.k026') : t('org.create.k027')}
                           </span>
                         </button>
                         <AppLinks app={item.app} />
@@ -341,10 +343,9 @@ const KitResult = ({ answers, kit, catalog, onRestart, detailApp, openApp, close
       ))}
 
       <section className="bg-white/90 rounded-2xl p-5 shadow-sm">
-        <p className="font-black text-slate-800">Et ensuite ?</p>
+        <p className="font-black text-slate-800">{t('org.create.k028')}</p>
         <p className="mt-1 text-sm text-slate-600">
-          Enregistrez ce kit comme point de départ de votre évaluation : vous pourrez l'ajuster outil par outil et le suivre dans le temps.
-           Vous pouvez aussi télécharger dès maintenant le rapport du kit.
+          {t('org.create.k029')}
         </p>
         {confirming ? (
           <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
@@ -353,10 +354,10 @@ const KitResult = ({ answers, kit, catalog, onRestart, detailApp, openApp, close
             </p>
             <div className="mt-3 flex flex-col sm:flex-row gap-2">
               <button type="button" onClick={() => save('merge')} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl">
-                Ajouter le kit à ma sélection
+                {t('org.create.k030')}
               </button>
               <button type="button" onClick={() => save('replace')} className="flex-1 bg-white border border-slate-300 hover:border-slate-400 text-slate-700 font-bold py-3 px-4 rounded-xl">
-                Remplacer ma sélection
+                {t('org.create.k031')}
               </button>
               <button type="button" onClick={() => setConfirming(null)} className="sm:flex-none text-slate-500 font-bold py-3 px-4">
                 Annuler
@@ -369,7 +370,7 @@ const KitResult = ({ answers, kit, catalog, onRestart, detailApp, openApp, close
             onClick={onSave}
             className="mt-4 w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-md"
           >
-            <ClipboardCheck size={18} /> Enregistrer ce kit dans « Évaluer mon organisation »
+            <ClipboardCheck size={18} /> {t('org.create.k032')}
           </button>
         )}
         {summary.total > 0 && (
@@ -380,16 +381,16 @@ const KitResult = ({ answers, kit, catalog, onRestart, detailApp, openApp, close
               disabled={pdfStatus === 'working'}
               className="mt-2 w-full bg-white border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 font-bold py-3 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-60"
             >
-              <FileDown size={18} /> {pdfStatus === 'working' ? 'Création du PDF…' : 'Télécharger le rapport du kit (PDF)'}
+              <FileDown size={18} /> {pdfStatus === 'working' ? t('org.create.k033') : t('org.create.k034')}
             </button>
-            {pdfStatus === 'error' && <p className="mt-2 text-sm font-bold text-rose-600" role="alert">Le PDF n'a pas pu être créé. Réessayez.</p>}
+            {pdfStatus === 'error' && <p className="mt-2 text-sm font-bold text-rose-600" role="alert">{t('org.create.k035')}</p>}
           </>
         )}
       </section>
 
       <p className="text-xs text-slate-500 px-1">
-        Kits choisis par l'équipe Trusti, sans lien commercial avec les éditeurs. Tarifs indicatifs, à vérifier chez chaque éditeur (relu en {KITS_REVIEWED_AT}).
-        Ce kit est un point de départ, pas un avis juridique.
+        {t('org.create.kitsDisclaimer', { date: KITS_REVIEWED_AT })}
+        {t('org.create.k036')}
       </p>
     </div>
 
@@ -444,7 +445,7 @@ const CreateOrganisationPage = () => {
   const goBack = () => window.history.back();
 
   useEffect(() => {
-    document.title = 'Créer mon organisation · Trusti';
+    document.title = t('org.create.k037');
   }, []);
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -477,9 +478,9 @@ const CreateOrganisationPage = () => {
   } else if (status === 'error') {
     content = (
       <div className="bg-white/80 rounded-3xl p-8 text-center shadow-sm">
-        <p className="font-black text-slate-800">Le catalogue n'a pas pu être chargé.</p>
+        <p className="font-black text-slate-800">{t('org.create.k038')}</p>
         <button type="button" onClick={retry} className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-2xl">
-          Réessayer
+          {t('org.create.retry')}
         </button>
       </div>
     );
