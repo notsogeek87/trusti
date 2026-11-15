@@ -188,3 +188,14 @@ export const computeFilteredApps = ({
 
   return [];
 };
+
+/**
+ * Recherche dans « Mes Apps » : résultats du catalogue que l'utilisateur ne
+ * suit pas encore, affichés dans une section « Catalogue » sous ses propres
+ * apps (évite de basculer d'onglet quand l'app cherchée n'y est pas).
+ * Vide hors « Mes Apps » ou sans recherche.
+ */
+export const computeCatalogSearchApps = ({ activeTab, searchTerm, searchResults, myApps }) => {
+  if (activeTab !== TABS.MY_APPS || !searchTerm.trim()) return [];
+  return sortBestGradeFirst(searchResults.filter(app => !myApps.has(app.id)));
+};

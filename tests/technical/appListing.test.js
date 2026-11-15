@@ -6,6 +6,7 @@ import {
   buildAlternativeInfo,
   buildMyAppsList,
   computeFilteredApps,
+  computeCatalogSearchApps,
 } from '../../src/utils/appListing.js';
 import { TABS } from '../../src/constants/tabs.js';
 
@@ -91,4 +92,14 @@ test('recherche : filtrée selon l\'onglet', () => {
     ['3']
   );
   assert.equal(computeFilteredApps({ ...base, activeTab: TABS.TOP_ALTERNATIVES }), base.awardsApps);
+});
+
+test('computeCatalogSearchApps : résultats du catalogue hors « Mes Apps », meilleur grade d\'abord', () => {
+  const base = { searchTerm: 'a', searchResults: [whatsapp, tiktok, olvid, signal], myApps: new Set(['1']) };
+  assert.deepEqual(
+    computeCatalogSearchApps({ ...base, activeTab: TABS.MY_APPS }).map(a => a.id),
+    ['2', '3', '4']
+  );
+  assert.deepEqual(computeCatalogSearchApps({ ...base, activeTab: TABS.MY_APPS, searchTerm: '  ' }), []);
+  assert.deepEqual(computeCatalogSearchApps({ ...base, activeTab: TABS.APPLICATIONS }), []);
 });

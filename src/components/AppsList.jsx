@@ -30,7 +30,9 @@ const AppsList = ({
   pagination = { hasMore: false, isLoadingMore: false, total: 0 },
   onLoadMore,
   isLoadingAwards = false,
-  isLoadingMyApps = false
+  isLoadingMyApps = false,
+  catalogSearchApps = [],
+  isSearching = false
 }) => {
   const isMobile = useIsMobile();
   const loadMoreSentinelRef = useRef(null);
@@ -128,6 +130,8 @@ const AppsList = ({
     );
   }
 
+  const isMyAppsSearch = activeTab === TABS.MY_APPS && Boolean(searchTerm.trim());
+
   // Affichage normal pour les autres onglets
   return (
     <div className={isMobile ? 'space-y-4' : 'grid grid-cols-2 xl:grid-cols-3 gap-4'}>
@@ -164,6 +168,36 @@ const AppsList = ({
           isLoadingMyApps={isLoadingMyApps}
         />
       ))}
+
+      {/* Recherche dans « Mes Apps » : les apps du catalogue non suivies
+          viennent ensuite, dans leur propre section (le + les ajoute à Mes Apps) */}
+      {isMyAppsSearch && displayApps.length === 0 && !isSearching && (
+        <p className="col-span-full text-center text-slate-500 text-sm py-4 px-4">
+          Aucune de tes apps ne correspond à « {searchTerm.trim()} »
+        </p>
+      )}
+      {isMyAppsSearch && catalogSearchApps.length > 0 && (
+        <>
+          <div className="col-span-full flex items-center gap-3 pt-2">
+            <h3 className="text-xs font-black uppercase tracking-wider text-slate-500">Catalogue</h3>
+            <div className="flex-1 h-px bg-slate-200" />
+            <span className="text-xs text-slate-400">{catalogSearchApps.length}</span>
+          </div>
+          {catalogSearchApps.map((app) => (
+            <AppCard
+              key={`catalog-${app.id}`}
+              app={app}
+              activeTab={TABS.APPLICATIONS}
+              isInMyApps={false}
+              onToggleMyApp={onToggleMyApp}
+              isMigrated={migratedApps.has(app.id)}
+              customMigration={customMigrations.get(app.id)}
+              onToggleMigrate={onToggleMigrate}
+              onSelectApp={onSelectApp}
+            />
+          ))}
+        </>
+      )}
       
       {/* Sentinelle de chargement automatique au scroll pour la pagination serveur */}
       {hasMore && (

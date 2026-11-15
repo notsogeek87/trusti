@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { TABS } from '../constants/tabs';
 import { hasCompletedOnboarding } from '../utils/onboardingStorage';
-import { computeFilteredApps } from '../utils/appListing';
+import { computeFilteredApps, computeCatalogSearchApps } from '../utils/appListing';
 import { useUserSelections } from './useUserSelections';
 import { useCatalogApps } from './useCatalogApps';
 import { useAwardsApps, useMyAppsData, useAppSearch } from './useRemoteAppLists';
@@ -52,6 +52,11 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
     isLoadingMyApps,
   }), [activeTab, myApps, searchTerm, searchResults, catalog.apps, awardsApps, myAppsData, isLoadingMyApps, selectedCategory]);
 
+  const catalogSearchApps = useMemo(
+    () => computeCatalogSearchApps({ activeTab, searchTerm, searchResults, myApps }),
+    [activeTab, searchTerm, searchResults, myApps]
+  );
+
   return {
     // État
     activeTab,
@@ -70,6 +75,7 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
     isLoadingMyApps,
     myAppsData,
     filteredApps,
+    catalogSearchApps,
     pagination: catalog.pagination,
 
     // Actions

@@ -82,6 +82,7 @@ const App = () => {
     customMigrations,
     selectedApp,
     filteredApps,
+    catalogSearchApps,
     apps,
     isLoadingApps,
     isInitialLoading,
@@ -452,6 +453,8 @@ const App = () => {
 
               <AppsList
                 apps={isMyAppsTab ? myAppsDisplayed : filteredApps}
+                catalogSearchApps={catalogSearchApps}
+                isSearching={isSearching}
                 activeTab={activeTab}
                 myApps={myApps}
                 favoriteApps={favoriteApps}
