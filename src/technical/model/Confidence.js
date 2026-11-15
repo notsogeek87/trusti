@@ -1,3 +1,4 @@
+import { t } from '../../i18n/index.js';
 /**
  * Niveau de confiance d'une détection (Google / SDK / tracker).
  * Reflète la fiabilité du signal ayant mené à la détection, pas la certitude
@@ -21,9 +22,9 @@ export const CONFIDENCE_DOTS = {
 };
 
 export const CONFIDENCE_LABEL = {
-  [Confidence.HIGH]: 'Détection : forte certitude',
-  [Confidence.PROBABLE]: 'Détection : probable',
-  [Confidence.UNKNOWN]: 'Détection : incertaine',
+  [Confidence.HIGH]: t('technical.models.confidence.HIGH'),
+  [Confidence.PROBABLE]: t('technical.models.confidence.PROBABLE'),
+  [Confidence.UNKNOWN]: t('technical.models.confidence.UNKNOWN'),
 };
 
 export default Confidence;

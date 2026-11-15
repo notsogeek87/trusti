@@ -1,10 +1,11 @@
 import React from 'react';
 import { DetectionStatus } from '../../technical';
+import { t } from '../../i18n/index.js';
 
 const CONFIG = {
-  [DetectionStatus.DETECTED]: { icon: '✅', label: 'Oui', className: 'bg-emerald-50 text-emerald-700' },
-  [DetectionStatus.NOT_DETECTED]: { icon: '❌', label: 'Non détecté', className: 'bg-slate-100 text-slate-500' },
-  [DetectionStatus.UNKNOWN]: { icon: '⚪', label: 'Non déterminé', className: 'bg-slate-50 text-slate-400' },
+  [DetectionStatus.DETECTED]: { icon: '✅', get label() { return t('technical.ui.yes'); }, className: 'bg-emerald-50 text-emerald-700' },
+  [DetectionStatus.NOT_DETECTED]: { icon: '❌', get label() { return t('technical.ui.notDetected'); }, className: 'bg-slate-100 text-slate-500' },
+  [DetectionStatus.UNKNOWN]: { icon: '⚪', get label() { return t('technical.ui.undetermined'); }, className: 'bg-slate-50 text-slate-400' },
 };
 
 /**

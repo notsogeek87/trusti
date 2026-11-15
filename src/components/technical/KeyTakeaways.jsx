@@ -1,6 +1,7 @@
 import React from 'react';
 import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { getOverviewSignals, SIGNAL_STYLE } from './technicalSignals';
+import { t } from '../../i18n/index.js';
 
 /**
  * « Ce qu'il faut retenir » — tout en haut de l'analyse technique, avant le
@@ -18,8 +19,7 @@ const KeyTakeaways = ({ analysis }) => {
       <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-4 flex items-start gap-2">
         <CheckCircle2 size={16} className="text-emerald-600 shrink-0 mt-0.5" />
         <p className="text-xs text-emerald-800 leading-relaxed">
-          Rien de particulier à signaler parmi les points vérifiés ci-dessous (mode debug, trafic non
-          chiffré, sauvegarde, trackers, permissions sensibles...).
+          {t('technical.ui.nothingToFlag')}
         </p>
       </div>
     );
@@ -28,7 +28,7 @@ const KeyTakeaways = ({ analysis }) => {
   return (
     <div className="rounded-xl border border-slate-200 p-3 mb-4">
       <h4 className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wide text-slate-500 mb-2">
-        <AlertTriangle size={14} className="text-amber-500" /> Ce qu'il faut retenir
+        <AlertTriangle size={14} className="text-amber-500" /> {t('technical.ui.takeaways')}
       </h4>
       <div className="space-y-1.5">
         {signals.map((s) => {

@@ -33,8 +33,10 @@ export class ApkApplicationSource extends ApplicationSource {
   // eslint-disable-next-line class-methods-use-this
   async getRawData() {
     throw new Error(
+      // i18n-ignore-start : message de développement, jamais affiché (source non branchée)
       "L'analyse d'un fichier APK externe n'est pas encore implémentée. " +
       'Architecture préparée (ApplicationSource, TechnicalAnalyzer) — voir ApkApplicationSource.'
+      // i18n-ignore-end
     );
   }
 }

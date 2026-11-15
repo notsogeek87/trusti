@@ -1,3 +1,4 @@
+import { t } from '../../i18n/index.js';
 /**
  * Niveau de protection d'une permission Android, tel que défini par le système
  * (android.content.pm.PermissionInfo.protectionLevel). UNKNOWN couvre les
@@ -11,10 +12,10 @@ export const ProtectionLevel = Object.freeze({
 });
 
 export const PROTECTION_LEVEL_LABEL = {
-  [ProtectionLevel.NORMAL]: 'Standard — accordée automatiquement à l\'installation',
-  [ProtectionLevel.DANGEROUS]: 'Sensible — nécessite une confirmation explicite de l\'utilisateur',
-  [ProtectionLevel.SIGNATURE]: 'Réservée — limitée aux apps signées par le même développeur que le système',
-  [ProtectionLevel.UNKNOWN]: 'Non déterminé',
+  [ProtectionLevel.NORMAL]: t('technical.models.protection.NORMAL'),
+  [ProtectionLevel.DANGEROUS]: t('technical.models.protection.DANGEROUS'),
+  [ProtectionLevel.SIGNATURE]: t('technical.models.protection.SIGNATURE'),
+  [ProtectionLevel.UNKNOWN]: t('technical.models.protection.UNKNOWN'),
 };
 
 export default ProtectionLevel;

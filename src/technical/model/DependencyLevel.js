@@ -1,3 +1,4 @@
+import { t } from '../../i18n/index.js';
 /**
  * Niveau de dépendance technique — indicateur SÉPARÉ du Trusti-Score.
  *
@@ -14,24 +15,21 @@ export const DependencyLevel = Object.freeze({
 });
 
 export const DEPENDENCY_LEVEL_LABEL = {
-  [DependencyLevel.LOW]: 'Faible',
-  [DependencyLevel.MODERATE]: 'Modéré',
-  [DependencyLevel.HIGH]: 'Élevé',
-  [DependencyLevel.VERY_HIGH]: 'Très élevé',
-  [DependencyLevel.UNKNOWN]: 'Non déterminé',
+  [DependencyLevel.LOW]: t('technical.models.dependency.LOW'),
+  [DependencyLevel.MODERATE]: t('technical.models.dependency.MODERATE'),
+  [DependencyLevel.HIGH]: t('technical.models.dependency.HIGH'),
+  [DependencyLevel.VERY_HIGH]: t('technical.models.dependency.VERY_HIGH'),
+  [DependencyLevel.UNKNOWN]: t('technical.models.dependency.UNKNOWN'),
 };
 
 export const DEPENDENCY_LEVEL_EMOJI = {
-  [DependencyLevel.LOW]: '🟢',
-  [DependencyLevel.MODERATE]: '🟡',
-  [DependencyLevel.HIGH]: '🟠',
-  [DependencyLevel.VERY_HIGH]: '🔴',
-  [DependencyLevel.UNKNOWN]: '⚪',
+  [DependencyLevel.LOW]: t('technical.models.dependency.LOW'),
+  [DependencyLevel.MODERATE]: t('technical.models.dependency.MODERATE'),
+  [DependencyLevel.HIGH]: t('technical.models.dependency.HIGH'),
+  [DependencyLevel.VERY_HIGH]: t('technical.models.dependency.VERY_HIGH'),
+  [DependencyLevel.UNKNOWN]: t('technical.models.dependency.UNKNOWN'),
 };
 
-export const DEPENDENCY_LEVEL_EXPLANATION =
-  'Le niveau de dépendance décrit uniquement les dépendances techniques ' +
-  'détectées dans l\'application. Il ne constitue pas une évaluation de sa ' +
-  'sécurité, de sa qualité ou de sa fiabilité.';
+export const DEPENDENCY_LEVEL_EXPLANATION = t('technical.models.dependency.explanation');
 
 export default DependencyLevel;

@@ -7,6 +7,7 @@ import { analyzeTrackers } from './TrackerAnalyzer.js';
 import { calculateDependencyLevel } from './DependencyLevelCalculator.js';
 import { analyzeComposition } from './CompositionAnalyzer.js';
 import { analyzeSecurity } from './SecurityAnalyzer.js';
+import { t } from '../../i18n/index.js';
 
 /**
  * Orchestrateur de l'analyse technique. Ne dépend que d'une ApplicationSource
@@ -49,12 +50,12 @@ export class TechnicalAnalyzer {
     });
 
     const limitations = [
-      'Les résultats se basent sur des signatures connues et les informations accessibles via le système Android : ils peuvent être incomplets.',
-      'La présence d\'une permission, d\'un SDK ou d\'une bibliothèque ne signifie pas nécessairement que cette fonctionnalité est effectivement utilisée par l\'application.',
+      t('technical.models.limitations.signatures'),
+      t('technical.models.limitations.presence'),
     ];
     if (!rawData.componentsAvailable) {
       limitations.push(
-        'La liste des composants de cette application n\'a pas pu être lue : les sections Google, SDK et Trackers peuvent être incomplètes.'
+        t('technical.models.limitations.components')
       );
     }
 

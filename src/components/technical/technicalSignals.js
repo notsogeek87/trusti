@@ -1,4 +1,5 @@
 import { DetectionStatus, ProtectionLevel } from '../../technical';
+import { t } from '../../i18n/index.js';
 
 /**
  * Niveaux de lecture pédagogique pour un FAIT technique précis (ex. "mode
@@ -47,23 +48,23 @@ const TARGET_SDK_WATCH_FLOOR = 29; // Android 10
 
 function targetSdkSignal(version) {
   if (version == null) {
-    return { level: SignalLevel.NEUTRAL, explanation: "Version d'Android ciblée non déterminée." };
+    return { level: SignalLevel.NEUTRAL, explanation: t('technical.signals.sdkUnknown') };
   }
   if (version >= TARGET_SDK_GOOD_FLOOR) {
     return {
       level: SignalLevel.GOOD,
-      explanation: `Cible une version récente d'Android (API ${version}) : l'application est censée respecter les protections de sécurité et de vie privée les plus à jour.`,
+      explanation: t('technical.signals.sdkRecent', { version }),
     };
   }
   if (version >= TARGET_SDK_WATCH_FLOOR) {
     return {
       level: SignalLevel.WATCH,
-      explanation: `Cible une version d'Android un peu ancienne (API ${version}) : certaines protections plus récentes peuvent ne pas s'appliquer.`,
+      explanation: t('technical.signals.sdkOldish', { version }),
     };
   }
   return {
     level: SignalLevel.ALERT,
-    explanation: `Cible une version ancienne d'Android (API ${version}) : l'application peut se passer de plusieurs protections de sécurité et de vie privée introduites depuis.`,
+    explanation: t('technical.signals.sdkOld', { version }),
   };
 }
 
@@ -80,52 +81,52 @@ export function getSecuritySignals(security) {
   return [
     {
       key: 'debuggable',
-      label: 'Mode debug (debuggable)',
+      label: t('technical.signals.debugLabel'),
       value: security.debuggable,
       ...(security.debuggable === DetectionStatus.DETECTED
         ? {
             level: SignalLevel.ALERT,
             explanation:
-              "Le mode debug est actif. Sur un appareil non protégé, il peut permettre d'inspecter ou de modifier l'application en cours d'exécution — il ne devrait normalement pas être activé sur une version publiée.",
+              t('technical.signals.debugOn'),
           }
         : security.debuggable === DetectionStatus.NOT_DETECTED
-        ? { level: SignalLevel.GOOD, explanation: "Le mode debug est désactivé, comme attendu pour une application publiée." }
-        : { level: SignalLevel.NEUTRAL, explanation: 'Statut du mode debug non déterminé.' }),
+        ? { level: SignalLevel.GOOD, explanation: t('technical.signals.debugOff') }
+        : { level: SignalLevel.NEUTRAL, explanation: t('technical.signals.debugUnknown') }),
     },
     {
       key: 'cleartext',
-      label: 'Trafic HTTP non chiffré autorisé',
+      label: t('technical.signals.cleartextLabel'),
       value: security.usesCleartextTraffic,
       ...(security.usesCleartextTraffic === DetectionStatus.DETECTED
         ? {
             level: SignalLevel.ALERT,
             explanation:
-              "L'application autorise des échanges réseau non chiffrés (HTTP). Des données pourraient alors circuler en clair, lisibles par un tiers présent sur le même réseau (ex. Wi-Fi public).",
+              t('technical.signals.cleartextOn'),
           }
         : security.usesCleartextTraffic === DetectionStatus.NOT_DETECTED
         ? {
             level: SignalLevel.GOOD,
-            explanation: "Le trafic non chiffré n'est pas autorisé par défaut : les échanges réseau déclarés passent par une connexion chiffrée (HTTPS).",
+            explanation: t('technical.signals.cleartextOff'),
           }
-        : { level: SignalLevel.NEUTRAL, explanation: "Ce paramètre n'a pas pu être déterminé." }),
+        : { level: SignalLevel.NEUTRAL, explanation: t('technical.signals.unknown') }),
     },
     {
       key: 'backup',
-      label: 'Sauvegarde Android (backup)',
+      label: t('technical.signals.backupLabel'),
       value: security.allowBackup,
       ...(security.allowBackup === DetectionStatus.DETECTED
         ? {
             level: SignalLevel.WATCH,
             explanation:
-              "Les données de l'application peuvent être incluses dans une sauvegarde/restauration Android (par ex. lors d'un changement de téléphone), ce qui élargit un peu leur surface d'exposition.",
+              t('technical.signals.backupOn'),
           }
         : security.allowBackup === DetectionStatus.NOT_DETECTED
-        ? { level: SignalLevel.GOOD, explanation: "La sauvegarde automatique des données de l'application est désactivée." }
-        : { level: SignalLevel.NEUTRAL, explanation: "Ce paramètre n'a pas pu être déterminé." }),
+        ? { level: SignalLevel.GOOD, explanation: t('technical.signals.backupOff') }
+        : { level: SignalLevel.NEUTRAL, explanation: t('technical.signals.unknown') }),
     },
     {
       key: 'targetSdk',
-      label: 'Version Android ciblée',
+      label: t('technical.signals.sdkLabel'),
       value: security.targetSdkVersion,
       ...targetSdkSignal(security.targetSdkVersion),
     },
@@ -146,15 +147,15 @@ export function getPermissionSignal(permissions) {
   if (n === 0) {
     return {
       level: SignalLevel.GOOD,
-      label: 'Permissions sensibles',
-      explanation: 'Aucune permission sensible accordée détectée.',
+      label: t('technical.signals.permLabel'),
+      explanation: t('technical.signals.permNone'),
       count: 0,
     };
   }
   return {
     level: n >= 4 ? SignalLevel.ALERT : SignalLevel.WATCH,
-    label: 'Permissions sensibles',
-    explanation: `${n} permission${n > 1 ? 's' : ''} sensible${n > 1 ? 's' : ''} accordée${n > 1 ? 's' : ''} (ex. caméra, localisation, contacts...) — chacune a nécessité votre confirmation explicite lors de l'installation ou d'un usage.`,
+    label: t('technical.signals.permLabel'),
+    explanation: t('technical.signals.permSome', { count: n }),
     count: n,
   };
 }
@@ -163,12 +164,12 @@ export function getPermissionSignal(permissions) {
 export function getTrackerSignal(trackers) {
   const n = trackers.length;
   if (n === 0) {
-    return { level: SignalLevel.GOOD, label: 'Trackers', explanation: 'Aucun tracker connu détecté.', count: 0 };
+    return { level: SignalLevel.GOOD, label: t('technical.signals.trackers'), explanation: t('technical.signals.trackersNone'), count: 0 };
   }
   return {
     level: n >= 3 ? SignalLevel.ALERT : SignalLevel.WATCH,
-    label: 'Trackers',
-    explanation: `${n} tracker${n > 1 ? 's' : ''} connu${n > 1 ? 's' : ''} détecté${n > 1 ? 's' : ''} — des bibliothèques généralement utilisées pour la publicité, la mesure d'audience ou l'attribution.`,
+    label: t('technical.signals.trackers'),
+    explanation: t('technical.signals.trackersSome', { count: n }),
     count: n,
   };
 }

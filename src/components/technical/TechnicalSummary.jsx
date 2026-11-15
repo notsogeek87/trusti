@@ -1,6 +1,7 @@
 import React from 'react';
 import { DetectionStatus } from '../../technical';
 import { getSecuritySignals, SIGNAL_STYLE } from './technicalSignals';
+import { t } from '../../i18n/index.js';
 
 const StatRow = ({ label, value }) => (
   <div className="flex items-center justify-between text-xs py-1">
@@ -36,17 +37,17 @@ const TechnicalSummary = ({ analysis }) => {
   return (
     <div className="grid grid-cols-2 gap-3 mb-4">
       <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
-        <p className="text-[10px] font-black uppercase tracking-wide text-slate-400 mb-1.5">Dépendances tierces</p>
+        <p className="text-[10px] font-black uppercase tracking-wide text-slate-400 mb-1.5">{t('technical.ui.thirdParty')}</p>
         <StatRow label="Google" value={analysis.googleDependencies.length} />
-        <StatRow label="Trackers" value={analysis.trackers.length} />
+        <StatRow label={t('technical.signals.trackers')} value={analysis.trackers.length} />
         <StatRow label="SDK" value={analysis.sdks.length} />
-        <StatRow label="Permissions" value={analysis.permissions.length} />
+        <StatRow label={t('technical.ui.permissions')} value={analysis.permissions.length} />
       </div>
       <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
-        <p className="text-[10px] font-black uppercase tracking-wide text-slate-400 mb-1.5">Sécurité</p>
+        <p className="text-[10px] font-black uppercase tracking-wide text-slate-400 mb-1.5">{t('technical.ui.security')}</p>
         <SignalStatRow label="Target SDK" level={targetSdk.level} text={analysis.security.targetSdkVersion ?? '⚪'} />
-        <SignalStatRow label="Debuggable" level={debuggable.level} text={debuggable.value === DetectionStatus.DETECTED ? 'Oui' : debuggable.value === DetectionStatus.NOT_DETECTED ? 'Non' : '⚪'} />
-        <SignalStatRow label="Cleartext HTTP" level={cleartext.level} text={cleartext.value === DetectionStatus.DETECTED ? 'Oui' : cleartext.value === DetectionStatus.NOT_DETECTED ? 'Non' : '⚪'} />
+        <SignalStatRow label="Debuggable" level={debuggable.level} text={debuggable.value === DetectionStatus.DETECTED ? t('technical.ui.yes') : debuggable.value === DetectionStatus.NOT_DETECTED ? t('technical.ui.no') : '⚪'} />
+        <SignalStatRow label="Cleartext HTTP" level={cleartext.level} text={cleartext.value === DetectionStatus.DETECTED ? t('technical.ui.yes') : cleartext.value === DetectionStatus.NOT_DETECTED ? t('technical.ui.no') : '⚪'} />
       </div>
     </div>
   );

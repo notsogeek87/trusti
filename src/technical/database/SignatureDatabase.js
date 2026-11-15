@@ -1,6 +1,7 @@
 import { Confidence } from '../model/Confidence.js';
 import { DetectionMethod } from '../model/DetectionMethod.js';
 import { createDetectionEntry } from '../model/DetectionEntry.js';
+import { t } from '../../i18n/index.js';
 
 /**
  * Moteur générique de détection par signature — partagé par GoogleDatabase,
@@ -49,7 +50,7 @@ export class SignatureDatabase {
         detected.push(
           createDetectionEntry(signature, {
             confidence: Confidence.HIGH,
-            detectionMethod: `Composant déclaré dans le manifeste de l'application (${matchedComponent})`,
+            detectionMethod: t('technical.models.method.manifestComponent', { component: matchedComponent }),
             method: DetectionMethod.MANIFEST,
             source: matchedComponent,
           })
@@ -58,7 +59,7 @@ export class SignatureDatabase {
         detected.push(
           createDetectionEntry(signature, {
             confidence: Confidence.HIGH,
-            detectionMethod: `Clé de configuration détectée dans le manifeste (${matchedMetaData})`,
+            detectionMethod: t('technical.models.method.manifestKey', { key: matchedMetaData }),
             method: DetectionMethod.APK_METADATA,
             source: matchedMetaData,
           })

@@ -1,5 +1,6 @@
 import React from 'react';
 import { CONFIDENCE_DOTS, CONFIDENCE_LABEL } from '../../technical';
+import { t } from '../../i18n/index.js';
 
 /**
  * Petit badge de confiance pour une détection Google/SDK/tracker — la
@@ -20,7 +21,7 @@ const ConfidenceBadge = ({ confidence }) => {
           <span key={i} className={`w-1.5 h-1.5 rounded-full ${i < filled ? 'bg-indigo-500' : 'bg-slate-200'}`} />
         ))}
       </span>
-      <span>{CONFIDENCE_LABEL[confidence] || 'Détection : non déterminée'}</span>
+      <span>{CONFIDENCE_LABEL[confidence] || t('technical.ui.detectionUnknown')}</span>
     </span>
   );
 };

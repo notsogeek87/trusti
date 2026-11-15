@@ -13,6 +13,8 @@ import AboutTechnicalAnalysisModal from '../modals/AboutTechnicalAnalysisModal';
 import { exportTechnicalAnalysisJSON } from '../../technical';
 import { downloadJSON } from '../../utils/downloadJSON';
 import { countSignalsByLevel } from './technicalSignals';
+import { t } from '../../i18n/index.js';
+import BoldText from '../ui/BoldText';
 
 /**
  * Section "🔎 Analyse technique" — totalement découplée du Trusti-Score
@@ -45,7 +47,7 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
   }
 
   const handleExport = () => {
-    downloadJSON(exportTechnicalAnalysisJSON(analysis), `${analysis.packageName}-analyse-technique.json`).catch(err => console.error('Export', err));
+    downloadJSON(exportTechnicalAnalysisJSON(analysis), t('technical.ui.exportFile', { pkg: analysis.packageName })).catch(err => console.error('Export', err));
   };
 
   const { alert, watch } = countSignalsByLevel(analysis);
@@ -54,14 +56,14 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
   // pas alarmer l'utilisateur lambda avant même qu'il l'ouvre.
   const headerBadge = attentionCount > 0 ? (
     <span className="text-[10px] text-slate-400">
-      {attentionCount} point{attentionCount > 1 ? 's' : ''}
+      {t('technical.ui.points', { count: attentionCount })}
     </span>
   ) : null;
 
   return (
     <Accordion
       icon={Search}
-      title="Détails techniques (pour les curieux)"
+      title={t('technical.ui.sectionTitle')}
       subtitle={null}
       subtle
       badge={headerBadge}
@@ -75,16 +77,12 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
         <HelpCircle size={16} className="text-indigo-500 shrink-0 mt-0.5" />
         <div className="text-[11px] text-indigo-900 leading-relaxed space-y-1.5">
           <p>
-            Cette section liste des <strong>faits techniques</strong> détectés automatiquement
-            sur votre téléphone (permissions, services Google, SDK publicitaires, paramètres de
-            sécurité...). C'est différent du Trusti-Score ci-dessus, qui reflète l'avis de la
-            communauté : ici, aucun jugement, seulement ce qui a été trouvé.
+            <BoldText text={t('technical.ui.intro1')} />
           </p>
           <p>
-            Une bibliothèque détectée n'est pas forcément utilisée activement par l'application.
-            Et « non détecté » ne veut pas dire « absent » — voir{' '}
+            {t('technical.ui.intro2')}{' '}
             <button onClick={() => setShowAbout(true)} className="underline font-semibold">
-              à propos de l'analyse
+              {t('technical.ui.aboutLink')}
             </button>.
           </p>
         </div>
@@ -94,8 +92,7 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 flex items-start gap-2">
           <AlertTriangle size={16} className="text-amber-600 shrink-0 mt-0.5" />
           <p className="text-[11px] text-amber-800 leading-relaxed">
-            Certaines informations de cette application n'ont pas pu être lues sur cet appareil.
-            Les sections ci-dessous peuvent être incomplètes.
+            {t('technical.ui.partial')}
           </p>
         </div>
       )}
@@ -116,11 +113,11 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
       {/* 🕵️ Trackers */}
       <DetectionEntryList
         icon={Eye}
-        title="Trackers"
-        intro="Des bibliothèques qui peuvent transmettre des informations sur votre utilisation à des sociétés tierces : publicité ciblée, mesure d'audience ou attribution (savoir quelle pub vous a fait installer l'app). Plus il y en a, plus l'app partage potentiellement de données avec des tiers."
-        countLabel={(n) => (n === 0 ? 'Aucun détecté' : `${n} détecté${n > 1 ? 's' : ''}`)}
+        title={t('technical.signals.trackers')}
+        intro={t('technical.ui.trackersIntro')}
+        countLabel={(n) => (n === 0 ? t('technical.ui.noneDetected') : t('technical.ui.detected', { count: n }))}
         entries={analysis.trackers}
-        emptyLabel="Aucun SDK de tracking connu détecté."
+        emptyLabel={t('technical.ui.noTracker')}
         accentClassName="text-rose-600"
       />
 
@@ -128,10 +125,10 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
       <DetectionEntryList
         icon={Package}
         title="SDK"
-        intro="Les briques logicielles tierces (kits de développement) intégrées à l'application : paiement, cartes, notifications, statistiques... Ce ne sont pas forcément des trackers — beaucoup servent des fonctionnalités que vous utilisez directement."
-        countLabel={(n) => (n === 0 ? 'Aucun détecté' : `${n} détecté${n > 1 ? 's' : ''}`)}
+        intro={t('technical.ui.sdkIntro')}
+        countLabel={(n) => (n === 0 ? t('technical.ui.noneDetected') : t('technical.ui.detected', { count: n }))}
         entries={analysis.sdks}
-        emptyLabel="Aucun SDK connu détecté."
+        emptyLabel={t('technical.ui.noSdk')}
         accentClassName="text-violet-600"
       />
 
@@ -139,10 +136,10 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
       <DetectionEntryList
         icon={Boxes}
         title="Google"
-        intro="Les services Google intégrés à l'application (notifications, cartes, connexion, publicité...). Très courants sur Android : leur présence ne veut pas dire que l'app est problématique, mais que vos données peuvent transiter par des serveurs Google pour ces fonctions."
-        countLabel={(n) => (n === 0 ? 'Aucune détectée' : `${n} dépendance${n > 1 ? 's' : ''} détectée${n > 1 ? 's' : ''}`)}
+        intro={t('technical.ui.googleIntro')}
+        countLabel={(n) => (n === 0 ? t('technical.ui.noneDetectedF') : t('technical.ui.deps', { count: n }))}
         entries={analysis.googleDependencies}
-        emptyLabel="Aucune dépendance Google connue détectée."
+        emptyLabel={t('technical.ui.noGoogle')}
         accentClassName="text-blue-600"
       />
 
@@ -161,14 +158,14 @@ const TechnicalAnalysisSection = ({ status, analysis, error }) => {
         onClick={handleExport}
         className="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 px-3 rounded-xl transition-all active:scale-[0.98] mb-2"
       >
-        <Download size={14} /> Exporter l'analyse (JSON)
+        <Download size={14} /> {t('technical.ui.exportJson')}
       </button>
 
       <button
         onClick={() => setShowAbout(true)}
         className="w-full flex items-center justify-center gap-1.5 text-slate-400 hover:text-indigo-600 text-[11px] font-semibold py-1.5 transition-colors"
       >
-        <Info size={12} /> À propos de l'analyse
+        <Info size={12} /> {t('technical.ui.about')}
       </button>
 
       {showAbout && <AboutTechnicalAnalysisModal onClose={() => setShowAbout(false)} />}

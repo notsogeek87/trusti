@@ -2,12 +2,13 @@ import React from 'react';
 import { Shield } from 'lucide-react';
 import { DetectionStatus, ProtectionLevel, PROTECTION_LEVEL_LABEL } from '../../technical';
 import { getPermissionSignal, SIGNAL_STYLE } from './technicalSignals';
+import { t } from '../../i18n/index.js';
 
-const GRANTED_LABEL = {
-  [DetectionStatus.DETECTED]: 'Accordée',
-  [DetectionStatus.NOT_DETECTED]: 'Non accordée',
-  [DetectionStatus.UNKNOWN]: 'Statut non déterminé',
-};
+const grantedLabel = (status) => ({
+  [DetectionStatus.DETECTED]: t('technical.ui.granted'),
+  [DetectionStatus.NOT_DETECTED]: t('technical.ui.notGranted'),
+  [DetectionStatus.UNKNOWN]: t('technical.ui.grantedUnknown'),
+})[status];
 
 const GRANTED_CLASS = {
   [DetectionStatus.DETECTED]: 'bg-emerald-50 text-emerald-700',
@@ -29,7 +30,7 @@ const PermissionRow = ({ permission, highlighted }) => (
       </div>
     </div>
     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${GRANTED_CLASS[permission.granted]}`}>
-      {GRANTED_LABEL[permission.granted]}
+      {grantedLabel(permission.granted)}
     </span>
   </div>
 );
@@ -59,15 +60,15 @@ const TechnicalPermissionsCard = ({ permissions }) => {
     <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm mb-4">
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-black text-xs uppercase tracking-tight text-slate-800 flex items-center gap-2">
-          <Shield size={16} className="text-orange-600" /> Permissions
+          <Shield size={16} className="text-orange-600" /> {t('technical.ui.permissions')}
         </h3>
         <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-          {permissions.length} déclarée{permissions.length > 1 ? 's' : ''} · {grantedCount} accordée{grantedCount > 1 ? 's' : ''}
+          {t('technical.ui.declaredGranted', { declared: permissions.length, granted: grantedCount })}
         </span>
       </div>
 
       {permissions.length === 0 ? (
-        <p className="text-xs text-slate-400">Aucune permission déclarée détectée.</p>
+        <p className="text-xs text-slate-400">{t('technical.ui.noPermission')}</p>
       ) : (
         <>
           <div className={`flex items-start gap-2 rounded-lg border px-2.5 py-2 text-[11px] leading-relaxed mb-3 ${style.badgeClass}`}>
@@ -78,7 +79,7 @@ const TechnicalPermissionsCard = ({ permissions }) => {
           {sensitiveGranted.length > 0 && (
             <div className="mb-2">
               <p className="text-[10px] font-black uppercase tracking-wide text-amber-600 mb-1.5">
-                Sensibles et accordées — à surveiller en priorité
+                {t('technical.ui.sensitiveFirst')}
               </p>
               <div className="space-y-1.5">
                 {sensitiveGranted.map((permission) => (
@@ -91,7 +92,7 @@ const TechnicalPermissionsCard = ({ permissions }) => {
           {rest.length > 0 && (
             <div>
               {sensitiveGranted.length > 0 && (
-                <p className="text-[10px] font-black uppercase tracking-wide text-slate-400 mb-1.5">Autres permissions</p>
+                <p className="text-[10px] font-black uppercase tracking-wide text-slate-400 mb-1.5">{t('technical.ui.otherPerms')}</p>
               )}
               <div className="space-y-1.5">
                 {rest.map((permission) => (

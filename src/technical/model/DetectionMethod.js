@@ -1,3 +1,4 @@
+import { t } from '../../i18n/index.js';
 /**
  * Méthode ayant permis une détection technique — toujours attachée à une
  * DetectionMetadata (voir DetectionMetadata.js) pour que chaque information
@@ -14,13 +15,13 @@ export const DetectionMethod = Object.freeze({
 });
 
 export const DETECTION_METHOD_LABEL = {
-  [DetectionMethod.APK_METADATA]: 'Clé de configuration détectée dans le manifeste',
-  [DetectionMethod.MANIFEST]: 'Composant déclaré dans le manifeste de l\'application',
-  [DetectionMethod.DEX_SIGNATURE]: 'Signature détectée dans le bytecode de l\'application',
-  [DetectionMethod.NATIVE_LIBRARY]: 'Bibliothèque native détectée dans l\'application',
-  [DetectionMethod.KNOWN_DATABASE]: 'Correspondance trouvée dans une base de connaissances locale',
-  [DetectionMethod.PACKAGE_NAME]: 'Nom de paquet de l\'application',
-  [DetectionMethod.UNKNOWN]: 'Méthode de détection non déterminée',
+  [DetectionMethod.APK_METADATA]: t('technical.models.method.APK_METADATA'),
+  [DetectionMethod.MANIFEST]: t('technical.models.method.MANIFEST'),
+  [DetectionMethod.DEX_SIGNATURE]: t('technical.models.method.DEX_SIGNATURE'),
+  [DetectionMethod.NATIVE_LIBRARY]: t('technical.models.method.NATIVE_LIBRARY'),
+  [DetectionMethod.KNOWN_DATABASE]: t('technical.models.method.KNOWN_DATABASE'),
+  [DetectionMethod.PACKAGE_NAME]: t('technical.models.method.PACKAGE_NAME'),
+  [DetectionMethod.UNKNOWN]: t('technical.models.method.UNKNOWN'),
 };
 
 export default DetectionMethod;

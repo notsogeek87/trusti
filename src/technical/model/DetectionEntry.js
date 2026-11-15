@@ -1,5 +1,6 @@
 import { Confidence } from './Confidence.js';
 import { createDetectionMetadata } from './DetectionMetadata.js';
+import { t } from '../../i18n/index.js';
 
 /**
  * @typedef {Object} DetectionEntry
@@ -32,7 +33,7 @@ export function createDetectionEntry(signature, matchInfo) {
     vendor: signature.vendor,
     category: signature.category,
     confidence,
-    detectionMethod: matchInfo?.detectionMethod || 'Référence détectée dans l\'application',
+    detectionMethod: matchInfo?.detectionMethod || t('technical.models.method.reference'),
     metadata: createDetectionMetadata({
       method: matchInfo?.method,
       confidence,
