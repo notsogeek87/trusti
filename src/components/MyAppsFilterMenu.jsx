@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { SlidersHorizontal, ArrowUp, ArrowDown } from 'lucide-react';
 import { SORT_OPTIONS } from '../utils/myAppsSort';
+import { t } from '../i18n/index.js';
 
 // Réglages de la liste "Mes Apps" regroupés derrière une seule icône, à côté
 // de la recherche : tri + filtres migration / alternative. Remplace l'icône de
@@ -75,9 +76,9 @@ const MyAppsFilterMenu = ({
         className={`relative h-[46px] w-[46px] flex items-center justify-center rounded-2xl border shadow-sm transition-colors ${
           isOpen ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-white border-slate-100 text-slate-500 hover:text-slate-700'
         }`}
-        aria-label="Trier et filtrer"
+        aria-label={t('myApps.filters.button')}
         aria-expanded={isOpen}
-        title="Trier et filtrer"
+        title={t('myApps.filters.button')}
       >
         <SlidersHorizontal size={17} />
         {isCustomized && (
@@ -88,31 +89,31 @@ const MyAppsFilterMenu = ({
       {isOpen && (
         <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-lg border border-slate-100 p-3 z-20 space-y-3">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Afficher</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">{t('myApps.filters.show')}</p>
             <div className="space-y-1.5">
               <Segmented
                 value={migrationFilter}
                 onChange={onMigrationFilterChange}
                 options={[
-                  { value: 'all', label: 'Toutes' },
-                  { value: 'todo', label: `À migrer (${migrationCounts.todo})` },
-                  { value: 'migrated', label: `Migrées (${migrationCounts.migrated})` },
+                  { value: 'all', label: t('myApps.filters.all') },
+                  { value: 'todo', label: t('myApps.filters.toMigrate', { count: migrationCounts.todo }) },
+                  { value: 'migrated', label: t('myApps.filters.migrated', { count: migrationCounts.migrated }) },
                 ]}
               />
               <Segmented
                 value={alternativeFilter}
                 onChange={onAlternativeFilterChange}
                 options={[
-                  { value: 'all', label: 'Toutes' },
-                  { value: 'with', label: `Avec alt. (${alternativeCounts.with})` },
-                  { value: 'without', label: `Sans alt. (${alternativeCounts.without})` },
+                  { value: 'all', label: t('myApps.filters.all') },
+                  { value: 'with', label: t('myApps.filters.withAlt', { count: alternativeCounts.with }) },
+                  { value: 'without', label: t('myApps.filters.withoutAlt', { count: alternativeCounts.without }) },
                 ]}
               />
             </div>
           </div>
 
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Trier par</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">{t('myApps.filters.sortBy')}</p>
             <div className="flex flex-wrap gap-1.5">
               {LIST_SORT_OPTIONS.map(option => {
                 const isActive = option.id === sort.sortBy;
@@ -144,7 +145,7 @@ const MyAppsFilterMenu = ({
               }}
               className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 underline underline-offset-2"
             >
-              Réinitialiser les filtres
+              {t('myApps.filters.reset')}
             </button>
           )}
         </div>

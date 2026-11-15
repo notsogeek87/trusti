@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../../i18n/index.js';
 
 /**
  * Mention d'hébergement, affichée seulement quand le build la demande
@@ -7,7 +8,7 @@ import React from 'react';
  */
 const HOSTS = {
   hyperfluid: {
-    label: 'Hébergé en France par Hyperfluid',
+    labelKey: 'ui.hosting.hyperfluid',
     url: 'https://www.hyperfluid.cloud/',
     // Copié dans l'image au build (workflow hyperfluid-image) : aucune requête vers un tiers.
     logo: '/hosting/hyperfluid.svg',
@@ -26,7 +27,7 @@ const HostingCredit = ({ className = '', size = 'text-[11px]' }) => {
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1 underline decoration-slate-600 underline-offset-2 hover:text-slate-300"
       >
-        {host.label}
+        {t(host.labelKey)}
         {host.logo && logoOk && (
           <img
             src={host.logo}

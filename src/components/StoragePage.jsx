@@ -21,6 +21,7 @@ import GradeStorageDonut from './ui/GradeStorageDonut';
 import SystemCleanerSection from './SystemCleanerSection';
 import AlternativeNudgesSection from './AlternativeNudgesSection';
 import AppIconImage from './ui/AppIconImage';
+import { categoryLabel } from '../constants/categories';
 
 const StatTile = ({ value, label }) => (
   <div className="bg-slate-50 rounded-2xl p-3 text-center">
@@ -513,7 +514,7 @@ const StoragePage = ({
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-bold text-slate-800 truncate">{app.name}</p>
                           <p className="text-[10px] text-slate-400 truncate">
-                            {app.category}
+                            {categoryLabel(app.category)}
                             {typeof app.sizeBytes === 'number' && ` · ${formatBytes(app.sizeBytes)}`}
                           </p>
                         </div>

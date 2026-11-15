@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 // Tri de la liste "Mes Apps" : réglage discret (persisté en local) permettant
 // de choisir le critère de tri et son sens, en plus du tri par défaut
 // (TrustiScore, du plus risqué au plus sûr) déjà en place historiquement.
@@ -9,15 +10,15 @@ const MY_APPS_SORT_KEY = 'trusti_my_apps_sort';
 const GRADE_RANK = { A: 1, B: 2, C: 3, D: 4, E: 5 };
 
 export const SORT_OPTIONS = [
-  { id: 'trustiScore', label: 'TrustiScore', defaultDirection: 'desc' },
-  { id: 'category', label: 'Catégorie', defaultDirection: 'asc' },
-  { id: 'alphabetical', label: 'Alphabétique', defaultDirection: 'asc' },
-  { id: 'dateAdded', label: "Date d'ajout", defaultDirection: 'desc' },
-  { id: 'popularity', label: 'Popularité', defaultDirection: 'asc' },
+  { id: 'trustiScore', get label() { return t('myApps.sort.trustiScore'); }, defaultDirection: 'desc' },
+  { id: 'category', get label() { return t('myApps.sort.category'); }, defaultDirection: 'asc' },
+  { id: 'alphabetical', get label() { return t('myApps.sort.alphabetical'); }, defaultDirection: 'asc' },
+  { id: 'dateAdded', get label() { return t('myApps.sort.dateAdded'); }, defaultDirection: 'desc' },
+  { id: 'popularity', get label() { return t('myApps.sort.popularity'); }, defaultDirection: 'asc' },
   // Uniquement pertinent là où `app.sizeBytes` est renseigné (écran "Espace de
   // stockage", voir StoragePage) — ailleurs, absent sur toutes les apps, il se
   // rabat silencieusement sur l'ordre alphabétique (voir sortMyApps ci-dessous).
-  { id: 'size', label: 'Taille', defaultDirection: 'desc' },
+  { id: 'size', get label() { return t('myApps.sort.size'); }, defaultDirection: 'desc' },
 ];
 
 export const DEFAULT_MY_APPS_SORT = { sortBy: 'trustiScore', direction: 'desc' };

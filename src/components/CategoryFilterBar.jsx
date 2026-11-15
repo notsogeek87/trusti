@@ -1,6 +1,7 @@
 import React from 'react';
-import { CATEGORIES } from '../constants/categories';
+import { CATEGORIES, categoryLabel } from '../constants/categories';
 import InlineSpinner from './ui/InlineSpinner';
+import { t } from '../i18n/index.js';
 
 const ALL_CATEGORIES = ['Toutes', ...CATEGORIES];
 
@@ -9,7 +10,7 @@ const CategoryFilterBar = ({ selectedCategory, onSelectCategory, isLoading }) =>
   <div className="mb-3 text-center">
     <div className="flex items-center justify-center gap-2 mb-0.5">
       <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
-        Apps populaires
+        {t('ui.catalogue.popular')}
       </p>
       {isLoading && <InlineSpinner />}
     </div>
@@ -32,7 +33,7 @@ const CategoryFilterBar = ({ selectedCategory, onSelectCategory, isLoading }) =>
                     }
                   `}
                 >
-                  {category}
+                  {categoryLabel(category)}
                 </button>
               );
             })}

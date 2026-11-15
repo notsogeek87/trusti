@@ -3,8 +3,9 @@ import AppCard from './AppCard';
 import LoadingSpinner from './ui/LoadingSpinner';
 import { buildAwardsPodiums } from '../utils/awards';
 import { TABS } from '../constants/tabs';
-import { getMainCategory, getPodiumCategory } from '../constants/categories';
+import { categoryLabel, getMainCategory, getPodiumCategory } from '../constants/categories';
 import { useIsMobile } from '../contexts/ViewModeContext';
+import { t } from '../i18n/index.js';
 
 /**
  * Normalise une catégorie vers sa catégorie principale
@@ -79,7 +80,7 @@ const AppsList = ({
   if (activeTab === TABS.TOP_ALTERNATIVES) {
     // Afficher un loader pendant le chargement initial
     if (isLoadingAwards) {
-      return <LoadingSpinner message="Chargement des Awards..." size="medium" />;
+      return <LoadingSpinner message={t('myApps.list.loadingAwards')} size="medium" />;
     }
     
     // Un podium (3 apps A/B max) par catégorie détaillée : regrouper par
@@ -90,13 +91,13 @@ const AppsList = ({
     return (
       <div className="space-y-6">
         {podiums.length === 0 && (
-          <p className="text-center text-slate-500 text-sm py-8 px-4">Aucune app au palmarès pour l'instant</p>
+          <p className="text-center text-slate-500 text-sm py-8 px-4">{t('myApps.list.noAwards')}</p>
         )}
         {podiums.map(({ category, apps: podiumApps }) => (
           <div key={category}>
             {/* En-tête de catégorie */}
             <div className="sticky top-0 z-10 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-4 py-2 rounded-xl mb-3 shadow-lg">
-              <h3 className="font-black text-sm uppercase tracking-wider">{category}</h3>
+              <h3 className="font-black text-sm uppercase tracking-wider">{categoryLabel(category)}</h3>
             </div>
             
             {/* Apps de cette catégorie */}
@@ -128,16 +129,16 @@ const AppsList = ({
     <div className={isMobile ? 'space-y-4' : 'grid grid-cols-2 xl:grid-cols-3 gap-4'}>
       {displayApps.length === 0 && activeTab === TABS.APPLICATIONS && selectedCategory !== 'Toutes' && (
         <div className="text-center py-8 px-4">
-          <p className="text-slate-500 text-sm mb-2">Aucune application dans cette catégorie</p>
-          <p className="text-slate-400 text-xs">Essayez une autre catégorie ou utilisez la recherche</p>
+          <p className="text-slate-500 text-sm mb-2">{t('myApps.list.emptyCategory')}</p>
+          <p className="text-slate-400 text-xs">{t('myApps.list.emptyCategoryHint')}</p>
         </div>
       )}
       {displayApps.length === 0 && activeTab === TABS.MY_APPS && !searchTerm.trim() && myApps.size > 0 && isLoadingMyApps && (
-        <LoadingSpinner message="Chargement de tes applications..." size="medium" />
+        <LoadingSpinner message={t('myApps.list.loadingMyApps')} size="medium" />
       )}
       {displayApps.length === 0 && activeTab === TABS.MY_APPS && !searchTerm.trim() && myApps.size > 0 && !isLoadingMyApps && (
         <div className="text-center py-8 px-4">
-          <p className="text-slate-500 text-sm">Aucune application ne correspond à ce filtre</p>
+          <p className="text-slate-500 text-sm">{t('myApps.list.noFilterMatch')}</p>
         </div>
       )}
       {displayApps.map((app) => (
@@ -158,13 +159,13 @@ const AppsList = ({
           viennent ensuite, dans leur propre section (le + les ajoute à Mes Apps) */}
       {isMyAppsSearch && displayApps.length === 0 && !isSearching && (
         <p className="col-span-full text-center text-slate-500 text-sm py-4 px-4">
-          Aucune de tes apps ne correspond à « {searchTerm.trim()} »
+          {t('myApps.list.noSearchMatch', { term: searchTerm.trim() })}
         </p>
       )}
       {isMyAppsSearch && catalogSearchApps.length > 0 && (
         <>
           <div className="col-span-full flex items-center gap-3 pt-2">
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-500">Catalogue</h3>
+            <h3 className="text-xs font-black uppercase tracking-wider text-slate-500">{t('myApps.list.catalogue')}</h3>
             <div className="flex-1 h-px bg-slate-200" />
             <span className="text-xs text-slate-400">{catalogSearchApps.length}</span>
           </div>
@@ -193,7 +194,7 @@ const AppsList = ({
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
-              Chargement...
+              {t('myApps.list.loading')}
             </span>
           )}
         </div>

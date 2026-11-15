@@ -2,6 +2,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import AppIconImage from '../ui/AppIconImage';
+import { categoryLabel } from '../../constants/categories';
 
 /**
  * Modal de sélection d'une alternative de migration
@@ -110,7 +111,7 @@ const MigrationSelectorModal = ({
                     
                     <div className="flex-grow text-left min-w-0">
                       <p className="font-black text-sm text-slate-900">{alt.name}</p>
-                      <p className="text-xs text-slate-500">{alt.category}</p>
+                      <p className="text-xs text-slate-500">{categoryLabel(alt.category)}</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <ScoreIndicator grade={alt.grade} />

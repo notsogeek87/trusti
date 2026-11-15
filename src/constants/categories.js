@@ -1,3 +1,5 @@
+import { t } from '../i18n/index.js';
+
 /**
  * Liste des catégories d'applications
  * Catégories principales simplifiées pour le mobile
@@ -270,4 +272,17 @@ export function getMainCategory(category) {
 export function getPodiumCategory(category) {
   if (!category) return 'Divers';
   return SPLIT_SUBCATEGORIES[category] || category;
+}
+
+/**
+ * Libellé affiché d'une catégorie. Les noms de catégories sont des clés (en base et
+ * dans les filtres) : on ne les traduit qu'à l'affichage. « Parent / Détail » est
+ * traduit morceau par morceau ; un morceau inconnu reste en français.
+ */
+export function categoryLabel(category) {
+  if (!category) return '';
+  const labels = t('categories.labels');
+  const one = (name) => (labels && typeof labels === 'object' && labels[name]) || name;
+  if (labels && labels[category]) return labels[category];
+  return String(category).split(' / ').map(one).join(' / ');
 }

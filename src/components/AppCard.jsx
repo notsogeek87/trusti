@@ -3,12 +3,9 @@ import { PlusCircle, CheckCircle, ShieldCheck, ChevronRight, CornerDownRight, Th
 import ScoreIndicator from './ui/ScoreIndicator';
 import { TABS } from '../constants/tabs';
 import AppIconImage from './ui/AppIconImage';
+import { t } from '../i18n/index.js';
+import { categoryLabel } from '../constants/categories';
 
-// Aucune alternative connue : c'est ce qui se fait de mieux aujourd'hui
-const BEST_AVAILABLE_MESSAGES = [
-  'Vous êtes pas mal !',
-  "On ne fait pas mieux aujourd'hui",
-];
 
 const AppCard = React.memo(({
   app,
@@ -50,7 +47,7 @@ const AppCard = React.memo(({
           <div className="flex-grow min-w-0">
             <h3 className={`font-bold text-[15px] truncate ${isLoadingSkeleton ? 'text-slate-400' : 'text-slate-900'}`}>{app.name}</h3>
             <p className="text-xs font-medium text-slate-400">
-              {isLoadingSkeleton ? 'Chargement...' : app.category}
+              {isLoadingSkeleton ? t('ui.appCard.loading') : categoryLabel(app.category)}
             </p>
           </div>
 
@@ -84,8 +81,8 @@ const AppCard = React.memo(({
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center gap-2">
             <div className="w-5 h-5 rounded-full border-2 border-slate-300 border-t-indigo-600 animate-spin" />
             <div className="flex-grow">
-              <p className="text-xs font-bold text-slate-600">Recherche d'alternatives...</p>
-              <p className="text-[11px] text-slate-500">Analyse des meilleures options disponibles</p>
+              <p className="text-xs font-bold text-slate-600">{t('ui.appCard.searchingAlternatives')}</p>
+              <p className="text-[11px] text-slate-500">{t('ui.appCard.analysingOptions')}</p>
             </div>
           </div>
         )}
@@ -94,7 +91,7 @@ const AppCard = React.memo(({
         {activeTab === TABS.MY_APPS && !isLoadingSkeleton && app.grade === 'A' && (
           <div className="flex items-center gap-1.5 pl-0.5">
             <ShieldCheck size={14} className="text-emerald-500 shrink-0" />
-            <p className="text-xs font-semibold text-emerald-600">TrustiScore au max, tout va bien</p>
+            <p className="text-xs font-semibold text-emerald-600">{t('ui.appCard.gradeMax')}</p>
           </div>
         )}
 
@@ -104,15 +101,17 @@ const AppCard = React.memo(({
             {app.isLoadingAlternative ? (
               <>
                 <div className="w-3.5 h-3.5 rounded-full border-2 border-slate-300 border-t-indigo-600 animate-spin shrink-0" />
-                <p className="text-xs font-semibold text-slate-500">Recherche d'alternatives...</p>
+                <p className="text-xs font-semibold text-slate-500">{t('ui.appCard.searchingAlternatives')}</p>
               </>
             ) : (
               <>
                 <ThumbsUp size={14} className="text-emerald-500 shrink-0" />
                 <p className="text-xs font-semibold text-emerald-600">
-                  {app.grade === 'B'
-                    ? BEST_AVAILABLE_MESSAGES[(app.name?.length || 0) % BEST_AVAILABLE_MESSAGES.length]
-                    : BEST_AVAILABLE_MESSAGES[1]}
+                  {(() => {
+                    // Aucune alternative connue : c'est ce qui se fait de mieux aujourd'hui
+                    const messages = t('ui.appCard.bestAvailable');
+                    return app.grade === 'B' ? messages[(app.name?.length || 0) % messages.length] : messages[1];
+                  })()}
                 </p>
               </>
             )}
@@ -124,13 +123,13 @@ const AppCard = React.memo(({
           <div className="space-y-1">
             <div className="w-full flex items-center gap-1.5 pl-0.5 text-left">
               <CornerDownRight size={14} className="text-emerald-500 shrink-0" />
-              <span className="text-xs font-semibold text-emerald-700 shrink-0">Alternative :</span>
+              <span className="text-xs font-semibold text-emerald-700 shrink-0">{t('ui.appCard.alternative')}</span>
               <span className="text-sm font-bold text-emerald-600 truncate">
                 {app.alternative || customMigration}
               </span>
               {app.alternativeAdopted && (
                 <span className="inline-flex items-center gap-0.5 text-xs font-bold text-emerald-700 bg-emerald-100 rounded-full px-1.5 py-0.5 shrink-0">
-                  <CheckCircle size={11} /> Déjà installée
+                  <CheckCircle size={11} /> {t('ui.appCard.alreadyInstalled')}
                 </span>
               )}
             </div>

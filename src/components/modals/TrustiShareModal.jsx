@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { shareText } from '../../utils/shareUtils';
 import AppIconImage from '../ui/AppIconImage';
+import { categoryLabel } from '../../constants/categories';
 
 /**
  * Modal de partage des TrustiApp
@@ -65,7 +66,7 @@ const TrustiShareModal = ({ selectedApps, customMigrations = new Map(), allApps 
                         </div>
                         <div className="flex-grow">
                           <p className="font-black text-sm text-slate-900">{app.name}</p>
-                          <p className="text-xs text-slate-500">{app.category}</p>
+                          <p className="text-xs text-slate-500">{categoryLabel(app.category)}</p>
                         </div>
                         <ScoreIndicator grade={app.grade} />
                       </div>

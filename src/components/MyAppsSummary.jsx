@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { GRADES, GRADE_COLORS, PHONE_GRADE_LABEL } from '../constants/grades';
 import { computeTrustiSummary } from '../utils/trustiScore';
+import { t } from '../i18n/index.js';
 
 // Carte de bilan affichée en haut de l'onglet "Mes Apps" : le TrustiScore
 // global du téléphone (déduit des apps suivies) et la progression des
@@ -43,7 +44,7 @@ const MyAppsSummary = ({ apps, onShareMigrations, children }) => {
                 <span className="text-base font-black leading-none">{overallGrade}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[15px] font-bold text-white truncate">TrustiScore du téléphone</p>
+                <p className="text-[15px] font-bold text-white truncate">{t('myApps.summary.phoneScore')}</p>
                 <p className="text-xs text-indigo-100 truncate">{phoneGradeLabel[overallGrade]}</p>
               </div>
               <ChevronDown size={18} className={`shrink-0 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -71,7 +72,7 @@ const MyAppsSummary = ({ apps, onShareMigrations, children }) => {
                   onClick={onShareMigrations}
                   className="ml-auto text-[11px] font-semibold text-emerald-300 hover:text-emerald-200 underline underline-offset-2"
                 >
-                  Partager mes migrations
+                  {t('myApps.summary.shareMigrations')}
                 </button>
               )}
             </div>
@@ -86,7 +87,7 @@ const MyAppsSummary = ({ apps, onShareMigrations, children }) => {
           <span className="text-xs text-slate-300 truncate">
             {hasScore && riskyCount > 0 && (
               <>
-                <span className="font-bold text-white">{migratedCount} / {riskyCount}</span> apps migrées
+                <span className="font-bold text-white">{migratedCount} / {riskyCount}</span> {t('myApps.summary.migrated')}
               </>
             )}
           </span>

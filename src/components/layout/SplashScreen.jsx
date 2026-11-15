@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../../i18n/index.js';
 
 /** Écran de chargement initial (logo, nom, points animés). */
 const SplashScreen = () => (
@@ -11,7 +12,7 @@ const SplashScreen = () => (
       Trusti
     </p>
     <p className="text-sm text-slate-400 font-medium mb-10" style={{ animation: 'splashFadeIn 0.5s 0.2s ease-out both', opacity: 0 }}>
-      Votre guide pour maîtriser vos apps et vos données
+      {t('ui.splash.tagline')}
     </p>
 
     <div className="flex items-center gap-2" style={{ animation: 'splashFadeIn 0.5s 0.35s ease-out both', opacity: 0 }}>

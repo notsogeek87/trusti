@@ -1,7 +1,7 @@
 import React from 'react';
 import { Globe } from 'lucide-react';
 import { ENABLED_LANGUAGES, LANGUAGE_NAMES } from '../../i18n/languages';
-import { changeLanguage, getLanguage, t } from '../../i18n';
+import { changeLanguage, getLanguage, t } from '../../i18n/index.js';
 
 /**
  * Choix de la langue de l'interface. N'apparaît que si plusieurs langues sont activées

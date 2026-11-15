@@ -1,4 +1,5 @@
 import React from 'react';
+import { t } from '../i18n/index.js';
 
 /**
  * Filet de sécurité global : sans ErrorBoundary, une exception de rendu
@@ -37,9 +38,9 @@ class ErrorBoundary extends React.Component {
           textAlign: 'center',
           fontFamily: 'Nunito, system-ui, sans-serif',
         }}>
-          <h1 style={{ fontSize: '20px', fontWeight: 700 }}>Une erreur est survenue</h1>
+          <h1 style={{ fontSize: '20px', fontWeight: 700 }}>{t('myApps.error.title')}</h1>
           <p style={{ color: '#5B6B7D', maxWidth: '400px' }}>
-            L'application a rencontré un problème inattendu. Rechargez la page pour continuer.
+            {t('myApps.error.body')}
           </p>
           <button
             onClick={this.handleReload}
@@ -53,7 +54,7 @@ class ErrorBoundary extends React.Component {
               cursor: 'pointer',
             }}
           >
-            Recharger la page
+            {t('myApps.error.reload')}
           </button>
         </div>
       );

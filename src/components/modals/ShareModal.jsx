@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { shareText } from '../../utils/shareUtils';
 import AppIconImage from '../ui/AppIconImage';
+import { categoryLabel } from '../../constants/categories';
 
 /**
  * Modal de partage des migrations
@@ -70,7 +71,7 @@ const ShareModal = ({ migratedApps, customMigrations, allApps = [], sortedAppIds
                       </div>
                       <div className="flex-grow">
                         <p className="font-black text-sm text-slate-900">{app.name}</p>
-                        <p className="text-xs text-slate-500">{app.category}</p>
+                        <p className="text-xs text-slate-500">{categoryLabel(app.category)}</p>
                       </div>
                       <ScoreIndicator grade={app.grade} />
                     </div>
@@ -93,7 +94,7 @@ const ShareModal = ({ migratedApps, customMigrations, allApps = [], sortedAppIds
                       </div>
                       <div className="flex-grow">
                         <p className="font-black text-sm text-slate-900">{customAlt || app.alternative}</p>
-                        {altApp && <p className="text-xs text-emerald-600">{altApp.category}</p>}
+                        {altApp && <p className="text-xs text-emerald-600">{categoryLabel(altApp.category)}</p>}
                       </div>
                       {altApp && <ScoreIndicator grade={altApp.grade} />}
                     </div>

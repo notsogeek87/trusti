@@ -2,11 +2,12 @@ import React from 'react';
 import { Globe, BookmarkCheck, Award } from 'lucide-react';
 import { TABS } from '../../constants/tabs';
 import { useIsMobile } from '../../contexts/ViewModeContext';
+import { t } from '../../i18n/index.js';
 
 const TABS_CONFIG = [
   {
     id: TABS.MY_APPS,
-    label: 'Mes Apps',
+    labelKey: 'ui.nav.myApps',
     icon: BookmarkCheck,
     activeColor: 'text-indigo-600',
     activeBg: 'bg-indigo-50',
@@ -15,7 +16,7 @@ const TABS_CONFIG = [
   },
   {
     id: TABS.APPLICATIONS,
-    label: 'Catalogue',
+    labelKey: 'ui.nav.catalogue',
     icon: Globe,
     activeColor: 'text-purple-600',
     activeBg: 'bg-purple-50',
@@ -23,7 +24,7 @@ const TABS_CONFIG = [
   },
   {
     id: TABS.TOP_ALTERNATIVES,
-    label: 'Palmarès',
+    labelKey: 'ui.nav.awards',
     icon: Award,
     activeColor: 'text-emerald-600',
     activeBg: 'bg-emerald-50',
@@ -37,7 +38,7 @@ const Navigation = ({ activeTab, onTabChange, myAppsCount }) => {
   if (isMobile) {
     return (
       <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-white/60 py-3 px-4 max-w-md mx-auto flex justify-around items-center z-40 rounded-t-[2.5rem] shadow-2xl">
-        {TABS_CONFIG.map(({ id, label, icon: Icon, activeColor, inactiveColor, badge }) => {
+        {TABS_CONFIG.map(({ id, labelKey, icon: Icon, activeColor, inactiveColor, badge }) => {
           const active = activeTab === id;
           return (
             <button
@@ -53,7 +54,7 @@ const Navigation = ({ activeTab, onTabChange, myAppsCount }) => {
                   </span>
                 )}
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
+              <span className="text-[10px] font-black uppercase tracking-widest">{t(labelKey)}</span>
             </button>
           );
         })}
@@ -68,8 +69,8 @@ const Navigation = ({ activeTab, onTabChange, myAppsCount }) => {
     // même d'un pixel, pendant le scroll.
     <aside className="w-52 shrink-0">
       <nav className="fixed top-14 left-0 bottom-0 w-52 flex flex-col gap-1 py-6 px-3 border-r border-white/60 bg-white/75 backdrop-blur-md overflow-y-auto z-20">
-        <p className="text-[10px] font-black uppercase tracking-widest text-slate-300 px-3 mb-2">Navigation</p>
-        {TABS_CONFIG.map(({ id, label, icon: Icon, activeColor, activeBg, inactiveColor, badge }) => {
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-300 px-3 mb-2">{t('ui.nav.title')}</p>
+        {TABS_CONFIG.map(({ id, labelKey, icon: Icon, activeColor, activeBg, inactiveColor, badge }) => {
           const active = activeTab === id;
           return (
             <button
@@ -86,7 +87,7 @@ const Navigation = ({ activeTab, onTabChange, myAppsCount }) => {
                   </span>
                 )}
               </div>
-              <span>{label}</span>
+              <span>{t(labelKey)}</span>
             </button>
           );
         })}

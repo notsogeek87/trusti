@@ -18,6 +18,7 @@ import MigrationGuideModal from './MigrationGuideModal';
 import AppIconImage from '../ui/AppIconImage';
 import { shareText } from '../../utils/shareUtils';
 import { buildAppShareUrl, buildAppShareText } from '../../utils/appShareLink';
+import { categoryLabel } from '../../constants/categories';
 
 const ANIM_STYLES = `
   @keyframes detailSlideUp {
@@ -376,7 +377,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
             <h2 className="text-2xl font-black text-slate-900 mb-1">{app.name}</h2>
             {app.category && (
               <div className="mb-4 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold uppercase tracking-wide">
-                {app.category}
+                {categoryLabel(app.category)}
               </div>
             )}
             <ScoreIndicator grade={app.grade} size="large" />

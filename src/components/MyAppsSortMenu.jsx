@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowUpDown, ArrowUp, ArrowDown, Check } from 'lucide-react';
 import { SORT_OPTIONS } from '../utils/myAppsSort';
+import { t } from '../i18n/index.js';
 
 // Réglage discret de tri pour l'onglet "Mes Apps" : une simple icône parmi
 // les autres actions de l'en-tête, qui ouvre un petit menu au tap. Le choix
@@ -36,9 +37,9 @@ const MyAppsSortMenu = ({ sortBy, direction, onChange }) => {
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         className="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
-        aria-label="Trier mes applications"
+        aria-label={t('myApps.sort.sortMyApps')}
         aria-expanded={isOpen}
-        title="Trier mes applications"
+        title={t('myApps.sort.sortMyApps')}
       >
         <ArrowUpDown size={16} />
       </button>

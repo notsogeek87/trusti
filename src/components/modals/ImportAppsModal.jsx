@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { API_URL } from '../../utils/apiConfig';
 import AppIconImage from '../ui/AppIconImage';
+import { categoryLabel } from '../../constants/categories';
 
 /**
  * Modal d'import : s'affiche quand l'utilisateur ouvre un lien de partage
@@ -116,7 +117,7 @@ const ImportAppsModal = ({ appIds = [], migrations = [], onConfirm, onClose }) =
                         {renderIcon(app)}
                         <div className="flex-grow">
                           <p className="font-black text-sm text-slate-900">{app.name}</p>
-                          <p className="text-xs text-slate-500">{app.category}</p>
+                          <p className="text-xs text-slate-500">{categoryLabel(app.category)}</p>
                         </div>
                         <ScoreIndicator grade={app.grade} />
                       </div>

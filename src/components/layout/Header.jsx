@@ -4,7 +4,7 @@ import { useIsMobile } from '../../contexts/ViewModeContext';
 import { STANDALONE_URLS } from '../../utils/standalonePage';
 import HostingCredit from '../ui/HostingCredit';
 import LanguageSwitcher from '../ui/LanguageSwitcher';
-import { t } from '../../i18n';
+import { t } from '../../i18n/index.js';
 
 const Header = ({
   onOpenStorageManager,
