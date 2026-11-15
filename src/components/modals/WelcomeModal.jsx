@@ -9,7 +9,7 @@ const WelcomeModal = ({ onFirstTimeYes, onFirstTimeNo }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-300 px-4">
       <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-indigo-500/30 max-w-sm w-full overflow-hidden animate-in zoom-in duration-500">
-        <LanguageSwitcher className="absolute top-3 right-3 text-slate-300 hover:bg-white/10 hover:text-white" />
+        <div className="absolute top-3 right-3 z-10"><LanguageSwitcher className="text-slate-300 hover:bg-white/10 hover:text-white" /></div>
         {/* En-tête avec logo */}
         <div className="bg-gradient-to-r from-indigo-600/20 via-purple-600/20 to-indigo-600/20 p-6 text-center border-b border-indigo-500/20">
           <div className="flex justify-center mb-3">

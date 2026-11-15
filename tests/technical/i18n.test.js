@@ -71,3 +71,25 @@ test('i18n : détection de la langue (adresse, puis navigateur, sinon français)
   }
   assert.equal(detectLanguage({ search: '?lang=zz', navigatorLanguages: ['fr-FR'] }).lang, 'fr');
 });
+
+test("i18n : chaque clé t('…') utilisée dans le code existe en français", async () => {
+  const { readdirSync, readFileSync, statSync } = await import('node:fs');
+  const { join } = await import('node:path');
+  const files = [];
+  const walk = (dir) => {
+    for (const f of readdirSync(dir)) {
+      const p = join(dir, f);
+      if (statSync(p).isDirectory()) { if (!/i18n$|models$/.test(p)) walk(p); } else if (/\.(jsx?|mjs)$/.test(f)) files.push(p);
+    }
+  };
+  walk(new URL('../../src', import.meta.url).pathname);
+  const missing = [];
+  for (const file of files) {
+    for (const m of readFileSync(file, 'utf-8').matchAll(/\bt\('([\w.-]+)'/g)) {
+      const key = m[1];
+      const has = frLeaves.has(key) || [...frLeaves.keys()].some((k) => k.startsWith(`${key}.`) || k.startsWith(`${key}_`));
+      if (!has) missing.push(`${file.split('/src/')[1]} : ${key}`);
+    }
+  }
+  assert.deepEqual(missing, []);
+});
