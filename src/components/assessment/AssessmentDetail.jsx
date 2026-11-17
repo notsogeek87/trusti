@@ -173,6 +173,17 @@ const AssessmentDetail = ({ status, assessment }) => {
           )}
         </p>
       )}
+      <a
+        href={t('assessment.detail.discussUrl')}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-center gap-2 w-full text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl px-3 py-2.5 mb-3 transition-colors"
+      >
+        <MessageCircle size={14} className="shrink-0" />
+        {t('assessment.detail.discuss')}
+        <ExternalLink size={12} className="shrink-0 opacity-60" />
+      </a>
+
       {!hasCriteria && (
         <p className="text-xs text-slate-500 leading-relaxed">
           {t('assessment.detail.teamGrade')}
@@ -202,18 +213,6 @@ const AssessmentDetail = ({ status, assessment }) => {
         <ul className="divide-y divide-slate-100">
           {criteria.map(c => <CriterionItem key={c.key} c={c} />)}
         </ul>
-      )}
-
-      {hasCriteria && (
-        <a
-          href={t('assessment.detail.discussUrl')}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1.5 text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 underline-offset-2 hover:underline mt-3"
-        >
-          <MessageCircle size={12} className="shrink-0" />
-          {t('assessment.detail.discuss')}
-        </a>
       )}
 
       <GradeHistory history={assessment.gradeHistory} />
