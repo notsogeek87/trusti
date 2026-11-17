@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, HelpCircle, ExternalLink, Eye, Hourglass, History, Info, Landmark, MapPin, ShieldCheck, Wrench } from 'lucide-react';
+import { AlertTriangle, HelpCircle, ExternalLink, Eye, Hourglass, History, Info, Landmark, MapPin, MessageCircle, ShieldCheck, Wrench } from 'lucide-react';
 import { isStrictlyBetterGrade } from '../../utils/alternatives';
 import { formatDate, t } from '../../i18n/index.js';
 import BoldText from '../ui/BoldText';
@@ -202,6 +202,18 @@ const AssessmentDetail = ({ status, assessment }) => {
         <ul className="divide-y divide-slate-100">
           {criteria.map(c => <CriterionItem key={c.key} c={c} />)}
         </ul>
+      )}
+
+      {hasCriteria && (
+        <a
+          href={t('assessment.detail.discussUrl')}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 underline-offset-2 hover:underline mt-3"
+        >
+          <MessageCircle size={12} className="shrink-0" />
+          {t('assessment.detail.discuss')}
+        </a>
       )}
 
       <GradeHistory history={assessment.gradeHistory} />

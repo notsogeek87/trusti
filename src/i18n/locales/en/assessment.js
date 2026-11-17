@@ -35,6 +35,8 @@ export default {
     overridden: "The calculation gave {computed}; the final grade {grade} was set by the Trusti team.",
     unverifiedSources: "Some information has not yet been checked against a source and remains to be confirmed.",
     disclaimer: "These are **non-exhaustive** pointers: they shed light on the grade without fully explaining it. The full assessment relies on other information that is not all shown here.",
+    discuss: "Disagree with this grade? Discuss it with the community",
+    discussUrl: "https://matrix.to/#/%23trusti-score:matrix.org",
     levels: {
       conformite: {
         "0": "Non-compliant",

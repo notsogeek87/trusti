@@ -35,6 +35,8 @@ export default {
     overridden: "Le calcul donnait {computed} ; la note finale {grade} a été fixée par l'équipe Trusti.",
     unverifiedSources: "Certaines informations ne sont pas encore vérifiées sur une source et restent à confirmer.",
     disclaimer: "Ces éléments sont des repères **non exhaustifs** : ils éclairent la note sans l'expliquer entièrement. L'évaluation complète repose sur d'autres informations qui ne sont pas toutes affichées ici.",
+    discuss: "Pas d'accord avec cette note ? En discuter avec la communauté",
+    discussUrl: "https://matrix.to/#/%23trusti-score:matrix.org",
     levels: {
       conformite: {
         "0": "Non conforme",
