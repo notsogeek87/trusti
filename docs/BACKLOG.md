@@ -33,7 +33,7 @@ dont l'alternative est mieux notée ; candidates calculées sur le téléphone
 (`src/utils/alternativeNudges.js`), action « Ne plus proposer », réglage dans « Espace de stockage ».
 **Deuxième volet livré** : alertes de changement de note (carte « Notes mises à jour » dans « Mes Apps », historique dans la fiche, notification Android), à partir de `app_assessment_history`.
 **Troisième volet livré** : moteur de notifications unique avec budget commun (2 par semaine, alertes critiques prioritaires), boîte de réception (cloche, web et APK), événements des apps (`app_events` : fuite, rachat, politique, open source… proposés par la veille puis validés), apps D/E nouvellement installées, relances et détection de fin de migration, mode bilan mensuel. Voir [Notifications](guides/notifications.md).
-Reste à faire : appliquer la migration `app_events`, brancher la veille n8n (propositions via `POST /api/app-events`), traduire les textes des événements.
+Table `app_events` créée en base, veille n8n en place (`cvrwyUSELrCGgrvT`). Reste à faire : traduire les textes des événements, commande Telegram de validation.
 Notification quand la note d'une app installée change ou en cas d'incident (fuite,
 changement de politique, rachat). Historique des notes par app. Canal : push Android
 (plus d'e-mail : la connexion a été supprimée). Donne une raison de revenir dans l'app après l'onboarding.
