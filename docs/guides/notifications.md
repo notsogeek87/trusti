@@ -62,7 +62,7 @@ Table `app_events` (migration `server/database/migrations/2026-11-19-app-events.
 
 Cycle de vie :
 
-1. La veille propose : workflow n8n « Trusti - Veille événements des apps » (`cvrwyUSELrCGgrvT`, auto.lielu.eu), chaque jour à 18 h 40. Il lit 5 flux RSS (Have I Been Pwned, CNIL, Numerama Cyberguerre, Zataz, 01net), garde les articles des 3 derniers jours qui citent une app du catalogue, fait trier les vrais événements par l'IA (Mistral, secours Gemini, 5 essais) puis envoie `POST /api/app-events` (clé `x-api-key`, credential « Trusti API Key »). Récapitulatif Telegram à David avec les ids à valider ; les articles déjà analysés sont mémorisés dans le workflow.
+1. La veille propose : workflow n8n « Trusti - Veille événements des apps » (`cvrwyUSELrCGgrvT`, auto.lielu.eu), chaque jour à 18 h 40. Il lit 5 flux RSS (Have I Been Pwned, CNIL, Numerama Cyberguerre, Zataz, 01net), garde les articles des 3 derniers jours qui citent une app du catalogue, fait trier les vrais événements par l'IA (Mistral, secours Gemini, 5 essais) puis envoie `POST /api/app-events` (clé `x-api-key`, credential « Trusti API Key »). Récapitulatif Telegram à David avec les ids à valider ; les articles déjà analysés sont mémorisés dans le workflow. À la demande : commande `veille` du bot Telegram (routeur `jOjqXB5hFJER20w3` → sous-workflow `dTlI76SOlNhqHKTe`), qui lance la veille puis renvoie la liste des propositions en attente.
 2. Validation humaine : `GET /api/app-events?status=proposed`, puis `PATCH /api/app-events` `{ id, status: 'published' | 'rejected' }` (ou `UPDATE` via le connecteur Trusti_DB).
 3. À la publication, `published_at` est fixé : les téléphones le voient au passage suivant (~6 h), la fiche de l'app et la boîte de réception aussitôt (cache CDN 5 min).
 
