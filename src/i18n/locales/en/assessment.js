@@ -25,6 +25,8 @@ export default {
     unverified: "Unverified information, to be confirmed",
     provisional: "Provisional grade",
     measures: "What it measures",
+    events: "Events",
+    eventsSource: "Source",
     history: "Grade history",
     unchanged: "Grade unchanged since the first assessment on {date}.",
     up: "up",

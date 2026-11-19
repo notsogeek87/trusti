@@ -62,10 +62,10 @@ export function computeProgress(done = {}) {
  * Parcours commencés mais pas terminés, pour les apps encore dans « Mes Apps » et pas
  * encore migrées (carte « Migrations en cours »).
  *
- * @param {Object<string, {altId: string|null, done: object}>} states progressions stockées
+ * @param {Object<string, {altId: string|null, done: object, updatedAt?: number}>} states progressions stockées
  * @param {object[]} myAppsList apps chargées de « Mes Apps »
  * @param {{ migratedApps?: Set<string>, catalogApps?: object[] }} [options]
- * @returns {Array<{app: object, altName: string|null, completed: number, total: number}>}
+ * @returns {Array<{app: object, altId: string|null, altName: string|null, completed: number, total: number, updatedAt: number|null}>}
  *   les plus avancés d'abord
  */
 export function getMigrationsInProgress(states, myAppsList, { migratedApps, catalogApps = [] } = {}) {
@@ -77,7 +77,14 @@ export function getMigrationsInProgress(states, myAppsList, { migratedApps, cata
       if (!state) return null;
       const { completed, total, isComplete } = computeProgress(state.done);
       if (completed === 0 || isComplete) return null;
-      return { app, altName: state.altId ? names.get(String(state.altId)) || null : null, completed, total };
+      return {
+        app,
+        altId: state.altId || null,
+        altName: state.altId ? names.get(String(state.altId)) || null : null,
+        completed,
+        total,
+        updatedAt: state.updatedAt || null,
+      };
     })
     .filter(Boolean)
     .sort((a, b) => b.completed - a.completed || a.app.name.localeCompare(b.app.name));

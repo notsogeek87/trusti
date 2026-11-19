@@ -12,6 +12,7 @@ import TechnicalAnalysisSection from '../technical/TechnicalAnalysisSection';
 import useTechnicalAnalysis from '../../hooks/useTechnicalAnalysis';
 import useAssessment from '../../hooks/useAssessment';
 import AssessmentDetail from '../assessment/AssessmentDetail';
+import AppEventsList from '../assessment/AppEventsList';
 import { getNote, setNote as saveNote } from '../../utils/notesStorage';
 import { canStartMigration } from '../../utils/migrationGuide';
 import MigrationGuideModal from './MigrationGuideModal';
@@ -492,6 +493,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
 
           {/* Détail de l'évaluation TrustiScore (critères, sources) — masqué en mode enfant */}
           <AssessmentDetail status={assessmentState.status} assessment={assessmentState.assessment} />
+          <AppEventsList events={assessmentState.events} />
 
           {/* Alternatives */}
           {((isLoadingRelations && app.alternativeAppIds?.length > 0) || alternatives.length > 0) && (

@@ -105,6 +105,7 @@ const StoragePage = ({
   onToggleNudges,
   gradeAlertsEnabled = true,
   onToggleGradeAlerts,
+  notificationSettings = {},
 }) => {
   // null = scan pas encore terminé, [] = scan fait, rien trouvé.
   const [installedPackages, setInstalledPackages] = useState(null);
@@ -332,6 +333,7 @@ const StoragePage = ({
             onToggle={onToggleNudges}
             gradeAlertsEnabled={gradeAlertsEnabled}
             onToggleGradeAlerts={onToggleGradeAlerts}
+            {...notificationSettings}
           />
         )}
 

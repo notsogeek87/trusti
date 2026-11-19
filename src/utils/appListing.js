@@ -69,6 +69,8 @@ export const buildAlternativeInfo = (app, candidatePool, myAppsSet) => {
         : null;
     return {
       alternative: usedAlternative.name,
+      altId: usedAlternative.id,
+      altPlayStoreUrl: usedAlternative.playStoreUrl || null,
       altIcon: usedAlternative.icon,
       altGrade: usedAlternative.grade,
       alternativeAdopted: true,
@@ -78,6 +80,8 @@ export const buildAlternativeInfo = (app, candidatePool, myAppsSet) => {
 
   return {
     alternative: bestOverall.name,
+    altId: bestOverall.id,
+    altPlayStoreUrl: bestOverall.playStoreUrl || null,
     altIcon: bestOverall.icon,
     altGrade: bestOverall.grade,
     alternativeAdopted: false,

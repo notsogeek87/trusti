@@ -2,6 +2,8 @@ export default {
   app: {
     migrationAbandoned: "Wechsel abgebrochen",
     undo: "Rückgängig",
+    migrationsCompleted_one: "Umstieg abgeschlossen: {name} ist ersetzt. Glückwunsch!",
+    migrationsCompleted_other: "{count} Umstiege abgeschlossen. Glückwunsch!",
     removedFromMyApps: "App aus Meine Apps entfernt",
   },
   share: {

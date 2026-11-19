@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Bell, BellOff, TrendingDown } from 'lucide-react';
+import { Bell, BellOff, TrendingDown, AlertTriangle, Smartphone, Route, CalendarDays } from 'lucide-react';
 import AlternativeNudges from '../native/AlternativeNudges';
 import { t } from '../i18n/index.js';
 
@@ -30,21 +30,38 @@ const Row = ({ enabled, Icon, title, description, onToggle }) => (
 );
 
 /**
- * Réglages des notifications (app Android native uniquement) :
- *  - « Suggestions d'alternatives » : de temps en temps, une alternative mieux notée à une
- *    app C, D ou E ;
- *  - « Changements de note » : quand la note d'une app de « Mes Apps » change.
- * Activer l'un ou l'autre demande la permission Android 13+ si elle ne l'a pas encore été.
+ * Réglages des notifications (app Android native uniquement), tous envoyés par le même
+ * moteur (NotificationEngineWorker) avec un budget commun (voir docs/guides/notifications.md) :
+ *  - « Événements » : fuite, rachat, changement de politique, open source… d'une app suivie ;
+ *  - « Changements de note » : quand la note d'une app de « Mes Apps » change ;
+ *  - « Nouvelles apps à risque » : une app notée D ou E vient d'être installée ;
+ *  - « Suivi des migrations » : relance d'une migration en plan, bravo quand elle est finie ;
+ *  - « Suggestions d'alternatives » : de temps en temps, une alternative mieux notée ;
+ *  - « Bilan mensuel » : une notification par mois au lieu du fil de l'eau.
+ * Activer un réglage demande la permission Android 13+ si elle ne l'a pas encore été.
  */
-const AlternativeNudgesSection = ({ enabled, onToggle, gradeAlertsEnabled, onToggleGradeAlerts }) => {
+const AlternativeNudgesSection = ({
+  enabled, onToggle, gradeAlertsEnabled, onToggleGradeAlerts,
+  eventsEnabled, onToggleEvents, installsEnabled, onToggleInstalls,
+  migrationRemindersEnabled, onToggleMigrationReminders, digestEnabled, onToggleDigest,
+}) => {
   // 'granted' | 'denied' | 'prompt' | null (inconnu)
   const [permission, setPermission] = useState(null);
+  // Apps mises en sourdine depuis une notification (« Ne plus m'alerter pour cette app »)
+  const [mutedCount, setMutedCount] = useState(0);
 
   useEffect(() => {
     AlternativeNudges.checkPermission()
       .then(({ display }) => setPermission(display))
       .catch(() => setPermission(null));
+    AlternativeNudges.getNotificationState()
+      .then(({ muted }) => setMutedCount(Array.isArray(muted) ? muted.length : 0))
+      .catch(() => {});
   }, []);
+
+  const unmuteAll = () => {
+    AlternativeNudges.unmuteAll().then(() => setMutedCount(0)).catch(() => {});
+  };
 
   const toggleWithPermission = (current, apply) => async () => {
     const next = !current;
@@ -59,7 +76,8 @@ const AlternativeNudgesSection = ({ enabled, onToggle, gradeAlertsEnabled, onTog
     }
   };
 
-  const blocked = (enabled || gradeAlertsEnabled) && permission === 'denied';
+  const anyEnabled = enabled || gradeAlertsEnabled || eventsEnabled || installsEnabled || migrationRemindersEnabled;
+  const blocked = anyEnabled && permission === 'denied';
 
   return (
     <section className="bg-white rounded-2xl border border-slate-100 p-4">
@@ -67,6 +85,15 @@ const AlternativeNudgesSection = ({ enabled, onToggle, gradeAlertsEnabled, onTog
         {t('cards.notifications.title')}
       </h2>
       <div className="space-y-4">
+        {onToggleEvents && (
+          <Row
+            enabled={eventsEnabled}
+            Icon={AlertTriangle}
+            title={t('cards.notifications.eventsTitle')}
+            description={t('cards.notifications.eventsBody')}
+            onToggle={toggleWithPermission(eventsEnabled, onToggleEvents)}
+          />
+        )}
         <Row
           enabled={enabled}
           Icon={enabled ? Bell : BellOff}
@@ -83,7 +110,43 @@ const AlternativeNudgesSection = ({ enabled, onToggle, gradeAlertsEnabled, onTog
             onToggle={toggleWithPermission(gradeAlertsEnabled, onToggleGradeAlerts)}
           />
         )}
+        {onToggleInstalls && (
+          <Row
+            enabled={installsEnabled}
+            Icon={Smartphone}
+            title={t('cards.notifications.installsTitle')}
+            description={t('cards.notifications.installsBody')}
+            onToggle={toggleWithPermission(installsEnabled, onToggleInstalls)}
+          />
+        )}
+        {onToggleMigrationReminders && (
+          <Row
+            enabled={migrationRemindersEnabled}
+            Icon={Route}
+            title={t('cards.notifications.migrationTitle')}
+            description={t('cards.notifications.migrationBody')}
+            onToggle={toggleWithPermission(migrationRemindersEnabled, onToggleMigrationReminders)}
+          />
+        )}
+        {onToggleDigest && (
+          <Row
+            enabled={digestEnabled}
+            Icon={CalendarDays}
+            title={t('cards.notifications.digestTitle')}
+            description={t('cards.notifications.digestBody')}
+            onToggle={() => onToggleDigest(!digestEnabled)}
+          />
+        )}
       </div>
+      <p className="mt-3 text-[11px] text-slate-400">{t('cards.notifications.budget')}</p>
+      {mutedCount > 0 && (
+        <p className="mt-2 flex items-center justify-between gap-2 text-xs text-slate-600">
+          <span>{t('cards.notifications.muted', { count: mutedCount })}</span>
+          <button type="button" onClick={unmuteAll} className="font-bold text-indigo-600 hover:text-indigo-800 shrink-0">
+            {t('cards.notifications.unmute')}
+          </button>
+        </p>
+      )}
       {blocked && (
         <p className="mt-2 text-xs text-rose-600">
           {t('cards.notifications.blocked')}

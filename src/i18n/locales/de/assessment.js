@@ -25,6 +25,8 @@ export default {
     unverified: "Ungeprüfte Information, noch zu bestätigen",
     provisional: "Vorläufige Note",
     measures: "Was gemessen wird",
+    events: "Ereignisse",
+    eventsSource: "Quelle",
     history: "Notenverlauf",
     unchanged: "Note unverändert seit der ersten Bewertung am {date}.",
     up: "gestiegen",

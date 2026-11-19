@@ -1,5 +1,5 @@
 import React from 'react';
-import { HelpCircle, PieChart, Building2 } from 'lucide-react';
+import { HelpCircle, PieChart, Building2, Bell } from 'lucide-react';
 import { useIsMobile } from '../../contexts/ViewModeContext';
 import { STANDALONE_URLS } from '../../utils/standalonePage';
 import HostingCredit from '../ui/HostingCredit';
@@ -9,6 +9,8 @@ import { t } from '../../i18n/index.js';
 const Header = ({
   onOpenStorageManager,
   onShowLandingPage,
+  onOpenInbox,
+  unreadCount = 0,
 }) => {
   const isMobile = useIsMobile();
 
@@ -43,6 +45,23 @@ const Header = ({
           </a>
 
           <LanguageSwitcher />
+
+          {/* Boîte de réception des notifications (voir NotificationInboxPage) */}
+          {onOpenInbox && (
+            <button
+              onClick={onOpenInbox}
+              className="relative p-1.5 md:p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all"
+              aria-label={unreadCount > 0 ? t('header.notificationsUnread', { count: unreadCount }) : t('header.notifications')}
+              title={t('header.notifications')}
+            >
+              <Bell size={18} />
+              {unreadCount > 0 && (
+                <span className="absolute top-0 right-0 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-black leading-4 text-center">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+          )}
 
           <button
             onClick={onOpenStorageManager}

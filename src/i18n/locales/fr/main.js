@@ -2,6 +2,8 @@ export default {
   app: {
     migrationAbandoned: "Migration abandonnée",
     undo: "Annuler",
+    migrationsCompleted_one: "Migration terminée : {name} est remplacée. Bravo !",
+    migrationsCompleted_other: "{count} migrations terminées. Bravo !",
     removedFromMyApps: "App retirée de Mes Apps",
   },
   share: {

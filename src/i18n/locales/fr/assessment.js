@@ -25,6 +25,8 @@ export default {
     unverified: "Information non vérifiée, à confirmer",
     provisional: "Note provisoire",
     measures: "Ce que ça mesure",
+    events: "Événements",
+    eventsSource: "Source",
     history: "Historique de la note",
     unchanged: "Note inchangée depuis la première évaluation, le {date}.",
     up: "hausse",

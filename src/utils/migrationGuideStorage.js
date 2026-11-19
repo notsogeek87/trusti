@@ -2,7 +2,9 @@
  * Progression du parcours « Migration guidée », par app remplacée.
  * Stockée uniquement en localStorage (clé "trusti_migration_guides", préfixe
  * commun voir storageStats.js) — jamais envoyée au serveur.
- * Forme : { [appId]: { altId?: string, done: { [stepId]: true } } }
+ * Forme : { [appId]: { altId?: string, done: { [stepId]: true }, updatedAt?: number } }
+ * updatedAt (ms) : dernier progrès, pour la relance d'un parcours resté en plan
+ * (voir src/utils/notificationInbox.js).
  */
 const STORAGE_KEY = 'trusti_migration_guides';
 
@@ -26,7 +28,7 @@ export const getMigrationGuideState = (appId) => {
 export const saveMigrationGuideState = (appId, state) => {
   try {
     const all = readAll();
-    all[String(appId)] = { altId: state.altId || undefined, done: state.done || {} };
+    all[String(appId)] = { altId: state.altId || undefined, done: state.done || {}, updatedAt: Date.now() };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
   } catch {
     // localStorage indisponible (navigation privée stricte) : progression perdue.
@@ -37,6 +39,16 @@ export const saveMigrationGuideState = (appId, state) => {
 export const getAllMigrationGuideStates = () => {
   const all = readAll();
   return Object.fromEntries(Object.keys(all).map(id => [id, getMigrationGuideState(id)]));
+};
+
+/** Date du dernier progrès de chaque parcours : { [appId]: ms } (absente pour les anciens parcours). */
+export const getMigrationGuideTimestamps = () => {
+  const all = readAll();
+  return Object.fromEntries(
+    Object.entries(all)
+      .map(([id, entry]) => [id, Number(entry?.updatedAt) || null])
+      .filter(([, at]) => at),
+  );
 };
 
 /**

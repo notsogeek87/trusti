@@ -4,6 +4,7 @@ import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
 import { useAlternativeNudges } from './hooks/useAlternativeNudges';
 import { useGradeChanges } from './hooks/useGradeChanges';
+import { useNotificationCenter } from './hooks/useNotificationCenter';
 import { useIsSmallViewport } from './hooks/useIsSmallViewport';
 import { usePreferenceToggle } from './hooks/usePreferenceToggle';
 import { useMyAppsView } from './hooks/useMyAppsView';
@@ -16,6 +17,10 @@ import { ViewModeContext } from './contexts/ViewModeContext';
 import { useToast } from './contexts/ToastContext';
 import { areNudgesEnabled, setNudgesEnabled } from './utils/alternativeNudges';
 import { areGradeAlertsEnabled, setGradeAlertsEnabled } from './utils/gradeChanges';
+import {
+  areEventAlertsEnabled, setEventAlertsEnabled, areInstallAlertsEnabled, setInstallAlertsEnabled,
+  areMigrationRemindersEnabled, setMigrationRemindersEnabled, isDigestModeEnabled, setDigestModeEnabled,
+} from './utils/notificationSettings';
 import { getMigrationsInProgress } from './utils/migrationGuide';
 import { getAllMigrationGuideStates, removeMigrationGuideState, saveMigrationGuideState } from './utils/migrationGuideStorage';
 import { isNativeAndroid } from './utils/platform';
@@ -42,6 +47,7 @@ import LandingPage from './components/LandingPage';
 import AppsSelectionScreen from './components/AppsSelectionScreen';
 import RescanPrompts from './components/RescanPrompts';
 import StoragePage from './components/StoragePage';
+import NotificationInboxPage from './components/NotificationInboxPage';
 
 // Modales
 import AppDetailModal from './components/modals/AppDetailModal';
@@ -73,6 +79,10 @@ const App = () => {
   // l'onglet actif est différent.
   const [showStorageManager, setShowStorageManager] = useState(false);
   const closeStorageManager = useCallback(() => setShowStorageManager(false), []);
+
+  // Boîte de réception des notifications (cloche du header)
+  const [showInbox, setShowInbox] = useState(false);
+  const closeInbox = useCallback(() => setShowInbox(false), []);
 
   const {
     activeTab,
@@ -147,7 +157,7 @@ const App = () => {
 
   // Suggestions d'alternatives par notification (Android natif)
   const [nudgesEnabled, toggleNudges] = usePreferenceToggle(areNudgesEnabled, setNudgesEnabled);
-  const { openRequestId: nudgeOpenId, clearOpenRequest: clearNudgeOpen } = useAlternativeNudges({
+  const { openRequest: nativeOpenRequest, clearOpenRequest: clearNativeOpen } = useAlternativeNudges({
     myAppsList: filteredApps,
     isMyAppsTab: activeTab === TABS.MY_APPS && !searchTerm.trim(),
     migratedApps,
@@ -163,6 +173,44 @@ const App = () => {
     active: activeTab === TABS.MY_APPS && isInitialized,
     alertsEnabled: gradeAlertsEnabled,
   });
+
+  // Centre de notifications : boîte de réception (web et APK) et moteur natif (APK)
+  const [eventAlertsEnabled, toggleEventAlerts] = usePreferenceToggle(areEventAlertsEnabled, setEventAlertsEnabled);
+  const [installAlertsEnabled, toggleInstallAlerts] = usePreferenceToggle(areInstallAlertsEnabled, setInstallAlertsEnabled);
+  const [migrationRemindersEnabled, toggleMigrationReminders] = usePreferenceToggle(areMigrationRemindersEnabled, setMigrationRemindersEnabled);
+  const [digestEnabled, toggleDigest] = usePreferenceToggle(isDigestModeEnabled, setDigestModeEnabled);
+  const notificationSettings = useMemo(() => ({
+    events: eventAlertsEnabled,
+    installs: installAlertsEnabled,
+    migrationReminders: migrationRemindersEnabled,
+    digest: digestEnabled,
+  }), [eventAlertsEnabled, installAlertsEnabled, migrationRemindersEnabled, digestEnabled]);
+
+  // Migrations vues terminées par le téléphone (alternative installée, app quittée désinstallée)
+  const handleMigrationsCompleted = useCallback((items) => {
+    importMigrations(items.map(({ appId, altName }) => ({ id: appId, customAlt: altName || undefined })));
+    toast.success(t('main.app.migrationsCompleted', { count: items.length, name: items[0]?.appName || items[0]?.altName || '' }));
+  }, [importMigrations, toast]);
+
+  const notifications = useNotificationCenter({
+    myApps,
+    ready: isInitialized,
+    myAppsList: filteredApps,
+    isMyAppsTab: activeTab === TABS.MY_APPS && !searchTerm.trim(),
+    migratedApps,
+    catalogApps: apps,
+    settings: notificationSettings,
+    onMigrationsCompleted: handleMigrationsCompleted,
+  });
+
+  // Fiche à ouvrir depuis une notification Android ou la boîte de réception :
+  // { appId, action? } (action 'resumeMigration' : rouvrir le parcours de migration)
+  const [pendingOpen, setPendingOpen] = useState(null);
+  useEffect(() => {
+    if (!nativeOpenRequest) return;
+    setPendingOpen(nativeOpenRequest);
+    clearNativeOpen();
+  }, [nativeOpenRequest]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Parcours de migration guidée commencés et pas terminés (relus à chaque
   // fermeture de fiche, où le parcours a pu avancer, et après un abandon)
@@ -186,25 +234,34 @@ const App = () => {
     });
   };
 
-  // Ouverture depuis une notification de suggestion : on passe sur « Mes Apps »
+  // Ouverture depuis une notification ou la boîte de réception : on passe sur « Mes Apps »
   // (qui charge les données de l'app et son alternative), puis on ouvre sa fiche.
   useEffect(() => {
-    if (!nudgeOpenId) return;
+    if (!pendingOpen) return;
+    setShowStorageManager(false);
+    setShowInbox(false);
     if (activeTab !== TABS.MY_APPS || searchTerm) {
       setSearchTerm('');
       setActiveTab(TABS.MY_APPS);
       return;
     }
-    setShowStorageManager(false);
-    const target = filteredApps.find(app => String(app.id) === nudgeOpenId);
+    const { appId, action } = pendingOpen;
+    const target = filteredApps.find(app => String(app.id) === appId);
     if (target && !target.isLoadingSkeleton) {
-      clearNudgeOpen();
-      openAppDetail(target);
-    } else if (!myApps.has(nudgeOpenId)) {
-      // Retirée de « Mes Apps » depuis la notification : rien à ouvrir
-      clearNudgeOpen();
+      setPendingOpen(null);
+      if (action === 'resumeMigration') resumeMigration(target);
+      else openAppDetail(target);
+    } else if (!myApps.has(appId)) {
+      // Pas (ou plus) dans « Mes Apps » (ex. app à risque tout juste installée) : on l'ajoute
+      // pour charger sa fiche, sauf si l'utilisateur vient de la retirer depuis la notification.
+      if (action === 'add') {
+        addMyApps([appId]);
+        setPendingOpen({ appId, action: null });
+      } else {
+        setPendingOpen(null);
+      }
     }
-  }, [nudgeOpenId, activeTab, searchTerm, filteredApps, myApps]);
+  }, [pendingOpen, activeTab, searchTerm, filteredApps, myApps]);
 
   // Remonter en haut au changement d'onglet ou de catégorie
   useEffect(() => {
@@ -229,6 +286,7 @@ const App = () => {
     closeMigrationSelector,
     closables: [
       [showStorageManager, closeStorageManager],
+      [showInbox, closeInbox],
       [showShareModal, () => setShowShareModal(false)],
       [showTrustiShareModal, () => setShowTrustiShareModal(false)],
       [!!pendingImport, cancelImport],
@@ -336,6 +394,32 @@ const App = () => {
         onToggleNudges={toggleNudges}
         gradeAlertsEnabled={gradeAlertsEnabled}
         onToggleGradeAlerts={toggleGradeAlerts}
+        notificationSettings={{
+          eventsEnabled: eventAlertsEnabled,
+          onToggleEvents: toggleEventAlerts,
+          installsEnabled: installAlertsEnabled,
+          onToggleInstalls: toggleInstallAlerts,
+          migrationRemindersEnabled,
+          onToggleMigrationReminders: toggleMigrationReminders,
+          digestEnabled,
+          onToggleDigest: toggleDigest,
+        }}
+      />
+    );
+  }
+
+  // Boîte de réception (page à part entière, comme l'espace de stockage)
+  if (showInbox) {
+    return (
+      <NotificationInboxPage
+        items={notifications.items}
+        unreadKeys={notifications.unreadKeys}
+        digest={notifications.digest}
+        hasApps={myApps.size > 0}
+        onClose={closeInbox}
+        onOpenApp={(appId, action) => setPendingOpen({ appId, action })}
+        onOpenSettings={isNativeAndroid ? () => { setShowInbox(false); setShowStorageManager(true); } : undefined}
+        onMarkAllRead={notifications.markAllRead}
       />
     );
   }
@@ -352,6 +436,8 @@ const App = () => {
         <Header
           onOpenStorageManager={() => setShowStorageManager(true)}
           onShowLandingPage={() => setShowLandingPage(true)}
+          onOpenInbox={() => { notifications.refreshNative(); setShowInbox(true); }}
+          unreadCount={notifications.unreadCount}
         />
 
         {/* items-start casserait le sticky du menu : sans stretch, la colonne du

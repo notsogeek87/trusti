@@ -2,6 +2,8 @@ export default {
   app: {
     migrationAbandoned: "Switch abandoned",
     undo: "Undo",
+    migrationsCompleted_one: "Switch complete: {name} has been replaced. Well done!",
+    migrationsCompleted_other: "{count} switches complete. Well done!",
     removedFromMyApps: "App removed from My apps",
   },
   share: {
