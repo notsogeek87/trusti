@@ -56,7 +56,8 @@ Endpoint principal, backé par PostgreSQL (`service-postgres.js`).
   fiche garde le texte court `reason`.
   `assessment.gradeHistory` = `{ firstAssessedAt, changes: [{ date, from, to }] }`
   (changements du plus récent au plus ancien), lu dans `app_assessment_history`
-  (voir `server/gradeChanges.js` : `buildGradeTimeline`).
+  (voir `server/gradeChanges.js` : `buildGradeTimeline`). La réponse porte aussi
+  `events` : événements publiés de l'app (même forme que `/api/app-events`, 20 au plus).
 - **GET** `?migration_guide_from=:id&migration_guide_to=:id` : guide de migration
   lu dans `app_migration_guides`. Réponse : `{ success: true, guide: { export, import } }`,
   chaque côté `{ summary, steps[], notes[{ text, level }], source, checkedAt, verified }` ou `null`
@@ -121,6 +122,30 @@ configurée, elles répondent `401`. Les `GET` du catalogue restent publics.
   réponse `200` sur `OPTIONS`) — il n'y a pas de middleware CORS partagé.
 - En développement, un serveur Express équivalent existe dans
   `server/index.js` (`npm run server`) qui monte les mêmes handlers.
+
+## `/api/app-events` — `api/app-events.js`
+
+Événements des apps (fuite de données, rachat, changement de politique, passage en open
+source…). Voir [Notifications](../guides/notifications.md).
+
+- **GET** `?since=AAAA-MM-JJ` : événements **publiés** depuis cette date de publication, tout
+  le catalogue (90 jours si vide, 365 au plus ; 400 si invalide). Réponse :
+  `{ success: true, since, events: [{ id, appId, appName, type, impact, severity, title,
+  summary, sourceUrl, date, publishedAt }] }`. Même réponse pour tous, mise en cache CDN :
+  l'appareil garde ceux de ses apps, en local.
+- **GET** `?app=:id` : événements publiés d'une app (20 au plus, du plus récent au plus ancien).
+- **GET** `?status=proposed` (clé `x-api-key`) : propositions en attente de validation.
+  Jamais mis en cache (`Cache-Control: no-store`).
+- **POST** (clé `x-api-key`) : proposition d'un événement par la veille. Corps JSON :
+  `app_id`, `type` (`incident`, `acquisition`, `policy_change`, `jurisdiction_change`,
+  `open_source`, `closed_source`, `audit`, `shutdown`, `other`), `impact` (`negative`,
+  `neutral`, `positive`), `severity` (`low`, `medium` par défaut, `high`), `title` (3 à
+  200 caractères), `summary` (facultatif), `source_url` (https, requis), `event_date`
+  (AAAA-MM-JJ, pas dans le futur), `proposed_by` (facultatif). Réponses : `201 { id }`,
+  `200 { duplicate: true }` si la même source est déjà proposée pour cette app, `404` si
+  l'app est inconnue, `400` si invalide.
+- **PATCH** (clé `x-api-key`) : `{ id, status }` avec `status` = `published`, `rejected` ou
+  `proposed`. La date de publication est fixée à la première publication.
 
 ## `POST /api/suggest-tool`
 

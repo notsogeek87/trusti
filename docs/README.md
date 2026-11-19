@@ -32,6 +32,7 @@ démarrage rapide.
 - [Mises à jour automatiques de l'app Android](guides/android-auto-update.md)
 - [Hygiène numérique — gestionnaires de mots de passe et bilan de sécurité](guides/hygiene-numerique.md)
 - [Migration guidée — remplacer une app par une alternative, pas à pas](guides/migration-guidee.md)
+- [Notifications — moteur unique, boîte de réception, événements, budget, bilan mensuel](guides/notifications.md)
 - [Alertes de changement de note — carte « Mes Apps », historique, notification Android](guides/alertes-notes.md)
 - [Nettoyeur de stockage — fichiers inutiles, filtres et permission](guides/nettoyeur-stockage.md)
 - [Clés partenaires facultatives de l'API `/api/v1` — quota, suspension](guides/api-partenaires.md)

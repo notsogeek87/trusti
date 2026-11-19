@@ -23,7 +23,7 @@
 - Premier passage (web comme Android) : tout ce que l'API renvoie est marqué comme vu. Personne ne reçoit d'un coup des mois de changements.
 - Un changement est identifié par `appId:date:note` et n'est signalé qu'une fois.
 - On relit 14 jours avant la dernière visite, car une évaluation peut être publiée quelques jours après sa date.
-- Android : passage toutes les ~12 h avec réseau, notification seulement entre 9 h et 21 h, une seule notification par passage.
+- Android : la notification est envoyée par le moteur unique (voir [Notifications](notifications.md)) : passage toutes les ~6 h, entre 9 h et 21 h, une notification par passage, budget commun de 2 par semaine.
 
 ## Code
 
@@ -35,8 +35,9 @@
 | `src/hooks/useGradeChanges.js` | Chargement, état « vu », synchronisation vers le natif |
 | `src/components/GradeChangesCard.jsx` | Carte de « Mes Apps » |
 | `src/components/assessment/AssessmentDetail.jsx` | Historique dans la fiche |
-| `android/.../GradeChangeWorker.java` | Tâche de fond et notification |
-| `android/.../AlternativeNudgesPlugin.java` | `syncGradeAlerts({ enabled, apiUrl, apps })` |
+| `android/.../NotificationSources.java` (`grades`) | Lecture des changements et notification, via `NotificationEngineWorker` |
+| `android/.../GradeChangeWorker.java` | Préférences (apps suivies, changements vus) ; tâche WorkManager vide gardée pour les anciennes installations |
+| `android/.../AlternativeNudgesPlugin.java` | `syncGradeAlerts({ enabled, apiUrl, apps })` (la liste des apps suivies sert aussi aux événements) |
 | `tests/server/gradeChanges.test.js`, `tests/technical/gradeChanges.test.js` | Tests |
 
 ## Stockage local
