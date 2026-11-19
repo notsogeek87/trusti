@@ -35,6 +35,11 @@
         <receiver
             android:name=".AlternativeNudgeDismissReceiver"
             android:exported="false" />
+
+        <!-- Boutons « Ne plus m'alerter pour cette app » / « Ne plus proposer » du moteur de notifications -->
+        <receiver
+            android:name=".NotificationActionReceiver"
+            android:exported="false" />
     </application>
 
     <!-- Permissions -->

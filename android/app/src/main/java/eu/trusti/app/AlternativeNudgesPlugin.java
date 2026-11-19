@@ -2,6 +2,7 @@ package eu.trusti.app;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import androidx.core.app.NotificationManagerCompat;
 import com.getcapacitor.JSArray;
@@ -15,15 +16,20 @@ import com.getcapacitor.annotation.Permission;
 import com.getcapacitor.annotation.PermissionCallback;
 
 /**
- * Suggestions d'alternatives par notification. Le web calcule les apps candidates (voir
- * src/utils/alternativeNudges.js) et les transmet via sync() ; elles sont gardées dans les
- * SharedPreferences et une tâche périodique WorkManager (AlternativeNudgeWorker) choisit,
- * même quand Trusti est fermé, s'il faut en proposer une. Aucune donnée ne quitte l'appareil.
+ * Pont entre le web et le moteur de notifications (NotificationEngineWorker, voir
+ * docs/guides/notifications.md). Le web transmet ce qu'il sait (apps suivies, candidates de
+ * suggestion, parcours de migration, réglages) ; tout est gardé dans les SharedPreferences et
+ * la tâche de fond décide seule, même Trusti fermé, quoi notifier. Aucune donnée ne quitte l'appareil.
  *
- * syncGradeAlerts() fait de même pour les alertes de changement de note (GradeChangeWorker).
+ *  - sync() : suggestions d'alternatives (calculées par src/utils/alternativeNudges.js) ;
+ *  - syncGradeAlerts() : apps suivies et réglage « Changements de note » ;
+ *  - syncEngine() : événements, apps à risque installées, migrations, mode bilan ;
+ *  - getNotificationState() / consumeCompletedMigrations() / unmuteAll() : lus par la boîte de
+ *    réception et les réglages.
  *
- * Toucher la notification rouvre Trusti avec l'id de l'app : consumeOpenRequest() le lit au
- * démarrage à froid, l'événement "openApp" le signale quand Trusti était déjà ouvert.
+ * Toucher une notification rouvre Trusti avec l'id de l'app (et une action éventuelle) :
+ * consumeOpenRequest() le lit au démarrage à froid, l'événement "openApp" le signale quand
+ * Trusti était déjà ouvert.
  */
 @CapacitorPlugin(
     name = "AlternativeNudges",
@@ -31,30 +37,31 @@ import com.getcapacitor.annotation.PermissionCallback;
 )
 public class AlternativeNudgesPlugin extends Plugin {
 
-    private String pendingAppId;
+    private JSObject pendingOpen;
 
     @Override
     public void load() {
-        pendingAppId = takeAppId(getActivity().getIntent());
+        pendingOpen = takeOpenRequest(getActivity().getIntent());
+        // Bascule des anciennes tâches séparées vers le moteur unique (mise à jour de l'app).
+        NotificationEngineWorker.reschedule(getContext());
     }
 
     @Override
     protected void handleOnNewIntent(Intent intent) {
         super.handleOnNewIntent(intent);
-        String appId = takeAppId(intent);
-        if (appId == null) return;
+        JSObject request = takeOpenRequest(intent);
+        if (request == null) return;
         if (hasListeners("openApp")) {
-            notifyListeners("openApp", new JSObject().put("appId", appId));
+            notifyListeners("openApp", request);
         } else {
-            pendingAppId = appId;
+            pendingOpen = request;
         }
     }
 
     @PluginMethod
     public void consumeOpenRequest(PluginCall call) {
-        JSObject result = new JSObject();
-        if (pendingAppId != null) result.put("appId", pendingAppId);
-        pendingAppId = null;
+        JSObject result = pendingOpen != null ? pendingOpen : new JSObject();
+        pendingOpen = null;
         call.resolve(result);
     }
 
@@ -63,11 +70,7 @@ public class AlternativeNudgesPlugin extends Plugin {
         boolean enabled = Boolean.TRUE.equals(call.getBoolean("enabled", true));
         JSArray candidates = call.getArray("candidates", new JSArray());
         AlternativeNudgeWorker.saveState(getContext(), enabled, candidates.toString());
-        if (enabled) {
-            AlternativeNudgeWorker.schedule(getContext());
-        } else {
-            AlternativeNudgeWorker.cancel(getContext());
-        }
+        NotificationEngineWorker.reschedule(getContext());
         call.resolve();
     }
 
@@ -80,11 +83,66 @@ public class AlternativeNudgesPlugin extends Plugin {
         boolean enabled = Boolean.TRUE.equals(call.getBoolean("enabled", true));
         JSArray apps = call.getArray("apps", new JSArray());
         GradeChangeWorker.saveState(getContext(), enabled, call.getString("apiUrl"), apps.toString());
-        if (enabled) {
-            GradeChangeWorker.schedule(getContext());
-        } else {
-            GradeChangeWorker.cancel(getContext());
+        NotificationEngineWorker.reschedule(getContext());
+        call.resolve();
+    }
+
+    /**
+     * Réglages du moteur : { apiUrl, eventsEnabled, installAlertsEnabled, migrationRemindersEnabled,
+     * digestEnabled, migrations? }. Sans migrations, la dernière liste reçue est gardée.
+     */
+    @PluginMethod
+    public void syncEngine(PluginCall call) {
+        SharedPreferences prefs = NotificationStore.prefs(getContext());
+        boolean digest = Boolean.TRUE.equals(call.getBoolean("digestEnabled", false));
+        SharedPreferences.Editor editor = prefs.edit()
+            .putBoolean(NotificationStore.KEY_EVENTS_ENABLED, Boolean.TRUE.equals(call.getBoolean("eventsEnabled", true)))
+            .putBoolean(NotificationStore.KEY_INSTALLS_ENABLED, Boolean.TRUE.equals(call.getBoolean("installAlertsEnabled", true)))
+            .putBoolean(NotificationStore.KEY_MIGRATIONS_ENABLED, Boolean.TRUE.equals(call.getBoolean("migrationRemindersEnabled", true)))
+            .putBoolean(NotificationStore.KEY_DIGEST_ENABLED, digest);
+        // Le premier bilan arrive 30 jours après l'activation du mode bilan.
+        if (digest && !prefs.getBoolean(NotificationStore.KEY_DIGEST_ENABLED, false)) {
+            editor.putLong(NotificationStore.KEY_DIGEST_ENABLED_AT, System.currentTimeMillis());
         }
+        String apiUrl = call.getString("apiUrl");
+        if (apiUrl != null && apiUrl.startsWith("https://")) editor.putString(NotificationStore.KEY_API_URL, apiUrl);
+        JSArray migrations = call.getArray("migrations", null);
+        if (migrations != null) editor.putString(NotificationStore.KEY_MIGRATIONS, migrations.toString());
+        editor.apply();
+        NotificationEngineWorker.reschedule(getContext());
+        call.resolve();
+    }
+
+    /** Historique des notifications envoyées (boîte de réception) et apps en sourdine. */
+    @PluginMethod
+    public void getNotificationState(PluginCall call) {
+        JSObject result = new JSObject();
+        try {
+            result.put("history", new JSArray(NotificationStore.readArray(NotificationStore.prefs(getContext()), NotificationStore.KEY_HISTORY).toString()));
+        } catch (Exception e) {
+            result.put("history", new JSArray());
+        }
+        JSArray muted = new JSArray();
+        for (String appId : NotificationStore.muted(getContext())) muted.put(appId);
+        result.put("muted", muted);
+        call.resolve(result);
+    }
+
+    /** Migrations vues terminées par le téléphone, à marquer comme faites côté web (lues une fois). */
+    @PluginMethod
+    public void consumeCompletedMigrations(PluginCall call) {
+        JSObject result = new JSObject();
+        try {
+            result.put("items", new JSArray(NotificationStore.takeCompletedMigrations(getContext()).toString()));
+        } catch (Exception e) {
+            result.put("items", new JSArray());
+        }
+        call.resolve(result);
+    }
+
+    @PluginMethod
+    public void unmuteAll(PluginCall call) {
+        NotificationStore.unmuteAll(getContext());
         call.resolve();
     }
 
@@ -121,11 +179,17 @@ public class AlternativeNudgesPlugin extends Plugin {
         return new JSObject().put("display", display);
     }
 
-    // Lit puis retire l'id de l'intent, pour qu'une recréation de l'activité ne rouvre pas la fiche.
-    private static String takeAppId(Intent intent) {
+    // Lit puis retire l'id (et l'action) de l'intent, pour qu'une recréation de l'activité ne
+    // rouvre pas la fiche.
+    private static JSObject takeOpenRequest(Intent intent) {
         if (intent == null) return null;
-        String appId = intent.getStringExtra(AlternativeNudgeWorker.EXTRA_APP_ID);
-        if (appId != null) intent.removeExtra(AlternativeNudgeWorker.EXTRA_APP_ID);
-        return appId;
+        String appId = intent.getStringExtra(NotificationEngineWorker.EXTRA_APP_ID);
+        String action = intent.getStringExtra(NotificationEngineWorker.EXTRA_ACTION);
+        intent.removeExtra(NotificationEngineWorker.EXTRA_APP_ID);
+        intent.removeExtra(NotificationEngineWorker.EXTRA_ACTION);
+        if (appId == null) return null;
+        JSObject request = new JSObject().put("appId", appId);
+        if (action != null) request.put("action", action);
+        return request;
     }
 }
