@@ -37,18 +37,20 @@ La base vit dans le PostgreSQL d'Hyperfluid. Le workflow manuel
 ### Sauvegarde
 
 Le workflow manuel `hyperfluid-backup-db.yml` (onglet Actions > « Hyperfluid
-backup db » > Run workflow) fait un `pg_dump` de la base Hyperfluid, le chiffre
-(gpg AES256) et le publie en artefact `trusti-AAAA-MM-JJ` conservé 30 jours.
-Il ne modifie rien dans la base.
+backup db » > Run workflow) fait un `pg_dump` de la base Hyperfluid et le publie
+en artefact `trusti-AAAA-MM-JJ` conservé 30 jours. Il ne modifie rien dans la base.
+
+Le dépôt étant public, l'artefact l'est aussi (non chiffré) : les tables
+`magic_link_tokens`, `otp_attempts` et `tool_suggestions` (e-mails, jetons de
+connexion, commentaires de visiteurs) sont exportées sans leurs lignes, seulement
+leur structure. Un contrôle annule la publication si des lignes y apparaissent.
 
 Prérequis : Public Endpoint de la base réactivé côté Hyperfluid, et secrets
-`HYPERFLUID_DATABASE_URL`, `HYPERFLUID_DB_ENDPOINT` et `BACKUP_PASSPHRASE`
-(phrase de passe à garder ailleurs : sans elle, la sauvegarde est illisible).
+`HYPERFLUID_DATABASE_URL` et `HYPERFLUID_DB_ENDPOINT`.
 
 Restauration :
 
 ```bash
-gpg --decrypt trusti-AAAA-MM-JJ.dump.gpg > trusti.dump
 pg_restore --no-owner --no-acl --clean --if-exists -d "$DATABASE_URL" trusti.dump
 ```
 
