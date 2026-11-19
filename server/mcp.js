@@ -93,7 +93,8 @@ export async function handleRpc(message, query) {
         serverInfo: { name: 'trusti-db', version: '1.0.0' },
         instructions:
           "Base PostgreSQL de Trusti (hébergée chez Hyperfluid). Tables principales : applications, " +
-          'app_relations, app_assessments, app_assessment_history, app_migration_guides. ' +
+          'app_relations, app_assessments, app_assessment_history, app_migration_guides, app_events ' +
+          "(événements : status 'proposed' à valider, 'published' visible du public). " +
           "Toujours lire avant d'écrire, et faire valider les écritures par l'utilisateur.",
       });
     }

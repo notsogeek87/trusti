@@ -20,6 +20,7 @@ import topAppsHandler from '../api/top-apps.js';
 import suggestToolHandler from '../api/suggest-tool.js';
 import cleanDuplicatesHandler from '../api/clean-duplicates.js';
 import lookupPlayStoreHandler from '../api/lookup-playstore.js';
+import appEventsHandler from '../api/app-events.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.resolve(__dirname, '..', 'dist');
@@ -79,6 +80,7 @@ app.all('/api/top-apps', topAppsHandler);
 app.all('/api/suggest-tool', suggestToolHandler);
 app.all('/api/clean-duplicates', cleanDuplicatesHandler);
 app.all('/api/lookup-playstore', lookupPlayStoreHandler);
+app.all('/api/app-events', appEventsHandler);
 
 // Noms des champs d'un bloc JSON ou KEY=valeur, sans jamais afficher les valeurs.
 function listFieldNames(text) {

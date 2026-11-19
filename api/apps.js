@@ -82,11 +82,13 @@ async function handleApps(req, res) {
       // GET /api/apps?assessment_for=:id — détail de l'évaluation TrustiScore (null si non évaluée)
       // Inclut l'historique de la note (gradeHistory : première évaluation + changements).
       if (assessment_for) {
-        const [assessment, gradeHistory] = await Promise.all([
+        // Inclut aussi les événements publiés de l'app (events : fuite, rachat, open source…).
+        const [assessment, gradeHistory, events] = await Promise.all([
           dbService.getAssessmentForApp(assessment_for),
           dbService.getGradeHistoryForApp(assessment_for),
+          dbService.getEventsForApp(assessment_for),
         ]);
-        return res.status(200).json({ success: true, assessment: assessment ? { ...assessment, gradeHistory } : null });
+        return res.status(200).json({ success: true, assessment: assessment ? { ...assessment, gradeHistory } : null, events });
       }
 
       // GET /api/apps?migration_guide_from=:id&migration_guide_to=:id — guide de migration

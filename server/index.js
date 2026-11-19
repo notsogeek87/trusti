@@ -16,6 +16,7 @@ import topAppsHandler from '../api/top-apps.js';
 import suggestToolHandler from '../api/suggest-tool.js';
 import cleanDuplicatesHandler from '../api/clean-duplicates.js';
 import lookupPlayStoreHandler from '../api/lookup-playstore.js';
+import appEventsHandler from '../api/app-events.js';
 import { createDefaultPublicApiRouter } from './publicApi/index.js';
 
 const app = express();
@@ -32,6 +33,7 @@ app.all('/api/top-apps', topAppsHandler);
 app.all('/api/suggest-tool', suggestToolHandler);
 app.all('/api/clean-duplicates', cleanDuplicatesHandler);
 app.all('/api/lookup-playstore', lookupPlayStoreHandler);
+app.all('/api/app-events', appEventsHandler);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
