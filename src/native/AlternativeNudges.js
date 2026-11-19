@@ -14,6 +14,7 @@ import { registerPlugin } from '@capacitor/core';
  * - getNotificationState() -> { history: [{ key, kind, appId, appName, title, text, at, priority }], muted: [appId] }
  * - consumeCompletedMigrations() -> { items: [{ appId, altName }] } : migrations vues terminées par le
  *   téléphone (alternative installée, app quittée désinstallée), à marquer comme faites.
+ * - openSettings() : ouvre les réglages Android des notifications de Trusti (permission refusée).
  * - unmuteAll() : réactive les apps mises en sourdine depuis une notification.
  * - checkPermission() / requestPermission() -> { display: 'granted' | 'denied' | 'prompt' }
  *   (permission POST_NOTIFICATIONS, Android 13+).

@@ -12,7 +12,6 @@ import { GRADE_PRIORITY, isStrictlyBetterGrade } from './alternatives.js';
 export const NUDGE_APP_GRADES = ['C', 'D', 'E'];
 
 const ENABLED_KEY = 'trusti_alt_nudges_enabled';
-const PERMISSION_ASKED_KEY = 'trusti_alt_nudges_permission_asked';
 
 /**
  * @param {Array<object>} myAppsList apps de « Mes Apps » enrichies par
@@ -72,23 +71,5 @@ export const setNudgesEnabled = (enabled) => {
     localStorage.setItem(ENABLED_KEY, enabled ? 'true' : 'false');
   } catch {
     // localStorage indisponible : le réglage reste valable pour la session.
-  }
-};
-
-// La permission Android 13+ n'est demandée automatiquement qu'une seule fois ;
-// ensuite, seulement depuis le réglage (page Espace de stockage).
-export const wasNudgePermissionAsked = () => {
-  try {
-    return localStorage.getItem(PERMISSION_ASKED_KEY) === 'true';
-  } catch {
-    return true;
-  }
-};
-
-export const markNudgePermissionAsked = () => {
-  try {
-    localStorage.setItem(PERMISSION_ASKED_KEY, 'true');
-  } catch {
-    // tant pis : on redemandera au prochain lancement.
   }
 };

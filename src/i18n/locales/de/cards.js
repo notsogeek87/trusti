@@ -49,6 +49,13 @@ export default {
     unmute: "Wieder einschalten",
     blocked: "Die Benachrichtigungen von Trusti sind blockiert: Erlaube sie in den Android-Einstellungen (Apps > Trusti > Benachrichtigungen).",
   },
+  notifPrompt: {
+    title: "Hinweise zu deinen Apps erhalten?",
+    body: "Trusti kann dir Bescheid sagen, wenn eine deiner Apps ein Datenleck hat, ihre Note ändert oder übernommen wird. Höchstens 2 Benachrichtigungen pro Woche, zwischen 9 und 21 Uhr.",
+    privacy: "Alles wird auf deinem Handy berechnet: Die Liste deiner Apps wird nie gesendet.",
+    enable: "Aktivieren",
+    later: "Später",
+  },
   rescan: {
     changedTitle: "Haben sich deine Apps geändert?",
     changedBody: "Starte einen neuen Scan, damit dein TrustiScore aktuell bleibt.",

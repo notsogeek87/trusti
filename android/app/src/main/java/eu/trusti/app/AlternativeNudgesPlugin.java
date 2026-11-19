@@ -3,6 +3,8 @@ package eu.trusti.app;
 import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
+import android.provider.Settings;
 import android.os.Build;
 import androidx.core.app.NotificationManagerCompat;
 import com.getcapacitor.JSArray;
@@ -144,6 +146,26 @@ public class AlternativeNudgesPlugin extends Plugin {
     public void unmuteAll(PluginCall call) {
         NotificationStore.unmuteAll(getContext());
         call.resolve();
+    }
+
+    /** Ouvre les réglages Android des notifications de Trusti (permission refusée). */
+    @PluginMethod
+    public void openSettings(PluginCall call) {
+        Intent intent;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                .putExtra(Settings.EXTRA_APP_PACKAGE, getContext().getPackageName());
+        } else {
+            intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                .setData(Uri.fromParts("package", getContext().getPackageName(), null));
+        }
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        try {
+            getContext().startActivity(intent);
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("Réglages indisponibles", e);
+        }
     }
 
     @PluginMethod

@@ -7,6 +7,8 @@ export default {
   privacy: "Worked out on your device: the list of your apps is never sent.",
   empty: "Nothing new for your apps. Trusti will let you know if a grade changes or if an event concerns them.",
   emptyNoApps: "Add your apps in \"My apps\" to hear about what concerns them.",
+  blocked: "Trusti's notifications are blocked on this phone: you won't be told about a breach or a grade change.",
+  openSettings: "Open settings",
   unread: "New",
   digestTitle: "Your last 30 days",
   digest: {

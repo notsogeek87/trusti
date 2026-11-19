@@ -27,6 +27,15 @@
 
 Une migration vue terminée par le téléphone est aussi marquée comme faite dans « Mes Apps » au prochain lancement (toast « Migration terminée »).
 
+## Permission (Android 13+)
+
+Sur Android 13 et plus, rien n'est notifié tant que la personne n'a pas accepté la permission.
+
+- Dès que « Mes Apps » contient une app et qu'un type de notification est actif, une carte « Être prévenu pour tes apps ? » s'affiche en tête de « Mes Apps » (`NotificationPermissionCard`), avant la fenêtre Android (qu'Android ne laisse montrer que deux fois).
+- « Activer » ouvre la fenêtre Android ; la carte ne revient plus. « Plus tard » la fait revenir 14 jours après, 3 fois au plus (`src/utils/notificationPermission.js`, testé).
+- Permission refusée : un bandeau dans la boîte de réception et dans les réglages ouvre les réglages Android des notifications de Trusti (`openSettings`). L'état est relu à chaque retour dans Trusti.
+- Avant Android 13, les notifications sont autorisées d'office : pas de carte.
+
 ## Règles anti-spam (`NotificationPolicy.java`)
 
 - Une notification par passage au plus, entre 9 h et 21 h.
@@ -74,6 +83,7 @@ Les textes des événements (titre, résumé) sont en français uniquement pour 
 | `api/app-events.js` | Route `/api/app-events` |
 | `src/utils/notificationInbox.js` | Boîte de réception, bilan, priorités, données envoyées au natif (pur, testé) |
 | `src/utils/notificationSettings.js` | Nouveaux réglages |
+| `src/utils/notificationPermission.js`, `src/hooks/useNotificationPermission.js`, `src/components/NotificationPermissionCard.jsx` | Carte d'explication et demande de la permission |
 | `src/hooks/useNotificationCenter.js` | Chargement, état lu, synchronisation avec le moteur natif |
 | `src/components/NotificationInboxPage.jsx`, `layout/Header.jsx` | Boîte de réception, cloche et badge |
 | `src/components/AlternativeNudgesSection.jsx` | Réglages (Espace de stockage) |

@@ -5,6 +5,7 @@ import { useAuth } from './hooks/useAuth';
 import { useAlternativeNudges } from './hooks/useAlternativeNudges';
 import { useGradeChanges } from './hooks/useGradeChanges';
 import { useNotificationCenter } from './hooks/useNotificationCenter';
+import { useNotificationPermission } from './hooks/useNotificationPermission';
 import { useIsSmallViewport } from './hooks/useIsSmallViewport';
 import { usePreferenceToggle } from './hooks/usePreferenceToggle';
 import { useMyAppsView } from './hooks/useMyAppsView';
@@ -41,6 +42,7 @@ import MyAppsSummary from './components/MyAppsSummary';
 import DataHygieneCard from './components/DataHygieneCard';
 import GradeChangesCard from './components/GradeChangesCard';
 import MigrationsInProgressCard from './components/MigrationsInProgressCard';
+import NotificationPermissionCard from './components/NotificationPermissionCard';
 import MyAppsFilterMenu from './components/MyAppsFilterMenu';
 import MyAppsFilterNotice from './components/MyAppsFilterNotice';
 import LandingPage from './components/LandingPage';
@@ -201,6 +203,12 @@ const App = () => {
     catalogApps: apps,
     settings: notificationSettings,
     onMigrationsCompleted: handleMigrationsCompleted,
+  });
+
+  // Permission Android 13+ : proposée une fois « Mes Apps » rempli, après une carte d'explication
+  const notificationPermission = useNotificationPermission({
+    hasApps: myApps.size > 0,
+    anyEnabled: nudgesEnabled || gradeAlertsEnabled || eventAlertsEnabled || installAlertsEnabled || migrationRemindersEnabled,
   });
 
   // Fiche à ouvrir depuis une notification Android ou la boîte de réception :
@@ -420,6 +428,8 @@ const App = () => {
         onOpenApp={(appId, action) => setPendingOpen({ appId, action })}
         onOpenSettings={isNativeAndroid ? () => { setShowInbox(false); setShowStorageManager(true); } : undefined}
         onMarkAllRead={notifications.markAllRead}
+        notificationsBlocked={notificationPermission.permission === 'denied'}
+        onOpenNotificationSettings={notificationPermission.openSettings}
       />
     );
   }
@@ -487,6 +497,12 @@ const App = () => {
                   >
                     {myApps.size > 0 && <DataHygieneCard myApps={filteredApps} catalogApps={apps} />}
                   </MyAppsSummary>
+                  {notificationPermission.showOffer && (
+                    <NotificationPermissionCard
+                      onAccept={notificationPermission.accept}
+                      onLater={notificationPermission.later}
+                    />
+                  )}
                   <GradeChangesCard
                     changes={gradeChanges}
                     apps={filteredApps}

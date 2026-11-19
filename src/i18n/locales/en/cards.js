@@ -49,6 +49,13 @@ export default {
     unmute: "Turn back on",
     blocked: "Trusti's notifications are blocked: allow them in Android settings (Apps > Trusti > Notifications).",
   },
+  notifPrompt: {
+    title: "Get alerts about your apps?",
+    body: "Trusti can let you know if one of your apps has a data breach, changes grade or is bought. At most 2 notifications a week, between 9 am and 9 pm.",
+    privacy: "Everything is worked out on your phone: the list of your apps is never sent.",
+    enable: "Turn on",
+    later: "Later",
+  },
   rescan: {
     changedTitle: "Have your apps changed?",
     changedBody: "Run a new scan to keep your TrustiScore up to date.",

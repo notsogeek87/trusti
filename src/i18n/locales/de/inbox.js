@@ -7,6 +7,8 @@ export default {
   privacy: "Auf deinem Gerät berechnet: Die Liste deiner Apps wird nie gesendet.",
   empty: "Nichts Neues zu deinen Apps. Trusti sagt dir Bescheid, wenn sich eine Note ändert oder ein Ereignis sie betrifft.",
   emptyNoApps: "Füge deine Apps unter „Meine Apps“ hinzu, um zu erfahren, was sie betrifft.",
+  blocked: "Die Benachrichtigungen von Trusti sind auf diesem Handy blockiert: Du erfährst nichts von einem Datenleck oder einer Notenänderung.",
+  openSettings: "Einstellungen öffnen",
   unread: "Neu",
   digestTitle: "Deine letzten 30 Tage",
   digest: {

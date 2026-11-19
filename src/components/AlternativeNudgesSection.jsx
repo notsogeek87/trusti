@@ -149,7 +149,14 @@ const AlternativeNudgesSection = ({
       )}
       {blocked && (
         <p className="mt-2 text-xs text-rose-600">
-          {t('cards.notifications.blocked')}
+          {t('cards.notifications.blocked')}{' '}
+          <button
+            type="button"
+            onClick={() => AlternativeNudges.openSettings().catch(() => {})}
+            className="font-bold underline"
+          >
+            {t('inbox.openSettings')}
+          </button>
         </p>
       )}
     </section>

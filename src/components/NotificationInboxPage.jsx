@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import {
   ChevronLeft, Bell, TrendingDown, TrendingUp, AlertTriangle, Sparkles, Info, Route, PartyPopper,
-  Smartphone, CalendarDays, ExternalLink, ChevronRight, Settings, ShieldCheck,
+  Smartphone, CalendarDays, ExternalLink, ChevronRight, Settings, ShieldCheck, BellOff,
 } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
 import { isDigestEmpty } from '../utils/notificationInbox';
@@ -132,7 +132,10 @@ const InboxItem = ({ item, unread, onOpenApp }) => {
  * terminées, bilans). Tout est marqué comme lu en quittant la page.
  * Données : useNotificationCenter.
  */
-const NotificationInboxPage = ({ items, unreadKeys, digest, hasApps, onClose, onOpenApp, onOpenSettings, onMarkAllRead }) => {
+const NotificationInboxPage = ({
+  items, unreadKeys, digest, hasApps, onClose, onOpenApp, onOpenSettings, onMarkAllRead,
+  notificationsBlocked = false, onOpenNotificationSettings,
+}) => {
   // Quitter la page (retour, ouverture d'une fiche) vaut lecture : on garde la dernière
   // version de onMarkAllRead, qui connaît les éléments chargés entre-temps.
   const markAllReadRef = useRef(onMarkAllRead);
@@ -163,6 +166,25 @@ const NotificationInboxPage = ({ items, unreadKeys, digest, hasApps, onClose, on
       </header>
 
       <main className="max-w-2xl mx-auto p-4 md:p-6 space-y-4">
+        {/* Permission refusée (APK) : rien ne peut arriver sur le téléphone, on le dit */}
+        {notificationsBlocked && (
+          <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-3">
+            <BellOff size={16} className="text-amber-600 shrink-0 mt-0.5" />
+            <div className="min-w-0 flex-1">
+              <p className="text-xs text-amber-800 leading-relaxed">{t('inbox.blocked')}</p>
+              {onOpenNotificationSettings && (
+                <button
+                  type="button"
+                  onClick={onOpenNotificationSettings}
+                  className="mt-1.5 text-[11px] font-bold text-amber-800 underline"
+                >
+                  {t('inbox.openSettings')}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {!isDigestEmpty(digest) && <DigestCard digest={digest} />}
 
         {items.length === 0 ? (

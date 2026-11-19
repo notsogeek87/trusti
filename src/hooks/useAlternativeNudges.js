@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react';
 import AlternativeNudges from '../native/AlternativeNudges';
 import { isNativeAndroid } from '../utils/platform';
-import {
-  buildNudgeCandidates,
-  isMyAppsListSettled,
-  wasNudgePermissionAsked,
-  markNudgePermissionAsked,
-} from '../utils/alternativeNudges';
+import { buildNudgeCandidates, isMyAppsListSettled } from '../utils/alternativeNudges';
 
 /**
  * Suggestions d'alternatives par notification (Android natif uniquement).
  * - À chaque affichage complet de « Mes Apps », recalcule les apps à suggérer et les transmet
  *   au natif, qui décide seul (même Trusti fermé) quand envoyer une notification.
- * - Demande la permission de notifier une seule fois, dès qu'une suggestion est possible.
  * - Renvoie l'app ouverte depuis une notification ({ appId, action }, null sinon) et de quoi l'acquitter.
  *
  * @param {{ myAppsList: object[], isMyAppsTab: boolean, migratedApps: Set<string>,
@@ -49,20 +43,13 @@ export const useAlternativeNudges = ({ myAppsList, isMyAppsTab, migratedApps, cu
     setCandidates(prev => (JSON.stringify(prev) === JSON.stringify(next) ? prev : next));
   }, [myAppsList, isMyAppsTab, migratedApps, customMigrations]);
 
-  // Synchronisation vers le natif, puis demande unique de la permission
+  // Synchronisation vers le natif (la permission est demandée par useNotificationPermission)
   useEffect(() => {
     // Sans candidates encore calculées, on ne transmet qu'une désactivation
     if (!isNativeAndroid || (!candidates && enabled)) return;
     AlternativeNudges.sync({ enabled, candidates: candidates || [] }).catch((error) => {
       console.error('Synchronisation des suggestions impossible:', error);
     });
-
-    if (enabled && candidates?.length > 0 && !wasNudgePermissionAsked()) {
-      markNudgePermissionAsked();
-      AlternativeNudges.checkPermission()
-        .then(({ display }) => (display === 'prompt' ? AlternativeNudges.requestPermission() : null))
-        .catch(() => {});
-    }
   }, [candidates, enabled]);
 
   return {

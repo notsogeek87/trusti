@@ -49,6 +49,13 @@ export default {
     unmute: "Réactiver",
     blocked: "Les notifications de Trusti sont bloquées : autorisez-les dans les réglages Android (Applis > Trusti > Notifications).",
   },
+  notifPrompt: {
+    title: "Être prévenu pour tes apps ?",
+    body: "Trusti peut te prévenir si une de tes apps a une fuite de données, change de note ou est rachetée. 2 notifications par semaine au plus, entre 9 h et 21 h.",
+    privacy: "Tout est calculé sur ton téléphone : la liste de tes apps n'est jamais envoyée.",
+    enable: "Activer",
+    later: "Plus tard",
+  },
   rescan: {
     changedTitle: "Tes apps ont changé ?",
     changedBody: "Relance un scan pour garder ton TrustiScore à jour.",
