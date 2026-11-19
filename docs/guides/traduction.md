@@ -57,7 +57,7 @@ Les textes du catalogue restent en français dans leurs tables (`applications`,
 | entity | entity_id | field |
 |---|---|---|
 | `application` | id de l'app | `reason`, `description`, `teamPickReason` |
-| `assessment` | id de l'app | `summary`, `rationale.<critère>` |
+| `assessment` | id de l'app | `rationale.<critère>` |
 | `migration_guide` | `<id app>:export` ou `<id app>:import` | `summary`, `steps`, `notes`, `directExport` |
 
 - `value` : chaîne JSON pour un texte, liste de chaînes pour `steps` et `notes` (même
@@ -83,8 +83,55 @@ DO UPDATE SET value = EXCLUDED.value, source_hash = EXCLUDED.source_hash,
               translated_by = EXCLUDED.translated_by, updated_at = NOW();
 ```
 
+### Rafraîchir les traductions
+
+Le contenu en base évolue (nouvelles fiches, évaluations révisées, guides). Une traduction
+dont le français a changé est ignorée par l'API, qui sert alors le français : il faut donc
+la refaire. Pour savoir quoi :
+
+```bash
+node scripts/translations-report.js           # résumé par type de texte et par langue
+node scripts/translations-report.js --list    # + les 50 premiers textes à traduire
+node scripts/translations-report.js --check   # code de sortie 1 s'il reste quelque chose
+```
+
+Le rapport est en lecture seule. Il dit pour chaque ligne attendue (français non vide ×
+`en`, `de`) si la traduction est `missing` (absente), `stale` (empreinte différente : le
+français a changé) ou `invalid` (valeur vide, ou liste de longueur différente du français).
+Les traductions orphelines (fiche supprimée) sont comptées à part ; les supprimer demande
+la même validation que toute écriture en base. Logique et tests : `server/translationsReport.js`,
+`tests/server/translationsReport.test.js`.
+
+Pour traduire une série :
+
+1. Lister les textes français à traduire (même requête que l'API, par exemple les raisons
+   dont l'empreinte ne correspond plus).
+2. Traduire en gardant le style des textes existants : phrases courtes, vouvoiement
+   (« Sie ») en allemand, citations anglaises de politiques laissées telles quelles,
+   guillemets typographiques « … » remplacés par `"…"` en anglais et `„…“` en allemand,
+   Markdown (`**gras**`, liens, `code`) conservé.
+3. Faire valider l'écriture, puis insérer avec `ON CONFLICT … DO UPDATE` (exemple ci-dessus).
+   Pour les textes qui se répètent (justifications identiques d'une app à l'autre), on
+   traduit chaque texte distinct une fois et on l'écrit pour toutes les fiches concernées,
+   en calculant `source_hash` avec `md5()` dans la requête.
+4. Relancer le rapport : tout doit repasser à `ok`.
+
+Pour les listes (`steps`, `notes`), l'empreinte est celle du JSON compact de la liste de
+chaînes : en SQL `md5('[' || string_agg(to_json(e)::text, ',' ORDER BY o) || ']')`, avec
+le texte seul des notes (le niveau `danger` reste celui du français). Les libellés
+d'interface cités dans les guides (Google Takeout, Facebook, Instagram…) ont été traduits
+de mémoire : à relire quand un service change son interface.
+
+## État des traductions
+
+Au 2026-11-19, tout le contenu du catalogue est traduit en anglais et en allemand
+(traduction par Claude, style validé par David, `translated_by` en base) : raisons,
+descriptions et raisons « choix de l'équipe » des fiches, justifications de toutes les
+évaluations, 29 guides de migration. Le rapport ci-dessus doit afficher « Tout est
+traduit et à jour ». Toute nouvelle fiche ou révision d'évaluation ajoute des lignes à
+traduire : lancer le rapport après chaque lot d'évaluation.
+
 ## Non traduit à ce jour
 
-- Contenu en base : la structure est prête, aucune traduction n'est encore saisie.
 - Messages d'erreur renvoyés par le serveur ou le système Android (affichés tels quels).
 - `public/retours.html` (page des bêta-testeurs).
