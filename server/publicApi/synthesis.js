@@ -24,6 +24,32 @@ const LABELS = {
   },
 };
 
+// Exposition aux lois étrangères, d'après le niveau du critère « gouvernance » (0 à 4 points).
+// Le niveau 4 couvre aussi les projets libres sans société propriétaire : d'où « ou communautaire ».
+const JURISDICTION = {
+  fr: [
+    'Éditeur soumis au Cloud Act américain ou à des lois extraterritoriales équivalentes.',
+    'Éditeur étranger, hors Union européenne, avec des garanties contractuelles minimales.',
+    'Filiale européenne d\'un groupe étranger : exposition modérée aux lois extraterritoriales.',
+    'Groupe européen à l\'actionnariat mixte : protection partielle contre les lois extraterritoriales.',
+    'Gouvernance européenne ou communautaire : pas d\'exposition identifiée aux lois extraterritoriales.',
+  ],
+  en: [
+    'Publisher subject to the US Cloud Act or equivalent extraterritorial laws.',
+    'Foreign publisher, outside the European Union, with minimal contractual safeguards.',
+    'European subsidiary of a foreign group: moderate exposure to extraterritorial laws.',
+    'European group with mixed ownership: partial protection against extraterritorial laws.',
+    'European or community governance: no identified exposure to extraterritorial laws.',
+  ],
+  de: [
+    'Anbieter unterliegt dem US-amerikanischen Cloud Act oder vergleichbaren extraterritorialen Gesetzen.',
+    'Ausländischer Anbieter außerhalb der Europäischen Union mit minimalen vertraglichen Garantien.',
+    'Europäische Tochtergesellschaft eines ausländischen Konzerns: mäßige Gefährdung durch extraterritoriale Gesetze.',
+    'Europäischer Konzern mit gemischten Eigentumsverhältnissen: teilweiser Schutz vor extraterritorialen Gesetzen.',
+    'Europäische oder gemeinschaftliche Governance: keine erkennbare Gefährdung durch extraterritoriale Gesetze.',
+  ],
+};
+
 const band = (s) => (s >= 80 ? 'A' : s >= 60 ? 'B' : s >= 40 ? 'C' : s >= 20 ? 'D' : 'E');
 
 const TEXT = {
@@ -81,8 +107,13 @@ export function buildSynthesis(assessment, lang = 'fr') {
     parts.push(t.overridden(assessment.computedGrade, assessment.grade));
   }
 
+  const gov = (assessment.criteria || []).find(c => c.key === 'gouvernance');
+  const jurisdiction = (JURISDICTION[lang] || JURISDICTION.fr)[gov?.points];
+  if (jurisdiction) parts.push(jurisdiction);
+
+  // La gouvernance a sa propre phrase : elle n'est pas répétée dans les points forts / faibles.
   const criteria = [...(assessment.criteria || [])]
-    .filter(c => Number.isFinite(c.points) && labels[c.key])
+    .filter(c => Number.isFinite(c.points) && labels[c.key] && c.key !== 'gouvernance')
     .sort((a, b) => CRITERIA_ORDER.indexOf(a.key) - CRITERIA_ORDER.indexOf(b.key));
   const strong = criteria.filter(c => c.points >= 3).map(c => labels[c.key]);
   const weak = criteria.filter(c => c.points <= 1).map(c => labels[c.key]);

@@ -83,12 +83,15 @@ traduction à jour existe (table `content_translations`). Sinon le texte reste e
 ### Synthèse d'une évaluation (`summary`)
 
 `summary` est **généré** par `server/publicApi/synthesis.js` à partir des données structurées,
-directement dans la langue demandée : score et note, correction éditoriale éventuelle, points
-forts (critères à 3 ou 4 points), points faibles (0 ou 1), fourchette si l'évaluation est
-provisoire, sources à vérifier. Exemple :
+directement dans la langue demandée : score et note, correction éditoriale éventuelle,
+exposition aux lois étrangères (d'après le niveau du critère gouvernance, de 0 « Cloud Act » à
+4 « gouvernance européenne ou communautaire »), points forts (autres critères à 3 ou 4 points),
+points faibles (0 ou 1), fourchette si l'évaluation est provisoire, sources à vérifier. La
+colonne `jurisdiction` des apps, presque vide, n'est pas utilisée. Exemple :
 
-> Score de 70/100, note B. Points forts : gouvernance et juridiction ; localisation des données ;
-> conformité et certifications ; transparence. Points faibles : contrôle technique. Évaluation
+> Score de 70/100, note B. Gouvernance européenne ou communautaire : pas d'exposition identifiée
+> aux lois extraterritoriales. Points forts : localisation des données ; conformité et
+> certifications ; transparence. Points faibles : contrôle technique. Évaluation
 > provisoire : selon les points à confirmer, le score pourrait aller de 65 (B) à 70 (B).
 > Certaines sources restent à vérifier.
 

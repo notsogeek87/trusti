@@ -303,13 +303,17 @@ test('synthèse : score, forces, faiblesses, fourchette, correction de note', ()
     criteria: [crit('controle', 1), crit('gouvernance', 4), crit('localisation', 3), crit('conformite', 2), crit('transparence', 0)],
   };
   assert.equal(buildSynthesis(base, 'fr'),
-    'Score de 64/100, note B. Points forts : gouvernance et juridiction ; localisation des données. '
+    'Score de 64/100, note B. Gouvernance européenne ou communautaire : pas d\'exposition identifiée aux lois extraterritoriales. '
+    + 'Points forts : localisation des données. '
     + 'Points faibles : contrôle technique ; transparence. Évaluation provisoire : selon les points à confirmer, '
     + 'le score pourrait aller de 59 (C) à 70 (B). Certaines sources restent à vérifier.');
-  assert.match(buildSynthesis(base, 'de'), /^Punktzahl 64\/100, Note B\. Stärken: Governance und Rechtsraum; Datenstandort\./);
+  assert.match(buildSynthesis(base, 'de'), /^Punktzahl 64\/100, Note B\. Europäische oder gemeinschaftliche Governance: .*Stärken: Datenstandort\./);
 
   const sys = { ...base, grade: 'E', score: 33, computedGrade: 'D', overridden: true, provisional: false, hasUnverifiedSources: false, scoreRange: { min: 33, max: 33 } };
   assert.match(buildSynthesis(sys, 'fr'), /Note abaissée de D à E par décision éditoriale\./);
+  const us = { ...sys, criteria: [crit('gouvernance', 0), crit('controle', 1)] };
+  assert.match(buildSynthesis(us, 'en'), /Publisher subject to the US Cloud Act/);
+  assert.ok(!buildSynthesis(us, 'fr').includes('Points faibles : gouvernance'), 'gouvernance pas répétée');
   assert.ok(!buildSynthesis(sys, 'fr').includes('provisoire'), 'fourchette nulle et non provisoire : rien');
 
   const empty = { grade: 'E', score: null, criteria: [], provisional: false };
