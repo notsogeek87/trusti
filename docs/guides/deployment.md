@@ -34,6 +34,24 @@ La base vit dans le PostgreSQL d'Hyperfluid. Le workflow manuel
 `hyperfluid-import-db.yml` a servi à la copier depuis l'ancienne base Neon ; il
 **écrase** la base cible, à ne relancer qu'en connaissance de cause.
 
+### Sauvegarde
+
+Le workflow manuel `hyperfluid-backup-db.yml` (onglet Actions > « Hyperfluid
+backup db » > Run workflow) fait un `pg_dump` de la base Hyperfluid, le chiffre
+(gpg AES256) et le publie en artefact `trusti-AAAA-MM-JJ` conservé 30 jours.
+Il ne modifie rien dans la base.
+
+Prérequis : Public Endpoint de la base réactivé côté Hyperfluid, et secrets
+`HYPERFLUID_DATABASE_URL`, `HYPERFLUID_DB_ENDPOINT` et `BACKUP_PASSPHRASE`
+(phrase de passe à garder ailleurs : sans elle, la sauvegarde est illisible).
+
+Restauration :
+
+```bash
+gpg --decrypt trusti-AAAA-MM-JJ.dump.gpg > trusti.dump
+pg_restore --no-owner --no-acl --clean --if-exists -d "$DATABASE_URL" trusti.dump
+```
+
 ## Développement local
 
 ```bash

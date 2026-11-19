@@ -1,0 +1,87 @@
+name: Hyperfluid backup db
+
+# Sauvegarde la base PostgreSQL d'Hyperfluid (pg_dump 17 via Docker), chiffrée.
+# Lancement manuel : onglet Actions > « Hyperfluid backup db » > Run workflow.
+# Lecture seule sur la base : rien n'est modifié.
+# Secrets requis : HYPERFLUID_DATABASE_URL (adresse ou bloc JSON),
+# HYPERFLUID_DB_ENDPOINT (IP:port du Public Endpoint, à réactiver avant),
+# BACKUP_PASSPHRASE (phrase de passe du chiffrement, à garder hors du dépôt).
+# Le dépôt est public : le dump n'est publié que chiffré (gpg AES256) et aucun
+# log ne doit contenir d'URL ni de données.
+#
+# Restauration :
+#   gpg --decrypt trusti-AAAA-MM-JJ.dump.gpg > trusti.dump
+#   pg_restore --no-owner --no-acl --clean --if-exists -d "$DATABASE_URL" trusti.dump
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    env:
+      DST: ${{ secrets.HYPERFLUID_DATABASE_URL }}
+      DST_ENDPOINT: ${{ secrets.HYPERFLUID_DB_ENDPOINT }}
+      PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+      PGIMG: postgres:17-alpine
+    steps:
+      - name: Vérifier les secrets
+        run: |
+          [ -n "$DST" ] || { echo "Secret HYPERFLUID_DATABASE_URL manquant"; exit 1; }
+          [ -n "$PASSPHRASE" ] || { echo "Secret BACKUP_PASSPHRASE manquant"; exit 1; }
+
+      # Même logique que hyperfluid-import-db.yml : adresse postgres://... ou bloc JSON
+      # « (all fields) » copié depuis la console Hyperfluid.
+      - name: Préparer l'adresse Hyperfluid
+        run: |
+          set -euo pipefail
+          case "$DST" in
+            "{"*)
+              URL=$(printf '%s' "$DST" | python3 -c '
+          import json, sys, urllib.parse as u
+          d = json.load(sys.stdin)
+          url = d.get("database-url") or d.get("database_url")
+          if not url:
+              import os
+              host = d.get("host"); port = d.get("port")
+              ep = os.environ.get("DST_ENDPOINT", "").strip()
+              if ep:
+                  host, port = ep.rsplit(":", 1)
+              if not host or not port:
+                  sys.exit("Adresse publique inconnue : créer le secret HYPERFLUID_DB_ENDPOINT (IP:port du Public Endpoint)")
+              url = "postgres://%s:%s@%s:%s/%s" % (u.quote(d["username"], safe=""), u.quote(d["password"], safe=""), host, port, d["database"])
+          print(url)')
+              echo "::add-mask::$URL"
+              { echo "DST<<EOF_DST"; echo "$URL"; echo "EOF_DST"; } >> "$GITHUB_ENV"
+              echo "Adresse construite depuis le bloc JSON"
+              ;;
+            *) echo "Adresse fournie directement" ;;
+          esac
+
+      - name: Exporter et chiffrer
+        run: |
+          set -euo pipefail
+          NAME="trusti-$(date -u +%F)"
+          echo "NAME=$NAME" >> "$GITHUB_ENV"
+          if ! docker run --rm -e URL="$DST" "$PGIMG" sh -c 'pg_dump "$URL" -Fc --no-owner --no-acl' \
+              > "$RUNNER_TEMP/$NAME.dump" 2> "$RUNNER_TEMP/dump.log"; then
+            echo "Export impossible :"
+            sed -E 's#[a-z]+://[^ ]+#<url>#g; s/[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/<ip>/g; s/port [0-9]+/port <port>/g; s/"[^"]*"/"…"/g' "$RUNNER_TEMP/dump.log" | cut -c1-200
+            exit 2
+          fi
+          # Contrôle : le dump doit être lisible et contenir des données
+          docker run --rm -i "$PGIMG" pg_restore -l < "$RUNNER_TEMP/$NAME.dump" > "$RUNNER_TEMP/toc.txt"
+          echo "Export terminé ($(wc -c < "$RUNNER_TEMP/$NAME.dump") octets, $(grep -c 'TABLE DATA' "$RUNNER_TEMP/toc.txt") tables de données)"
+          printf '%s' "$PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
+            --symmetric --cipher-algo AES256 -o "$RUNNER_TEMP/$NAME.dump.gpg" "$RUNNER_TEMP/$NAME.dump"
+          rm -f "$RUNNER_TEMP/$NAME.dump" "$RUNNER_TEMP/dump.log" "$RUNNER_TEMP/toc.txt"
+
+      - name: Publier l'artefact chiffré
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.NAME }}
+          path: ${{ runner.temp }}/${{ env.NAME }}.dump.gpg
+          retention-days: 30
+          if-no-files-found: error
