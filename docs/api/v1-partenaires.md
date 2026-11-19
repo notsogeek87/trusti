@@ -1,0 +1,120 @@
+# API partenaires `/api/v1` (lecture seule)
+
+**Pour qui / Pourquoi** : pour les développeurs d'un partenaire qui veulent afficher ou
+réutiliser les notes TrustiScore et leur détail (critères, justifications, sources) dans
+leur propre service. C'est aussi la référence pour qui modifie `server/publicApi/`.
+
+- Base : `https://api.trusti-score.eu/api/v1`
+- Spécification OpenAPI 3.1 (sans clé) : `GET /api/v1/openapi.json`
+- Code : `server/publicApi/` (`router.js` pour les routes, `format.js` pour le contrat de
+  réponse, `partners.js` pour les clés, `openapi.js` pour la spec) et
+  `server/database/postgres/public-api.js` pour les requêtes. Tests :
+  `tests/server/publicApi.test.js`.
+- Créer ou révoquer une clé : [guide API partenaires](../guides/api-partenaires.md).
+- Pourquoi une API séparée de `/api/apps` : voir
+  [l'ADR du 2026-11-19](../architecture/2026-11-19-api-partenaires-v1.md).
+
+## Authentification
+
+Chaque partenaire reçoit sa propre clé `tsk_...`, à envoyer dans l'en-tête `Authorization` :
+
+```bash
+curl -H "Authorization: Bearer tsk_xxxxxxxx" \
+  "https://api.trusti-score.eu/api/v1/apps?grade=A,B&per_page=20"
+```
+
+L'API s'appelle **depuis un serveur**. Elle n'envoie pas d'en-têtes CORS : la clé ne doit
+jamais se retrouver dans le code d'une page web.
+
+## Format des réponses
+
+Toutes les réponses ont la forme `{ data, meta }`. `meta` porte toujours la licence et
+l'attribution à afficher :
+
+```json
+{
+  "data": [ { "id": "signal", "name": "Signal", "grade": "A", "...": "..." } ],
+  "meta": {
+    "apiVersion": "1.0.0",
+    "license": "CC-BY-4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/deed.fr",
+    "attribution": "Source : TrustiScore (https://trusti-score.eu)",
+    "lang": "fr",
+    "pagination": { "page": 1, "perPage": 20, "total": 205, "totalPages": 11 }
+  }
+}
+```
+
+Les erreurs ont la forme `{ "error": { "code", "message" } }` :
+
+| Statut | `code` | Cas |
+|---|---|---|
+| 400 | `bad_request` | Paramètre invalide (note inconnue, date mal formée, `per_page` > 100…) |
+| 401 | `unauthorized` | Clé absente, inconnue ou désactivée |
+| 404 | `not_found` / `not_assessed` | App ou route inconnue / app sans évaluation détaillée |
+| 405 | `method_not_allowed` | Tout sauf `GET` ou `HEAD` |
+| 429 | `rate_limited` | Limite de débit atteinte (voir `Retry-After`) |
+| 500 | `internal_error` | Erreur serveur (le détail n'est jamais renvoyé) |
+
+## Routes
+
+| Route | Contenu |
+|---|---|
+| `GET /apps` | Liste triée par nom. `page`, `per_page` (≤ 100, 50 par défaut), `grade=A,B`, `category`, `q` (≥ 2 caractères, cherche dans le nom), `updated_since=AAAA-MM-JJ`, `lang` |
+| `GET /apps/{id}` | Fiche d'une app |
+| `GET /apps/{id}/assessment` | Détail de l'évaluation : score sur 100, fourchette, note calculée et note corrigée à la main (`overridden`), critères (points, niveau, confiance, justification, sources avec `toConfirm`), historique de la note |
+| `GET /apps/{id}/alternatives` | Alternatives strictement mieux notées (même calcul que l'app) |
+| `GET /grade-changes?since=` | Changements de note nets (90 jours par défaut, 365 au plus) |
+| `GET /categories` | Catégories et nombre d'apps |
+| `GET /export` | Toutes les apps avec leur évaluation détaillée (`assessmentDetail`, sans l'historique), environ 1 à 2 Mo. Régénéré toutes les 10 minutes au plus |
+| `GET /openapi.json` | Spécification (seule route sans clé) |
+
+`lang=en|de` traduit la raison de la note, la description, le résumé et les justifications
+quand une traduction à jour existe (table `content_translations`). Sinon le texte reste en
+français.
+
+### Champs d'une app
+
+`id`, `name`, `grade` (A à E), `category`, `developer`, `jurisdiction`, `isEuropean`,
+`isOpenSource`, `license` (licence logicielle de l'app), `website`, `icon` (URL https ou
+null), `gradeReason`, `description`, `links` (`playStore`, `appStore`, `fDroid`, `github`,
+`other`), `assessment` (résumé `{ score, provisional, assessedAt }` ou null), `trustiUrl`
+(fiche publique sur Trusti), `updatedAt`.
+
+Les champs internes de l'interface (couleur, popularité, choix de l'équipe, permissions
+Android…) ne sortent pas.
+
+## Synchronisation conseillée
+
+1. Première copie : `GET /export`.
+2. Ensuite, une fois par jour : `GET /apps?updated_since=<date du dernier passage>`,
+   en paginant. Cela renvoie les apps modifiées ou réévaluées.
+3. Pour le détail d'une app modifiée : `GET /apps/{id}/assessment`.
+
+```js
+// Node 18+ : toutes les apps notées A modifiées depuis le 1er novembre
+const res = await fetch(
+  'https://api.trusti-score.eu/api/v1/apps?grade=A&updated_since=2026-11-01&per_page=100',
+  { headers: { Authorization: `Bearer ${process.env.TRUSTI_API_KEY}` } },
+);
+if (res.status === 429) await sleep(Number(res.headers.get('retry-after')) * 1000);
+const { data, meta } = await res.json();
+```
+
+## Limites et cache
+
+- Débit par partenaire : `rate_per_minute` en base (60 par défaut), annoncé dans
+  `X-RateLimit-Limit`.
+- Clés refusées : 30 essais par IP sur 10 minutes, puis 429.
+- Cache mémoire côté serveur : 60 s par URL (10 min pour `/export`). Une clé désactivée en
+  base est refusée au plus tard 60 s après.
+- Réponses `Cache-Control: private, max-age=60`, `Vary: Authorization`.
+
+## Règles de stabilité (pour qui modifie le code)
+
+- Un champ peut être **ajouté** en v1. Il ne doit jamais être retiré ni renommé : cela
+  exige une `/api/v2`.
+- Tout changement de format se fait dans `server/publicApi/format.js` **et**
+  `server/publicApi/openapi.js`. Les tests vérifient que chaque route figure dans la spec
+  et que les champs internes ne sortent pas.
+- La licence des données se change en un seul endroit : `DATA_LICENSE` dans `format.js`.

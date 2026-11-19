@@ -9,6 +9,7 @@ import express from 'express';
 import { pickDriver, resolveDatabaseUrl } from './database/sql.js';
 import { createRateLimiter, createApiCache } from './protection.js';
 import { mountMcp } from './mcp.js';
+import { createDefaultPublicApiRouter } from './publicApi/index.js';
 import pg from 'pg';
 
 import appsHandler from '../api/apps.js';
@@ -51,6 +52,10 @@ if (mountMcp(app, {
 })) {
   console.log('Point d\'accès MCP actif sur /mcp');
 }
+
+// API partenaires en lecture (/api/v1) : clé par partenaire et limites propres,
+// montée avant la limite générale par IP (un partenaire appelle depuis une seule IP).
+app.use('/api/v1', createDefaultPublicApiRouter());
 
 // Limites de débit par IP : générale, puis plus strictes pour les routes coûteuses ou ouvertes.
 const apiLimiter = createRateLimiter({ windowMs: 60_000, max: 120 });

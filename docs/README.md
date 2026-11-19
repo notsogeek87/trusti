@@ -17,10 +17,12 @@ démarrage rapide.
 - [2026-10-11 : Tailwind compilé au build, fin du CDN](architecture/2026-10-11-tailwind-compile-au-build.md)
 - [2026-11-10 : découpage par domaine (App.jsx, hooks, accès aux données) — où mettre quoi](architecture/2026-11-10-decoupage-par-domaine.md)
 - [2026-11-13 : bascule sur Hyperfluid, relais Vercel temporaire](architecture/2026-11-13-bascule-hyperfluid-relais-vercel.md)
+- [2026-11-19 : API partenaires `/api/v1`, séparée de l'API interne](architecture/2026-11-19-api-partenaires-v1.md)
 
 ## 📡 API
 
 - [Référence API](api/README.md) — toutes les routes serverless (`api/`)
+- [API partenaires `/api/v1`](api/v1-partenaires.md) — lecture seule, clé par partenaire, licence CC BY 4.0
 
 ## 📘 Guides
 
@@ -32,6 +34,7 @@ démarrage rapide.
 - [Migration guidée — remplacer une app par une alternative, pas à pas](guides/migration-guidee.md)
 - [Alertes de changement de note — carte « Mes Apps », historique, notification Android](guides/alertes-notes.md)
 - [Nettoyeur de stockage — fichiers inutiles, filtres et permission](guides/nettoyeur-stockage.md)
+- [Gérer les partenaires de l'API `/api/v1` — clés, débit, suspension](guides/api-partenaires.md)
 - [Évaluer mon organisation — parc applicatif d'une entreprise ou d'un organisme](guides/evaluation-organisation.md)
 
 ## 🗄️ Legacy

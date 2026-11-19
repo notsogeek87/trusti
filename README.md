@@ -85,6 +85,9 @@ restent sur son appareil (localStorage). Le catalogue d'apps n'est modifiable qu
 des appels serveur à serveur portant l'en-tête `x-api-key` (variable `API_KEY`), par
 exemple depuis n8n. Sans `API_KEY`, toute écriture est refusée.
 
+Les partenaires lisent les notes et leur détail via une API séparée, en lecture seule,
+avec une clé par partenaire : [`/api/v1`](./docs/api/v1-partenaires.md).
+
 ## 🗄️ Base de données
 
 Le projet utilise **PostgreSQL**, hébergé chez **Hyperfluid** depuis le 13 novembre 2026
@@ -212,7 +215,7 @@ Toute la documentation détaillée (architecture, référence API, guides) vit
 dans **[/docs](./docs/README.md)** :
 
 - [Architecture](./docs/architecture/) — dont l'[app Android native](./docs/architecture/android-native-app-scan.md)
-- [Référence API](./docs/api/README.md)
+- [Référence API](./docs/api/README.md) — dont l'[API partenaires `/api/v1`](./docs/api/v1-partenaires.md)
 - [Guides](./docs/guides/) — déploiement, migration PostgreSQL, authentification, icônes, Play Store, mises à jour Android
 - [Legacy](./docs/legacy/) — documentation obsolète conservée pour l'historique
 

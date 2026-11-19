@@ -13,6 +13,11 @@ données (façade ; les requêtes sont rangées par domaine dans
 En local, voir
 `npm run server` / `npm run dev:all` dans [../guides/deployment.md](../guides/deployment.md).
 
+## API partenaires (`/api/v1`)
+
+API en lecture seule pour les partenaires, avec une clé par partenaire et un format stable,
+séparée des routes ci-dessous (qui servent l'app) : voir [v1-partenaires.md](v1-partenaires.md).
+
 ## Apps
 
 ### `GET/POST/PUT/DELETE /api/apps` — `api/apps.js`

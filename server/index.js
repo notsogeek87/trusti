@@ -16,12 +16,14 @@ import topAppsHandler from '../api/top-apps.js';
 import suggestToolHandler from '../api/suggest-tool.js';
 import cleanDuplicatesHandler from '../api/clean-duplicates.js';
 import lookupPlayStoreHandler from '../api/lookup-playstore.js';
+import { createDefaultPublicApiRouter } from './publicApi/index.js';
 
 const app = express();
 const PORT = 3001;
 
 app.use(express.json());
 
+app.use('/api/v1', createDefaultPublicApiRouter());
 app.all('/api/apps', appsHandler);
 app.all('/api/custom-trusti-apps', customTrustiAppsHandler);
 app.all('/api/star-apps', starAppsHandler);
