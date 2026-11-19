@@ -1,11 +1,11 @@
 /**
  * API partenaires en lecture seule : /api/v1 (montée par server/production.js et server/index.js).
  *
- * - Authentification : « Authorization: Bearer tsk_... », une clé par partenaire (partners.js).
- * - Limite de débit par partenaire (rate_per_minute en base) et par IP pour les clés refusées.
+ * - Ouverte sans clé : limite de débit par adresse IP (ANONYMOUS_RATE_PER_MINUTE), plus une
+ *   limite propre à /export (lourd). CORS ouvert : utilisable aussi depuis un navigateur.
+ * - Clé facultative « Authorization: Bearer tsk_... » (partners.js) : quota propre au partenaire
+ *   (rate_per_minute en base). Une clé fournie mais invalide est refusée (401), jamais ignorée.
  * - Réponses { data, meta } avec licence et attribution (format.js), erreurs { error: { code, message } }.
- * - Pas d'en-têtes CORS : l'API s'appelle depuis un serveur, jamais depuis un navigateur
- *   (la clé serait visible de tous). Seule la spec OpenAPI est lisible sans clé.
  *
  * Les accès base sont injectés (`deps`) pour pouvoir tester le routeur sans base.
  */
@@ -27,10 +27,17 @@ const ID_PATTERN = /^[A-Za-z0-9._:-]{1,200}$/;
  * @param {object} deps.db lectures : listApps, getAppsByIds, getCategories, getAllAssessments,
  *   getAssessment, getGradeHistory, getGradeChangesSince, getAlternativeIds, translate
  */
-export function createPublicApiRouter({ resolvePartner, db, cacheTtlMs = 60_000, exportTtlMs = 10 * 60_000 }) {
+export const ANONYMOUS_RATE_PER_MINUTE = 60;
+export const ANONYMOUS_EXPORTS_PER_HOUR = 20;
+
+export function createPublicApiRouter({
+  resolvePartner, db, cacheTtlMs = 60_000, exportTtlMs = 10 * 60_000,
+  anonymousRatePerMinute = ANONYMOUS_RATE_PER_MINUTE, anonymousExportsPerHour = ANONYMOUS_EXPORTS_PER_HOUR,
+}) {
   const router = express.Router();
   const failedAuthLimiter = createRateLimiter({ windowMs: 10 * 60_000, max: 30 });
   const partnerLimiters = new Map(); // débit/minute -> limiteur
+  const anonymousExportLimiter = createRateLimiter({ windowMs: 60 * 60_000, max: anonymousExportsPerHour });
   const cache = createApiCache({ ttlMs: cacheTtlMs });
   const exportCache = createApiCache({ ttlMs: exportTtlMs, maxEntries: 5 });
 
@@ -39,25 +46,35 @@ export function createPublicApiRouter({ resolvePartner, db, cacheTtlMs = 60_000,
     return partnerLimiters.get(rate);
   };
 
-  // Lecture seule.
+  // CORS ouvert, lecture seule.
   router.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Authorization');
+    res.setHeader('Access-Control-Expose-Headers', 'Retry-After, X-RateLimit-Limit');
+    if (req.method === 'OPTIONS') {
+      res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+      res.setHeader('Access-Control-Max-Age', '86400');
+      return res.status(204).end();
+    }
     if (req.method === 'GET' || req.method === 'HEAD') return next();
     res.setHeader('Allow', 'GET, HEAD');
     return res.status(405).json(errorBody('method_not_allowed', 'API en lecture seule : GET uniquement.'));
   });
 
   router.get('/openapi.json', (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Cache-Control', 'public, max-age=3600');
     res.json(openApiSpec);
   });
 
-  // Authentification par clé partenaire, puis limite de débit du partenaire.
+  // Sans clé : visiteur anonyme limité par IP. Avec clé : partenaire et son propre quota.
   router.use(async (req, res, next) => {
     try {
       const ip = req.ip || 'inconnue';
-      const key = extractKey(req.headers.authorization);
-      const partner = key ? await resolvePartner(key) : null;
+      const hasAuth = typeof req.headers.authorization === 'string' && req.headers.authorization.trim() !== '';
+      const key = hasAuth ? extractKey(req.headers.authorization) : null;
+      const partner = hasAuth
+        ? (key ? await resolvePartner(key) : null)
+        : { id: `ip:${ip}`, name: null, ratePerMinute: anonymousRatePerMinute, anonymous: true };
       if (!partner) {
         const { allowed, retryAfterSec } = failedAuthLimiter.check(ip);
         if (!allowed) {
@@ -65,7 +82,7 @@ export function createPublicApiRouter({ resolvePartner, db, cacheTtlMs = 60_000,
           return res.status(429).json(errorBody('rate_limited', 'Trop de tentatives refusées, réessayez plus tard.'));
         }
         res.setHeader('WWW-Authenticate', 'Bearer realm="trusti-api"');
-        return res.status(401).json(errorBody('unauthorized', 'Clé absente ou invalide : en-tête « Authorization: Bearer <clé> » attendu.'));
+        return res.status(401).json(errorBody('unauthorized', 'Clé invalide ou désactivée. L\'API s\'utilise aussi sans clé : retirez l\'en-tête Authorization.'));
       }
       const { allowed, retryAfterSec } = limiterFor(partner.ratePerMinute).check(partner.id);
       res.setHeader('X-RateLimit-Limit', String(partner.ratePerMinute));
@@ -74,7 +91,7 @@ export function createPublicApiRouter({ resolvePartner, db, cacheTtlMs = 60_000,
         return res.status(429).json(errorBody('rate_limited', `Limite de ${partner.ratePerMinute} requêtes par minute atteinte.`));
       }
       req.partner = partner;
-      res.setHeader('Cache-Control', 'private, max-age=60');
+      res.setHeader('Cache-Control', partner.anonymous ? 'public, max-age=60' : 'private, max-age=60');
       res.setHeader('Vary', 'Authorization');
       return next();
     } catch (error) {
@@ -112,6 +129,7 @@ export function createPublicApiRouter({ resolvePartner, db, cacheTtlMs = 60_000,
       endpoints: ['/api/v1/apps', '/api/v1/apps/{id}', '/api/v1/apps/{id}/assessment', '/api/v1/apps/{id}/alternatives',
         '/api/v1/grade-changes', '/api/v1/categories', '/api/v1/export'],
       partner: req.partner.name,
+      rateLimitPerMinute: req.partner.ratePerMinute,
     }));
   });
 
@@ -186,7 +204,15 @@ export function createPublicApiRouter({ resolvePartner, db, cacheTtlMs = 60_000,
     }
   });
 
-  router.get('/export', cached(exportCache), async (req, res, next) => {
+  const exportLimit = (req, res, next) => {
+    if (!req.partner.anonymous) return next();
+    const { allowed, retryAfterSec } = anonymousExportLimiter.check(req.partner.id);
+    if (allowed) return next();
+    res.setHeader('Retry-After', String(retryAfterSec));
+    return res.status(429).json(errorBody('rate_limited', `Export limité à ${anonymousExportsPerHour} par heure sans clé.`));
+  };
+
+  router.get('/export', exportLimit, cached(exportCache), async (req, res, next) => {
     try {
       const filters = { grades: null, category: null, q: null, updatedSince: null, limit: 100_000, offset: 0 };
       const [{ rows }, assessmentMap] = await Promise.all([db.listApps(filters), db.getAllAssessments()]);

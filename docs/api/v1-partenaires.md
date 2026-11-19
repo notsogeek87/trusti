@@ -1,8 +1,9 @@
-# API partenaires `/api/v1` (lecture seule)
+# API ouverte `/api/v1` (lecture seule)
 
-**Pour qui / Pourquoi** : pour les développeurs d'un partenaire qui veulent afficher ou
-réutiliser les notes TrustiScore et leur détail (critères, justifications, sources) dans
-leur propre service. C'est aussi la référence pour qui modifie `server/publicApi/`.
+**Pour qui / Pourquoi** : pour les développeurs qui veulent afficher ou réutiliser les notes
+TrustiScore et leur détail (critères, justifications, sources) dans leur propre service, et
+pour qui modifie `server/publicApi/`. Page publique destinée aux développeurs :
+<https://trusti-score.eu/developpeurs> (dépôt `trusti-score`).
 
 - Base : `https://api.trusti-score.eu/api/v1`
 - Spécification OpenAPI 3.1 (sans clé) : `GET /api/v1/openapi.json`
@@ -10,21 +11,28 @@ leur propre service. C'est aussi la référence pour qui modifie `server/publicA
   réponse, `partners.js` pour les clés, `openapi.js` pour la spec) et
   `server/database/postgres/public-api.js` pour les requêtes. Tests :
   `tests/server/publicApi.test.js`.
-- Créer ou révoquer une clé : [guide API partenaires](../guides/api-partenaires.md).
+- Clé facultative (quota dédié) : [guide API partenaires](../guides/api-partenaires.md).
 - Pourquoi une API séparée de `/api/apps` : voir
   [l'ADR du 2026-11-19](../architecture/2026-11-19-api-partenaires-v1.md).
 
-## Authentification
+## Accès : sans clé, clé facultative
 
-Chaque partenaire reçoit sa propre clé `tsk_...`, à envoyer dans l'en-tête `Authorization` :
+L'API est **ouverte, sans clé ni inscription**. Elle est limitée par adresse IP et le CORS
+est ouvert (`Access-Control-Allow-Origin: *`) : on peut l'appeler depuis un serveur comme
+depuis un navigateur.
 
 ```bash
-curl -H "Authorization: Bearer tsk_xxxxxxxx" \
-  "https://api.trusti-score.eu/api/v1/apps?grade=A,B&per_page=20"
+curl "https://api.trusti-score.eu/api/v1/apps?grade=A,B&per_page=20"
 ```
 
-L'API s'appelle **depuis un serveur**. Elle n'envoie pas d'en-têtes CORS : la clé ne doit
-jamais se retrouver dans le code d'une page web.
+Un partenaire qui a besoin de plus de volume peut recevoir une **clé facultative** `tsk_...`,
+à envoyer dans l'en-tête `Authorization`. Elle lui donne son propre quota. Une clé fournie
+mais invalide est refusée (401), jamais ignorée en silence. Une clé ne doit jamais se
+retrouver dans le code d'une page web.
+
+```bash
+curl -H "Authorization: Bearer tsk_xxxxxxxx" "https://api.trusti-score.eu/api/v1/apps"
+```
 
 ## Format des réponses
 
@@ -50,7 +58,7 @@ Les erreurs ont la forme `{ "error": { "code", "message" } }` :
 | Statut | `code` | Cas |
 |---|---|---|
 | 400 | `bad_request` | Paramètre invalide (note inconnue, date mal formée, `per_page` > 100…) |
-| 401 | `unauthorized` | Clé absente, inconnue ou désactivée |
+| 401 | `unauthorized` | Clé fournie mais inconnue, mal formée ou désactivée (jamais sans en-tête `Authorization`) |
 | 404 | `not_found` / `not_assessed` | App ou route inconnue / app sans évaluation détaillée |
 | 405 | `method_not_allowed` | Tout sauf `GET` ou `HEAD` |
 | 429 | `rate_limited` | Limite de débit atteinte (voir `Retry-After`) |
@@ -67,7 +75,7 @@ Les erreurs ont la forme `{ "error": { "code", "message" } }` :
 | `GET /grade-changes?since=` | Changements de note nets (90 jours par défaut, 365 au plus) |
 | `GET /categories` | Catégories et nombre d'apps |
 | `GET /export` | Toutes les apps avec leur évaluation détaillée (`assessmentDetail`, sans l'historique), environ 1 à 2 Mo. Régénéré toutes les 10 minutes au plus |
-| `GET /openapi.json` | Spécification (seule route sans clé) |
+| `GET /openapi.json` | Spécification OpenAPI (hors limite de débit) |
 
 `lang=en|de` traduit la raison de la note, la description, le résumé et les justifications
 quand une traduction à jour existe (table `content_translations`). Sinon le texte reste en
@@ -95,7 +103,7 @@ Android…) ne sortent pas.
 // Node 18+ : toutes les apps notées A modifiées depuis le 1er novembre
 const res = await fetch(
   'https://api.trusti-score.eu/api/v1/apps?grade=A&updated_since=2026-11-01&per_page=100',
-  { headers: { Authorization: `Bearer ${process.env.TRUSTI_API_KEY}` } },
+  // Avec une clé partenaire : { headers: { Authorization: `Bearer ${process.env.TRUSTI_API_KEY}` } }
 );
 if (res.status === 429) await sleep(Number(res.headers.get('retry-after')) * 1000);
 const { data, meta } = await res.json();
@@ -103,12 +111,15 @@ const { data, meta } = await res.json();
 
 ## Limites et cache
 
-- Débit par partenaire : `rate_per_minute` en base (60 par défaut), annoncé dans
-  `X-RateLimit-Limit`.
+- Sans clé : 60 requêtes par minute et par IP (`ANONYMOUS_RATE_PER_MINUTE`), et 20 exports
+  par heure et par IP (`ANONYMOUS_EXPORTS_PER_HOUR`), dans `server/publicApi/router.js`.
+- Avec clé : `rate_per_minute` du partenaire en base (60 par défaut), sans plafond d'export.
+- Le quota en cours est annoncé dans `X-RateLimit-Limit`.
 - Clés refusées : 30 essais par IP sur 10 minutes, puis 429.
 - Cache mémoire côté serveur : 60 s par URL (10 min pour `/export`). Une clé désactivée en
   base est refusée au plus tard 60 s après.
-- Réponses `Cache-Control: private, max-age=60`, `Vary: Authorization`.
+- Réponses `Cache-Control: public, max-age=60` sans clé, `private, max-age=60` avec clé,
+  toujours `Vary: Authorization`.
 
 ## Règles de stabilité (pour qui modifie le code)
 

@@ -85,8 +85,9 @@ restent sur son appareil (localStorage). Le catalogue d'apps n'est modifiable qu
 des appels serveur à serveur portant l'en-tête `x-api-key` (variable `API_KEY`), par
 exemple depuis n8n. Sans `API_KEY`, toute écriture est refusée.
 
-Les partenaires lisent les notes et leur détail via une API séparée, en lecture seule,
-avec une clé par partenaire : [`/api/v1`](./docs/api/v1-partenaires.md).
+Les notes et leur détail sont aussi publiés par une API ouverte, en lecture seule et sans
+clé : [`/api/v1`](./docs/api/v1-partenaires.md) (page développeurs :
+<https://trusti-score.eu/developpeurs>).
 
 ## 🗄️ Base de données
 
@@ -215,7 +216,7 @@ Toute la documentation détaillée (architecture, référence API, guides) vit
 dans **[/docs](./docs/README.md)** :
 
 - [Architecture](./docs/architecture/) — dont l'[app Android native](./docs/architecture/android-native-app-scan.md)
-- [Référence API](./docs/api/README.md) — dont l'[API partenaires `/api/v1`](./docs/api/v1-partenaires.md)
+- [Référence API](./docs/api/README.md) — dont l'[API ouverte `/api/v1`](./docs/api/v1-partenaires.md)
 - [Guides](./docs/guides/) — déploiement, migration PostgreSQL, authentification, icônes, Play Store, mises à jour Android
 - [Legacy](./docs/legacy/) — documentation obsolète conservée pour l'historique
 

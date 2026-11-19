@@ -1,9 +1,11 @@
-# Gérer les partenaires de l'API `/api/v1`
+# Clés partenaires (facultatives) de l'API `/api/v1`
 
-**Pour qui / Pourquoi** : pour David ou l'agent qui ouvre, suspend ou ajuste l'accès d'un
-partenaire à l'API en lecture ([référence](../api/v1-partenaires.md)).
+**Pour qui / Pourquoi** : pour David ou l'agent qui donne à un partenaire un quota plus élevé
+que l'accès libre ([référence](../api/v1-partenaires.md)). L'API fonctionne **sans clé** :
+ce guide ne sert que pour les partenaires qui dépassent les limites par IP (60 requêtes par
+minute, 20 exports par heure).
 
-## 1. Activer l'API (une seule fois)
+## 1. Activer les clés (une seule fois, au premier partenaire)
 
 Créer la table `api_partners` sur la base Trusti (idempotent) :
 
@@ -12,7 +14,7 @@ psql "$DATABASE_URL" -f server/database/migrations/2026-11-19-api-partners.sql
 ```
 
 Ou via le connecteur Trusti_DB, en collant le contenu du fichier. Tant que la table
-n'existe pas, toutes les clés sont refusées (401) : l'API est déployée mais fermée.
+n'existe pas, l'API marche sans clé et toute clé est refusée (401).
 
 ## 2. Créer une clé pour un partenaire
 
@@ -23,8 +25,9 @@ node scripts/create-partner-key.js "Nom du partenaire" 120 "contact@partenaire.e
 
 Le script affiche :
 
-1. **la clé** `tsk_...` à transmettre au partenaire par un canal sûr. Elle n'est
-   stockée nulle part et ne peut pas être retrouvée ensuite.
+1. **la clé** `tsk_...` à transmettre au partenaire par un canal sûr (lien à usage unique,
+   Signal, e-mail chiffré avec mot de passe donné à part ; jamais un e-mail en clair). Elle
+   n'est stockée nulle part et ne peut pas être retrouvée ensuite.
 2. **l'`INSERT`** à exécuter sur la base. Seule l'empreinte SHA-256 de la clé y est
    enregistrée.
 

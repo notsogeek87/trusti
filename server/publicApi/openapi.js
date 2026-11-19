@@ -23,13 +23,15 @@ const errors = (...codes) => Object.fromEntries(codes.map(c => [c, { $ref: `#/co
 export const openApiSpec = {
   openapi: '3.1.0',
   info: {
-    title: 'API TrustiScore (partenaires)',
+    title: 'API ouverte TrustiScore',
     version: API_VERSION,
     description: [
-      'API en lecture seule des notes TrustiScore (souveraineté numérique, A à E) et de leur détail.',
+      'API ouverte, en lecture seule, des notes TrustiScore (souveraineté numérique, A à E) et de leur détail.',
       '',
-      'Authentification : une clé par partenaire, dans l\'en-tête `Authorization: Bearer tsk_...`.',
-      'À appeler depuis un serveur uniquement (pas de CORS : la clé ne doit jamais être exposée dans un navigateur).',
+      'Accès libre, sans clé ni inscription : 60 requêtes par minute par adresse IP, et 20 exports complets par heure.',
+      'CORS ouvert : appelable depuis un serveur comme depuis un navigateur.',
+      'Besoin de plus ? Une clé partenaire facultative (`Authorization: Bearer tsk_...`) donne un quota dédié : la demander à Trusti.',
+      'Ne jamais mettre une clé partenaire dans le code d\'une page web.',
       '',
       `Données sous licence ${DATA_LICENSE.license} (${DATA_LICENSE.licenseUrl}). Attribution obligatoire : « ${DATA_LICENSE.attribution} ».`,
       '',
@@ -38,7 +40,7 @@ export const openApiSpec = {
     license: { name: DATA_LICENSE.license, url: DATA_LICENSE.licenseUrl },
   },
   servers: [{ url: 'https://api.trusti-score.eu/api/v1' }],
-  security: [{ partnerKey: [] }],
+  security: [{}, { partnerKey: [] }],
   paths: {
     '/apps': {
       get: {
@@ -111,7 +113,7 @@ export const openApiSpec = {
     '/export': {
       get: {
         summary: 'Export complet',
-        description: 'Toutes les apps avec leur évaluation détaillée (`assessmentDetail`, sans l\'historique). Régénéré toutes les 10 minutes au plus. Préférer cette route à une pagination complète pour une copie locale.',
+        description: 'Toutes les apps avec leur évaluation détaillée (`assessmentDetail`, sans l\'historique). Régénéré toutes les 10 minutes au plus. Préférer cette route à une pagination complète pour une copie locale. Sans clé : 20 par heure et par IP.',
         parameters: [langParam],
         responses: {
           200: ok({ type: 'array', items: { allOf: [ref('App'), { type: 'object', properties: { assessmentDetail: { oneOf: [ref('Assessment'), { type: 'null' }] } } }] } }),
@@ -122,7 +124,7 @@ export const openApiSpec = {
   },
   components: {
     securitySchemes: {
-      partnerKey: { type: 'http', scheme: 'bearer', description: 'Clé partenaire `tsk_...` fournie par Trusti.' },
+      partnerKey: { type: 'http', scheme: 'bearer', description: 'Facultatif. Clé partenaire `tsk_...` fournie par Trusti, pour un quota dédié.' },
     },
     parameters: {
       lang: {
@@ -132,7 +134,7 @@ export const openApiSpec = {
     },
     responses: {
       E400: { description: 'Paramètre invalide', content: { 'application/json': { schema: ref('Error') } } },
-      E401: { description: 'Clé absente ou invalide', content: { 'application/json': { schema: ref('Error') } } },
+      E401: { description: 'Clé fournie mais invalide ou désactivée (sans en-tête Authorization, pas de 401)', content: { 'application/json': { schema: ref('Error') } } },
       E404: { description: 'Introuvable (`not_found`) ou non évalué (`not_assessed`)', content: { 'application/json': { schema: ref('Error') } } },
       E429: { description: 'Limite de débit atteinte (voir l\'en-tête Retry-After)', content: { 'application/json': { schema: ref('Error') } } },
     },

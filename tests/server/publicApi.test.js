@@ -137,6 +137,8 @@ app.use('/api/v1', createPublicApiRouter({
   db: fakeDb,
   cacheTtlMs: 0,
   exportTtlMs: 0,
+  anonymousRatePerMinute: 5,
+  anonymousExportsPerHour: 1,
 }));
 const server = app.listen(0);
 after(() => server.close());
@@ -144,13 +146,29 @@ const base = () => `http://127.0.0.1:${server.address().port}/api/v1`;
 const get = (path, key = KEY, init = {}) =>
   fetch(base() + path, { ...init, headers: key ? { Authorization: `Bearer ${key}` } : {} });
 
-test('sans clé ou clé inconnue : 401, pas de données', async () => {
-  for (const key of [null, 'tsk_pas_une_vraie_cle_000000000']) {
-    const res = await get('/apps', key);
-    assert.equal(res.status, 401);
+test('sans clé : accès libre, cache public, quota anonyme annoncé', async () => {
+  const res = await get('/apps', null);
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get('cache-control'), 'public, max-age=60');
+  assert.equal(res.headers.get('x-ratelimit-limit'), '5');
+  assert.equal((await res.json()).data.length, 2);
+});
+
+test('clé fournie mais invalide ou mal formée : 401, jamais ignorée', async () => {
+  for (const auth of ['Bearer tsk_pas_une_vraie_cle_000000000', 'Basic abc', 'Bearer']) {
+    const res = await fetch(`${base()}/apps`, { headers: { Authorization: auth } });
+    assert.equal(res.status, 401, auth);
     assert.equal((await res.json()).error.code, 'unauthorized');
     assert.ok(res.headers.get('www-authenticate'));
   }
+});
+
+test('CORS ouvert et pré-requête OPTIONS', async () => {
+  const res = await fetch(`${base()}/apps`, { method: 'OPTIONS' });
+  assert.equal(res.status, 204);
+  assert.equal(res.headers.get('access-control-allow-origin'), '*');
+  assert.match(res.headers.get('access-control-allow-methods'), /GET/);
+  assert.match(res.headers.get('access-control-allow-headers'), /Authorization/);
 });
 
 test('spec OpenAPI lisible sans clé et à jour des routes', async () => {
@@ -173,8 +191,9 @@ test('écriture refusée : 405', async () => {
 test('GET /apps : enveloppe, licence, pagination, filtres', async () => {
   const res = await get('/apps?grade=A&per_page=10');
   assert.equal(res.status, 200);
-  assert.equal(res.headers.get('access-control-allow-origin'), null, 'pas de CORS');
+  assert.equal(res.headers.get('access-control-allow-origin'), '*');
   assert.equal(res.headers.get('x-ratelimit-limit'), '1000');
+  assert.equal(res.headers.get('cache-control'), 'private, max-age=60', 'réponse avec clé : pas de cache partagé');
   const body = await res.json();
   assert.equal(body.meta.license, 'CC-BY-4.0');
   assert.deepEqual(body.meta.pagination, { page: 1, perPage: 10, total: 1, totalPages: 1 });
@@ -245,4 +264,31 @@ test('limite de débit par partenaire : 429 avec Retry-After', async () => {
   assert.equal(res.status, 429);
   assert.ok(Number(res.headers.get('retry-after')) > 0);
   assert.equal((await get('/categories')).status, 200, 'les autres partenaires ne sont pas touchés');
+});
+
+test('sans clé : limite par IP puis 429, export limité à part', async () => {
+  // Une IP neuve n'est pas simulable ici : le compteur anonyme de 127.0.0.1 a déjà servi.
+  let res;
+  for (let i = 0; i < 6; i += 1) res = await get('/categories', null);
+  assert.equal(res.status, 429);
+  assert.equal((await res.json()).error.code, 'rate_limited');
+  assert.equal((await get('/categories')).status, 200, 'avec clé : quota propre, non touché');
+});
+
+test('export sans clé : plafond horaire dédié', async () => {
+  const app2 = express();
+  app2.use('/api/v1', createPublicApiRouter({
+    resolvePartner: async () => null, db: fakeDb, cacheTtlMs: 0, exportTtlMs: 0,
+    anonymousRatePerMinute: 100, anonymousExportsPerHour: 1,
+  }));
+  const srv = app2.listen(0);
+  try {
+    const url = `http://127.0.0.1:${srv.address().port}/api/v1/export`;
+    assert.equal((await fetch(url)).status, 200);
+    const second = await fetch(url);
+    assert.equal(second.status, 429);
+    assert.match((await second.json()).error.message, /par heure/);
+  } finally {
+    srv.close();
+  }
 });
