@@ -55,3 +55,9 @@ test('ne divulgue pas la trace interne ni le motif brut', () => {
   assert.equal('trace' in a, false);
   assert.equal(JSON.stringify(a).includes('David'), false);
 });
+
+test('ne renvoie jamais le résumé interne (note de travail de la chaîne d\'évaluation)', () => {
+  const a = formatAssessmentFromDB({ ...row, summary: 'Réserve levée par David le 2026-10-10' });
+  assert.ok(!('summary' in a));
+  assert.ok(!JSON.stringify(a).includes('David'));
+});

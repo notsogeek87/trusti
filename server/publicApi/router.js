@@ -165,7 +165,7 @@ export function createPublicApiRouter({
         return res.status(404).json(errorBody('not_assessed', 'Cette application n\'a pas encore d\'évaluation détaillée.'));
       }
       const { assessments } = await db.translate(lang(req), { assessments: [assessment] });
-      res.json(envelope(toPublicAssessment(assessments[0], history), langMeta(req)));
+      res.json(envelope(toPublicAssessment(assessments[0], history, lang(req) || 'fr'), langMeta(req)));
     } catch (error) {
       next(error);
     }
@@ -221,7 +221,7 @@ export function createPublicApiRouter({
       const byId = new Map(translated.assessments.map(a => [String(a.appId), a]));
       const data = translated.apps.map(r => ({
         ...toPublicApp(r),
-        assessmentDetail: toPublicAssessment(byId.get(String(r.id)) || null),
+        assessmentDetail: toPublicAssessment(byId.get(String(r.id)) || null, null, lang(req) || 'fr'),
       }));
       res.json(envelope(data, { generatedAt: new Date().toISOString(), count: data.length, ...langMeta(req) }));
     } catch (error) {

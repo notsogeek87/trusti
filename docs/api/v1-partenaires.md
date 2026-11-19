@@ -70,16 +70,30 @@ Les erreurs ont la forme `{ "error": { "code", "message" } }` :
 |---|---|
 | `GET /apps` | Liste triée par nom. `page`, `per_page` (≤ 100, 50 par défaut), `grade=A,B`, `category`, `q` (≥ 2 caractères, cherche dans le nom), `updated_since=AAAA-MM-JJ`, `lang` |
 | `GET /apps/{id}` | Fiche d'une app |
-| `GET /apps/{id}/assessment` | Détail de l'évaluation : score sur 100, fourchette, note calculée et note corrigée à la main (`overridden`), critères (points, niveau, confiance, justification, sources avec `toConfirm`), historique de la note |
+| `GET /apps/{id}/assessment` | Détail de l'évaluation : score sur 100, fourchette, note calculée et note corrigée à la main (`overridden`), synthèse (`summary`), critères (points, niveau, confiance, justification, sources avec `toConfirm`), historique de la note |
 | `GET /apps/{id}/alternatives` | Alternatives strictement mieux notées (même calcul que l'app) |
 | `GET /grade-changes?since=` | Changements de note nets (90 jours par défaut, 365 au plus) |
 | `GET /categories` | Catégories et nombre d'apps |
 | `GET /export` | Toutes les apps avec leur évaluation détaillée (`assessmentDetail`, sans l'historique), environ 1 à 2 Mo. Régénéré toutes les 10 minutes au plus |
 | `GET /openapi.json` | Spécification OpenAPI (hors limite de débit) |
 
-`lang=en|de` traduit la raison de la note, la description, le résumé et les justifications
-quand une traduction à jour existe (table `content_translations`). Sinon le texte reste en
-français.
+`lang=en|de` traduit la raison de la note, la description et les justifications quand une
+traduction à jour existe (table `content_translations`). Sinon le texte reste en français.
+
+### Synthèse d'une évaluation (`summary`)
+
+`summary` est **généré** par `server/publicApi/synthesis.js` à partir des données structurées,
+directement dans la langue demandée : score et note, correction éditoriale éventuelle, points
+forts (critères à 3 ou 4 points), points faibles (0 ou 1), fourchette si l'évaluation est
+provisoire, sources à vérifier. Exemple :
+
+> Score de 70/100, note B. Points forts : gouvernance et juridiction ; localisation des données ;
+> conformité et certifications ; transparence. Points faibles : contrôle technique. Évaluation
+> provisoire : selon les points à confirmer, le score pourrait aller de 65 (B) à 70 (B).
+> Certaines sources restent à vérifier.
+
+Le champ `summary` de la table `app_assessments` est une note de travail de la chaîne
+d'évaluation (trustillm) : il ne sort jamais, ni ici ni dans `/api/apps`.
 
 ### Champs d'une app
 

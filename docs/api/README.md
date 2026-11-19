@@ -45,9 +45,11 @@ Endpoint principal, backé par PostgreSQL (`service-postgres.js`).
   `{ success: true, assessment }`, avec `assessment = null` si l'app n'a pas
   été évaluée ou si la table n'existe pas encore. `assessment` contient `grade`,
   `score`, `scoreRange`, `computedGrade`, `overridden`, `provisional`,
-  `hasUnverifiedSources`, `assessedAt`, `summary` et `criteria[]` (par critère :
+  `hasUnverifiedSources`, `assessedAt` et `criteria[]` (par critère :
   `name`, `points`, `levelTitle`, `levelDescription`, `confidence`, `rationale`,
-  `provisional`, `sources[]` avec `toConfirm` pour les sources non vérifiées).
+  `provisional`, `sources[]` avec `toConfirm` pour les sources non vérifiées). Le champ
+  `summary` de la table n'est **jamais** renvoyé : c'est une note de travail de la chaîne
+  d'évaluation (trustillm), pas un texte public (voir l'API v1 pour la synthèse générée).
   Mise en forme : `server/assessment.js`. Affiché par
   `src/components/assessment/AssessmentDetail.jsx` dans la fiche d'une app
   (masqué en mode enfant pour l'instant) ; sans connexion ou sans évaluation, la

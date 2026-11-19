@@ -198,7 +198,7 @@ export const openApiSpec = {
           provisional: { type: 'boolean' },
           hasUnverifiedSources: { type: 'boolean' },
           assessedAt: { type: ['string', 'null'], format: 'date' },
-          summary: nullableString,
+          summary: { type: 'string', description: 'Synthèse générée à partir du score, des critères et de la fourchette, dans la langue demandée (lang).' },
           criteria: {
             type: 'array',
             items: {

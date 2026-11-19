@@ -31,7 +31,7 @@ test('apps : traduction à jour appliquée, périmée ou absente = français', (
   assert.equal(body.apps[0].reason, 'Hébergé en France', 'la réponse d\'origine n\'est pas modifiée');
 });
 
-test('évaluation : résumé et justification par critère', () => {
+test('évaluation : justification par critère traduite, résumé interne jamais exposé', () => {
   const index = indexTranslations([
     row('assessment', '7', 'summary', 'Good', 'Bien'),
     row('assessment', '7', 'rationale.gouvernance', 'EU company', 'Société européenne'),
@@ -40,7 +40,7 @@ test('évaluation : résumé et justification par critère', () => {
     { key: 'gouvernance', rationale: 'Société européenne' },
     { key: 'donnees', rationale: 'Serveurs en France' },
   ] } }, index);
-  assert.equal(out.assessment.summary, 'Good');
+  assert.equal(out.assessment.summary, 'Bien', 'le résumé interne n\'est plus traduit (il ne sort plus de l\'API)');
   assert.equal(out.assessment.criteria[0].rationale, 'EU company');
   assert.equal(out.assessment.criteria[1].rationale, 'Serveurs en France');
 });

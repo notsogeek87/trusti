@@ -69,7 +69,6 @@ export function applyAssessmentTranslations(assessment, index) {
   const id = assessment.appId;
   return {
     ...assessment,
-    summary: pick(index, 'assessment', id, 'summary', assessment.summary),
     criteria: Array.isArray(assessment.criteria)
       ? assessment.criteria.map(c => ({ ...c, rationale: pick(index, 'assessment', id, `rationale.${c.key}`, c.rationale) }))
       : assessment.criteria,

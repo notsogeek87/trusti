@@ -5,6 +5,7 @@ import { createPublicApiRouter } from '../../server/publicApi/router.js';
 import { createPartnerResolver, extractKey, generateKey, hashKey } from '../../server/publicApi/partners.js';
 import { parseListQuery, toPublicApp, toPublicAssessment, BadRequest, DATA_LICENSE } from '../../server/publicApi/format.js';
 import { openApiSpec } from '../../server/publicApi/openapi.js';
+import { buildSynthesis } from '../../server/publicApi/synthesis.js';
 
 const ROW = {
   id: 'signal', name: 'Signal', trusti_score: 'A', category: 'Messagerie', developer: 'Signal Foundation',
@@ -123,7 +124,7 @@ const fakeDb = {
   async getAlternativeIds(id) { return id === 'whatsapp' ? ['signal'] : []; },
   async translate(lang, { apps = [], assessments = [] }) {
     if (lang !== 'en') return { apps, assessments };
-    return { apps: apps.map(a => ({ ...a, reason: `EN ${a.reason}` })), assessments: assessments.map(a => ({ ...a, summary: 'EN summary' })) };
+    return { apps: apps.map(a => ({ ...a, reason: `EN ${a.reason}` })), assessments: assessments.map(a => ({ ...a, criteria: a.criteria.map(c => ({ ...c, rationale: `EN ${c.rationale}` })) })) };
   },
 };
 
@@ -223,8 +224,9 @@ test('GET /apps/:id et 404', async () => {
 
 test('GET /apps/:id/assessment : détail, ou not_assessed', async () => {
   const body = await (await get('/apps/signal/assessment?lang=en')).json();
-  assert.equal(body.data.criteria[0].rationale, 'Parce que');
-  assert.equal(body.data.summary, 'EN summary');
+  assert.equal(body.data.criteria[0].rationale, 'EN Parce que');
+  assert.match(body.data.summary, /^Score of 82\/100, grade A\./, 'synthèse générée en anglais');
+  assert.ok(!body.data.summary.includes('Résumé'), 'jamais la note interne');
   assert.equal(body.data.gradeHistory.firstAssessedAt, '2026-10-01');
   const res = await get('/apps/whatsapp/assessment');
   assert.equal(res.status, 404);
@@ -291,4 +293,26 @@ test('export sans clé : plafond horaire dédié', async () => {
   } finally {
     srv.close();
   }
+});
+
+test('synthèse : score, forces, faiblesses, fourchette, correction de note', () => {
+  const crit = (key, points) => ({ key, points });
+  const base = {
+    grade: 'B', score: 64, computedGrade: 'B', overridden: false, provisional: true, hasUnverifiedSources: true,
+    scoreRange: { min: 59, max: 70 },
+    criteria: [crit('controle', 1), crit('gouvernance', 4), crit('localisation', 3), crit('conformite', 2), crit('transparence', 0)],
+  };
+  assert.equal(buildSynthesis(base, 'fr'),
+    'Score de 64/100, note B. Points forts : gouvernance et juridiction ; localisation des données. '
+    + 'Points faibles : contrôle technique ; transparence. Évaluation provisoire : selon les points à confirmer, '
+    + 'le score pourrait aller de 59 (C) à 70 (B). Certaines sources restent à vérifier.');
+  assert.match(buildSynthesis(base, 'de'), /^Punktzahl 64\/100, Note B\. Stärken: Governance und Rechtsraum; Datenstandort\./);
+
+  const sys = { ...base, grade: 'E', score: 33, computedGrade: 'D', overridden: true, provisional: false, hasUnverifiedSources: false, scoreRange: { min: 33, max: 33 } };
+  assert.match(buildSynthesis(sys, 'fr'), /Note abaissée de D à E par décision éditoriale\./);
+  assert.ok(!buildSynthesis(sys, 'fr').includes('provisoire'), 'fourchette nulle et non provisoire : rien');
+
+  const empty = { grade: 'E', score: null, criteria: [], provisional: false };
+  assert.match(buildSynthesis(empty, 'en'), /^Grade E, without a detailed score/);
+  assert.equal(buildSynthesis(null), null);
 });

@@ -64,7 +64,9 @@ export function formatAssessmentFromDB(row) {
     provisional: Boolean(row.provisional),
     hasUnverifiedSources: Boolean(row.has_unverified_sources),
     assessedAt: row.assessed_at ? String(row.assessed_at).slice(0, 10) : null,
-    summary: row.summary || null,
+    // `summary` (note de travail de la chaîne d'évaluation) n'est volontairement pas repris :
+    // il n'est pas destiné au public. L'API /api/v1 renvoie une synthèse générée
+    // (server/publicApi/synthesis.js).
     criteria: keys.map(k => formatCriterion(k, raw[k])),
   };
 }

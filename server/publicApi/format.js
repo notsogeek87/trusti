@@ -6,6 +6,7 @@
  * l'interface peut évoluer sans casser les partenaires. Tout changement qui
  * retire ou renomme un champ ici exige une /api/v2.
  */
+import { buildSynthesis } from './synthesis.js';
 
 /** Licence des données servies par l'API. Changer ces trois valeurs suffit. */
 export const DATA_LICENSE = {
@@ -71,8 +72,10 @@ export function toPublicApp(row) {
 /**
  * Évaluation (format de server/assessment.js) + historique -> évaluation publique.
  * Détail complet : critères, points, niveau, confiance, justification, sources.
+ * `summary` est une synthèse générée dans la langue demandée (synthesis.js), jamais
+ * la note de travail interne stockée en base.
  */
-export function toPublicAssessment(assessment, gradeHistory = null) {
+export function toPublicAssessment(assessment, gradeHistory = null, lang = 'fr') {
   if (!assessment) return null;
   return {
     appId: String(assessment.appId),
@@ -84,7 +87,7 @@ export function toPublicAssessment(assessment, gradeHistory = null) {
     provisional: assessment.provisional,
     hasUnverifiedSources: assessment.hasUnverifiedSources,
     assessedAt: assessment.assessedAt,
-    summary: assessment.summary,
+    summary: buildSynthesis(assessment, lang),
     criteria: (assessment.criteria || []).map(c => ({
       key: c.key,
       name: c.name,
