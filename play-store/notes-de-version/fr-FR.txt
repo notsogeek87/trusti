@@ -1,4 +1,5 @@
 Nouveautés :
-• Trusti parle maintenant anglais et allemand : choisissez la langue en haut de l'écran. Par défaut, l'app suit la langue de votre téléphone.
-• Les notifications et la fenêtre de mise à jour suivent aussi la langue du téléphone.
-• Les descriptions des apps restent en français pour l'instant.
+• Une cloche en haut de l'écran rassemble ce qui concerne vos apps : fuite de données, rachat, changement de note.
+• Des notifications plus utiles et plus rares (2 par semaine au plus) : app mal notée tout juste installée, migration à terminer. Bilan mensuel au choix.
+• Les fiches des apps sont traduites en anglais et en allemand.
+• Un lien pour discuter d'une note sur Matrix.

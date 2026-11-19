@@ -1,4 +1,5 @@
 What's new:
-• Trusti now speaks English and German: choose the language at the top of the screen. By default, the app follows your phone's language.
-• Notifications and the update window follow your phone's language too.
-• App descriptions are still in French for now.
+• A bell at the top of the screen gathers what concerns your apps: data breach, acquisition, grade change.
+• More useful and fewer notifications (at most 2 a week): a poorly rated app you just installed, a switch to finish. Optional monthly summary.
+• App pages are now translated into English and German.
+• A link to discuss a grade on Matrix.

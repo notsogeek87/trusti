@@ -1,4 +1,5 @@
 Neu:
-• Trusti gibt es jetzt auf Englisch und Deutsch: Wähle die Sprache oben auf dem Bildschirm. Standardmäßig folgt die App der Sprache deines Handys.
-• Benachrichtigungen und das Update-Fenster folgen ebenfalls der Sprache deines Handys.
-• Die Beschreibungen der Apps sind vorerst noch auf Französisch.
+• Eine Glocke oben auf dem Bildschirm sammelt, was deine Apps betrifft: Datenleck, Übernahme, Notenänderung.
+• Nützlichere und seltenere Benachrichtigungen (höchstens 2 pro Woche): eine schlecht bewertete, gerade installierte App, ein Umstieg zum Abschließen. Monatsübersicht auf Wunsch.
+• Die App-Seiten sind jetzt auf Englisch und Deutsch übersetzt.
+• Ein Link, um über eine Note auf Matrix zu diskutieren.
