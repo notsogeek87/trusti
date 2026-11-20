@@ -57,7 +57,7 @@ test('buildInboxItems : relance de migration seulement après le délai, clé li
   assert.equal(fresh.length, 0);
   const stale = buildInboxItems({ myAppIds: ['w'], migrations: [{ ...migration, updatedAt: NOW - (MIGRATION_REMINDER_DAYS + 1) * DAY }], now: NOW });
   assert.equal(stale.length, 1);
-  assert.equal(stale[0].key, 'migration:w:2');
+  assert.equal(stale[0].key, 'rem:w:2'); // même clé que la relance du téléphone
   assert.equal(stale[0].kind, 'migration');
   // Ancien parcours sans date : pas de relance (on ne sait pas depuis quand il est arrêté)
   assert.equal(buildInboxItems({ myAppIds: ['w'], migrations: [migration], now: NOW }).length, 0);
@@ -71,7 +71,8 @@ test('buildInboxItems : historique natif repris, types inconnus ignorés, doublo
   ];
   const items = buildInboxItems({ myAppIds: [], nativeHistory, now: NOW });
   assert.equal(items.length, 1);
-  assert.equal(items[0].key, 'native:install:tiktok:1');
+  assert.equal(items[0].key, 'install:tiktok:1');
+  assert.equal(items[0].native, true);
   assert.equal(items[0].impact, 'negative');
   assert.equal(items[0].data.title, 'TikTok est noté E');
 });
@@ -122,4 +123,29 @@ test('buildMigrationSync : paquets de l\'app et de l\'alternative choisie', () =
   const [fallback] = buildMigrationSync([{ app, altId: null, altName: null, completed: 1, total: 4 }], catalog);
   assert.equal(fallback.altPackage, 'org.thoughtcrime.securesms');
   assert.equal(fallback.altName, 'Signal');
+});
+
+test('buildInboxItems : la cloche reprend chaque notification reçue, sans doublon', () => {
+  const nativeHistory = [
+    // suggestion d'alternative : reçue, donc listée avec son texte
+    { key: 'nudge:w:2026-11-19', kind: 'nudge', appId: 'w', appName: 'WhatsApp', at: NOW, title: 'WhatsApp est noté D', text: 'Signal (A) fait la même chose', priority: PRIORITY.NUDGE },
+    // relance d'un parcours sans date côté web : seul le téléphone la connaît
+    { key: 'rem:g:1', kind: 'migration', appId: 'g', appName: 'Gmail', at: NOW, title: 'Migration Gmail → Proton Mail', text: 'Étape 1 sur 4', priority: PRIORITY.MIGRATION_REMINDER },
+    // changement de note aussi calculé côté web : une seule ligne (version web)
+    { key: 'grade:s:2026-11-12:A', kind: 'grade', appId: 's', appName: 'Signal', at: NOW, title: 'Signal progresse', text: 'x', priority: PRIORITY.GRADE_UP },
+    // résumé de plusieurs notes : non repris, chaque changement est déjà listé
+    { key: 'grades:2026-11-19:2', kind: 'grade', at: NOW, title: '2 de tes apps ont changé de note', text: 'x', priority: PRIORITY.GRADE_DOWN },
+  ];
+  const items = buildInboxItems({
+    gradeChanges: [{ appId: 's', name: 'Signal', previousGrade: 'B', grade: 'A', date: '2026-11-12' }],
+    myAppIds: ['w', 'g', 's'],
+    nativeHistory,
+    now: NOW,
+  });
+  const keys = items.map(i => i.key);
+  assert.deepEqual(keys.sort(), ['grade:s:2026-11-12:A', 'nudge:w:2026-11-19', 'rem:g:1'].sort());
+  const nudge = items.find(i => i.kind === 'nudge');
+  assert.equal(nudge.native, true);
+  assert.equal(nudge.data.title, 'WhatsApp est noté D');
+  assert.equal(items.find(i => i.key === 'grade:s:2026-11-12:A').native, undefined); // version web, plus riche
 });

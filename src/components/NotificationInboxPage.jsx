@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import {
   ChevronLeft, Bell, TrendingDown, TrendingUp, AlertTriangle, Sparkles, Info, Route, PartyPopper,
-  Smartphone, CalendarDays, ExternalLink, ChevronRight, Settings, ShieldCheck, BellOff,
+  Smartphone, CalendarDays, ExternalLink, ChevronRight, Settings, ShieldCheck, BellOff, Lightbulb,
 } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
 import { isDigestEmpty } from '../utils/notificationInbox';
@@ -23,6 +23,7 @@ function iconFor(item) {
     case 'grade': return item.impact === 'positive' ? TrendingUp : TrendingDown;
     case 'event': return item.impact === 'negative' ? AlertTriangle : item.impact === 'positive' ? Sparkles : Info;
     case 'migration': case 'migrationAltInstalled': return Route;
+    case 'nudge': return Lightbulb;
     case 'migrationDone': return PartyPopper;
     case 'install': return Smartphone;
     case 'digest': return CalendarDays;
@@ -33,6 +34,8 @@ function iconFor(item) {
 /** Titre et texte d'un élément, dans la langue de l'interface (le natif rédige les siens). */
 function describe(item) {
   const { data } = item;
+  // Reçu sur le téléphone : on affiche exactement le texte de la notification.
+  if (item.native) return { title: data.title, text: data.text };
   switch (item.kind) {
     case 'grade': {
       const up = item.impact === 'positive';
@@ -76,7 +79,7 @@ const InboxItem = ({ item, unread, onOpenApp }) => {
   const Icon = iconFor(item);
   const { label, title, text } = describe(item);
   const canOpen = Boolean(item.appId) && item.kind !== 'digest';
-  const isMigration = item.kind === 'migration';
+  const isMigration = item.kind === 'migration' || item.kind === 'migrationAltInstalled';
 
   return (
     <li className={`p-3 rounded-2xl border ${unread ? 'bg-indigo-50/40 border-indigo-100' : 'bg-white border-slate-100'}`}>
@@ -92,7 +95,7 @@ const InboxItem = ({ item, unread, onOpenApp }) => {
           </p>
           <p className="text-sm font-bold text-slate-800 leading-snug mt-0.5">{title}</p>
           {text && <p className="text-xs text-slate-500 leading-relaxed mt-0.5">{text}</p>}
-          {item.kind === 'grade' && (
+          {item.kind === 'grade' && !item.native && (
             <span className="flex items-center gap-1 mt-1.5" aria-hidden="true">
               <ScoreIndicator grade={item.data.previousGrade} />
               <ChevronRight size={12} className="text-slate-300" />

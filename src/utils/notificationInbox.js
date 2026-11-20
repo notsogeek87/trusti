@@ -56,7 +56,7 @@ const isoDay = (time) => new Date(time).toISOString().slice(0, 10);
  *   gradeChanges?: object[],  réponse de GET /api/apps?grade_changes_since=…
  *   myAppIds: Set<string>|string[],
  *   migrations?: object[],    voir buildMigrationSync (parcours en cours)
- *   nativeHistory?: object[], notifications envoyées par le moteur Android (installs, migrations finies, bilans)
+ *   nativeHistory?: object[], notifications réellement envoyées par le moteur Android (toutes sortes)
  *   now?: number,
  * }} input
  * @returns {Array<{key: string, kind: string, appId: string|null, appName: string, date: string,
@@ -98,7 +98,8 @@ export function buildInboxItems({ events, gradeChanges, myAppIds, migrations, na
   for (const m of migrations || []) {
     if (!m?.updatedAt || now - m.updatedAt < MIGRATION_REMINDER_DAYS * DAY_MS) continue;
     items.push({
-      key: `migration:${m.appId}:${m.completed}`,
+      // même clé que la relance envoyée par le téléphone (NotificationSources.migrations)
+      key: `rem:${m.appId}:${m.completed}`,
       kind: 'migration',
       appId: String(m.appId),
       appName: m.appName,
@@ -109,16 +110,19 @@ export function buildInboxItems({ events, gradeChanges, myAppIds, migrations, na
     });
   }
 
-  // Ce que seul le téléphone sait (apps installées) : textes déjà rédigés par le natif.
+  // Tout ce que le téléphone a réellement notifié, avec le texte reçu. Même clé que l'élément
+  // calculé ici (note, événement, relance) : un seul exemplaire, celui rédigé côté web.
+  // Le résumé « N apps ont changé de note » n'est pas repris : chaque changement est déjà listé.
   for (const h of nativeHistory || []) {
-    if (!h?.key || !['install', 'migrationDone', 'migrationAltInstalled', 'digest'].includes(h.kind)) continue;
+    if (!h?.key || !NATIVE_KINDS.includes(h.kind) || String(h.key).startsWith('grades:')) continue;
     items.push({
-      key: `native:${h.key}`,
+      key: String(h.key),
       kind: h.kind,
+      native: true,
       appId: h.appId ? String(h.appId) : null,
       appName: h.appName || '',
       date: isoDay(Number(h.at) || now),
-      impact: h.kind === 'install' ? 'negative' : h.kind === 'digest' ? 'neutral' : 'positive',
+      impact: nativeImpact(h),
       priority: Number(h.priority) || 0,
       data: { title: h.title || '', text: h.text || '' },
     });
@@ -129,6 +133,20 @@ export function buildInboxItems({ events, gradeChanges, myAppIds, migrations, na
   return items
     .filter(item => (seen.has(item.key) ? false : seen.add(item.key)))
     .sort((a, b) => String(b.date).localeCompare(String(a.date)) || b.priority - a.priority);
+}
+
+const NATIVE_KINDS = ['event', 'grade', 'install', 'migration', 'migrationAltInstalled', 'migrationDone', 'nudge', 'digest'];
+
+/** Couleur d'un élément venu du téléphone, d'après son type et sa priorité (même barème). */
+function nativeImpact(h) {
+  const p = Number(h.priority) || 0;
+  switch (h.kind) {
+    case 'install': return 'negative';
+    case 'migrationDone': case 'migrationAltInstalled': return 'positive';
+    case 'grade': return p >= PRIORITY.GRADE_DOWN ? 'negative' : 'positive';
+    case 'event': return p >= PRIORITY.EVENT_NEGATIVE_LOW ? 'negative' : p === PRIORITY.EVENT_POSITIVE ? 'positive' : 'neutral';
+    default: return 'neutral';
+  }
 }
 
 /**
