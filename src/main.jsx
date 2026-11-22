@@ -11,6 +11,10 @@ import './styles/index.css'
 import { App as CapacitorApp } from '@capacitor/app'
 import { resolveStandalonePage, standaloneParentUrl, STANDALONE_PAGES } from './utils/standalonePage.js'
 import { isNativeAndroid } from './utils/platform.js'
+import { loadAnalytics } from './utils/analytics.js'
+
+// Mesure d'audience anonyme (Umami) : site web ou site Android selon la plateforme.
+loadAnalytics({ nativeAndroid: isNativeAndroid })
 
 // Pages autonomes de la rubrique « Organisations », chargées à part : sans
 // leur paramètre d'adresse, l'app s'affiche exactement comme avant.
