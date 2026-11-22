@@ -1,5 +1,2 @@
 What's new:
-• A bell at the top of the screen gathers what concerns your apps: data breach, acquisition, grade change.
-• More useful and fewer notifications (at most 2 a week): a poorly rated app you just installed, a switch to finish. Optional monthly summary.
-• App pages are now translated into English and German.
-• A link to discuss a grade on Matrix.
+• Anonymous, cookie-free analytics hosted in France, to learn which screens matter most to you. No personal data, nothing shared with third parties.

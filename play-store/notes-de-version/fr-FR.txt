@@ -1,5 +1,2 @@
 Nouveautés :
-• Une cloche en haut de l'écran rassemble ce qui concerne vos apps : fuite de données, rachat, changement de note.
-• Des notifications plus utiles et plus rares (2 par semaine au plus) : app mal notée tout juste installée, migration à terminer. Bilan mensuel au choix.
-• Les fiches des apps sont traduites en anglais et en allemand.
-• Un lien pour discuter d'une note sur Matrix.
+• Mesure d'audience anonyme, sans cookie et hébergée en France, pour savoir quels écrans vous servent le plus. Aucune donnée personnelle, rien de partagé avec des tiers.
