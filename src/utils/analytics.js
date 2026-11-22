@@ -14,7 +14,7 @@
 export const UMAMI_SCRIPT_URL = 'https://stats.trusti-score.eu/script.js';
 export const WEB_WEBSITE_ID = 'a48710e8-7c90-4b5d-9e55-4a8b2fc3a320';
 export const WEB_DOMAIN = 'app.trusti-score.eu';
-export const ANDROID_WEBSITE_ID = null;
+export const ANDROID_WEBSITE_ID = 'c60d13de-c8e8-4e1a-9e84-d74d61797a47';
 
 /** Attributs du script Umami pour cette plateforme, ou null s'il ne faut rien charger. */
 export function umamiAttributes({ nativeAndroid }) {
