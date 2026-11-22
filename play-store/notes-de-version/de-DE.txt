@@ -1,5 +1,2 @@
 Neu:
-• Eine Glocke oben auf dem Bildschirm sammelt, was deine Apps betrifft: Datenleck, Übernahme, Notenänderung.
-• Nützlichere und seltenere Benachrichtigungen (höchstens 2 pro Woche): eine schlecht bewertete, gerade installierte App, ein Umstieg zum Abschließen. Monatsübersicht auf Wunsch.
-• Die App-Seiten sind jetzt auf Englisch und Deutsch übersetzt.
-• Ein Link, um über eine Note auf Matrix zu diskutieren.
+• Anonyme Reichweitenmessung ohne Cookies, in Frankreich gehostet, um zu erfahren, welche Bildschirme dir am meisten nützen. Keine personenbezogenen Daten, keine Weitergabe an Dritte.
