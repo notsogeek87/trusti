@@ -139,6 +139,12 @@ app.use((req, res) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     return res.status(405).end();
   }
+  // Visites venues des fiches du site vitrine (liens « Voir dans l'app », ?src=site) :
+  // une ligne de journal, sans IP ni cookie, pour mesurer ce que les fiches apportent.
+  if (req.query.src === 'site') {
+    const appId = String(req.query.app || '').replace(/[^\w.-]/g, '').slice(0, 64) || '-';
+    console.log(`[visite-site] app=${appId}`);
+  }
   res.setHeader('Cache-Control', 'no-cache');
   res.sendFile(path.join(distDir, 'index.html'));
 });
