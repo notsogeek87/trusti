@@ -25,6 +25,7 @@ import {
 import { getMigrationsInProgress } from './utils/migrationGuide';
 import { getAllMigrationGuideStates, removeMigrationGuideState, saveMigrationGuideState } from './utils/migrationGuideStorage';
 import { isNativeAndroid } from './utils/platform';
+import { screenPath, trackScreen } from './utils/analytics';
 
 // Layout
 import Header from './components/layout/Header';
@@ -323,6 +324,22 @@ const App = () => {
       onDismissOnReopen={flow.dismissReopenPrompt}
     />
   );
+
+  // Mesure d'audience : une page vue virtuelle par écran (voir utils/analytics),
+  // une fois l'état initial connu (sinon « Applications » serait compté avant
+  // l'onboarding d'une première visite).
+  const currentScreen = isInitialized ? screenPath({
+    landing: showLandingPage,
+    onboarding: flow.showOnboarding,
+    rescan: flow.showRescan,
+    appDetail: !!selectedApp,
+    storage: showStorageManager,
+    inbox: showInbox,
+    tab: activeTab,
+  }) : null;
+  useEffect(() => {
+    trackScreen(currentScreen);
+  }, [currentScreen]);
 
   const migrationSelector = showMigrationSelector && (
     <MigrationSelectorModal

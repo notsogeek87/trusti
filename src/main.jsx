@@ -11,7 +11,7 @@ import './styles/index.css'
 import { App as CapacitorApp } from '@capacitor/app'
 import { resolveStandalonePage, standaloneParentUrl, STANDALONE_PAGES } from './utils/standalonePage.js'
 import { isNativeAndroid } from './utils/platform.js'
-import { loadAnalytics } from './utils/analytics.js'
+import { loadAnalytics, trackScreen } from './utils/analytics.js'
 
 // Mesure d'audience anonyme (Umami) : site web ou site Android selon la plateforme.
 loadAnalytics({ nativeAndroid: isNativeAndroid })
@@ -28,6 +28,10 @@ const STANDALONE_COMPONENTS = {
 }
 const standalonePage = resolveStandalonePage(window.location.search)
 const StandalonePage = STANDALONE_COMPONENTS[standalonePage]
+
+// Page autonome : une page vue virtuelle à son nom (l'app principale envoie
+// les siennes depuis App.jsx).
+if (StandalonePage) trackScreen(`/${standalonePage}`)
 
 // Pages autonomes dans l'APK : le bouton retour matériel n'émet pas « popstate »
 // et ferme l'app par défaut. On le relie à l'historique (question précédente,
