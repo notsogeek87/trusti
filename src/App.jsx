@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useAppManagement } from './hooks/useAppManagement';
 import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
@@ -149,10 +149,20 @@ const App = () => {
   const myAppsView = useMyAppsView({ activeTab, filteredApps, myApps, customMigrations });
   const { myAppsSorted, myAppsDisplayed } = myAppsView;
 
-  const { openAppDetail, closeAppDetail, resumeMigration, resumeMigrationId } = useAppDetail({
+  const { openAppDetail, closeAppDetail: closeAppDetailOnly, resumeMigration, resumeMigrationId } = useAppDetail({
     selectedApp,
     setSelectedApp,
   });
+
+  // Fiche ouverte depuis la boîte de réception : la fermer (retour Android compris) y ramène
+  const returnToInboxRef = useRef(false);
+  const closeAppDetail = useCallback(() => {
+    closeAppDetailOnly();
+    if (returnToInboxRef.current) {
+      returnToInboxRef.current = false;
+      setShowInbox(true);
+    }
+  }, [closeAppDetailOnly]);
 
   const { pendingImport, confirmImport, cancelImport } = useShareLinks({
     openAppDetail,
@@ -272,6 +282,7 @@ const App = () => {
         addMyApps([appId]);
         setPendingOpen({ appId, action: null });
       } else {
+        returnToInboxRef.current = false;
         setPendingOpen(null);
       }
     }
@@ -473,7 +484,10 @@ const App = () => {
         digest={notifications.digest}
         hasApps={myApps.size > 0}
         onClose={closeInbox}
-        onOpenApp={(appId, action) => setPendingOpen({ appId, action })}
+        onOpenApp={(appId, action) => {
+          returnToInboxRef.current = true;
+          setPendingOpen({ appId, action });
+        }}
         onOpenSettings={isNativeAndroid ? () => { setShowInbox(false); setShowStorageManager(true); } : undefined}
         onMarkAllRead={notifications.markAllRead}
         notificationsBlocked={notificationPermission.permission === 'denied'}
