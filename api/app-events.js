@@ -46,7 +46,9 @@ export default async function handler(req, res) {
         return res.status(200).json({ success: true, events });
       }
 
-      res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600');
+      // no-cache : le navigateur / WebView revalide à chaque appel (304 via ETag). Avec
+      // stale-while-revalidate, il resservait une liste périmée jusqu'à 1 h après publication.
+      res.setHeader('Cache-Control', 'no-cache');
       if (app !== undefined) {
         const id = String(app).trim().slice(0, 100);
         if (!id) return res.status(400).json({ success: false, error: 'app est requis' });
