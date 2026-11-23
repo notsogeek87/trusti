@@ -1,4 +1,3 @@
-Nouveautés :
-• Sélectionnez plusieurs apps dans le catalogue ou le palmarès et partagez-les en un lien, avec leur note TrustiScore. Votre contact voit la sélection et l'ajoute à ses apps en un geste.
-• Le lien de partage s'affiche désormais sur sa propre ligne dans les messageries.
-• Notifications : les événements récemment publiés s'affichent sans délai, et le retour depuis une fiche ramène aux notifications.
+Corrections :
+• Les événements récemment publiés s'affichent sans délai dans les notifications.
+• Le retour depuis une fiche ouverte depuis les notifications y ramène.

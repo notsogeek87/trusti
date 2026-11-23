@@ -1,4 +1,3 @@
-What's new:
-• Select several apps in the catalogue or rankings and share them in one link, with their TrustiScore. Your contact sees the selection and adds it to their apps in one tap.
-• Shared links now appear on their own line in messaging apps.
-• Notifications: newly published events show up right away, and going back from an app page returns to your notifications.
+Fixes:
+• Newly published events now show up right away in your notifications.
+• Going back from an app page opened from your notifications returns to them.
