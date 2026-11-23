@@ -127,3 +127,17 @@ export const buildAppsSelectionText = (apps = []) => {
     text: `${t('main.share.selectionHeader', { count: apps.length })}\n\n${lines.join('\n')}`,
   };
 };
+
+/**
+ * Message de partage final : le texte, une ligne vide, puis le lien seul sur
+ * sa ligne (cliquable et lisible dans toutes les messageries).
+ *
+ * @param {string} text
+ * @param {string} [url]
+ * @returns {string}
+ */
+export const joinShareMessage = (text = '', url) => {
+  const body = String(text).trimEnd();
+  if (!url) return body;
+  return body ? `${body}\n\n${url}` : url;
+};

@@ -9,6 +9,7 @@ import {
   buildAppsSelectionUrl,
   buildAppsSelectionText,
   MAX_SHARED_APPS,
+  joinShareMessage,
 } from '../../src/utils/appShareLink.js';
 
 const webLocation = { origin: 'https://app.trusti-score.eu', pathname: '/' };
@@ -93,4 +94,11 @@ test('texte de sélection : en-tête au pluriel et une ligne par app', () => {
   assert.match(text, /2 apps/);
   assert.match(text, /• Mistral : note B/);
   assert.match(text, /• Lumo$/m);
+});
+
+test('message de partage : le lien est seul sur sa ligne, après une ligne vide', () => {
+  assert.equal(joinShareMessage('Voici :\n• A', 'https://x/?apps=1'), 'Voici :\n• A\n\nhttps://x/?apps=1');
+  assert.equal(joinShareMessage('Texte \n', 'https://x'), 'Texte\n\nhttps://x');
+  assert.equal(joinShareMessage('Texte'), 'Texte');
+  assert.equal(joinShareMessage('', 'https://x'), 'https://x');
 });

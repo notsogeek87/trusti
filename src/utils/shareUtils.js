@@ -4,7 +4,7 @@
 
 import { Share } from '@capacitor/share';
 import { isNativeAndroid } from './platform';
-import { getShareBaseUrl, parseSharedAppId, SHARED_APP_PARAM } from './appShareLink';
+import { getShareBaseUrl, parseSharedAppId, SHARED_APP_PARAM, joinShareMessage } from './appShareLink';
 import { t } from '../i18n/index.js';
 
 /**
@@ -17,9 +17,14 @@ import { t } from '../i18n/index.js';
  * @param {string} [url] - Lien profond permettant de réimporter la sélection
  */
 export const shareText = async (title, text, url) => {
+  // Le lien est intégré au texte, sur sa propre ligne : passé à part (champ
+  // `url`), Android et la plupart des messageries le collent au texte sans
+  // retour à la ligne.
+  const message = joinShareMessage(text, url);
+
   if (isNativeAndroid) {
     try {
-      await Share.share(url ? { title, text, url } : { title, text });
+      await Share.share({ title, text: message });
     } catch (err) {
       // Partage annulé par l'utilisateur
     }
@@ -28,15 +33,13 @@ export const shareText = async (title, text, url) => {
 
   if (navigator.share) {
     try {
-      await navigator.share(url ? { title, text, url } : { title, text });
+      await navigator.share({ title, text: message });
     } catch (err) {
       // Partage annulé par l'utilisateur
     }
   } else {
-    // Fallback presse-papiers : on ajoute le lien au texte s'il existe
-    const payload = url ? `${text}\n\n${url}` : text;
     try {
-      await navigator.clipboard.writeText(payload);
+      await navigator.clipboard.writeText(message);
       alert(t('main.share.copied'));
     } catch (err) {
       console.error('Erreur lors de la copie', err);
