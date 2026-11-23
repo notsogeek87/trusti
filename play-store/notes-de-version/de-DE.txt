@@ -1,3 +1,4 @@
 Neu:
 • Wähle mehrere Apps im Katalog oder in der Rangliste aus und teile sie mit einem Link, samt TrustiScore-Note. Dein Kontakt sieht die Auswahl und fügt sie mit einem Tipp zu seinen Apps hinzu.
 • Geteilte Links stehen in Messengern jetzt in einer eigenen Zeile.
+• Benachrichtigungen: Neu veröffentlichte Ereignisse erscheinen sofort, und „Zurück“ auf einer App-Seite führt wieder zu den Benachrichtigungen.
