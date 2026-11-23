@@ -1,2 +1,3 @@
 Nouveautés :
-• Mesure d'audience anonyme, sans cookie et hébergée en France, pour savoir quels écrans vous servent le plus. Aucune donnée personnelle, rien de partagé avec des tiers.
+• Sélectionnez plusieurs apps dans le catalogue ou le palmarès et partagez-les en un lien, avec leur note TrustiScore. Votre contact voit la sélection et l'ajoute à ses apps en un geste.
+• Le lien de partage s'affiche désormais sur sa propre ligne dans les messageries.

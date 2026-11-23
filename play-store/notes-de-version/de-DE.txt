@@ -1,2 +1,3 @@
 Neu:
-• Anonyme Reichweitenmessung ohne Cookies, in Frankreich gehostet, um zu erfahren, welche Bildschirme dir am meisten nützen. Keine personenbezogenen Daten, keine Weitergabe an Dritte.
+• Wähle mehrere Apps im Katalog oder in der Rangliste aus und teile sie mit einem Link, samt TrustiScore-Note. Dein Kontakt sieht die Auswahl und fügt sie mit einem Tipp zu seinen Apps hinzu.
+• Geteilte Links stehen in Messengern jetzt in einer eigenen Zeile.
