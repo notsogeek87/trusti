@@ -17,7 +17,10 @@ import {
   saveInboxState,
 } from '../utils/notificationInbox';
 
-const CACHE_TTL = 60 * 60 * 1000; // 1 h : événements et notes changent au plus quelques fois par semaine
+const CACHE_TTL = 60 * 60 * 1000; // 1 h : les notes changent au plus quelques fois par semaine
+// 5 min : un événement publié doit apparaître au prochain lancement (le cache local survit au
+// redémarrage de l'app) ; le serveur et le CDN cachent déjà la réponse (30 s et 5 min).
+const EVENTS_CACHE_TTL = 5 * 60 * 1000;
 
 /**
  * Centre de notifications (web et APK) : boîte de réception de la cloche du header, et
@@ -51,7 +54,7 @@ export const useNotificationCenter = ({
     if (!ready || !hasApps || (events && gradeChanges)) return undefined;
     let cancelled = false;
     Promise.allSettled([
-      cachedFetchJSON(`${API_URL}/app-events`, { ttl: CACHE_TTL }),
+      cachedFetchJSON(`${API_URL}/app-events`, { ttl: EVENTS_CACHE_TTL }),
       cachedFetchJSON(appsUrl('grade_changes_since=true'), { ttl: CACHE_TTL }),
     ]).then(([ev, gr]) => {
       if (cancelled) return;
