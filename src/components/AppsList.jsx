@@ -31,7 +31,8 @@ const AppsList = ({
   isLoadingAwards = false,
   isLoadingMyApps = false,
   catalogSearchApps = [],
-  isSearching = false
+  isSearching = false,
+  selection = null
 }) => {
   const isMobile = useIsMobile();
   const loadMoreSentinelRef = useRef(null);
@@ -47,6 +48,11 @@ const AppsList = ({
 
   // Le « + » ajoute / retire de « Mes Apps », quel que soit l'onglet
   const getToggleProps = (app) => ({ isInMyApps: myApps.has(app.id), onToggleMyApp });
+
+  // Mode sélection (partage d'une liste d'apps par lien)
+  const getSelectionProps = (app) => selection?.isSelecting
+    ? { isSelecting: true, isSelected: selection.isSelected(app.id), onToggleSelect: selection.onToggle }
+    : {};
   
   // Pour l'onglet APPLICATIONS, utiliser la pagination serveur
   // Désactiver la pagination pendant une recherche
@@ -108,6 +114,7 @@ const AppsList = ({
                   app={app}
                   activeTab={activeTab}
                   {...getToggleProps(app)}
+                  {...getSelectionProps(app)}
                   isMigrated={migratedApps.has(app.id)}
                   customMigration={customMigrations.get(app.id)}
                   onToggleMigrate={onToggleMigrate}
@@ -147,6 +154,7 @@ const AppsList = ({
           app={app}
           activeTab={activeTab}
           {...getToggleProps(app)}
+          {...getSelectionProps(app)}
           isMigrated={migratedApps.has(app.id)}
           customMigration={customMigrations.get(app.id)}
           onToggleMigrate={onToggleMigrate}

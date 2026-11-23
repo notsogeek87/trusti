@@ -11,6 +11,7 @@ import { usePreferenceToggle } from './hooks/usePreferenceToggle';
 import { useMyAppsView } from './hooks/useMyAppsView';
 import { useAppDetail } from './hooks/useAppDetail';
 import { useShareLinks } from './hooks/useShareLinks';
+import { useAppSelection } from './hooks/useAppSelection';
 import { useOnboardingFlow } from './hooks/useOnboardingFlow';
 import { useBackNavigation } from './hooks/useBackNavigation';
 import { TABS } from './constants/tabs';
@@ -37,6 +38,9 @@ import SearchBar from './components/ui/SearchBar';
 import ExplainerPanel from './components/ExplainerPanel';
 import AppsList from './components/AppsList';
 import CategoryFilterBar from './components/CategoryFilterBar';
+import SelectionShareBar from './components/SelectionShareBar';
+import { shareText } from './utils/shareUtils';
+import { buildAppsSelectionUrl, buildAppsSelectionText, MAX_SHARED_APPS } from './utils/appShareLink';
 import AwardsHeader from './components/AwardsHeader';
 import MyAppsHeader from './components/MyAppsHeader';
 import MyAppsSummary from './components/MyAppsSummary';
@@ -60,6 +64,7 @@ import ImportAppsModal from './components/modals/ImportAppsModal';
 import MigrationSelectorModal from './components/modals/MigrationSelectorModal';
 import WelcomeModal from './components/modals/WelcomeModal';
 import { t } from './i18n/index.js';
+import { Share2 } from 'lucide-react';
 
 /**
  * Composant principal de l'application Trusti : assemble l'état (hooks) et
@@ -284,6 +289,31 @@ const App = () => {
     }
   }, [activeTab]);
 
+  // Sélection d'apps du catalogue à partager par lien (onglets catalogue et palmarès)
+  const selection = useAppSelection();
+  const canSelect = activeTab === TABS.APPLICATIONS || activeTab === TABS.TOP_ALTERNATIVES;
+  const stopSelection = selection.stop;
+  useEffect(() => {
+    if (!canSelect) stopSelection();
+  }, [canSelect, stopSelection]);
+
+  const handleToggleSelect = useCallback((app) => {
+    if (selection.toggleApp(app) === 'limit') {
+      toast.error(t('ui.selection.limit', { max: MAX_SHARED_APPS }));
+    }
+  }, [selection, toast]);
+
+  const handleShareSelection = async () => {
+    const url = buildAppsSelectionUrl(
+      selection.selectedApps.map((app) => app.id),
+      { isNative: isNativeAndroid, location: window.location }
+    );
+    if (!url) return;
+    const { title, text } = buildAppsSelectionText(selection.selectedApps);
+    await shareText(title, text, url);
+    selection.stop();
+  };
+
   const closeMigrationSelector = useCallback(() => setShowMigrationSelector(null), [setShowMigrationSelector]);
 
   useBackNavigation({
@@ -300,6 +330,7 @@ const App = () => {
       [showTrustiShareModal, () => setShowTrustiShareModal(false)],
       [!!pendingImport, cancelImport],
       [showExplainer, () => setShowExplainer(false)],
+      [selection.isSelecting, selection.stop],
     ],
   });
 
@@ -564,6 +595,17 @@ const App = () => {
 
               {activeTab === TABS.TOP_ALTERNATIVES && <AwardsHeader isLoading={isLoadingApps} />}
 
+              {canSelect && !selection.isSelecting && (
+                <div className="flex justify-end mb-3">
+                  <button
+                    onClick={selection.start}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 px-3 py-2 rounded-full bg-indigo-50 hover:bg-indigo-100 transition-colors"
+                  >
+                    <Share2 size={14} /> {t('ui.selection.start')}
+                  </button>
+                </div>
+              )}
+
               {showExplainer && (
                 <ExplainerPanel onClose={() => setShowExplainer(false)} />
               )}
@@ -585,10 +627,24 @@ const App = () => {
                 onLoadMore={loadMoreApps}
                 isLoadingAwards={isLoadingAwards}
                 isLoadingMyApps={isLoadingMyApps}
+                selection={canSelect && selection.isSelecting
+                  ? { isSelecting: true, isSelected: selection.isSelected, onToggle: handleToggleSelect }
+                  : null}
               />
+              {/* Espace pour que la barre de sélection ne masque pas la dernière carte */}
+              {canSelect && selection.isSelecting && <div className="h-20" aria-hidden="true" />}
             </div>
           </main>
         </div>
+
+        {canSelect && selection.isSelecting && (
+          <SelectionShareBar
+            count={selection.selectedApps.length}
+            onShare={handleShareSelection}
+            onCancel={selection.stop}
+            isMobile={isMobile}
+          />
+        )}
 
         {showShareModal && (
           <ShareModal

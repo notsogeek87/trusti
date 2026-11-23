@@ -31,4 +31,13 @@ export default {
     alternative: "Alternative :",
     alreadyInstalled: "Déjà installée",
   },
+  selection: {
+    start: "Sélectionner et partager",
+    count_one: "{count} app sélectionnée",
+    count_other: "{count} apps sélectionnées",
+    hint: "Touche les apps à partager",
+    share: "Partager le lien",
+    cancel: "Annuler",
+    limit: "{max} apps maximum par lien",
+  },
 };

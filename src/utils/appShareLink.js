@@ -78,3 +78,52 @@ export const buildAppShareText = (app) => {
     : t('main.share.appText', { name: app.name });
   return { title, text };
 };
+
+/** Paramètre d'URL désignant une sélection d'apps partagée. */
+export const SHARED_APPS_PARAM = 'apps';
+
+/** Nombre maximal d'apps dans un lien de sélection (garde l'URL courte). */
+export const MAX_SHARED_APPS = 50;
+
+const isValidAppId = (id) => /^[A-Za-z0-9_-]{1,64}$/.test(id);
+
+/**
+ * Lien partageable vers une sélection d'apps (`?apps=id1,id2`). À l'ouverture,
+ * le destinataire voit l'aperçu de la sélection (notes comprises) et peut
+ * l'ajouter à « Mes Apps ».
+ *
+ * Les IDs invalides et les doublons sont ignorés, l'ordre est conservé, et la
+ * sélection est limitée à MAX_SHARED_APPS.
+ *
+ * @param {Array<string|number>} appIds
+ * @param {Parameters<typeof getShareBaseUrl>[0]} [opts]
+ * @returns {string|null} URL absolue, ou null si aucune app valide
+ */
+export const buildAppsSelectionUrl = (appIds = [], opts) => {
+  const ids = [...new Set(appIds.map((id) => String(id).trim()))]
+    .filter(isValidAppId)
+    .slice(0, MAX_SHARED_APPS);
+  if (ids.length === 0) return null;
+  const url = new URL(getShareBaseUrl(opts));
+  url.search = '';
+  // Virgules non encodées : lien lisible, compris tel quel par parseShareParams
+  return `${url.toString()}?${SHARED_APPS_PARAM}=${ids.join(',')}`;
+};
+
+/**
+ * Texte d'accompagnement du partage d'une sélection d'apps.
+ *
+ * @param {Array<{ name: string, grade?: string }>} apps
+ * @returns {{ title: string, text: string }}
+ */
+export const buildAppsSelectionText = (apps = []) => {
+  const lines = apps.map((app) =>
+    app.grade
+      ? t('main.share.selectionLineGrade', { name: app.name, grade: app.grade })
+      : `• ${app.name}`
+  );
+  return {
+    title: t('main.share.selectionTitle'),
+    text: `${t('main.share.selectionHeader', { count: apps.length })}\n\n${lines.join('\n')}`,
+  };
+};

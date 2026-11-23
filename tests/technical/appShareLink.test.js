@@ -6,6 +6,9 @@ import {
   buildAppShareUrl,
   parseSharedAppId,
   buildAppShareText,
+  buildAppsSelectionUrl,
+  buildAppsSelectionText,
+  MAX_SHARED_APPS,
 } from '../../src/utils/appShareLink.js';
 
 const webLocation = { origin: 'https://app.trusti-score.eu', pathname: '/' };
@@ -54,4 +57,40 @@ test('texte de partage', () => {
   assert.match(buildAppShareText({ name: 'Signal', grade: 'A' }).text, /Signal obtient la note A/);
   assert.equal(buildAppShareText({ name: 'Signal' }).title, 'Signal sur Trusti');
   assert.match(buildAppShareText({ name: 'Signal' }).text, /fiche de Signal/);
+});
+
+test('lien de sélection : IDs dans l’ordre, sans doublon, virgules lisibles', () => {
+  assert.equal(
+    buildAppsSelectionUrl(['1770752284146', 1769540682080, '1770752284146', 'app_1_x-y'], { isNative: true }),
+    'https://app.trusti-score.eu/?apps=1770752284146,1769540682080,app_1_x-y'
+  );
+});
+
+test('lien de sélection : IDs invalides ignorés, null si rien de valide', () => {
+  assert.equal(
+    buildAppsSelectionUrl(['42', 'a,b', '<script>', ' 7 '], { location: webLocation }),
+    'https://app.trusti-score.eu/?apps=42,7'
+  );
+  assert.equal(buildAppsSelectionUrl([], { isNative: true }), null);
+  assert.equal(buildAppsSelectionUrl(['../x'], { isNative: true }), null);
+});
+
+test('lien de sélection : limité à MAX_SHARED_APPS apps', () => {
+  const ids = Array.from({ length: MAX_SHARED_APPS + 10 }, (_, i) => i + 1);
+  const url = buildAppsSelectionUrl(ids, { isNative: true });
+  assert.equal(new URL(url).searchParams.get('apps').split(',').length, MAX_SHARED_APPS);
+});
+
+test('lien de sélection : relu tel quel par le parseur de partage', () => {
+  const url = buildAppsSelectionUrl(['12', 'app_3'], { location: { origin: 'https://preview.example', pathname: '/x' } });
+  assert.equal(url, 'https://preview.example/x?apps=12,app_3');
+  assert.equal(new URL(url).searchParams.get('apps'), '12,app_3');
+});
+
+test('texte de sélection : en-tête au pluriel et une ligne par app', () => {
+  const { title, text } = buildAppsSelectionText([{ name: 'Mistral', grade: 'B' }, { name: 'Lumo' }]);
+  assert.ok(title.length > 0);
+  assert.match(text, /2 apps/);
+  assert.match(text, /• Mistral : note B/);
+  assert.match(text, /• Lumo$/m);
 });

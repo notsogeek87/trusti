@@ -13,5 +13,9 @@ export default {
     appTextGrade: "{name} obtient la note {grade} au TrustiScore (souveraineté numérique). Découvre sa fiche et ses alternatives :",
     appText: "Découvre la fiche de {name} et ses alternatives sur Trusti :",
     copied: "Copié dans le presse-papiers ✓",
+    selectionTitle: "Ma sélection d'apps sur Trusti",
+    selectionHeader_one: "Voici une app que je te recommande, avec sa note TrustiScore (souveraineté numérique) :",
+    selectionHeader_other: "Voici {count} apps que je te recommande, avec leur note TrustiScore (souveraineté numérique) :",
+    selectionLineGrade: "• {name} : note {grade}",
   },
 };

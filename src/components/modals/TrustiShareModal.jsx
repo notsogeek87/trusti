@@ -2,6 +2,8 @@ import React from 'react';
 import { X } from 'lucide-react';
 import ScoreIndicator from '../ui/ScoreIndicator';
 import { shareText } from '../../utils/shareUtils';
+import { buildAppsSelectionUrl } from '../../utils/appShareLink';
+import { isNativeAndroid } from '../../utils/platform';
 import AppIconImage from '../ui/AppIconImage';
 import { categoryLabel } from '../../constants/categories';
 import { t } from '../../i18n/index.js';
@@ -30,7 +32,12 @@ const TrustiShareModal = ({ selectedApps, customMigrations = new Map(), allApps 
   };
 
   const handleShare = () => {
-    shareText(t('modals.trustiApps.title'), generateShareText());
+    // Lien profond : le destinataire peut réimporter la sélection dans Trusti
+    const url = buildAppsSelectionUrl(
+      selectedApps.map(app => app.id),
+      { isNative: isNativeAndroid, location: window.location }
+    );
+    shareText(t('modals.trustiApps.title'), generateShareText(), url || undefined);
   };
 
   return (

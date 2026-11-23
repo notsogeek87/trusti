@@ -1,5 +1,5 @@
 import React from 'react';
-import { PlusCircle, CheckCircle, ShieldCheck, ChevronRight, CornerDownRight, ThumbsUp } from 'lucide-react';
+import { PlusCircle, CheckCircle, CheckCircle2, Circle, ShieldCheck, ChevronRight, CornerDownRight, ThumbsUp } from 'lucide-react';
 import ScoreIndicator from './ui/ScoreIndicator';
 import { TABS } from '../constants/tabs';
 import AppIconImage from './ui/AppIconImage';
@@ -16,12 +16,18 @@ const AppCard = React.memo(({
   onToggleMyApp,
   onToggleMigrate,
   onSelectApp,
-  isLoadingMyApps = false
+  isLoadingMyApps = false,
+  isSelecting = false,
+  isSelected = false,
+  onToggleSelect
 }) => {
   const isLoadingSkeleton = app.isLoadingSkeleton === true;
 
+  // Mode sélection : toucher la carte la coche / décoche au lieu d'ouvrir le détail
   const handleCardClick = () => {
-    if (!isLoadingSkeleton) onSelectApp(app);
+    if (isLoadingSkeleton) return;
+    if (isSelecting) onToggleSelect?.(app);
+    else onSelectApp(app);
   };
 
   return (
@@ -29,7 +35,9 @@ const AppCard = React.memo(({
       {/* Carte : un seul geste, toucher ouvre le détail */}
       <div
         onClick={handleCardClick}
-        className={`bg-white border border-slate-100 p-4 flex flex-col gap-2 rounded-2xl ${
+        role={isSelecting ? 'checkbox' : undefined}
+        aria-checked={isSelecting ? isSelected : undefined}
+        className={`bg-white border p-4 ${isSelecting && isSelected ? 'border-emerald-400 ring-2 ring-emerald-400' : 'border-slate-100'} flex flex-col gap-2 rounded-2xl ${
           isLoadingSkeleton ? 'cursor-default' : 'cursor-pointer hover:shadow-md hover:border-indigo-100'
         } transition-shadow group`}
       >
@@ -54,7 +62,13 @@ const AppCard = React.memo(({
           <div className="flex items-center gap-2">
             <ScoreIndicator grade={app.grade} />
 
-            {activeTab !== TABS.MY_APPS && (
+            {isSelecting && !isLoadingSkeleton && (
+              <span className={`w-12 h-12 -m-1 flex items-center justify-center ${isSelected ? 'text-emerald-500' : 'text-slate-300'}`}>
+                {isSelected ? <CheckCircle2 size={22} /> : <Circle size={22} />}
+              </span>
+            )}
+
+            {!isSelecting && activeTab !== TABS.MY_APPS && (
               <button
                 onClick={(e) => { e.stopPropagation(); !isLoadingSkeleton && onToggleMyApp(e, app.id); }}
                 disabled={isLoadingSkeleton}
@@ -70,7 +84,7 @@ const AppCard = React.memo(({
               </button>
             )}
 
-            {!isLoadingSkeleton && (
+            {!isSelecting && !isLoadingSkeleton && (
               <ChevronRight size={15} className="text-slate-300 group-hover:text-indigo-400 transition-colors shrink-0" />
             )}
           </div>
