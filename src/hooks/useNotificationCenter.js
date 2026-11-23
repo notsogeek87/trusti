@@ -49,21 +49,31 @@ export const useNotificationCenter = ({
   const [state, setState] = useState(() => loadInboxState());
   const hasApps = myApps.size > 0;
 
-  // Données publiques : une fois par lancement (cache 1 h), dès que « Mes Apps » est connu
+  // Retour au premier plan (APK : l'app reprend sans recharger le JS) : on relit les données
+  const [refreshTick, setRefreshTick] = useState(0);
   useEffect(() => {
-    if (!ready || !hasApps || (events && gradeChanges)) return undefined;
+    const onVisible = () => { if (document.visibilityState === 'visible') setRefreshTick(n => n + 1); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, []);
+
+  // Données publiques : au lancement et à chaque retour dans l'app (caches 5 min / 1 h)
+  useEffect(() => {
+    if (!ready || !hasApps) return undefined;
     let cancelled = false;
     Promise.allSettled([
       cachedFetchJSON(`${API_URL}/app-events`, { ttl: EVENTS_CACHE_TTL }),
       cachedFetchJSON(appsUrl('grade_changes_since=true'), { ttl: CACHE_TTL }),
     ]).then(([ev, gr]) => {
       if (cancelled) return;
-      // Échec (hors ligne, table pas encore créée) : liste vide, on réessaiera au prochain lancement
-      setEvents(ev.status === 'fulfilled' && Array.isArray(ev.value?.events) ? ev.value.events : []);
-      setGradeChanges(gr.status === 'fulfilled' && Array.isArray(gr.value?.changes) ? gr.value.changes : []);
+      // Échec (hors ligne, table pas encore créée) : on garde la liste connue, sinon liste vide
+      if (ev.status === 'fulfilled' && Array.isArray(ev.value?.events)) setEvents(ev.value.events);
+      else setEvents(prev => prev || []);
+      if (gr.status === 'fulfilled' && Array.isArray(gr.value?.changes)) setGradeChanges(gr.value.changes);
+      else setGradeChanges(prev => prev || []);
     });
     return () => { cancelled = true; };
-  }, [ready, hasApps]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ready, hasApps, refreshTick]);
 
   // APK : historique des notifications natives et migrations terminées détectées par le téléphone
   const completedRef = useRef(onMigrationsCompleted);
