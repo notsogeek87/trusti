@@ -4,7 +4,9 @@
 //
 // Sécurité :
 // - inactif tant que MCP_TOKEN n'est pas défini (au moins 32 caractères) ;
-// - en-tête « Authorization: Bearer <MCP_TOKEN> » exigé, comparaison en temps constant ;
+// - jeton exigé, comparaison en temps constant : en-tête « Authorization: Bearer <MCP_TOKEN> »
+//   ou paramètre « ?token=<MCP_TOKEN> » (pour les clients qui ne savent pas envoyer
+//   d'en-tête fixe, comme ChatGPT) ; l'URL de /mcp n'est jamais journalisée ;
 // - une seule instruction SQL par appel, délai maximal 15 s, 500 lignes renvoyées au plus.
 
 import crypto from 'node:crypto';
@@ -26,11 +28,13 @@ const TOOLS = [
       },
       required: ['sql'],
     },
+    annotations: { title: 'Exécuter du SQL', readOnlyHint: false, destructiveHint: true, openWorldHint: false },
   },
   {
     name: 'list_tables',
     description: 'Liste les tables du schéma public avec leur nombre de lignes estimé.',
     inputSchema: { type: 'object', properties: {} },
+    annotations: { title: 'Lister les tables', readOnlyHint: true, openWorldHint: false },
   },
   {
     name: 'describe_table',
@@ -40,17 +44,27 @@ const TOOLS = [
       properties: { table: { type: 'string' } },
       required: ['table'],
     },
+    annotations: { title: 'Décrire une table', readOnlyHint: true, openWorldHint: false },
   },
 ];
 
-/** Vérifie l'en-tête Authorization (Bearer) en temps constant. */
-export function isAuthorized(header, token) {
-  if (!token || token.length < 32) return false;
-  const match = /^Bearer\s+(.+)$/i.exec(String(header || ''));
-  if (!match) return false;
-  const a = crypto.createHash('sha256').update(match[1].trim()).digest();
+/** Compare un jeton candidat au jeton attendu, en temps constant. */
+function sameToken(candidate, token) {
+  const a = crypto.createHash('sha256').update(String(candidate)).digest();
   const b = crypto.createHash('sha256').update(token).digest();
   return crypto.timingSafeEqual(a, b);
+}
+
+/**
+ * Vérifie le jeton : en-tête Authorization (Bearer) ou, à défaut, paramètre ?token=.
+ * Comparaison en temps constant dans les deux cas.
+ */
+export function isAuthorized(header, token, queryToken) {
+  if (!token || token.length < 32) return false;
+  const match = /^Bearer\s+(.+)$/i.exec(String(header || ''));
+  if (match) return sameToken(match[1].trim(), token);
+  if (typeof queryToken === 'string' && queryToken.length > 0) return sameToken(queryToken, token);
+  return false;
 }
 
 /** Refuse plusieurs instructions dans un même appel (point-virgule hors fin de texte). */
@@ -166,7 +180,7 @@ export function mountMcp(app, { token = process.env.MCP_TOKEN, getPool }) {
   };
 
   app.all('/mcp', async (req, res) => {
-    if (!isAuthorized(req.headers.authorization, token)) {
+    if (!isAuthorized(req.headers.authorization, token, req.query?.token)) {
       return res.status(401).json({ error: 'Non autorisé' });
     }
     if (req.method !== 'POST') {

@@ -12,6 +12,24 @@ test('authentification : jeton exact exigé', () => {
   assert.equal(isAuthorized('Bearer court', 'court'), false, 'jeton trop court refusé');
 });
 
+test('authentification : jeton accepté en paramètre ?token=', () => {
+  assert.equal(isAuthorized(undefined, TOKEN, TOKEN), true);
+  assert.equal(isAuthorized('', TOKEN, `${TOKEN}y`), false);
+  assert.equal(isAuthorized(undefined, TOKEN, ''), false);
+  assert.equal(isAuthorized(undefined, TOKEN, [TOKEN]), false, 'paramètre répété refusé');
+  assert.equal(isAuthorized(undefined, 'court', 'court'), false, 'jeton trop court refusé');
+  assert.equal(isAuthorized('Bearer faux', TOKEN, TOKEN), false, "l'en-tête prime s'il est présent");
+});
+
+test('annotations : lecture seule sauf run_sql', async () => {
+  const list = await handleRpc({ jsonrpc: '2.0', id: 9, method: 'tools/list' }, fakeQuery);
+  const byName = Object.fromEntries(list.result.tools.map((t) => [t.name, t.annotations]));
+  assert.equal(byName.list_tables.readOnlyHint, true);
+  assert.equal(byName.describe_table.readOnlyHint, true);
+  assert.equal(byName.run_sql.readOnlyHint, false);
+  assert.equal(byName.run_sql.destructiveHint, true);
+});
+
 test('une seule instruction SQL', () => {
   assert.equal(isSingleStatement('SELECT 1;'), true);
   assert.equal(isSingleStatement("UPDATE a SET b = 'x;y' WHERE id = 1"), true);
