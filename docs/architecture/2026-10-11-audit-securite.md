@@ -19,5 +19,5 @@ Jeton admin HMAC avec expiration et comparaison en temps constant, OTP aléatoir
 - **CORS `*`** sur toutes les routes, y compris celles qui acceptent `Authorization`. Restreindre aux origines du site et de l'app (`https://localhost` pour Capacitor) : liste à fournir.
 - **Secret de signature** : repli sur `API_KEY` si `ADMIN_SESSION_SECRET` manque. Exiger un secret dédié en production.
 - **Jeton admin en localStorage** (12 h, non révocable) : acceptable ici, mais un cookie `HttpOnly` réduirait l'impact d'une XSS.
-- **Hygiène du dépôt** : `fix-icons-output.log` et les fichiers `loaderio-*.txt` sont versionnés ; `debug.keystore` est la clé de debug standard (sans risque).
+- **Hygiène du dépôt** : `fix-icons-output.log` et les fichiers `loaderio-*.txt` sont versionnés ; `debug.keystore` est une clé de debug publique. Les anciens APK GitHub signés avec cette clé nécessitent une réinstallation pour migrer vers la clé de publication dédiée. Voir le [guide de migration](../guides/android-auto-update.md#migration-depuis-la-clé-debug).
 - **CI** : les workflows Play Store utilisent des secrets de signature ; vérifier qu'ils ne s'exécutent pas sur des PR de forks et épingler les actions par SHA.
