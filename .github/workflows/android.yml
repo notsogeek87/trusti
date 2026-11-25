@@ -95,7 +95,7 @@ jobs:
           fi
           apksigner=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)
           certs=$("$apksigner" verify --print-certs "${apks[0]}")
-          actual=$(sed -nE 's/^Signer .* certificate SHA-256 digest: ([[:xdigit:]]{64})[[:space:]]*$/\1/p' <<< "$certs" | tr 'A-F' 'a-f' | sort -u)
+          actual=$(sed -nE 's/^(Signer .+|V[0-9]+([.][0-9]+)? Signer[^:]*:) certificate SHA-256 digest: ([[:xdigit:]]{64})[[:space:]]*$/\3/p' <<< "$certs" | tr 'A-F' 'a-f' | sort -u)
           if [[ "$actual" != "$expected" ]]; then
             echo "::error::Le certificat de l’APK ne correspond pas à la clé de publication"
             printf 'SHA-256 attendu : %s\n' "$expected"
