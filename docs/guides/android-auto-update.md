@@ -99,9 +99,11 @@ Renseignez ces [secrets GitHub Actions](https://github.com/notsogeek87/trusti/se
 | `TRUSTI_APK_KEY_ALIAS` | `trusti-github` |
 | `TRUSTI_APK_KEY_PASSWORD` | Même mot de passe pour ce keystore PKCS12 |
 
-Définissez la [variable GitHub Actions](https://github.com/notsogeek87/trusti/settings/variables/actions)
-`TRUSTI_APK_CERT_SHA256` à l’empreinte SHA-256 affichée par la commande ci-dessous.
-La CI bloque si la configuration manque ou si le certificat diffère.
+L’empreinte SHA-256 publique attendue est versionnée dans
+[`android.yml`](../../.github/workflows/android.yml). Avant une rotation de clé,
+vérifiez l’empreinte du nouveau certificat avec la commande ci-dessous, puis
+mettez à jour `EXPECTED_SHA256` dans le workflow. La CI bloque la publication
+si les secrets manquent ou si le certificat diffère.
 
 ```sh
 keytool -list -v -keystore trusti-github.p12 -alias trusti-github
