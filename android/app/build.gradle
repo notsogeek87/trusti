@@ -13,7 +13,7 @@ def appVersionBase = project.property('appVersionBase')
 // swipernews, voir play-store-bundle.yml).
 def releaseKeystore = System.getenv('ANDROID_KEYSTORE_FILE')
 def hasReleaseKeystore = releaseKeystore && file(releaseKeystore).exists()
-def githubKeystore = System.getenv('GITHUB_APK_KEYSTORE_FILE')
+def githubKeystore = System.getenv('TRUSTI_APK_KEYSTORE_FILE')
 
 android {
     namespace = "eu.trusti.app"
@@ -52,9 +52,9 @@ android {
         if (githubKeystore) {
             githubRelease {
                 storeFile file(githubKeystore)
-                storePassword System.getenv('GITHUB_APK_KEYSTORE_PASSWORD')
-                keyAlias System.getenv('GITHUB_APK_KEY_ALIAS')
-                keyPassword System.getenv('GITHUB_APK_KEY_PASSWORD')
+                storePassword System.getenv('TRUSTI_APK_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('TRUSTI_APK_KEY_ALIAS')
+                keyPassword System.getenv('TRUSTI_APK_KEY_PASSWORD')
             }
         }
     }

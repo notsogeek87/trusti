@@ -94,13 +94,13 @@ Renseignez ces [secrets GitHub Actions](https://github.com/notsogeek87/trusti/se
 
 | Secret | Valeur |
 | --- | --- |
-| `GITHUB_APK_KEYSTORE_BASE64` | Contenu du keystore encodé en Base64 sur une ligne |
-| `GITHUB_APK_KEYSTORE_PASSWORD` | Mot de passe du keystore |
-| `GITHUB_APK_KEY_ALIAS` | `trusti-github` |
-| `GITHUB_APK_KEY_PASSWORD` | Même mot de passe pour ce keystore PKCS12 |
+| `TRUSTI_APK_KEYSTORE_BASE64` | Contenu du keystore encodé en Base64 sur une ligne |
+| `TRUSTI_APK_KEYSTORE_PASSWORD` | Mot de passe du keystore |
+| `TRUSTI_APK_KEY_ALIAS` | `trusti-github` |
+| `TRUSTI_APK_KEY_PASSWORD` | Même mot de passe pour ce keystore PKCS12 |
 
 Définissez la [variable GitHub Actions](https://github.com/notsogeek87/trusti/settings/variables/actions)
-`GITHUB_APK_CERT_SHA256` à l’empreinte SHA-256 affichée par la commande ci-dessous.
+`TRUSTI_APK_CERT_SHA256` à l’empreinte SHA-256 affichée par la commande ci-dessous.
 La CI bloque si la configuration manque ou si le certificat diffère.
 
 ```sh

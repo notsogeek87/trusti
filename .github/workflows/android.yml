@@ -62,22 +62,22 @@ jobs:
         if: github.event_name == 'push' && github.ref_name == 'main'
         working-directory: android
         env:
-          KEYSTORE_BASE64: ${{ secrets.GITHUB_APK_KEYSTORE_BASE64 }}
-          GITHUB_APK_KEYSTORE_PASSWORD: ${{ secrets.GITHUB_APK_KEYSTORE_PASSWORD }}
-          GITHUB_APK_KEY_ALIAS: ${{ secrets.GITHUB_APK_KEY_ALIAS }}
-          GITHUB_APK_KEY_PASSWORD: ${{ secrets.GITHUB_APK_KEY_PASSWORD }}
-          EXPECTED_SHA256: ${{ vars.GITHUB_APK_CERT_SHA256 }}
+          KEYSTORE_BASE64: ${{ secrets.TRUSTI_APK_KEYSTORE_BASE64 }}
+          TRUSTI_APK_KEYSTORE_PASSWORD: ${{ secrets.TRUSTI_APK_KEYSTORE_PASSWORD }}
+          TRUSTI_APK_KEY_ALIAS: ${{ secrets.TRUSTI_APK_KEY_ALIAS }}
+          TRUSTI_APK_KEY_PASSWORD: ${{ secrets.TRUSTI_APK_KEY_PASSWORD }}
+          EXPECTED_SHA256: ${{ vars.TRUSTI_APK_CERT_SHA256 }}
         run: |
           set -euo pipefail
-          : "${KEYSTORE_BASE64:?Secret GITHUB_APK_KEYSTORE_BASE64 manquant}"
-          : "${GITHUB_APK_KEYSTORE_PASSWORD:?Secret GITHUB_APK_KEYSTORE_PASSWORD manquant}"
-          : "${GITHUB_APK_KEY_ALIAS:?Secret GITHUB_APK_KEY_ALIAS manquant}"
-          : "${GITHUB_APK_KEY_PASSWORD:?Secret GITHUB_APK_KEY_PASSWORD manquant}"
-          : "${EXPECTED_SHA256:?Variable GITHUB_APK_CERT_SHA256 manquante}"
+          : "${KEYSTORE_BASE64:?Secret TRUSTI_APK_KEYSTORE_BASE64 manquant}"
+          : "${TRUSTI_APK_KEYSTORE_PASSWORD:?Secret TRUSTI_APK_KEYSTORE_PASSWORD manquant}"
+          : "${TRUSTI_APK_KEY_ALIAS:?Secret TRUSTI_APK_KEY_ALIAS manquant}"
+          : "${TRUSTI_APK_KEY_PASSWORD:?Secret TRUSTI_APK_KEY_PASSWORD manquant}"
+          : "${EXPECTED_SHA256:?Variable TRUSTI_APK_CERT_SHA256 manquante}"
           umask 077
-          export GITHUB_APK_KEYSTORE_FILE="$(mktemp "$RUNNER_TEMP/trusti-github.XXXXXX")"
-          trap 'rm -f "$GITHUB_APK_KEYSTORE_FILE"' EXIT
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$GITHUB_APK_KEYSTORE_FILE"
+          export TRUSTI_APK_KEYSTORE_FILE="$(mktemp "$RUNNER_TEMP/trusti-github.XXXXXX")"
+          trap 'rm -f "$TRUSTI_APK_KEYSTORE_FILE"' EXIT
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$TRUSTI_APK_KEYSTORE_FILE"
           unset KEYSTORE_BASE64
           ./gradlew assembleGithubRelease --no-daemon -q
 
