@@ -13,6 +13,7 @@ def appVersionBase = project.property('appVersionBase')
 // swipernews, voir play-store-bundle.yml).
 def releaseKeystore = System.getenv('ANDROID_KEYSTORE_FILE')
 def hasReleaseKeystore = releaseKeystore && file(releaseKeystore).exists()
+def githubKeystore = System.getenv('TRUSTI_APK_KEYSTORE_FILE')
 
 android {
     namespace = "eu.trusti.app"
@@ -31,14 +32,8 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
-    // Clé debug FIXE, committée dans le repo (android/debug.keystore).
-    // Sans ça, chaque runner CI neuf régénère sa propre clé debug aléatoire
-    // (~/.android/debug.keystore n'existe pas encore) : deux builds
-    // successifs sont alors signés différemment, et Android refuse
-    // d'installer la mise à jour par-dessus l'ancienne ("app non installée")
-    // tant qu'on n'a pas désinstallé à la main. Une clé debug n'a rien de
-    // secret (mot de passe "android" documenté par Google) — la committer
-    // est la pratique standard pour des builds CI reproductibles.
+    // Clé fixe réservée aux APK de test. Les releases GitHub ont leur propre
+    // clé, fournie par le workflow de publication.
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -54,6 +49,14 @@ android {
                 keyPassword System.getenv('ANDROID_KEY_PASSWORD')
             }
         }
+        if (githubKeystore) {
+            githubRelease {
+                storeFile file(githubKeystore)
+                storePassword System.getenv('TRUSTI_APK_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('TRUSTI_APK_KEY_ALIAS')
+                keyPassword System.getenv('TRUSTI_APK_KEY_PASSWORD')
+            }
+        }
     }
     buildFeatures {
         buildConfig = true
@@ -61,7 +64,7 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
-            // Les APK des releases GitHub sont des builds debug : mises à jour automatiques actives.
+            // Les APK de test peuvent vérifier la dernière release GitHub.
             buildConfigField "boolean", "UPDATER_ENABLED", "true"
         }
         release {
@@ -73,6 +76,13 @@ android {
             if (hasReleaseKeystore) {
                 signingConfig signingConfigs.release
             }
+        }
+        githubRelease {
+            initWith release
+            matchingFallbacks = ['release']
+            signingConfig = signingConfigs.findByName('githubRelease')
+            // Le manifeste de src/release s’applique uniquement au build Play Store.
+            buildConfigField "boolean", "UPDATER_ENABLED", "true"
         }
     }
 }
