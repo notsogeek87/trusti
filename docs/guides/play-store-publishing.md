@@ -135,8 +135,10 @@ est ignorée avec un avertissement.
 
 ## Différence avec android.yml / F-Droid
 
-- `android.yml` (déjà existant) : build **debug**, signé de la clé debug
-  committée — pour tester, jamais pour Play Store.
-- `play-store-bundle.yml` (nouveau) : build **release**, signé de la clé
-  d'upload Play Store dédiée — jamais la même clé qu'un éventuel futur canal
-  F-Droid, les deux écosystèmes restant indépendants.
+- `android.yml` publie les APK stables GitHub avec la variante
+  `githubRelease` et la clé de publication dédiée à GitHub. Les APK de test
+  utilisent la variante `debug` et la clé debug versionnée.
+- `play-store-bundle.yml` construit la variante `release` et signe l’AAB avec
+  la clé d’envoi Google Play. Play App Signing signe ensuite les APK
+  distribués par le Play Store. Un éventuel canal F-Droid utiliserait sa
+  propre clé.
