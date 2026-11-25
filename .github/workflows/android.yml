@@ -66,14 +66,13 @@ jobs:
           TRUSTI_APK_KEYSTORE_PASSWORD: ${{ secrets.TRUSTI_APK_KEYSTORE_PASSWORD }}
           TRUSTI_APK_KEY_ALIAS: ${{ secrets.TRUSTI_APK_KEY_ALIAS }}
           TRUSTI_APK_KEY_PASSWORD: ${{ secrets.TRUSTI_APK_KEY_PASSWORD }}
-          EXPECTED_SHA256: ${{ vars.TRUSTI_APK_CERT_SHA256 }}
+          EXPECTED_SHA256: 7479ae3d3d7cd1af00bf7738393c5b08ab0c566d472e815e8abbcfde21491360
         run: |
           set -euo pipefail
           : "${KEYSTORE_BASE64:?Secret TRUSTI_APK_KEYSTORE_BASE64 manquant}"
           : "${TRUSTI_APK_KEYSTORE_PASSWORD:?Secret TRUSTI_APK_KEYSTORE_PASSWORD manquant}"
           : "${TRUSTI_APK_KEY_ALIAS:?Secret TRUSTI_APK_KEY_ALIAS manquant}"
           : "${TRUSTI_APK_KEY_PASSWORD:?Secret TRUSTI_APK_KEY_PASSWORD manquant}"
-          : "${EXPECTED_SHA256:?Variable TRUSTI_APK_CERT_SHA256 manquante}"
           umask 077
           export TRUSTI_APK_KEYSTORE_FILE="$(mktemp "$RUNNER_TEMP/trusti-github.XXXXXX")"
           trap 'rm -f "$TRUSTI_APK_KEYSTORE_FILE"' EXIT
