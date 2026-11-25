@@ -5,12 +5,9 @@ name: Play Store AAB
 # l'historique complet des pièges déjà rencontrés (nom de track "alpha" faux,
 # countryTargeting invalide, mimetype .aab non détecté...).
 #
-# Séparé d'android.yml : celui-là produit des .apk signés de la clé DEBUG
-# committée (android/app/debug.keystore), utile pour tester mais jamais
-# acceptée par Play Store. Ici on signe d'une clé d'UPLOAD dédiée
-# (PLAY_STORE_*, distincte de toute clé F-Droid éventuelle), que Google
-# re-signe ensuite de sa propre clé (Play App Signing) : les deux clés ne se
-# mélangent jamais.
+# Google Play utilise une clé d’upload dédiée (PLAY_STORE_*). Play App
+# Signing signe ensuite les APK distribués sur le Store. Le workflow
+# android.yml utilise une clé de publication GitHub indépendante.
 #
 # Déclenchement manuel (workflow_dispatch) : publier à chaque push serait
 # trop agressif pour des testeurs externes.

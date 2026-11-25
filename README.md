@@ -190,7 +190,7 @@ que tant que ce backend, non open et centralisé, reste disponible.
 ### Build et publication de l'APK
 
 `.github/workflows/android.yml` construit l'APK à chaque push sur `main`/
-`staging` (et sur PR/`workflow_dispatch`, sans publication) :
+`staging`, sur PR et sur déclenchement manuel :
 
 - `versionCode` = `github.run_number` et `versionName` = `<appVersionBase>.<run_number>`
   (`appVersionBase` dans `android/gradle.properties`, ex. `1.0.152`), donc
@@ -205,10 +205,12 @@ que tant que ce backend, non open et centralisé, reste disponible.
 - **Mises à jour automatiques** : les APK des releases GitHub vérifient et
   proposent les nouvelles versions à chaque ouverture (désactivé dans le build
   Play Store) — voir [le guide](./docs/guides/android-auto-update.md).
-- **Signature** : uniquement la clé debug committée
-  (`android/app/debug.keystore`, mot de passe standard `android`). Aucune clé
-  de production n'est configurée à ce jour — voir « Risqué, non touché » dans
-  l'audit de soumission Izzy pour les implications.
+- Les releases stables GitHub utilisent une clé de publication dédiée.
+  Les pré-releases de test utilisent `android/app/debug.keystore`. Le certificat
+  de publication est vérifié par la CI et son empreinte figure dans les notes
+  de version. Les anciennes installations GitHub signées avec la clé debug
+  nécessitent une réinstallation après sauvegarde. Voir
+  [le guide de migration](./docs/guides/android-auto-update.md#migration-depuis-la-clé-debug).
 
 ## 📚 Documentation
 

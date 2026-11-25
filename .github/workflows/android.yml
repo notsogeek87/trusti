@@ -52,34 +52,74 @@ jobs:
           echo "name=${BASE}.${BUILD_NUMBER}" >> "$GITHUB_OUTPUT"
 
       - name: Build debug APK
+        if: github.event_name != 'push' || github.ref_name != 'main'
         working-directory: android
         run: |
           ./gradlew assembleDebug --no-daemon -q
 
-      # Gradle nomme toujours sa sortie "app-debug.apk" (nom fixe lié au
-      # buildType), quelle que soit la version : on la renomme pour que le
-      # fichier téléchargé (artifact ou asset de release) porte la version
-      # au lieu d'un nom générique identique à chaque run.
-      - name: Renommer l'APK avec sa version
+      - name: Construire et vérifier l’APK de publication
+        id: signature
+        if: github.event_name == 'push' && github.ref_name == 'main'
+        working-directory: android
+        env:
+          KEYSTORE_BASE64: ${{ secrets.TRUSTI_APK_KEYSTORE_BASE64 }}
+          TRUSTI_APK_KEYSTORE_PASSWORD: ${{ secrets.TRUSTI_APK_KEYSTORE_PASSWORD }}
+          TRUSTI_APK_KEY_ALIAS: ${{ secrets.TRUSTI_APK_KEY_ALIAS }}
+          TRUSTI_APK_KEY_PASSWORD: ${{ secrets.TRUSTI_APK_KEY_PASSWORD }}
+          EXPECTED_SHA256: ${{ vars.TRUSTI_APK_CERT_SHA256 }}
+        run: |
+          set -euo pipefail
+          : "${KEYSTORE_BASE64:?Secret TRUSTI_APK_KEYSTORE_BASE64 manquant}"
+          : "${TRUSTI_APK_KEYSTORE_PASSWORD:?Secret TRUSTI_APK_KEYSTORE_PASSWORD manquant}"
+          : "${TRUSTI_APK_KEY_ALIAS:?Secret TRUSTI_APK_KEY_ALIAS manquant}"
+          : "${TRUSTI_APK_KEY_PASSWORD:?Secret TRUSTI_APK_KEY_PASSWORD manquant}"
+          : "${EXPECTED_SHA256:?Variable TRUSTI_APK_CERT_SHA256 manquante}"
+          umask 077
+          export TRUSTI_APK_KEYSTORE_FILE="$(mktemp "$RUNNER_TEMP/trusti-github.XXXXXX")"
+          trap 'rm -f "$TRUSTI_APK_KEYSTORE_FILE"' EXIT
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$TRUSTI_APK_KEYSTORE_FILE"
+          unset KEYSTORE_BASE64
+          ./gradlew assembleGithubRelease --no-daemon -q
+
+          shopt -s nullglob
+          apks=(app/build/outputs/apk/githubRelease/*.apk)
+          if [[ "${#apks[@]}" != 1 ]]; then
+            echo "::error::Un seul APK GitHub est attendu"
+            exit 1
+          fi
+          apksigner=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)
+          certs=$("$apksigner" verify --print-certs "${apks[0]}")
+          actual=$(sed -n 's/^Signer #[0-9]* certificate SHA-256 digest: //p' <<< "$certs")
+          expected=$(tr -d ':' <<< "$EXPECTED_SHA256")
+          if [[ ! "$expected" =~ ^[[:xdigit:]]{64}$ ||
+                "${actual,,}" != "${expected,,}" ||
+                "${actual,,}" == 8f2fe2d4f47476e30c454d21fd61dd7c32e22c94777d7a14eff8226316f0f3ff ]]; then
+            echo "::error::Le certificat de l’APK ne correspond pas à la clé de publication"
+            exit 1
+          fi
+          echo "sha256=${actual,,}" >> "$GITHUB_OUTPUT"
+          mv "${apks[0]}" app/build/outputs/apk/app-published.apk
+
+      - name: Renommer l’APK avec sa version
         id: apk
+        env:
+          PUBLISH_RELEASE: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
         run: |
           NAME="Trusti-${{ steps.version.outputs.name }}.apk"
           SRC="android/app/build/outputs/apk/debug/app-debug.apk"
-          DEST="android/app/build/outputs/apk/debug/$NAME"
+          if [[ "$PUBLISH_RELEASE" == true ]]; then
+            SRC="android/app/build/outputs/apk/app-published.apk"
+          fi
+          DEST="android/app/build/outputs/apk/$NAME"
           mv "$SRC" "$DEST"
           echo "path=$DEST" >> "$GITHUB_OUTPUT"
           echo "name=$NAME" >> "$GITHUB_OUTPUT"
 
       - uses: actions/upload-artifact@v5
         with:
-          name: trusti-debug-${{ github.run_number }}
+          name: trusti-${{ github.event_name == 'push' && github.ref_name == 'main' && 'apk' || 'debug' }}-${{ github.run_number }}
           path: ${{ steps.apk.outputs.path }}
 
-      # Vraie release GitHub, versionnée et permanente : seulement pour main,
-      # jamais écrasée (chaque run a une version unique), pas marquée
-      # "Pre-release". Toujours signée avec la clé debug committée (pas de
-      # clé de production configurée) : à faire évoluer le jour où on distribue
-      # via le Play Store ou en dehors des testeurs internes.
       - name: Publier la release GitHub (main)
         if: github.event_name == 'push' && github.ref_name == 'main'
         env:
@@ -89,11 +129,14 @@ jobs:
           cat > release-notes.md <<EOF
           ## Trusti ${{ steps.version.outputs.name }}
 
-          Run #${{ github.run_number }} (${{ github.sha }}). Signé avec la clé debug (pas de clé de production configurée).
+          Run #${{ github.run_number }} (${{ github.sha }}). Signé avec la clé de publication GitHub de Trusti.
+
+          Empreinte SHA-256 du certificat : ${{ steps.signature.outputs.sha256 }}.
 
           ### Installer
 
-          - **Trusti est déjà installé** : ouvrez l'app. Elle détecte cette version à l'ouverture et propose la mise à jour :
+          - **Vous utilisez un ancien APK GitHub signé avec la clé debug** : dans Trusti, ouvrez Paramètres → Espace de stockage → Exporter / importer mes données. Exportez vos données et conservez le fichier hors de l’application. Désinstallez Trusti, installez l’APK ci-dessous puis importez votre sauvegarde.
+          - **Vous utilisez déjà un APK GitHub signé avec la clé de publication** : ouvrez l'app. Elle détecte cette version à l'ouverture et propose la mise à jour :
             1. Touchez « Installer » : la mise à jour se télécharge.
             2. Si Android demande d'autoriser Trusti à installer des applications, activez l'option, puis revenez en arrière.
             3. Confirmez avec « Mettre à jour ». Vos données sont conservées.
@@ -132,6 +175,6 @@ jobs:
           gh release create "$TAG" \
             "${{ steps.apk.outputs.path }}" \
             --title "Trusti — APK debug (${{ steps.reltag.outputs.branch }})" \
-            --notes "Build automatique non signé, run #${{ github.run_number }} (${{ github.sha }})." \
+            --notes "Build de test signé avec la clé debug, run #${{ github.run_number }} (${{ github.sha }})." \
             --prerelease \
             --target "${{ github.sha }}"
