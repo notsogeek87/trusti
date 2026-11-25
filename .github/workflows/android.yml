@@ -78,6 +78,13 @@ jobs:
           trap 'rm -f "$TRUSTI_APK_KEYSTORE_FILE"' EXIT
           printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$TRUSTI_APK_KEYSTORE_FILE"
           unset KEYSTORE_BASE64
+          expected="${EXPECTED_SHA256,,}"
+          keystore_sha256=$(keytool -exportcert -keystore "$TRUSTI_APK_KEYSTORE_FILE" \
+            -alias "$TRUSTI_APK_KEY_ALIAS" -storepass:env TRUSTI_APK_KEYSTORE_PASSWORD | sha256sum | cut -d ' ' -f 1)
+          if [[ "$keystore_sha256" != "$expected" ]]; then
+            echo "::error::Certificat du keystore inattendu ($keystore_sha256, attendu $expected)"
+            exit 1
+          fi
           ./gradlew assembleGithubRelease --no-daemon -q
 
           shopt -s nullglob
@@ -88,15 +95,14 @@ jobs:
           fi
           apksigner=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)
           certs=$("$apksigner" verify --print-certs "${apks[0]}")
-          actual=$(sed -n 's/^Signer #[0-9]* certificate SHA-256 digest: //p' <<< "$certs")
-          expected=$(tr -d ':' <<< "$EXPECTED_SHA256")
-          if [[ ! "$expected" =~ ^[[:xdigit:]]{64}$ ||
-                "${actual,,}" != "${expected,,}" ||
-                "${actual,,}" == 8f2fe2d4f47476e30c454d21fd61dd7c32e22c94777d7a14eff8226316f0f3ff ]]; then
+          actual=$(sed -nE 's/^Signer .* certificate SHA-256 digest: ([[:xdigit:]]{64})[[:space:]]*$/\1/p' <<< "$certs" | tr 'A-F' 'a-f' | sort -u)
+          if [[ "$actual" != "$expected" ]]; then
             echo "::error::Le certificat de l’APK ne correspond pas à la clé de publication"
+            printf 'SHA-256 attendu : %s\n' "$expected"
+            printf '%s\n' "$certs"
             exit 1
           fi
-          echo "sha256=${actual,,}" >> "$GITHUB_OUTPUT"
+          echo "sha256=$actual" >> "$GITHUB_OUTPUT"
           mv "${apks[0]}" app/build/outputs/apk/app-published.apk
 
       - name: Renommer l’APK avec sa version
