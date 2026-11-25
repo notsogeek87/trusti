@@ -9,8 +9,7 @@ def buildNumber = (System.getenv('BUILD_NUMBER') ?: project.findProperty('buildN
 def appVersionBase = project.property('appVersionBase')
 
 // Clé d'upload Play Store fournie par la CI depuis les secrets du dépôt.
-// Absente en local : Gradle retombe sur la signature debug (même logique que
-// swipernews, voir play-store-bundle.yml).
+// Sans cette clé, la variante Play Store release est construite sans signature.
 def releaseKeystore = System.getenv('ANDROID_KEYSTORE_FILE')
 def hasReleaseKeystore = releaseKeystore && file(releaseKeystore).exists()
 def githubKeystore = System.getenv('TRUSTI_APK_KEYSTORE_FILE')
