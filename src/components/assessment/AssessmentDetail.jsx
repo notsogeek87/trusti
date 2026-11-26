@@ -1,11 +1,12 @@
 import React from 'react';
-import { Calculator, ChevronDown, HelpCircle, ExternalLink, Eye, Hourglass, History, Info, Landmark, MapPin, MessageCircle, ShieldCheck, Wrench } from 'lucide-react';
+import { ChevronDown, HelpCircle, ExternalLink, Eye, Hourglass, History, Info, Landmark, MapPin, MessageCircle, ShieldCheck, Wrench } from 'lucide-react';
 import { isStrictlyBetterGrade } from '../../utils/alternatives';
 import { formatDate, t } from '../../i18n/index.js';
 import BoldText from '../ui/BoldText';
 import SourceLink from './SourceLink';
-import AssessmentFacts from './AssessmentFacts';
-import { buildFactSections } from '../../utils/assessmentFacts.js';
+import FactList, { FactDots } from './AssessmentFacts';
+import { buildCriterionFacts } from '../../utils/assessmentFacts.js';
+import { CRITERIA_ORDER } from '../../constants/assessmentFacts.js';
 
 const confidenceLabel = (c) => (c ? t(`assessment.detail.confidence.${c}`) : '');
 
@@ -53,34 +54,50 @@ const LevelBar = ({ points }) => (
   </div>
 );
 
-const CriterionItem = ({ c }) => {
+// Un critère : niveau et points de couleur des données en résumé ; justification, sources,
+// données vérifiées (fiche factuelle) et explication en ouvrant la carte.
+const CriterionItem = ({ c, facts }) => {
   const { Icon, help } = CRITERION_META[c.key] || FALLBACK_META;
   const tile = `shrink-0 w-8 h-8 rounded-xl flex items-center justify-center ${tileTone(c.points)}`;
+  const rated = c.points !== null && c.points !== undefined;
   return (
-    <li className="py-2.5 first:pt-0 last:pb-0">
-      <div className="flex gap-2.5">
-        <span className={tile} aria-hidden="true"><Icon size={16} /></span>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-black text-slate-800">{CRITERION_META[c.key] ? t(`assessment.detail.criteria.${c.key}`) : c.name}</span>
-            <LevelBar points={c.points} />
-          </div>
-          {c.levelTitle && <p className="text-[11px] font-semibold text-indigo-700 mt-0.5">{levelTitle(c)}</p>}
-          {c.rationale && <p className="text-xs text-slate-600 leading-relaxed mt-0.5">{c.rationale}</p>}
-          <p className="text-[11px] text-slate-400 mt-0.5 flex flex-wrap items-center">
-            <ConfidenceSignal confidence={c.confidence} />
-            <span>{confidenceLabel(c.confidence)}</span>
-            {c.provisional && (
-              <span className="ml-1.5 inline-flex items-center gap-1 text-amber-700 font-semibold">
-                · <Hourglass size={10} /> {t('assessment.detail.provisional')}
+    <li className="py-2 first:pt-0 last:pb-0">
+      <details className="group">
+        <summary className="flex gap-2.5 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+          <span className={tile} aria-hidden="true"><Icon size={16} /></span>
+          <span className="min-w-0 flex-1">
+            <span className="flex items-center justify-between gap-2">
+              <span className="text-xs font-black text-slate-800">{CRITERION_META[c.key] ? t(`assessment.detail.criteria.${c.key}`) : c.name}</span>
+              <span className="flex items-center gap-1.5 shrink-0">
+                {rated && <LevelBar points={c.points} />}
+                <ChevronDown size={14} className="text-slate-400 transition-transform group-open:rotate-180" />
               </span>
-            )}
-          </p>
+            </span>
+            <span className="flex items-center justify-between gap-2 mt-0.5">
+              <span className="text-[11px] font-semibold text-indigo-700">{rated ? levelTitle(c) : t('assessment.detail.notRated')}</span>
+              {facts && <FactDots rows={facts} />}
+            </span>
+          </span>
+        </summary>
+        <div className="pl-[42px] mt-1">
+          {c.rationale && <p className="text-xs text-slate-600 leading-relaxed">{c.rationale}</p>}
+          {rated && (
+            <p className="text-[11px] text-slate-400 mt-0.5 flex flex-wrap items-center">
+              <ConfidenceSignal confidence={c.confidence} />
+              <span>{confidenceLabel(c.confidence)}</span>
+              {c.provisional && (
+                <span className="ml-1.5 inline-flex items-center gap-1 text-amber-700 font-semibold">
+                  · <Hourglass size={10} /> {t('assessment.detail.provisional')}
+                </span>
+              )}
+            </p>
+          )}
           {c.sources.length > 0 && (
             <ul className="mt-1 space-y-0.5">
               {c.sources.map((s, i) => <SourceLink key={i} source={s} />)}
             </ul>
           )}
+          {facts && <FactList rows={facts} />}
           {help && (
             <p className="mt-1.5 text-xs text-slate-700 leading-snug bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5">
               <span className="block text-[10px] font-bold uppercase tracking-wide text-slate-500 mb-0.5">{t('assessment.detail.measures')}</span>
@@ -88,7 +105,7 @@ const CriterionItem = ({ c }) => {
             </p>
           )}
         </div>
-      </div>
+      </details>
     </li>
   );
 };
@@ -129,8 +146,8 @@ const GradeHistory = ({ history }) => {
 };
 
 /**
- * Détail d'évaluation TrustiScore d'une app : score, critères, justifications et
- * sources. Les sources « background » portent la mention « à confirmer ».
+ * Détail d'évaluation TrustiScore d'une app : score et 5 critères ; chaque critère montre sa
+ * justification, ses sources et les données vérifiées de la fiche factuelle qui s'y rattachent. Les sources « background » portent la mention « à confirmer ».
  * Données : useAssessment -> GET /api/apps?assessment_for=:id.
  */
 const AssessmentDetail = ({ status, assessment }) => {
@@ -140,8 +157,16 @@ const AssessmentDetail = ({ status, assessment }) => {
   if (!assessment) return null;
 
   const { score, scoreRange, provisional, overridden, computedGrade, grade, hasUnverifiedSources, criteria } = assessment;
+  const criterionFacts = buildCriterionFacts(assessment.facts);
+  // Critères notés, plus ceux qui n'ont que des données factuelles (note fixée par l'équipe).
+  const items = [...criteria];
+  if (criterionFacts) {
+    for (const key of CRITERIA_ORDER) {
+      if (!items.some(c => c.key === key)) items.push({ key, name: key, points: null, sources: [] });
+    }
+    items.sort((a, b) => CRITERIA_ORDER.indexOf(a.key) - CRITERIA_ORDER.indexOf(b.key));
+  }
   const hasCriteria = criteria.length > 0;
-  const hasFacts = Boolean(buildFactSections(assessment.facts));
 
   return (
     <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm mb-4">
@@ -182,28 +207,19 @@ const AssessmentDetail = ({ status, assessment }) => {
         </p>
       )}
 
-      {/* La fiche factuelle d'abord ; le détail des 5 critères (calcul de la note) est replié
-          sous elle. Sans fiche, les critères restent ouverts pour ne pas laisser l'écran vide. */}
-      <AssessmentFacts facts={assessment.facts} />
+      {items.length > 0 && (
+        <p className="flex items-start gap-1.5 text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 mb-3 leading-snug">
+          <Info size={12} className="shrink-0 mt-px text-slate-400" />
+          <span>
+            <BoldText text={t('assessment.detail.disclaimer')} strongClassName="font-semibold" />
+          </span>
+        </p>
+      )}
 
-      {hasCriteria && (
-        <details open={!hasFacts} className="group mt-3 pt-3 border-t border-slate-100">
-          <summary className="flex items-center justify-between gap-2 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-            <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-tight text-slate-500">
-              <Calculator size={12} /> {t('assessment.detail.howComputed')}
-            </span>
-            <ChevronDown size={14} className="shrink-0 text-slate-400 transition-transform group-open:rotate-180" />
-          </summary>
-          <p className="flex items-start gap-1.5 text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 my-2 leading-snug">
-            <Info size={12} className="shrink-0 mt-px text-slate-400" />
-            <span>
-              <BoldText text={t('assessment.detail.disclaimer')} strongClassName="font-semibold" />
-            </span>
-          </p>
-          <ul className="divide-y divide-slate-100">
-            {criteria.map(c => <CriterionItem key={c.key} c={c} />)}
-          </ul>
-        </details>
+      {items.length > 0 && (
+        <ul className="divide-y divide-slate-100">
+          {items.map(c => <CriterionItem key={c.key} c={c} facts={criterionFacts?.[c.key]} />)}
+        </ul>
       )}
 
       <GradeHistory history={assessment.gradeHistory} />

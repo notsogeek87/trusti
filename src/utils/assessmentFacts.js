@@ -1,4 +1,4 @@
-import { FACT_SECTIONS, FACT_UNKNOWN, factTone } from '../constants/assessmentFacts.js';
+import { CRITERION_FACTS, FACT_SECTIONS, FACT_UNKNOWN, factTone } from '../constants/assessmentFacts.js';
 import { getLanguage, t } from '../i18n/index.js';
 
 /** Nom d'un pays dans la langue de l'interface (code ISO -> « France »), ou le code si inconnu. */
@@ -35,6 +35,42 @@ export function observedLabel(item, fact) {
   return valueLabel(item, value);
 }
 
+/** Une donnée attendue avec sa valeur observée (ou non renseignée), sa lecture et ses sources. */
+function factRow(item, fact) {
+  return {
+    key: item.key,
+    expected: expectedLabel(item),
+    observed: observedLabel(item, fact),
+    tone: factTone(item.key, fact?.value),
+    countries: (fact?.countries || []).map(countryName),
+    detail: fact?.detail || null,
+    sources: fact?.sources || [],
+  };
+}
+
+const ITEM_BY_KEY = Object.fromEntries(FACT_SECTIONS.flatMap(s => s.items.map(i => [`${s.key}.${i.key}`, i])));
+
+/**
+ * Données de la fiche factuelle rangées par critère (CRITERION_FACTS), pour les afficher sous
+ * la justification de chaque critère.
+ * @param {object|null} facts  assessment.facts
+ * @returns {Object<string, object[]>|null}  null si aucune donnée observée
+ */
+export function buildCriterionFacts(facts) {
+  if (!facts) return null;
+  let observed = 0;
+  const out = {};
+  for (const [criterion, keys] of Object.entries(CRITERION_FACTS)) {
+    out[criterion] = keys.map(k => {
+      const [section, item] = k.split('.');
+      const row = factRow(ITEM_BY_KEY[k], facts[section]?.[item] || null);
+      if (row.observed !== null) observed += 1;
+      return row;
+    });
+  }
+  return observed ? out : null;
+}
+
 /**
  * Sections de la fiche factuelle prêtes à afficher : toutes les données attendues, dans l'ordre,
  * avec la valeur observée (ou non renseignée), sa lecture (tone) et ses sources.
@@ -44,18 +80,7 @@ export function observedLabel(item, fact) {
 export function buildFactSections(facts) {
   if (!facts) return null;
   const sections = FACT_SECTIONS.map(section => {
-    const items = section.items.map(item => {
-      const fact = facts[section.key]?.[item.key] || null;
-      return {
-        key: item.key,
-        expected: expectedLabel(item),
-        observed: observedLabel(item, fact),
-        tone: factTone(item.key, fact?.value),
-        countries: (fact?.countries || []).map(countryName),
-        detail: fact?.detail || null,
-        sources: fact?.sources || [],
-      };
-    });
+    const items = section.items.map(item => factRow(item, facts[section.key]?.[item.key] || null));
     return { key: section.key, filled: items.filter(i => i.observed !== null).length, items };
   });
   return sections.some(s => s.filled > 0) ? sections : null;

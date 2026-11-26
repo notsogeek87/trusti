@@ -31,7 +31,6 @@ export default {
     unchanged: "Ocena bez zmian od pierwszej oceny z {date}.",
     up: "wzrost",
     down: "spadek",
-    howComputed: "Jak obliczana jest ocena",
     title: "Szczegóły oceny",
     provisionalRange: " (tymczasowo: od {min} do {max})",
     teamGrade: "Ocena ustalona przez zespół Trusti, bez oceny kryterium po kryterium.",
@@ -79,11 +78,9 @@ export default {
     },
   },
   facts: {
-    title: "Karta faktów",
-    intro: "Dla każdej oczekiwanej informacji: zaobserwowana wartość i jej źródło. Te wskazówki wyjaśniają ocenę, ale jej nie wyliczają.",
+    heading: "Zweryfikowane dane",
     notFilled: "Brak danych",
     noneFound: "Nie znaleziono",
-    filled: "{filled}/{total}",
     countries: "Kraje: {countries}",
     expected: {
       label: "Oczekiwane:",

@@ -31,7 +31,6 @@ export default {
     unchanged: "Nota inalterada desde a primeira avaliação, a {date}.",
     up: "subida",
     down: "descida",
-    howComputed: "Como a nota é calculada",
     title: "Detalhe da avaliação",
     provisionalRange: " (provisória: entre {min} e {max})",
     teamGrade: "Nota fixada pela equipa Trusti, sem avaliação critério a critério.",
@@ -79,11 +78,9 @@ export default {
     },
   },
   facts: {
-    title: "Ficha de factos",
-    intro: "Para cada dado esperado, o valor observado e a sua fonte. Estas referências explicam a nota sem a calcular.",
+    heading: "Dados verificados",
     notFilled: "Não preenchido",
     noneFound: "Nenhuma encontrada",
-    filled: "{filled}/{total}",
     countries: "Países: {countries}",
     expected: {
       label: "Esperado:",

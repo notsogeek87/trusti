@@ -31,7 +31,6 @@ export default {
     unchanged: "Voto invariato dalla prima valutazione, il {date}.",
     up: "aumento",
     down: "calo",
-    howComputed: "Come viene calcolato il voto",
     title: "Dettaglio della valutazione",
     provisionalRange: " (provvisorio: tra {min} e {max})",
     teamGrade: "Voto fissato dal team di Trusti, senza valutazione criterio per criterio.",
@@ -79,11 +78,9 @@ export default {
     },
   },
   facts: {
-    title: "Scheda dei fatti",
-    intro: "Per ogni dato atteso, il valore osservato e la sua fonte. Questi riferimenti spiegano il voto senza calcolarlo.",
+    heading: "Dati verificati",
     notFilled: "Non indicato",
     noneFound: "Nessuna trovata",
-    filled: "{filled}/{total}",
     countries: "Paesi: {countries}",
     expected: {
       label: "Atteso:",
