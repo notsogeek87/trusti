@@ -25,10 +25,10 @@ export const FACT_SECTIONS = [
   {
     key: 'technique',
     items: [
-      { key: 'hebergement', type: 'multi', values: ['fr', 'ue', 'hors_ue'] },
-      { key: 'sauvegardes', type: 'multi', values: ['fr', 'ue', 'hors_ue'] },
-      { key: 'infrastructure', type: 'multi', values: ['europeenne', 'americaine', 'autre'] },
-      { key: 'sous_traitants', type: 'enum', values: ['identifies', 'non_identifies'] },
+      { key: 'hebergement', type: 'multi', values: ['fr', 'ue', 'hors_ue', 'local'] },
+      { key: 'sauvegardes', type: 'multi', values: ['fr', 'ue', 'hors_ue', 'local'] },
+      { key: 'infrastructure', type: 'multi', values: ['europeenne', 'americaine', 'autre', 'local'] },
+      { key: 'sous_traitants', type: 'enum', values: ['identifies', 'non_identifies', 'aucun'] },
       { key: 'transferts_internationaux', type: 'enum', values: ['oui', 'non'] },
     ],
   },
@@ -69,7 +69,7 @@ export const ADEQUACY_COUNTRIES = new Set([
 const BY_VALUE = {
   cloud_act: { expose: 'bad', non_expose: 'good' },
   controle_etranger: { oui: 'bad', non: 'good' },
-  sous_traitants: { identifies: 'good', non_identifies: 'bad' },
+  sous_traitants: { identifies: 'good', non_identifies: 'bad', aucun: 'good' },
   transferts_internationaux: { oui: 'bad', non: 'good' },
   politique_confidentialite: { accessible: 'good', absente: 'bad' },
   dpo: { oui: 'good', non: 'bad' },

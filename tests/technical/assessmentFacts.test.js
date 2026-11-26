@@ -37,7 +37,7 @@ test('lecture des valeurs observées', () => {
 });
 
 test('donnée attendue et valeur observée en texte', () => {
-  assert.equal(expectedLabel(item('hebergement')), 'France / UE / Hors UE / Inconnu');
+  assert.equal(expectedLabel(item('hebergement')), "France / UE / Hors UE / Sur l'appareil ou auto-hébergé / Inconnu");
   assert.equal(expectedLabel(item('maison_mere_pays')), 'Pays / Aucune (indépendant) / Inconnu');
   assert.equal(observedLabel(item('hebergement'), { value: ['fr', 'ue'] }), 'France, UE');
   assert.equal(observedLabel(item('sectorielles'), { value: ['C5', 'PCI DSS'] }), 'C5, PCI DSS');
@@ -58,4 +58,11 @@ test('fiche : toutes les données attendues, les manquantes « non renseignées 
   const missing = sections[1].items[0];
   assert.equal(missing.observed, null);
   assert.equal(missing.tone, 'missing');
+});
+
+test('app sans serveur : « sur l\'appareil », aucun sous-traitant', () => {
+  const item = (key) => FACT_SECTIONS.flatMap(s => s.items).find(i => i.key === key);
+  assert.equal(factTone('hebergement', ['local']), 'good');
+  assert.equal(factTone('sous_traitants', 'aucun'), 'good');
+  assert.equal(observedLabel(item('hebergement'), { value: ['local'] }), "Sur l'appareil ou auto-hébergé");
 });

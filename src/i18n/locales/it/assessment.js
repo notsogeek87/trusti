@@ -142,6 +142,8 @@ export default {
       possible: "Possibile",
       non_documentee: "Non documentata",
       en_cours: "In corso",
+      local: "Sul dispositivo o self-hosted",
+      aucun: "Nessuno",
     },
   },
 };

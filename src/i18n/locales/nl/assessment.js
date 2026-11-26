@@ -142,6 +142,8 @@ export default {
       possible: "Mogelijk",
       non_documentee: "Niet gedocumenteerd",
       en_cours: "Lopend",
+      local: "Op het apparaat of zelf gehost",
+      aucun: "Geen",
     },
   },
 };
