@@ -105,3 +105,16 @@ export function factTone(itemKey, value) {
   }
   return BY_VALUE[itemKey]?.[value] || 'neutral';
 }
+
+/**
+ * Rattachement des données de la fiche factuelle aux 5 critères de la grille : chaque critère
+ * affiche, sous sa justification, les données qui l'éclairent (« section.donnée »).
+ */
+export const CRITERIA_ORDER = ['controle', 'conformite', 'gouvernance', 'localisation', 'transparence'];
+export const CRITERION_FACTS = {
+  gouvernance: ['juridique.siege_pays', 'juridique.maison_mere_pays', 'juridique.droit_applicable', 'juridique.cloud_act', 'juridique.controle_etranger'],
+  localisation: ['technique.hebergement', 'technique.sauvegardes', 'technique.transferts_internationaux', 'rgpd.transferts_hors_ue'],
+  controle: ['technique.infrastructure', 'technique.sous_traitants'],
+  conformite: ['rgpd.dpo', 'rgpd.base_legale', 'certifications.secnumcloud', 'certifications.iso27001', 'certifications.hds', 'certifications.soc2', 'certifications.sectorielles'],
+  transparence: ['rgpd.politique_confidentialite', 'rgpd.duree_conservation', 'rgpd.suppression_donnees'],
+};

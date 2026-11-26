@@ -1,7 +1,5 @@
 import React from 'react';
-import { ChevronDown, ClipboardList } from 'lucide-react';
 import { t } from '../../i18n/index.js';
-import { buildFactSections } from '../../utils/assessmentFacts.js';
 import SourceLink from './SourceLink';
 
 // Pastille de la valeur observée selon sa lecture (le texte reste toujours affiché).
@@ -13,7 +11,14 @@ const TONE_CLASS = {
   neutral: 'bg-slate-50 text-slate-700 border-slate-200',
   missing: 'bg-white text-slate-400 border-slate-200 border-dashed',
 };
-const DOT_CLASS = { good: 'bg-emerald-500', bad: 'bg-rose-500', warn: 'bg-amber-400', unknown: 'bg-amber-300', neutral: 'bg-slate-300', missing: 'bg-slate-200' };
+export const DOT_CLASS = { good: 'bg-emerald-500', bad: 'bg-rose-500', warn: 'bg-amber-400', unknown: 'bg-amber-300', neutral: 'bg-slate-300', missing: 'bg-slate-200' };
+
+/** Points de couleur : un par donnée, pour lire un critère d'un coup d'œil sans l'ouvrir. */
+export const FactDots = ({ rows }) => (
+  <span className="flex gap-0.5" aria-hidden="true">
+    {rows.map(r => <span key={r.key} className={`w-1.5 h-1.5 rounded-full ${DOT_CLASS[r.tone]}`} />)}
+  </span>
+);
 
 const FactRow = ({ item }) => (
   <li className="py-2 first:pt-1 last:pb-0">
@@ -44,40 +49,16 @@ const FactRow = ({ item }) => (
 );
 
 /**
- * Fiche factuelle de l'évaluation : pour chaque donnée attendue (souveraineté juridique, technique,
- * RGPD, certifications), la valeur observée et sa source. N'affiche rien tant que la fiche est vide.
- * Données attendues : src/constants/assessmentFacts.js ; valeurs : colonne app_assessments.facts.
+ * Données vérifiées d'un critère : pour chaque donnée attendue, la valeur observée et sa source.
+ * Lignes construites par buildCriterionFacts (src/utils/assessmentFacts.js).
  */
-const AssessmentFacts = ({ facts }) => {
-  const sections = buildFactSections(facts);
-  if (!sections) return null;
-  return (
-    <div className="mt-3 pt-3 border-t border-slate-100">
-      <p className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-tight text-slate-500">
-        <ClipboardList size={12} /> {t('assessment.facts.title')}
-      </p>
-      <p className="text-[11px] text-slate-500 leading-snug mb-1.5">{t('assessment.facts.intro')}</p>
-      <div className="space-y-1.5">
-        {sections.map(section => (
-          <details key={section.key} className="group border border-slate-200 rounded-xl px-2.5 py-1.5">
-            <summary className="flex items-center justify-between gap-2 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-              <span className="text-xs font-black text-slate-800">{t(`assessment.facts.sections.${section.key}`)}</span>
-              <span className="flex items-center gap-1.5 shrink-0">
-                <span className="flex gap-0.5" aria-hidden="true">
-                  {section.items.map(i => <span key={i.key} className={`w-1.5 h-1.5 rounded-full ${DOT_CLASS[i.tone]}`} />)}
-                </span>
-                <span className="text-[10px] text-slate-400">{t('assessment.facts.filled', { filled: section.filled, total: section.items.length })}</span>
-                <ChevronDown size={14} className="text-slate-400 transition-transform group-open:rotate-180" />
-              </span>
-            </summary>
-            <ul className="divide-y divide-slate-100 mt-1">
-              {section.items.map(item => <FactRow key={item.key} item={item} />)}
-            </ul>
-          </details>
-        ))}
-      </div>
-    </div>
-  );
-};
+const FactList = ({ rows }) => (
+  <div className="mt-2 border border-slate-200 rounded-xl px-2.5 py-1.5">
+    <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{t('assessment.facts.heading')}</p>
+    <ul className="divide-y divide-slate-100">
+      {rows.map(item => <FactRow key={item.key} item={item} />)}
+    </ul>
+  </div>
+);
 
-export default AssessmentFacts;
+export default FactList;

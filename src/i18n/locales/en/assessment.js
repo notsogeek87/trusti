@@ -31,7 +31,6 @@ export default {
     unchanged: "Grade unchanged since the first assessment on {date}.",
     up: "up",
     down: "down",
-    howComputed: "How the grade is calculated",
     title: "Assessment details",
     provisionalRange: " (provisional: between {min} and {max})",
     teamGrade: "Grade set by the Trusti team, without a criterion-by-criterion assessment.",
@@ -79,11 +78,9 @@ export default {
     },
   },
   facts: {
-    title: "Fact sheet",
-    intro: "For each expected item, the observed value and its source. These markers explain the grade without computing it.",
+    heading: "Verified data",
     notFilled: "Not filled in",
     noneFound: "None found",
-    filled: "{filled}/{total}",
     countries: "Countries: {countries}",
     expected: {
       label: "Expected:",

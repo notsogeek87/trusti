@@ -73,3 +73,21 @@ test('Suisse et projets communautaires', () => {
   assert.equal(factTone('siege_pays', 'communautaire'), 'neutral');
   assert.equal(factTone('base_legale', 'non_applicable'), 'neutral');
 });
+
+test('les 21 données sont rattachées à un seul critère chacune', async () => {
+  const { CRITERION_FACTS } = await import('../../src/constants/assessmentFacts.js');
+  const all = Object.values(CRITERION_FACTS).flat();
+  const expected = FACT_SECTIONS.flatMap(s => s.items.map(i => `${s.key}.${i.key}`));
+  assert.equal(all.length, 21);
+  assert.deepEqual([...all].sort(), [...expected].sort());
+});
+
+test('données rangées par critère', async () => {
+  const { buildCriterionFacts } = await import('../../src/utils/assessmentFacts.js');
+  assert.equal(buildCriterionFacts(null), null);
+  const byCrit = buildCriterionFacts({ juridique: { cloud_act: { value: 'expose', sources: [] } }, certifications: { hds: { value: 'oui', sources: [] } } });
+  assert.equal(byCrit.gouvernance.length, 5);
+  assert.equal(byCrit.gouvernance.find(r => r.key === 'cloud_act').tone, 'bad');
+  assert.equal(byCrit.conformite.find(r => r.key === 'hds').observed, 'Oui');
+  assert.equal(byCrit.localisation[0].tone, 'missing');
+});
