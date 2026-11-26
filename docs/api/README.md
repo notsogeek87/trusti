@@ -64,7 +64,7 @@ Endpoint principal, backé par PostgreSQL (`service-postgres.js`).
   attendues (21, avec leurs valeurs possibles) sont dans `src/constants/assessmentFacts.js`, copie de
   `trustillm/trustiscore_pipeline/facts.json`. Affichée dans chaque critère (une carte repliable par
   critère dans `AssessmentDetail.jsx`, rattachement dans `CRITERION_FACTS`) : sous la justification, chaque
-  donnée attendue avec sa valeur observée (ou « Non renseigné ») et sa source (`AssessmentFacts.jsx`). La requête lit la
+  donnée attendue avec sa valeur observée (ou « Non renseigné ») et sa source (`AssessmentFacts.jsx`). Les points de couleur du résumé de chaque critère (`FactDots`) suivent les règles de [2026-11-26-points-de-couleur-des-criteres.md](../architecture/2026-11-26-points-de-couleur-des-criteres.md) : ligne « Code source » tirée de la fiche de l'app, transferts fusionnés, couleurs selon le contexte. La requête lit la
   colonne par `to_jsonb(app_assessments) -> 'facts'` : elle fonctionne avant la migration 002. Pas encore
   exposée par l'API v1 partenaires.
 - **GET** `?migration_guide_from=:id&migration_guide_to=:id` : guide de migration
