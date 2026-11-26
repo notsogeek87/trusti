@@ -31,6 +31,7 @@ export default {
     unchanged: "Grade unchanged since the first assessment on {date}.",
     up: "up",
     down: "down",
+    howComputed: "How the grade is calculated",
     title: "Assessment details",
     provisionalRange: " (provisional: between {min} and {max})",
     teamGrade: "Grade set by the Trusti team, without a criterion-by-criterion assessment.",

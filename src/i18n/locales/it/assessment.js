@@ -31,6 +31,7 @@ export default {
     unchanged: "Voto invariato dalla prima valutazione, il {date}.",
     up: "aumento",
     down: "calo",
+    howComputed: "Come viene calcolato il voto",
     title: "Dettaglio della valutazione",
     provisionalRange: " (provvisorio: tra {min} e {max})",
     teamGrade: "Voto fissato dal team di Trusti, senza valutazione criterio per criterio.",

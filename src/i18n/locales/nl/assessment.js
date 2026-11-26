@@ -31,6 +31,7 @@ export default {
     unchanged: "Score ongewijzigd sinds de eerste beoordeling op {date}.",
     up: "stijging",
     down: "daling",
+    howComputed: "Hoe het cijfer wordt berekend",
     title: "Details van de beoordeling",
     provisionalRange: " (voorlopig: tussen {min} en {max})",
     teamGrade: "Score vastgesteld door het Trusti-team, zonder beoordeling per criterium.",

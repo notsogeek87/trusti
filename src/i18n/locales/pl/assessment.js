@@ -31,6 +31,7 @@ export default {
     unchanged: "Ocena bez zmian od pierwszej oceny z {date}.",
     up: "wzrost",
     down: "spadek",
+    howComputed: "Jak obliczana jest ocena",
     title: "Szczegóły oceny",
     provisionalRange: " (tymczasowo: od {min} do {max})",
     teamGrade: "Ocena ustalona przez zespół Trusti, bez oceny kryterium po kryterium.",
