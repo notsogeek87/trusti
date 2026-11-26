@@ -84,7 +84,8 @@ export async function getAllAssessments() {
   const rows = await sql`
     SELECT app_id, grade, score, computed_grade, overridden, provisional,
            score_range, has_unverified_sources, summary, criteria,
-           assessed_at::text AS assessed_at
+           assessed_at::text AS assessed_at,
+           to_jsonb(app_assessments) -> 'facts' AS facts
     FROM app_assessments
   `;
   const map = new Map();
