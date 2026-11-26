@@ -7,10 +7,15 @@ import assert from 'node:assert/strict';
 import fr from '../../src/i18n/locales/fr/index.js';
 import en from '../../src/i18n/locales/en/index.js';
 import de from '../../src/i18n/locales/de/index.js';
+import es from '../../src/i18n/locales/es/index.js';
+import it from '../../src/i18n/locales/it/index.js';
+import nl from '../../src/i18n/locales/nl/index.js';
+import pl from '../../src/i18n/locales/pl/index.js';
+import pt from '../../src/i18n/locales/pt/index.js';
 import { ENABLED_LANGUAGES, LANGUAGES, DEFAULT_LANGUAGE } from '../../src/i18n/languages.js';
 import { t, setLanguageMessages, detectLanguage } from '../../src/i18n/index.js';
 
-const DICTS = { fr, en, de };
+const DICTS = { fr, en, de, es, it, nl, pl, pt };
 
 function leaves(obj, prefix = '', out = new Map()) {
   for (const [k, v] of Object.entries(obj)) {
@@ -26,14 +31,22 @@ const shape = (v) => (Array.isArray(v) ? `array:${v.length}` : typeof v);
 
 const frLeaves = leaves(fr);
 
+/**
+ * Formes plurielles propres à une langue (polonais : `_few` 2-4, `_many` 5+) : admises
+ * si le français a la clé `_other` correspondante, avec les mêmes variables.
+ */
+const EXTRA_PLURAL = /_(zero|two|few|many)$/;
+const pluralBase = (key) => (EXTRA_PLURAL.test(key) ? key.replace(EXTRA_PLURAL, '_other') : null);
+
 for (const lang of LANGUAGES.filter((l) => l !== DEFAULT_LANGUAGE)) {
   const dict = leaves(DICTS[lang]);
 
   test(`i18n ${lang} : pas de clé inconnue, mêmes variables et même forme que le français`, () => {
     const problems = [];
     for (const [key, value] of dict) {
-      if (!frLeaves.has(key)) { problems.push(`clé inconnue : ${key}`); continue; }
-      const ref = frLeaves.get(key);
+      const refKey = frLeaves.has(key) ? key : pluralBase(key);
+      if (!refKey || !frLeaves.has(refKey)) { problems.push(`clé inconnue : ${key}`); continue; }
+      const ref = frLeaves.get(refKey);
       if (shape(ref) !== shape(value)) problems.push(`${key} : forme ${shape(value)}, ${shape(ref)} attendue`);
       else if (vars(ref) !== vars(value)) problems.push(`${key} : variables ${vars(value) || '(aucune)'}, ${vars(ref) || '(aucune)'} attendues`);
       if (typeof value === 'string' && !value.trim()) problems.push(`${key} : texte vide`);
@@ -55,6 +68,15 @@ for (const lang of LANGUAGES.filter((l) => l !== DEFAULT_LANGUAGE)) {
   }
 }
 
+test('i18n : pluriels polonais (one / few / many)', async () => {
+  await setLanguageMessages('pl');
+  assert.equal(t('ui.selection.count', { count: 1 }), 'Wybrano 1 aplikację');
+  assert.equal(t('ui.selection.count', { count: 3 }), 'Wybrano 3 aplikacje');
+  assert.equal(t('ui.selection.count', { count: 5 }), 'Wybrano 5 aplikacji');
+  assert.equal(t('ui.selection.count', { count: 22 }), 'Wybrano 22 aplikacje');
+  await setLanguageMessages('fr');
+});
+
 test('i18n : t() interpole, gère le pluriel et retombe sur le français', async () => {
   await setLanguageMessages('fr');
   assert.equal(t('common.language'), 'Langue');
@@ -65,7 +87,10 @@ test('i18n : t() interpole, gère le pluriel et retombe sur le français', async
 });
 
 test('i18n : détection de la langue (adresse, puis navigateur, sinon français)', () => {
-  assert.equal(detectLanguage({ search: '', navigatorLanguages: ['xx-XX'] }).lang, 'fr');
+  assert.equal(detectLanguage({ search: '', navigatorLanguages: [] }).lang, 'fr');
+  assert.equal(detectLanguage({ search: '', navigatorLanguages: ['sv-SE'] }).lang, 'en', 'langue non prise en charge : anglais');
+  assert.equal(detectLanguage({ search: '', navigatorLanguages: ['sv-SE', 'pl-PL'] }).lang, 'pl');
+  assert.equal(detectLanguage({ search: '', navigatorLanguages: ['pt-BR'] }).lang, 'pt');
   for (const lang of ENABLED_LANGUAGES) {
     assert.equal(detectLanguage({ search: `?lang=${lang}`, navigatorLanguages: [] }).lang, lang);
   }

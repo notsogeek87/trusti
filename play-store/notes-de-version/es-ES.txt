@@ -1,0 +1,3 @@
+Correcciones:
+• Los eventos recién publicados aparecen enseguida en las notificaciones.
+• Volver desde la ficha de una app abierta desde las notificaciones te devuelve a ellas.

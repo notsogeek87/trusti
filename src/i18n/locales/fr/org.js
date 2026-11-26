@@ -481,6 +481,7 @@ export default {
       D: "Forte dépendance, risque élevé",
       E: "Dépendance critique",
     },
+    gradeLine: "Note {grade} : {label}",
     file: "trusti-rapport",
     heading: "RAPPORT DE SOUVERAINETÉ NUMÉRIQUE",
     madeWith: "Établi avec Trusti - app.trusti-score.eu",

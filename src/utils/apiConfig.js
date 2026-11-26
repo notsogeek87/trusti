@@ -17,8 +17,8 @@ export const API_URL = Capacitor.isNativePlatform()
   : (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
 
 /**
- * URL de /api/apps avec la langue de l'interface : en anglais ou en allemand, le
- * serveur renvoie les textes de la base traduits quand ils existent (repli français).
+ * URL de /api/apps avec la langue de l'interface : hors français, le
+ * serveur renvoie les textes de la base traduits quand ils existent (repli anglais, puis français).
  * @param {string} query paramètres déjà encodés, sans « ? » (ex. `ids=1,2`)
  */
 export function appsUrl(query = '') {

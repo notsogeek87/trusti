@@ -1,0 +1,3 @@
+Poprawki:
+• Nowo opublikowane zdarzenia od razu pojawiają się w powiadomieniach.
+• Powrót z karty aplikacji otwartej z powiadomień prowadzi z powrotem do nich.

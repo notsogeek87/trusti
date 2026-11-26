@@ -1,0 +1,3 @@
+Correzioni:
+• Gli eventi appena pubblicati compaiono subito nelle notifiche.
+• Tornare indietro da una scheda aperta dalle notifiche riporta alle notifiche.

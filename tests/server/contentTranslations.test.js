@@ -2,15 +2,18 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   normalizeContentLang, sourceHash, indexTranslations, applyToApiBody, translateApiBody, collectEntityIds,
+  contentLanguages,
 } from '../../server/contentTranslations.js';
 
 const row = (entity, entity_id, field, value, fr) => ({ entity, entity_id, field, value, source_hash: sourceHash(fr) });
 
-test('langue : en/de seulement, le reste = français', () => {
+test('langue : en, de, es, it, nl, pl, pt ; le reste = français', () => {
   assert.equal(normalizeContentLang('EN'), 'en');
   assert.equal(normalizeContentLang('de-DE'), 'de');
+  assert.equal(normalizeContentLang('it'), 'it');
+  assert.equal(normalizeContentLang('pl-PL'), 'pl');
   assert.equal(normalizeContentLang('fr'), null);
-  assert.equal(normalizeContentLang('it'), null);
+  assert.equal(normalizeContentLang('sv'), null);
   assert.equal(normalizeContentLang(undefined), null);
 });
 
@@ -83,4 +86,32 @@ test('ids collectés et requête unique ; erreur base = français', async () => 
   const failing = async () => { throw new Error('connection refused'); };
   assert.equal(await translateApiBody(body, 'de', {}, async () => failing), body);
   assert.equal(await translateApiBody(body, null, {}, async () => fakeSql), body);
+});
+
+test("langue sans traduction : repli sur l'anglais, puis le français", async () => {
+  assert.deepEqual(contentLanguages('pl'), ['pl', 'en']);
+  assert.deepEqual(contentLanguages('en'), ['en']);
+  const tr = (lang, field, value, fr) => ({ ...row('application', '1', field, value, fr), lang });
+  // Ordre de lecture quelconque : la langue demandée l'emporte, l'anglais sert de secours.
+  const rows = [
+    tr('pl', 'reason', 'Hostowane we Francji', 'Hébergé en France'),
+    tr('en', 'reason', 'Hosted in France', 'Hébergé en France'),
+    tr('en', 'description', 'English only', 'Description'),
+    tr('pl', 'teamPickReason', 'Stary tekst', 'Ancien choix'),
+    tr('en', 'teamPickReason', 'Team pick', 'Choix'),
+  ];
+  const index = indexTranslations(rows, ['pl', 'en']);
+  const body = { success: true, app: { id: 1, reason: 'Hébergé en France', description: 'Description', teamPickReason: 'Choix' } };
+  const out = applyToApiBody(body, index);
+  assert.equal(out.app.reason, 'Hostowane we Francji');
+  assert.equal(out.app.description, 'English only', 'absent en polonais : anglais');
+  assert.equal(out.app.teamPickReason, 'Team pick', 'polonais périmé : anglais');
+  const reversed = applyToApiBody(body, indexTranslations([...rows].reverse(), ['pl', 'en']));
+  assert.deepEqual(reversed.app, out.app);
+
+  let langsAsked = null;
+  const fakeSql = async (strings, ...values) => { langsAsked = values[0]; return rows; };
+  const viaSql = await translateApiBody(body, 'pl', {}, async () => fakeSql);
+  assert.deepEqual(langsAsked, ['pl', 'en']);
+  assert.equal(viaSql.app.description, 'English only');
 });

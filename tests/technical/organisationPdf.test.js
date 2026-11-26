@@ -9,6 +9,7 @@ test('texte PDF : espaces invisibles retirés, caractères hors police remplacé
   assert.equal(pdfText('​​Microsoft Copilot'), 'Microsoft Copilot');
   assert.equal(pdfText('Évaluation « œuvre » – 50 %'), 'Évaluation « œuvre » – 50 %');
   assert.equal(pdfText('Москва'), '??????');
+  assert.equal(pdfText('Zarządzanie i łączność: źródło'), 'Zarzadzanie i lacznosc: zródlo', 'polonais : lettres de base');
   assert.equal(pdfText(null), '');
 });
 

@@ -128,8 +128,8 @@ export const openApiSpec = {
     },
     parameters: {
       lang: {
-        name: 'lang', in: 'query', schema: { type: 'string', enum: ['fr', 'en', 'de'], default: 'fr' },
-        description: 'Langue des textes (raison, description, résumé, justifications). Texte français si la traduction manque.',
+        name: 'lang', in: 'query', schema: { type: 'string', enum: ['fr', 'en', 'de', 'es', 'it', 'nl', 'pl', 'pt'], default: 'fr' },
+        description: 'Langue des textes (raison, description, résumé, justifications). Traduction anglaise si celle de la langue demandée manque, puis texte français.',
       },
     },
     responses: {

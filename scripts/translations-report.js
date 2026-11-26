@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 /**
- * Rapport des traductions du contenu en base : ce qui manque ou est périmé en anglais et
- * en allemand (raisons, descriptions, justifications des évaluations, guides de migration).
+ * Rapport des traductions du contenu en base : ce qui manque ou est périmé dans chaque
+ * langue de CONTENT_LANGUAGES (raisons, descriptions, justifications des évaluations,
+ * guides de migration).
  *
  *   node scripts/translations-report.js            # résumé par type de texte et par langue
  *   node scripts/translations-report.js --list     # + les 50 premiers textes à traduire
  *   node scripts/translations-report.js --list=all # + la liste complète
  *   node scripts/translations-report.js --check    # code de sortie 1 s'il reste quelque chose
+ *   node scripts/translations-report.js --lang=pl  # une seule langue (ou --lang=es,it)
  *
  * Lecture seule : rien n'est écrit en base. Lit DATABASE_URL (voir server/database/sql.js).
  * Pour traduire ce qui est listé : docs/guides/traduction.md, section « Rafraîchir ».
@@ -14,11 +16,14 @@
 import 'dotenv/config';
 import sql from '../server/database/sql.js';
 import { expectedTranslations, compareTranslations } from '../server/translationsReport.js';
+import { CONTENT_LANGUAGES } from '../server/contentTranslations.js';
 
 const args = process.argv.slice(2);
 const check = args.includes('--check');
 const listArg = args.find(a => a === '--list' || a.startsWith('--list='));
 const listLimit = !listArg ? 0 : listArg === '--list=all' ? Infinity : 50;
+const langArg = args.find(a => a.startsWith('--lang='));
+const langs = langArg ? langArg.slice('--lang='.length).split(',').filter(l => CONTENT_LANGUAGES.includes(l)) : CONTENT_LANGUAGES;
 
 async function main() {
   if (!process.env.DATABASE_URL) {
@@ -32,7 +37,7 @@ async function main() {
   ]);
 
   const expected = expectedTranslations({ apps, assessments, guides });
-  const report = compareTranslations(expected, translations);
+  const report = compareTranslations(expected, translations, langs);
 
   console.log(`Catalogue : ${apps.length} apps, ${assessments.length} évaluations, ${guides.length} guides, ${expected.length} textes à traduire par langue.\n`);
   console.log('type'.padEnd(34) + 'langue  attendus      ok  manquants  périmés  invalides');

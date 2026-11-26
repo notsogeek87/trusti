@@ -24,6 +24,19 @@ const LINE = [220, 232, 239];
 
 // Caractères hors Latin-1 acceptés par les polices standard du PDF (WinAnsi).
 const WIN_ANSI_EXTRA = '€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ'; // i18n-ignore
+// Lettres latines sans décomposition Unicode (ł polonais…), remplacées par leur lettre de base.
+const LATIN_BASE = { ł: 'l', Ł: 'L', đ: 'd', Đ: 'D', ħ: 'h', Ħ: 'H', ı: 'i' }; // i18n-ignore
+
+/**
+ * Caractère hors WinAnsi : la lettre sans accent si elle existe (ą → a, ś → s, ł → l,
+ * pour le polonais, le tchèque, le roumain…), sinon « ? ».
+ */
+function winAnsiChar(ch) {
+  if (ch.charCodeAt(0) <= 0xff || WIN_ANSI_EXTRA.includes(ch)) return ch;
+  if (LATIN_BASE[ch]) return LATIN_BASE[ch];
+  const base = ch.normalize('NFD').replace(/[̀-ͯ]/g, '');
+  return base && base !== ch && [...base].every(c => c.charCodeAt(0) <= 0xff) ? base : '?';
+}
 
 /** Texte compatible avec les polices standard du PDF (espaces invisibles retirés). */
 export function pdfText(value) {
@@ -33,7 +46,7 @@ export function pdfText(value) {
     .replace(/[  ]/g, ' ')
     .replace(/[‘’]/g, '\'')
     .split('')
-    .map(ch => (ch.charCodeAt(0) <= 0xff || WIN_ANSI_EXTRA.includes(ch) ? ch : '?'))
+    .map(winAnsiChar)
     .join('')
     .trim();
 }
@@ -89,7 +102,7 @@ export async function buildOrganisationPdf({ orgName, profileLabel, selectedApps
   doc.setFont('helvetica', 'bold').setFontSize(30).setTextColor(...gradeTextRgb(g));
   doc.text(g, M + 10, y + 16, { align: 'center' });
   const textX = M + 26;
-  doc.setFontSize(14).setTextColor(...INK).text(pdfText(`Note ${g} : ${ORG_GRADE_LABEL[g]}`), textX, y + 6);
+  doc.setFontSize(14).setTextColor(...INK).text(pdfText(t('org.pdf.gradeLine', { grade: g, label: ORG_GRADE_LABEL[g] })), textX, y + 6);
   doc.setFont('helvetica', 'normal').setFontSize(9.5).setTextColor(...MUTED);
   const subtitle = t('org.pdf.subtitle', { count: summary.total })
     + (summary.rawGrade !== g ? t('org.pdf.unweighted', { grade: summary.rawGrade }) : '') + '.';

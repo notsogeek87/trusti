@@ -481,6 +481,7 @@ export default {
       D: "Heavy dependency, high risk",
       E: "Critical dependency",
     },
+    gradeLine: "Grade {grade}: {label}",
     file: "trusti-report",
     heading: "DIGITAL SOVEREIGNTY REPORT",
     madeWith: "Produced with Trusti - app.trusti-score.eu",

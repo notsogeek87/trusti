@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<!-- Textes natifs (notifications, mise à jour). values = français ; values-en / values-de : traductions. -->
+<!-- Textes natifs (notifications, mise à jour) en allemand. Source : values-fr ; voir docs/guides/traduction.md. -->
 <resources>
     <string name="notif_grade_down_title">%1$s sinkt: %2$s → %3$s</string>
     <string name="notif_grade_up_title">%1$s steigt: %2$s → %3$s</string>

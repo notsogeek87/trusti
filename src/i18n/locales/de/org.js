@@ -481,6 +481,7 @@ export default {
       D: "Starke Abhängigkeit, hohes Risiko",
       E: "Kritische Abhängigkeit",
     },
+    gradeLine: "Note {grade}: {label}",
     file: "trusti-bericht",
     heading: "BERICHT ZUR DIGITALEN SOUVERÄNITÄT",
     madeWith: "Erstellt mit Trusti - app.trusti-score.eu",

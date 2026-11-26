@@ -1,26 +1,32 @@
 /**
- * Traduction de l'interface (FR, EN, DE). Voir docs/guides/traduction.md.
+ * Traduction de l'interface (FR, EN, DE, ES, IT, NL, PL, PT). Voir docs/guides/traduction.md.
  *
  * - `t('ns.cle', { nom: 'x' })` : texte dans la langue courante, variables `{nom}`.
- *   Pluriel : `t('ns.cle', { count: n })` choisit `cle_one` / `cle_other` (Intl.PluralRules).
+ *   Pluriel : `t('ns.cle', { count: n })` choisit `cle_one` / `cle_other` (Intl.PluralRules) ;
+ *   le polonais ajoute `cle_few` / `cle_many` (2-4 / 5+), sinon `cle_other`.
  * - Utilisable partout (composants, hooks, utilitaires, PDF) : pas de contexte React.
  * - La langue est fixée au démarrage (`initI18n`, appelé par main.jsx avant de charger
  *   l'app). Changer de langue recharge l'app : pas de rendu à moitié traduit.
- * - Le français est embarqué ; l'anglais et l'allemand sont chargés à la demande.
+ * - Le français est embarqué ; les autres langues sont chargées à la demande.
  * - Une clé absente d'une traduction retombe sur le français.
  * - Seules les langues de `ENABLED_LANGUAGES` sont proposées : une langue n'y entre que
  *   complète (tests/technical/i18n.test.js le vérifie).
  */
 import fr from './locales/fr/index.js';
-import { ENABLED_LANGUAGES, LANGUAGES, DEFAULT_LANGUAGE } from './languages.js';
+import { ENABLED_LANGUAGES, LANGUAGES, DEFAULT_LANGUAGE, FALLBACK_LANGUAGE } from './languages.js';
 
-export { ENABLED_LANGUAGES, LANGUAGES, DEFAULT_LANGUAGE };
+export { ENABLED_LANGUAGES, LANGUAGES, DEFAULT_LANGUAGE, FALLBACK_LANGUAGE };
 
 const STORAGE_KEY = 'trusti-lang';
-const LOCALES = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE' };
+const LOCALES = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE', es: 'es-ES', it: 'it-IT', nl: 'nl-NL', pl: 'pl-PL', pt: 'pt-PT' };
 const LOADERS = {
   en: () => import('./locales/en/index.js'),
   de: () => import('./locales/de/index.js'),
+  es: () => import('./locales/es/index.js'),
+  it: () => import('./locales/it/index.js'),
+  nl: () => import('./locales/nl/index.js'),
+  pl: () => import('./locales/pl/index.js'),
+  pt: () => import('./locales/pt/index.js'),
 };
 
 let currentLang = DEFAULT_LANGUAGE;
@@ -38,7 +44,8 @@ function writeStored(lang) {
 
 /**
  * Langue à utiliser : `?lang=` dans l'adresse (liens depuis le site), puis le choix
- * mémorisé, puis la langue du navigateur ou du téléphone, sinon le français.
+ * mémorisé, puis la langue du navigateur ou du téléphone. Si aucune n'est prise en charge :
+ * le français pour un navigateur sans langue connue, l'anglais sinon (FALLBACK_LANGUAGE).
  */
 export function detectLanguage({ search = globalThis.location?.search || '', navigatorLanguages } = {}) {
   const fromUrl = new URLSearchParams(search).get('lang');
@@ -47,11 +54,14 @@ export function detectLanguage({ search = globalThis.location?.search || '', nav
   if (stored && isEnabled(stored)) return { lang: stored, fromUrl: false };
   const nav = navigatorLanguages
     || (globalThis.navigator?.languages?.length ? globalThis.navigator.languages : [globalThis.navigator?.language || '']);
+  let anyLanguage = false;
   for (const l of nav) {
     const short = String(l || '').slice(0, 2).toLowerCase();
+    if (/^[a-z]{2}$/.test(short)) anyLanguage = true;
     if (isEnabled(short)) return { lang: short, fromUrl: false };
   }
-  return { lang: DEFAULT_LANGUAGE, fromUrl: false };
+  const fallback = anyLanguage && isEnabled(FALLBACK_LANGUAGE) ? FALLBACK_LANGUAGE : DEFAULT_LANGUAGE;
+  return { lang: fallback, fromUrl: false };
 }
 
 /** Charge et active une langue (le français est toujours disponible). */
@@ -90,7 +100,7 @@ export function changeLanguage(lang) {
 }
 
 export const getLanguage = () => currentLang;
-/** Locale pour Intl (dates, nombres) : fr-FR, en-GB, de-DE. */
+/** Locale pour Intl (dates, nombres) : fr-FR, en-GB, de-DE, es-ES… */
 export const getLocale = () => LOCALES[currentLang] || LOCALES.fr;
 
 function lookup(dict, key) {

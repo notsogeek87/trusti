@@ -63,9 +63,9 @@ test('comparaison : ok, manquant, périmé, invalide, orphelin', () => {
     tr('migration_guide', 'g:import', 'steps', 'de', ['eins', 'zwei'], ['a', 'b']),
     tr('migration_guide', 'g:import', 'summary', 'en', 'S', 'R'),
     tr('application', 'supprimee', 'reason', 'en', 'Gone', 'Disparue'),
-    tr('application', 'a1', 'reason', 'it', 'Testo', 'Texte'),
+    tr('application', 'a1', 'reason', 'sv', 'Text', 'Texte'),
   ];
-  const { rows: out, summary, orphans, complete } = compareTranslations(exp, rows);
+  const { rows: out, summary, orphans, complete } = compareTranslations(exp, rows, ['en', 'de']);
   const status = (entity, id, field, lang) => out.find(r => r.entity === entity && r.entityId === id && r.field === field && r.lang === lang).status;
 
   assert.equal(status('application', 'a1', 'reason', 'en'), 'ok');
@@ -78,7 +78,7 @@ test('comparaison : ok, manquant, périmé, invalide, orphelin', () => {
   assert.equal(complete, false);
 
   assert.deepEqual(orphans, [{ entity: 'application', entityId: 'supprimee', field: 'reason', lang: 'en' }],
-    'la langue non gérée (it) n\'est pas comptée');
+    'la langue non gérée (sv) n\'est pas comptée');
 
   const reasonEn = summary.find(s => s.entity === 'application' && s.field === 'reason' && s.lang === 'en');
   assert.deepEqual(reasonEn, { entity: 'application', field: 'reason', lang: 'en', expected: 1, ok: 1, missing: 0, stale: 0, invalid: 0 });
@@ -94,7 +94,7 @@ test('comparaison : tout traduit = complet ; les justifications sont regroupées
     tr('assessment', '1', 'rationale.controle', lang, 'x', 'A'),
     tr('assessment', '1', 'rationale.localisation', lang, 'x', 'B'),
   ]);
-  const { complete, summary, orphans } = compareTranslations(exp, rows);
+  const { complete, summary, orphans } = compareTranslations(exp, rows, ['en', 'de']);
   assert.equal(complete, true);
   assert.equal(orphans.length, 0);
   const rat = summary.find(s => s.field === 'rationale.*' && s.lang === 'de');
@@ -107,5 +107,13 @@ test('comparaison : tout traduit = complet ; les justifications sont regroupées
 test('valeur stockée en chaîne JSON (driver qui ne parse pas le jsonb) : reconnue', () => {
   const exp = expectedTranslations({ guides: [{ app_id: 'g', direction: 'import', summary: null, steps: ['a'], notes: [] }] });
   const rows = ['en', 'de'].map(lang => tr('migration_guide', 'g:import', 'steps', lang, JSON.stringify(['one']), ['a']));
-  assert.equal(compareTranslations(exp, rows).complete, true);
+  assert.equal(compareTranslations(exp, rows, ['en', 'de']).complete, true);
+});
+
+test('par défaut, toutes les langues du contenu sont attendues (es, it, nl, pl, pt compris)', () => {
+  const exp = expectedTranslations({ apps: [{ id: '1', reason: 'R' }] });
+  const rows = ['en', 'de'].map(lang => tr('application', '1', 'reason', lang, 'x', 'R'));
+  const { complete, summary } = compareTranslations(exp, rows);
+  assert.equal(complete, false);
+  assert.deepEqual(summary.filter(s => s.missing).map(s => s.lang).sort(), ['es', 'it', 'nl', 'pl', 'pt']);
 });

@@ -1,0 +1,25 @@
+export default {
+  app: {
+    migrationAbandoned: "Migracja przerwana",
+    undo: "Cofnij",
+    migrationsCompleted_one: "Migracja zakończona: {name} została zastąpiona. Brawo!",
+    migrationsCompleted_few: "{count} migracje zakończone. Brawo!",
+    migrationsCompleted_many: "{count} migracji zakończonych. Brawo!",
+    migrationsCompleted_other: "{count} migracji zakończonych. Brawo!",
+    removedFromMyApps: "Aplikacja usunięta z Moich aplikacji",
+  },
+  share: {
+    appGone: "Ta aplikacja nie istnieje już w Trusti.",
+    openFailed: "Nie można otworzyć udostępnionej aplikacji. Sprawdź połączenie.",
+    appTitle: "{name} w Trusti",
+    appTextGrade: "{name} otrzymuje ocenę {grade} w TrustiScore (suwerenność cyfrowa). Zobacz jej kartę i alternatywy:",
+    appText: "Zobacz kartę {name} i alternatywy w Trusti:",
+    copied: "Skopiowano do schowka ✓",
+    selectionTitle: "Mój wybór aplikacji w Trusti",
+    selectionHeader_one: "Polecam ci tę aplikację, z jej oceną TrustiScore (suwerenność cyfrowa):",
+    selectionHeader_few: "Polecam ci te {count} aplikacje, z ich oceną TrustiScore (suwerenność cyfrowa):",
+    selectionHeader_many: "Polecam ci tych {count} aplikacji, z ich oceną TrustiScore (suwerenność cyfrowa):",
+    selectionHeader_other: "Polecam ci tych {count} aplikacji, z ich oceną TrustiScore (suwerenność cyfrowa):",
+    selectionLineGrade: "• {name}: ocena {grade}",
+  },
+};

@@ -1,0 +1,3 @@
+Verbeteringen:
+• Net gepubliceerde gebeurtenissen verschijnen meteen in je meldingen.
+• Terug vanaf een app-pagina die je via de meldingen opende, brengt je weer bij de meldingen.

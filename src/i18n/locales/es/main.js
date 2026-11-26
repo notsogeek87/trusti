@@ -1,0 +1,21 @@
+export default {
+  app: {
+    migrationAbandoned: "Migración abandonada",
+    undo: "Deshacer",
+    migrationsCompleted_one: "Migración terminada: {name} ha sido sustituida. ¡Enhorabuena!",
+    migrationsCompleted_other: "{count} migraciones terminadas. ¡Enhorabuena!",
+    removedFromMyApps: "App quitada de Mis Apps",
+  },
+  share: {
+    appGone: "Esta app ya no existe en Trusti.",
+    openFailed: "No se puede abrir la app compartida. Comprueba tu conexión.",
+    appTitle: "{name} en Trusti",
+    appTextGrade: "{name} obtiene la nota {grade} en el TrustiScore (soberanía digital). Descubre su ficha y sus alternativas:",
+    appText: "Descubre la ficha de {name} y sus alternativas en Trusti:",
+    copied: "Copiado al portapapeles ✓",
+    selectionTitle: "Mi selección de apps en Trusti",
+    selectionHeader_one: "Te recomiendo esta app, con su nota TrustiScore (soberanía digital):",
+    selectionHeader_other: "Te recomiendo estas {count} apps, con su nota TrustiScore (soberanía digital):",
+    selectionLineGrade: "• {name}: nota {grade}",
+  },
+};

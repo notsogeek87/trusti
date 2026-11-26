@@ -7,24 +7,25 @@ import {
 } from '../database/postgres/public-api.js';
 import { getAssessmentForApp, getGradeHistoryForApp, getGradeChangesSince } from '../database/postgres/app-insights.js';
 import { getAppRelations } from '../database/postgres/relations-store.js';
-import { indexTranslations, applyAppTranslations, applyAssessmentTranslations } from '../contentTranslations.js';
+import { indexTranslations, applyAppTranslations, applyAssessmentTranslations, contentLanguages } from '../contentTranslations.js';
 import { createPartnerResolver, partnerQueries } from './partners.js';
 import { createPublicApiRouter } from './router.js';
 
 /**
- * Superpose les traductions (en/de) aux lignes d'apps et aux évaluations, en une requête.
+ * Superpose les traductions (langue demandée, puis anglais) aux lignes d'apps et aux évaluations, en une requête.
  * Sans langue, table absente ou erreur : tout reste en français.
  */
 export async function translate(lang, { apps = [], assessments = [] }) {
   if (!lang || (apps.length === 0 && assessments.length === 0)) return { apps, assessments };
   try {
+    const langs = contentLanguages(lang);
     const rows = await sql`
-      SELECT entity, entity_id, field, value, source_hash
+      SELECT entity, entity_id, field, lang, value, source_hash
       FROM content_translations
-      WHERE lang = ${lang}
+      WHERE lang = ANY(${langs}::text[])
         AND ((entity = 'application' AND entity_id = ANY(${apps.map(a => String(a.id))}::text[]))
           OR (entity = 'assessment' AND entity_id = ANY(${assessments.map(a => String(a.appId))}::text[])))`;
-    const index = indexTranslations(rows);
+    const index = indexTranslations(rows, langs);
     if (index.size === 0) return { apps, assessments };
     return {
       apps: apps.map(a => applyAppTranslations(a, index)),

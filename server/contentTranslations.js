@@ -2,19 +2,30 @@
  * Traductions du contenu en base (table `content_translations`, voir
  * server/database/migrations/2026-11-15-content-translations.sql).
  *
- * Le français reste la source dans les tables d'origine. Pour `?lang=en|de`, l'API
- * superpose les traductions trouvées ; tout champ sans traduction, ou dont la
- * traduction est périmée (le français a changé depuis : `source_hash` différent),
- * reste en français. Si la table n'existe pas encore, tout reste en français.
+ * Le français reste la source dans les tables d'origine. Pour `?lang=en|de|es|it|nl|pl|pt`,
+ * l'API superpose les traductions trouvées dans cette langue, puis à défaut en anglais
+ * (un Polonais lit plus souvent l'anglais que le français) ; tout champ sans traduction,
+ * ou dont la traduction est périmée (le français a changé depuis : `source_hash`
+ * différent), reste en français. Si la table n'existe pas encore, tout reste en français.
  *
  * Les fonctions `apply*` sont pures (testables sans base) : elles reçoivent un index
- * Map<"entity|entityId|field", { value, sourceHash }>.
+ * Map<"entity|entityId|field", { value, sourceHash, fallback? }> ; `fallback` est la
+ * traduction anglaise à essayer si celle de la langue demandée manque ou est périmée.
  */
 import { createHash } from 'node:crypto';
 
-export const CONTENT_LANGUAGES = ['en', 'de'];
+export const CONTENT_LANGUAGES = ['en', 'de', 'es', 'it', 'nl', 'pl', 'pt'];
 
-/** 'en' / 'de' si demandé et pris en charge, sinon null (= français, rien à faire). */
+/** Langue de secours du contenu quand la langue demandée n'a pas (encore) de traduction. */
+export const CONTENT_FALLBACK_LANGUAGE = 'en';
+
+/** Langues à lire en base pour une langue demandée, de la préférée à la langue de secours. */
+export function contentLanguages(lang) {
+  if (!lang) return [];
+  return lang === CONTENT_FALLBACK_LANGUAGE ? [lang] : [lang, CONTENT_FALLBACK_LANGUAGE];
+}
+
+/** Langue de contenu prise en charge (en, de, es…) si demandée, sinon null (= français, rien à faire). */
 export function normalizeContentLang(raw) {
   const lang = String(raw || '').trim().toLowerCase().slice(0, 2);
   return CONTENT_LANGUAGES.includes(lang) ? lang : null;
@@ -28,29 +39,51 @@ export function sourceHash(value) {
 
 const keyOf = (entity, entityId, field) => `${entity}|${entityId}|${field}`;
 
-export function indexTranslations(rows) {
+/**
+ * Index des traductions. Avec `langs` (ordre de préférence, ex. ['pl', 'en']), une ligne
+ * d'une langue moins préférée devient le `fallback` de celle de la langue préférée.
+ * Sans `langs` (ou ligne sans `lang`), la dernière ligne lue pour une clé l'emporte.
+ */
+export function indexTranslations(rows, langs = null) {
+  const rank = (r) => (langs && r.lang ? Math.max(0, langs.indexOf(r.lang)) : 0);
+  const sorted = [...(rows || [])].filter(Boolean).sort((a, b) => rank(b) - rank(a));
   const index = new Map();
-  for (const r of rows || []) {
-    if (!r) continue;
+  for (const r of sorted) {
     let value = r.value;
     if (typeof value === 'string') {
       try { value = JSON.parse(value); } catch { /* chaîne brute */ }
     }
-    index.set(keyOf(r.entity, String(r.entity_id), r.field), { value, sourceHash: r.source_hash });
+    const key = keyOf(r.entity, String(r.entity_id), r.field);
+    const previous = index.get(key);
+    const entry = { value, sourceHash: r.source_hash };
+    if (previous && langs && rank(r) < previous.rank) entry.fallback = previous;
+    entry.rank = rank(r);
+    index.set(key, entry);
   }
   return index;
 }
 
-/** Valeur traduite si elle existe, est à jour et a le bon type ; sinon le français. */
-function pick(index, entity, entityId, field, frValue) {
-  if (frValue === null || frValue === undefined || frValue === '') return frValue;
-  const t = index.get(keyOf(entity, String(entityId), field));
-  if (!t || t.sourceHash !== sourceHash(frValue)) return frValue;
-  if (typeof frValue === 'string') return typeof t.value === 'string' && t.value.trim() ? t.value : frValue;
+/** Valeur d'une traduction si elle correspond au français actuel et a le bon type, sinon undefined. */
+function usable(t, frValue) {
+  if (!t || t.sourceHash !== sourceHash(frValue)) return undefined;
+  if (typeof frValue === 'string') return typeof t.value === 'string' && t.value.trim() ? t.value : undefined;
   if (Array.isArray(frValue)) {
     return Array.isArray(t.value) && t.value.length === frValue.length && t.value.every(v => typeof v === 'string')
       ? t.value
-      : frValue;
+      : undefined;
+  }
+  return undefined;
+}
+
+/**
+ * Valeur traduite si elle existe, est à jour et a le bon type ; sinon la traduction de
+ * secours (anglais) si elle remplit les mêmes conditions ; sinon le français.
+ */
+function pick(index, entity, entityId, field, frValue) {
+  if (frValue === null || frValue === undefined || frValue === '') return frValue;
+  for (let t = index.get(keyOf(entity, String(entityId), field)); t; t = t.fallback) {
+    const value = usable(t, frValue);
+    if (value !== undefined) return value;
   }
   return frValue;
 }
@@ -148,14 +181,15 @@ export async function translateApiBody(body, lang, query = {}, loadSql = async (
   if (total === 0) return body;
   try {
     const sql = await loadSql();
+    const langs = contentLanguages(lang);
     const rows = await sql`
-      SELECT entity, entity_id, field, value, source_hash
+      SELECT entity, entity_id, field, lang, value, source_hash
       FROM content_translations
-      WHERE lang = ${lang}
+      WHERE lang = ANY(${langs})
         AND ((entity = 'application' AND entity_id = ANY(${[...ids.application]}))
           OR (entity = 'assessment' AND entity_id = ANY(${[...ids.assessment]}))
           OR (entity = 'migration_guide' AND entity_id = ANY(${[...ids.migration_guide]})))`;
-    return applyToApiBody(body, indexTranslations(rows), query);
+    return applyToApiBody(body, indexTranslations(rows, langs), query);
   } catch (error) {
     if (/content_translations/.test(String(error?.message)) && /exist/.test(String(error?.message))) tableMissing = true;
     else console.warn('[contentTranslations] traductions ignorées :', error?.message);

@@ -1,0 +1,67 @@
+export default {
+  filters: {
+    "incomplete-downloads": {
+      label: "Niedokończone pobrania",
+      description: "Pliki .crdownload, .part lub .download pozostawione przez przerwane pobieranie.",
+    },
+    "temp-files": {
+      label: "Pliki tymczasowe",
+      description: "Pliki .tmp i .temp starsze niż 7 dni, z wyłączeniem danych aplikacji.",
+    },
+    "orphan-thumbnails": {
+      label: "Miniatury galerii",
+      description: "Pamięć podręczna miniatur (.thumbnails), którą galeria odtwarza automatycznie.",
+    },
+    "whatsapp-statuses": {
+      label: "Statusy WhatsApp w pamięci podręcznej",
+      description: "Obejrzane już statusy WhatsApp (starsze niż 30 dni) przechowywane w pamięci podręcznej aplikacji.",
+    },
+    "old-apks": {
+      label: "Stare pobrane pliki APK",
+      description: "Pliki .apk, .apks i .xapk z folderu Pobrane starsze niż 30 dni.",
+    },
+    "ota-leftovers": {
+      label: "Pozostałości aktualizacji systemu",
+      description: "Archiwa aktualizacji (update.zip, ota…) z folderu Pobrane starsze niż 30 dni.",
+    },
+    "logs-and-reports": {
+      label: "Logi i raporty błędów",
+      description: "Pliki .log, .trace i folder bugreports starsze niż 30 dni, z wyłączeniem danych aplikacji.",
+    },
+    "empty-directories": {
+      label: "Puste foldery",
+      description: "Foldery bez żadnej zawartości od ponad 30 dni (z wyłączeniem danych aplikacji).",
+    },
+  },
+  section: {
+    scanFailed: "Analiza nie powiodła się.",
+    freed_one: "Zwolniono {size} ({count} element){ignored}.",
+    freed_few: "Zwolniono {size} ({count} elementy){ignored}.",
+    freed_many: "Zwolniono {size} ({count} elementów){ignored}.",
+    freed_other: "Zwolniono {size} ({count} elementów){ignored}.",
+    ignored_one: ", {count} pominięty (zmieniony lub chroniony)",
+    ignored_few: ", {count} pominięte (zmienione lub chronione)",
+    ignored_many: ", {count} pominiętych (zmienionych lub chronionych)",
+    ignored_other: ", {count} pominiętych (zmienionych lub chronionych)",
+    deleteFailed: "Usuwanie nie powiodło się.",
+    title: "Wyczyść pamięć",
+    intro: "Wyszukuje niepotrzebne pliki (przerwane pobrania, pliki tymczasowe, miniatury…). Analiza odbywa się tylko na twoim telefonie i niczego nie usuwa: potem sam wybierasz kategorie do wyczyszczenia.",
+    checking: "Sprawdzanie…",
+    allowAccess: "Zezwól na dostęp do plików",
+    analysing: "Analiza…",
+    analyseAgain: "Analizuj ponownie",
+    analyse: "Analizuj",
+    nothing: "Nie ma nic do wyczyszczenia",
+    items_one: "{count} element · {size}",
+    items_few: "{count} elementy · {size}",
+    items_many: "{count} elementów · {size}",
+    items_other: "{count} elementów · {size}",
+    truncated: "Pamięć jest bardzo duża: analizę ograniczono. Uruchom ją ponownie po pierwszym czyszczeniu.",
+    deleting: "Usuwanie…",
+    confirm: "Potwierdź: trwałe usunięcie",
+    clean_one: "Wyczyść {count} element ({size})",
+    clean_few: "Wyczyść {count} elementy ({size})",
+    clean_many: "Wyczyść {count} elementów ({size})",
+    clean_other: "Wyczyść {count} elementów ({size})",
+  },
+};

@@ -1,6 +1,6 @@
 /**
  * Synthèse publique d'une évaluation TrustiScore, générée à partir des données
- * structurées (score, fourchette, critères, correction de note), en fr / en / de.
+ * structurées (score, fourchette, critères, correction de note), en fr / en / de / es / it / nl / pl / pt.
  *
  * Elle remplace le champ `summary` de la table app_assessments, qui est une note de
  * travail interne de la chaîne d'évaluation (trustillm) et ne doit jamais sortir.
@@ -21,6 +21,26 @@ const LABELS = {
   de: {
     controle: 'technische Kontrolle', conformite: 'Konformität und Zertifizierungen', gouvernance: 'Governance und Rechtsraum',
     localisation: 'Datenstandort', transparence: 'Transparenz',
+  },
+  es: {
+    controle: 'control técnico', conformite: 'cumplimiento y certificaciones', gouvernance: 'gobernanza y jurisdicción',
+    localisation: 'ubicación de los datos', transparence: 'transparencia',
+  },
+  it: {
+    controle: 'controllo tecnico', conformite: 'conformità e certificazioni', gouvernance: 'governance e giurisdizione',
+    localisation: 'localizzazione dei dati', transparence: 'trasparenza',
+  },
+  nl: {
+    controle: 'technische controle', conformite: 'naleving en certificeringen', gouvernance: 'governance en jurisdictie',
+    localisation: 'locatie van de gegevens', transparence: 'transparantie',
+  },
+  pl: {
+    controle: 'kontrola techniczna', conformite: 'zgodność i certyfikaty', gouvernance: 'zarządzanie i jurysdykcja',
+    localisation: 'lokalizacja danych', transparence: 'przejrzystość',
+  },
+  pt: {
+    controle: 'controlo técnico', conformite: 'conformidade e certificações', gouvernance: 'governação e jurisdição',
+    localisation: 'localização dos dados', transparence: 'transparência',
   },
 };
 
@@ -47,6 +67,41 @@ const JURISDICTION = {
     'Europäische Tochtergesellschaft eines ausländischen Konzerns: mäßige Gefährdung durch extraterritoriale Gesetze.',
     'Europäischer Konzern mit gemischten Eigentumsverhältnissen: teilweiser Schutz vor extraterritorialen Gesetzen.',
     'Europäische oder gemeinschaftliche Governance: keine erkennbare Gefährdung durch extraterritoriale Gesetze.',
+  ],
+  es: [
+    'Editor sujeto a la Cloud Act estadounidense o a leyes extraterritoriales equivalentes.',
+    'Editor extranjero, de fuera de la Unión Europea, con garantías contractuales mínimas.',
+    'Filial europea de un grupo extranjero: exposición moderada a las leyes extraterritoriales.',
+    'Grupo europeo con accionariado mixto: protección parcial frente a las leyes extraterritoriales.',
+    'Gobernanza europea o comunitaria: ninguna exposición identificada a leyes extraterritoriales.',
+  ],
+  it: [
+    'Editore soggetto al Cloud Act statunitense o a leggi extraterritoriali equivalenti.',
+    "Editore straniero, al di fuori dell'Unione europea, con garanzie contrattuali minime.",
+    'Filiale europea di un gruppo straniero: esposizione moderata alle leggi extraterritoriali.',
+    'Gruppo europeo con azionariato misto: protezione parziale dalle leggi extraterritoriali.',
+    'Governance europea o comunitaria: nessuna esposizione individuata a leggi extraterritoriali.',
+  ],
+  nl: [
+    'Uitgever valt onder de Amerikaanse Cloud Act of vergelijkbare extraterritoriale wetten.',
+    'Buitenlandse uitgever, buiten de Europese Unie, met minimale contractuele garanties.',
+    'Europees dochterbedrijf van een buitenlandse groep: matige blootstelling aan extraterritoriale wetten.',
+    'Europese groep met gemengd aandeelhouderschap: gedeeltelijke bescherming tegen extraterritoriale wetten.',
+    'Europese of communitygovernance: geen vastgestelde blootstelling aan extraterritoriale wetten.',
+  ],
+  pl: [
+    'Wydawca podlega amerykańskiemu Cloud Act lub równoważnym przepisom eksterytorialnym.',
+    'Zagraniczny wydawca spoza Unii Europejskiej, z minimalnymi gwarancjami umownymi.',
+    'Europejska spółka zależna zagranicznej grupy: umiarkowana ekspozycja na przepisy eksterytorialne.',
+    'Europejska grupa o mieszanym akcjonariacie: częściowa ochrona przed przepisami eksterytorialnymi.',
+    'Zarządzanie europejskie lub społecznościowe: brak stwierdzonej ekspozycji na przepisy eksterytorialne.',
+  ],
+  pt: [
+    'Editor sujeito ao Cloud Act norte-americano ou a leis extraterritoriais equivalentes.',
+    'Editor estrangeiro, fora da União Europeia, com garantias contratuais mínimas.',
+    'Filial europeia de um grupo estrangeiro: exposição moderada às leis extraterritoriais.',
+    'Grupo europeu com estrutura acionista mista: proteção parcial contra as leis extraterritoriais.',
+    'Governação europeia ou comunitária: nenhuma exposição identificada a leis extraterritoriais.',
   ],
 };
 
@@ -86,12 +141,67 @@ const TEXT = {
     provisional: 'Vorläufige Bewertung: Einige Punkte müssen noch bestätigt werden.',
     unverified: 'Einige Quellen müssen noch überprüft werden.',
   },
+  es: {
+    sep: '; ',
+    score: (s, g) => `Puntuación de ${s}/100, nota ${g}.`,
+    noScore: (g) => `Nota ${g}, sin puntuación detallada: la información disponible no permite valorar cada criterio.`,
+    overridden: (c, g) => `Nota rebajada de ${c} a ${g} por decisión editorial.`,
+    strengths: (l) => `Puntos fuertes: ${l}.`,
+    weaknesses: (l) => `Puntos débiles: ${l}.`,
+    range: (a, b) => `Evaluación provisional: según los puntos por confirmar, la puntuación podría ir de ${a} (${band(a)}) a ${b} (${band(b)}).`,
+    provisional: 'Evaluación provisional: algunos puntos están por confirmar.',
+    unverified: 'Algunas fuentes están por verificar.',
+  },
+  it: {
+    sep: '; ',
+    score: (s, g) => `Punteggio di ${s}/100, voto ${g}.`,
+    noScore: (g) => `Voto ${g}, senza punteggio dettagliato: le informazioni disponibili non permettono di valutare ogni criterio.`,
+    overridden: (c, g) => `Voto abbassato da ${c} a ${g} per decisione editoriale.`,
+    strengths: (l) => `Punti di forza: ${l}.`,
+    weaknesses: (l) => `Punti deboli: ${l}.`,
+    range: (a, b) => `Valutazione provvisoria: a seconda dei punti da confermare, il punteggio potrebbe andare da ${a} (${band(a)}) a ${b} (${band(b)}).`,
+    provisional: 'Valutazione provvisoria: alcuni punti restano da confermare.',
+    unverified: 'Alcune fonti restano da verificare.',
+  },
+  nl: {
+    sep: '; ',
+    score: (s, g) => `Score van ${s}/100, beoordeling ${g}.`,
+    noScore: (g) => `Beoordeling ${g}, zonder gedetailleerde score: de beschikbare informatie volstaat niet om elk criterium te beoordelen.`,
+    overridden: (c, g) => `Beoordeling door redactionele beslissing verlaagd van ${c} naar ${g}.`,
+    strengths: (l) => `Sterke punten: ${l}.`,
+    weaknesses: (l) => `Zwakke punten: ${l}.`,
+    range: (a, b) => `Voorlopige beoordeling: afhankelijk van de nog te bevestigen punten kan de score liggen tussen ${a} (${band(a)}) en ${b} (${band(b)}).`,
+    provisional: 'Voorlopige beoordeling: sommige punten moeten nog bevestigd worden.',
+    unverified: 'Sommige bronnen moeten nog geverifieerd worden.',
+  },
+  pl: {
+    sep: '; ',
+    score: (s, g) => `Wynik ${s}/100, ocena ${g}.`,
+    noScore: (g) => `Ocena ${g}, bez szczegółowego wyniku: dostępne informacje nie pozwalają ocenić każdego kryterium.`,
+    overridden: (c, g) => `Ocena obniżona z ${c} do ${g} decyzją redakcji.`,
+    strengths: (l) => `Mocne strony: ${l}.`,
+    weaknesses: (l) => `Słabe strony: ${l}.`,
+    range: (a, b) => `Ocena tymczasowa: zależnie od punktów do potwierdzenia wynik mógłby wynieść od ${a} (${band(a)}) do ${b} (${band(b)}).`,
+    provisional: 'Ocena tymczasowa: niektóre punkty wymagają jeszcze potwierdzenia.',
+    unverified: 'Niektóre źródła wymagają jeszcze weryfikacji.',
+  },
+  pt: {
+    sep: '; ',
+    score: (s, g) => `Pontuação de ${s}/100, nota ${g}.`,
+    noScore: (g) => `Nota ${g}, sem pontuação detalhada: as informações disponíveis não permitem avaliar cada critério.`,
+    overridden: (c, g) => `Nota baixada de ${c} para ${g} por decisão editorial.`,
+    strengths: (l) => `Pontos fortes: ${l}.`,
+    weaknesses: (l) => `Pontos fracos: ${l}.`,
+    range: (a, b) => `Avaliação provisória: consoante os pontos a confirmar, a pontuação poderia ir de ${a} (${band(a)}) a ${b} (${band(b)}).`,
+    provisional: 'Avaliação provisória: alguns pontos ainda estão por confirmar.',
+    unverified: 'Algumas fontes ainda estão por verificar.',
+  },
 };
 
 /**
  * @param {object} assessment format de server/assessment.js (score, scoreRange, grade, computedGrade,
  *   overridden, provisional, hasUnverifiedSources, criteria[{ key, points }])
- * @param {'fr'|'en'|'de'} lang
+ * @param {'fr'|'en'|'de'|'es'|'it'|'nl'|'pl'|'pt'} lang
  * @returns {string|null}
  */
 export function buildSynthesis(assessment, lang = 'fr') {
