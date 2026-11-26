@@ -31,7 +31,6 @@ export default {
     unchanged: "Note unverändert seit der ersten Bewertung am {date}.",
     up: "gestiegen",
     down: "gesunken",
-    howComputed: "Wie die Note berechnet wird",
     title: "Details der Bewertung",
     provisionalRange: " (vorläufig: zwischen {min} und {max})",
     teamGrade: "Note vom Trusti-Team festgelegt, ohne Bewertung Kriterium für Kriterium.",
@@ -79,11 +78,9 @@ export default {
     },
   },
   facts: {
-    title: "Faktenblatt",
-    intro: "Für jede erwartete Angabe der beobachtete Wert und seine Quelle. Diese Anhaltspunkte erklären die Note, berechnen sie aber nicht.",
+    heading: "Geprüfte Angaben",
     notFilled: "Nicht angegeben",
     noneFound: "Keine gefunden",
-    filled: "{filled}/{total}",
     countries: "Länder: {countries}",
     expected: {
       label: "Erwartet:",

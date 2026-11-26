@@ -31,7 +31,6 @@ export default {
     unchanged: "Score ongewijzigd sinds de eerste beoordeling op {date}.",
     up: "stijging",
     down: "daling",
-    howComputed: "Hoe het cijfer wordt berekend",
     title: "Details van de beoordeling",
     provisionalRange: " (voorlopig: tussen {min} en {max})",
     teamGrade: "Score vastgesteld door het Trusti-team, zonder beoordeling per criterium.",
@@ -79,11 +78,9 @@ export default {
     },
   },
   facts: {
-    title: "Feitenblad",
-    intro: "Voor elk verwacht gegeven de waargenomen waarde en de bron. Deze aanwijzingen verklaren het cijfer, maar berekenen het niet.",
+    heading: "Gecontroleerde gegevens",
     notFilled: "Niet ingevuld",
     noneFound: "Geen gevonden",
-    filled: "{filled}/{total}",
     countries: "Landen: {countries}",
     expected: {
       label: "Verwacht:",
