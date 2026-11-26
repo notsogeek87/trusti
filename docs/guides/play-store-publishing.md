@@ -125,13 +125,56 @@ supposé, comme "alpha", peut ne correspondre à rien de réel).
 
 ### Notes de version (« Nouveautés » sur la fiche)
 
-Le texte affiché aux utilisateurs dans « Nouveautés » vient de
-`play-store/notes-de-version/<langue>.txt` (ex. `fr-FR.txt`), envoyé avec la
-release par `tools/publish_play_store.py`. **À mettre à jour avant chaque
-envoi en production** : résumé des nouveautés visibles depuis la dernière
-publication, en langage utilisateur (pas de jargon technique), 500 caractères
-maximum (contrôlé par `npm test`). Une langue absente de la fiche Play Store
-est ignorée avec un avertissement.
+Le texte affiché dans « Nouveautés » vient de
+`play-store/notes-de-version/<code Play>.txt`, un fichier par langue : `fr-FR`,
+`en-US`, `de-DE`, `es-ES`, `it-IT`, `nl-NL`, `pl-PL`, `pt-PT`. Il est envoyé
+avec la release par `tools/publish_play_store.py`.
+
+**À mettre à jour avant chaque envoi en production, dans toutes les langues** :
+résumé des nouveautés visibles depuis la dernière publication, en langage
+utilisateur (pas de jargon technique), 500 caractères maximum par langue.
+Une langue sans fichier n'affiche aucune nouveauté pour cette version.
+
+### Langues de la fiche et pays
+
+Les nouveautés et la fiche se règlent **par langue, pas par pays** : Google
+affiche la traduction correspondant à la langue de l'appareil, sinon la langue
+par défaut de la fiche (français). Un pays dont la langue n'a pas de traduction
+(Suède, Grèce, Roumanie…) voit donc la fiche et les nouveautés en français.
+
+- **Fiche traduite** (titre, description courte, description complète) :
+  `play-store/fiche/README.md`, une section `## <code Play>` par langue.
+  À chaque publication, le script **ajoute à la fiche les langues qui y
+  manquent** ; une traduction déjà présente dans la Play Console n'est pas
+  modifiée (modifier une fiche existante se fait à la main dans la Console).
+- **Nouveautés** : envoyées seulement pour les langues présentes dans la
+  fiche (l'API refuse les autres ; le script le signale par un avertissement).
+- **Nouvelle langue** : ajouter sa section dans `play-store/fiche/README.md`
+  et son fichier `play-store/notes-de-version/<code>.txt`. `npm test` vérifie
+  les limites de Google (titre 30, description courte 80, description
+  complète 4 000 caractères) et que chaque fichier de nouveautés a sa fiche.
+- **Langue par défaut** : à régler à la main dans la Play Console (Présence
+  sur le Store → Fiche principale → Gérer les traductions → Langue par
+  défaut). Passer `en-US` en langue par défaut ferait voir l'anglais, au lieu
+  du français, aux pays sans traduction.
+
+### Pays de diffusion
+
+Les pays se règlent dans la Play Console (Production → Pays/régions). Par
+défaut, le script publie sur **tous les pays configurés pour le canal**
+(aujourd'hui les pays de l'UE). `--countries FR,BE` limite un déploiement
+progressif (`--fraction` < 1) à certains pays ; une release à 100 % couvre
+toujours tous les pays du canal.
+
+### Vérifier après la publication
+
+Dans les traces de l'étape « Publie sur Google Play » du workflow :
+
+- `Fiche ajoutée : <code>` pour chaque langue ajoutée à la fiche ;
+- `Notes de version [<code>]` pour chaque langue envoyée ;
+- aucun avertissement `Notes ignorées` (sinon, une langue de nouveautés n'est
+  pas dans la fiche) ;
+- `Pays du canal : [...] ; ciblage : tous`.
 
 ## Différence avec android.yml / F-Droid
 
