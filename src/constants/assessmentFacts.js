@@ -75,7 +75,8 @@ const BY_VALUE = {
   dpo: { oui: 'good', non: 'bad' },
   transferts_hors_ue: { oui: 'bad', non: 'good' },
   base_legale: { oui: 'good', non: 'bad' },
-  duree_conservation: { precisee: 'good', non_precisee: 'bad' },
+  // « Tant que nécessaire » reste conforme au RGPD mais imprécis : à surveiller, pas défavorable.
+  duree_conservation: { precisee: 'good', non_precisee: 'warn' },
   suppression_donnees: { possible: 'good', non_documentee: 'bad' },
   secnumcloud: { oui: 'good' },
   iso27001: { oui: 'good' },

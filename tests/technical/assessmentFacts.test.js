@@ -167,3 +167,9 @@ test('certifications inconnues : neutres (gris), pas à surveiller', () => {
   for (const k of ['secnumcloud', 'iso27001', 'hds', 'soc2', 'sectorielles']) assert.equal(factTone(k, 'inconnu'), 'neutral', k);
   assert.equal(factTone('dpo', 'inconnu'), 'unknown');
 });
+
+test('durée de conservation non chiffrée : à surveiller (orange), pas défavorable', () => {
+  assert.equal(factTone('duree_conservation', 'non_precisee'), 'warn');
+  assert.equal(factTone('duree_conservation', 'precisee'), 'good');
+  assert.equal(factTone('politique_confidentialite', 'absente'), 'bad');
+});
