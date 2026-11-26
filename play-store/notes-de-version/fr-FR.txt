@@ -1,3 +1,5 @@
-Corrections :
-• Les événements récemment publiés s'affichent sans délai dans les notifications.
-• Le retour depuis une fiche ouverte depuis les notifications y ramène.
+Nouveautés :
+• Trusti parle maintenant espagnol, italien, néerlandais, polonais et portugais, en plus du français, de l'anglais et de l'allemand.
+• Si la langue de ton téléphone n'est pas encore proposée, l'app s'affiche en anglais.
+• Notifications traduites dans ta langue.
+• Rapport PDF des organisations : les lettres polonaises, tchèques… ne sont plus remplacées par « ? ».

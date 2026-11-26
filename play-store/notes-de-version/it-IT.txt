@@ -1,3 +1,5 @@
-Correzioni:
-• Gli eventi appena pubblicati compaiono subito nelle notifiche.
-• Tornare indietro da una scheda aperta dalle notifiche riporta alle notifiche.
+Novità:
+• Trusti ora è in italiano! Anche in spagnolo, olandese, polacco e portoghese, oltre a francese, inglese e tedesco.
+• Se la lingua del tuo telefono non è ancora disponibile, l'app si apre in inglese.
+• Notifiche nella tua lingua.
+• Rapporto PDF delle organizzazioni: le lettere polacche, ceche… non sono più sostituite da «?».

@@ -1,3 +1,5 @@
-Korrekturen:
-• Neu veröffentlichte Ereignisse erscheinen sofort in den Benachrichtigungen.
-• „Zurück“ auf einer aus den Benachrichtigungen geöffneten App-Seite führt wieder dorthin.
+Neu:
+• Trusti spricht jetzt auch Spanisch, Italienisch, Niederländisch, Polnisch und Portugiesisch, neben Französisch, Englisch und Deutsch.
+• Ist die Sprache Ihres Handys noch nicht verfügbar, erscheint die App auf Englisch.
+• Benachrichtigungen in Ihrer Sprache.
+• PDF-Bericht für Organisationen: Polnische, tschechische… Buchstaben werden nicht mehr durch „?“ ersetzt.

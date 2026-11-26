@@ -1,3 +1,5 @@
-Verbeteringen:
-• Net gepubliceerde gebeurtenissen verschijnen meteen in je meldingen.
-• Terug vanaf een app-pagina die je via de meldingen opende, brengt je weer bij de meldingen.
+Nieuw:
+• Trusti is nu in het Nederlands! Ook in het Spaans, Italiaans, Pools en Portugees, naast Frans, Engels en Duits.
+• Is de taal van je telefoon nog niet beschikbaar, dan opent de app in het Engels.
+• Meldingen in je eigen taal.
+• Pdf-rapport voor organisaties: Poolse, Tsjechische… letters worden niet meer vervangen door '?'.

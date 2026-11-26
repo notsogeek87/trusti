@@ -22,6 +22,7 @@ google-api-python-client, google-auth.
 import argparse
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -36,6 +37,32 @@ SCOPES = ["https://www.googleapis.com/auth/androidpublisher"]
 # caractères par langue (vérifiée aussi par tests/technical/playStoreReleaseNotes.test.js).
 NOTES_DIR = Path(__file__).resolve().parent.parent / "play-store" / "notes-de-version"
 NOTES_MAX = 500
+
+# Fiche traduite (titre, description courte, description complète) : une section
+# « ## <code Play> » par langue dans play-store/fiche/README.md, avec trois blocs
+# **Libellé** suivis du texte, dans cet ordre. Le français (langue par défaut de la
+# fiche) se gère dans la Play Console et n'y figure pas.
+FICHE = Path(__file__).resolve().parent.parent / "play-store" / "fiche" / "README.md"
+LIMITS = {"title": 30, "shortDescription": 80, "fullDescription": 4000}
+
+
+def read_listings(path=FICHE):
+    if not path.is_file():
+        return {}
+    listings = {}
+    for section in re.split(r"\n## ", path.read_text(encoding="utf-8"))[1:]:
+        code = section.split("\n", 1)[0].strip()
+        if not re.fullmatch(r"[a-z]{2,3}-[A-Z]{2}", code):
+            continue
+        blocks = re.findall(r"\*\*[^*]+\*\*\n(.+?)(?=\n\n\*\*|\Z)", section, re.S)
+        if len(blocks) != 3:
+            sys.exit(f"Fiche {code} : 3 blocs attendus (titre, description courte, description complète), {len(blocks)} trouvés.")
+        listing = dict(zip(LIMITS, (b.strip() for b in blocks)))
+        for field, limit in LIMITS.items():
+            if len(listing[field]) > limit:
+                sys.exit(f"Fiche {code} : {field} fait {len(listing[field])} caractères, Google en accepte {limit}.")
+        listings[code] = listing
+    return listings
 
 
 def read_release_notes(notes_dir=NOTES_DIR):
@@ -67,8 +94,9 @@ def main():
     )
     p.add_argument(
         "--countries",
-        default="FR",
-        help="Pays de diffusion (codes ISO séparés par des virgules), production uniquement",
+        default="",
+        help="Pays de diffusion (codes ISO séparés par des virgules), production et déploiement "
+        "progressif uniquement. Vide (défaut) : tous les pays du canal, configurés dans la Play Console",
     )
     args = p.parse_args()
 
@@ -102,14 +130,26 @@ def main():
     print(f"Bundle uploadé : versionCode {version_code}")
 
     release = {"versionCodes": [version_code], "status": args.status}
+    listed = {
+        l["language"]
+        for l in edits.listings().list(packageName=args.package, editId=edit_id).execute().get("listings", [])
+    }
+    # Langues de play-store/fiche/README.md absentes de la fiche : ajoutées, pour que
+    # les « Nouveautés » de ces langues soient acceptées et que la fiche s'affiche
+    # traduite. Une traduction déjà présente n'est pas modifiée (retouches faites à la
+    # main dans la Play Console préservées).
+    for code, listing in read_listings().items():
+        if code in listed:
+            continue
+        edits.listings().update(
+            packageName=args.package, editId=edit_id, language=code, body={"language": code, **listing}
+        ).execute()
+        listed.add(code)
+        print(f"Fiche ajoutée : {code} ({listing['title']})")
     # Seules les langues présentes dans la fiche Play Store sont envoyées :
     # l'API refuse une note dans une langue que la fiche ne déclare pas.
     notes = read_release_notes()
     if notes:
-        listed = {
-            l["language"]
-            for l in edits.listings().list(packageName=args.package, editId=edit_id).execute().get("listings", [])
-        }
         skipped = [n["language"] for n in notes if n["language"] not in listed]
         if skipped:
             print(f"::warning::Notes ignorées (langue absente de la fiche : {skipped}). Langues de la fiche : {sorted(listed)}")
@@ -148,7 +188,7 @@ def main():
                 "Aucun pays configuré pour la production dans la Play Console "
                 "(Production > Pays/régions) : en ajouter au moins un."
             )
-        if rest_of_world or not available.issubset(countries):
+        if countries and (rest_of_world or not available.issubset(countries)):
             # Ciblage de pays réservé aux déploiements progressifs : une release
             # à 100 % touche forcément tous les pays du canal.
             if not staged:

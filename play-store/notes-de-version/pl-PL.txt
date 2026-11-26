@@ -1,3 +1,5 @@
-Poprawki:
-• Nowo opublikowane zdarzenia od razu pojawiają się w powiadomieniach.
-• Powrót z karty aplikacji otwartej z powiadomień prowadzi z powrotem do nich.
+Nowości:
+• Trusti mówi teraz po polsku! Także po hiszpańsku, włosku, niderlandzku i portugalsku, oprócz francuskiego, angielskiego i niemieckiego.
+• Jeśli języka twojego telefonu jeszcze nie ma, aplikacja wyświetla się po angielsku.
+• Powiadomienia w twoim języku.
+• Raport PDF dla organizacji: polskie litery nie są już zastępowane znakiem „?”.

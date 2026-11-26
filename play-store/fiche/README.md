@@ -1,9 +1,15 @@
 # Fiche Play Store : traductions
 
-Textes à saisir dans la Play Console (Présence sur le Store → Fiche principale → Gérer les
-traductions → ajouter la langue) : `en-US`, `de-DE`, `es-ES`, `it-IT`, `nl-NL`, `pl-PL`,
-`pt-PT`. Tant qu'une langue n'est pas ajoutée à la fiche, `tools/publish_play_store.py`
-ignore la note de version correspondante (`play-store/notes-de-version/<code>.txt`).
+Titre et descriptions de la fiche dans chaque langue autre que le français (langue par
+défaut, gérée dans la Play Console). À chaque publication, `tools/publish_play_store.py`
+ajoute à la fiche les langues de ce fichier qui n'y sont pas encore (une traduction déjà
+présente dans la Play Console n'est pas modifiée), puis envoie les « Nouveautés » de
+`play-store/notes-de-version/<code>.txt` pour chaque langue de la fiche. Google affiche
+fiche et nouveautés dans la langue de l'appareil, sinon en français.
+
+Format attendu par le script et par `tests/technical/playStoreReleaseNotes.test.js` : une
+section `## <code Play>`, puis trois blocs `**Libellé**` suivis du texte, dans l'ordre
+titre, description courte, description complète.
 
 Les autres pays de l'UE (Suède, Grèce, Roumanie…) voient la fiche dans la langue par
 défaut de la Play Console. Mettre `en-US` comme langue par défaut leur montre l'anglais

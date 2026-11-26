@@ -1,3 +1,5 @@
-Correcciones:
-• Los eventos recién publicados aparecen enseguida en las notificaciones.
-• Volver desde la ficha de una app abierta desde las notificaciones te devuelve a ellas.
+Novedades:
+• ¡Trusti ya está en español! También en italiano, neerlandés, polaco y portugués, además de francés, inglés y alemán.
+• Si el idioma de tu teléfono aún no está disponible, la app se muestra en inglés.
+• Notificaciones en tu idioma.
+• Informe PDF de organizaciones: las letras polacas, checas… ya no se sustituyen por «?».
