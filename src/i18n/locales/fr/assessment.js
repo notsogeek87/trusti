@@ -81,6 +81,7 @@ export default {
     heading: "Données vérifiées",
     notFilled: "Non renseigné",
     noneFound: "Aucune trouvée",
+    license: "Licence : {license}",
     countries: "Pays : {countries}",
     expected: {
       label: "Attendu :",
@@ -103,6 +104,7 @@ export default {
       sauvegardes: "Localisation des sauvegardes",
       infrastructure: "Infrastructure",
       sous_traitants: "Sous-traitants techniques",
+      code_source: "Code source",
       transferts_internationaux: "Transferts internationaux",
       politique_confidentialite: "Politique de confidentialité",
       dpo: "DPO identifié",
@@ -144,6 +146,8 @@ export default {
       aucun: "Aucun",
       adequat: "Pays adéquat (hors UE)",
       communautaire: "Projet communautaire",
+      open_source: "Open source",
+      proprietaire: "Propriétaire",
     },
   },
 };

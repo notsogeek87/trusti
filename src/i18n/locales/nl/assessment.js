@@ -81,6 +81,7 @@ export default {
     heading: "Gecontroleerde gegevens",
     notFilled: "Niet ingevuld",
     noneFound: "Geen gevonden",
+    license: "Licentie: {license}",
     countries: "Landen: {countries}",
     expected: {
       label: "Verwacht:",
@@ -103,6 +104,7 @@ export default {
       sauvegardes: "Locatie van de back-ups",
       infrastructure: "Infrastructuur",
       sous_traitants: "Technische subverwerkers",
+      code_source: "Broncode",
       transferts_internationaux: "Internationale doorgiften",
       politique_confidentialite: "Privacybeleid",
       dpo: "FG aangewezen",
@@ -144,6 +146,8 @@ export default {
       aucun: "Geen",
       adequat: "Adequaat land (buiten de EU)",
       communautaire: "Gemeenschapsproject",
+      open_source: "Open source",
+      proprietaire: "Propriëtair",
     },
   },
 };

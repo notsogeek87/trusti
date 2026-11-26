@@ -150,14 +150,14 @@ const GradeHistory = ({ history }) => {
  * justification, ses sources et les données vérifiées de la fiche factuelle qui s'y rattachent. Les sources « background » portent la mention « à confirmer ».
  * Données : useAssessment -> GET /api/apps?assessment_for=:id.
  */
-const AssessmentDetail = ({ status, assessment }) => {
+const AssessmentDetail = ({ status, assessment, app = null }) => {
   if (status === 'loading') {
     return <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm mb-4 h-32 animate-pulse" />;
   }
   if (!assessment) return null;
 
   const { score, scoreRange, provisional, overridden, computedGrade, grade, hasUnverifiedSources, criteria } = assessment;
-  const criterionFacts = buildCriterionFacts(assessment.facts);
+  const criterionFacts = buildCriterionFacts(assessment.facts, app);
   // Critères notés, plus ceux qui n'ont que des données factuelles (note fixée par l'équipe).
   const items = [...criteria];
   if (criterionFacts) {

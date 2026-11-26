@@ -91,3 +91,40 @@ test('données rangées par critère', async () => {
   assert.equal(byCrit.conformite.find(r => r.key === 'hds').observed, 'Oui');
   assert.equal(byCrit.localisation[0].tone, 'missing');
 });
+
+test('contrôle étranger « non » : favorable seulement pour une société européenne', async () => {
+  const { factToneInContext } = await import('../../src/constants/assessmentFacts.js');
+  const siege = (value) => ({ juridique: { siege_pays: { value } } });
+  assert.equal(factToneInContext('controle_etranger', 'non', siege('FR')), 'good');
+  assert.equal(factToneInContext('controle_etranger', 'non', siege('US')), 'neutral');
+  assert.equal(factToneInContext('controle_etranger', 'non', {}), 'neutral');
+  assert.equal(factToneInContext('controle_etranger', 'oui', siege('US')), 'bad');
+  const { buildCriterionFacts } = await import('../../src/utils/assessmentFacts.js');
+  const byCrit = buildCriterionFacts({ juridique: { siege_pays: { value: 'US' }, controle_etranger: { value: 'non' } } });
+  assert.equal(byCrit.gouvernance.find(r => r.key === 'controle_etranger').tone, 'neutral');
+});
+
+test('code source : ligne en tête du critère contrôle, depuis la fiche de l\'app', async () => {
+  const { buildCriterionFacts } = await import('../../src/utils/assessmentFacts.js');
+  const facts = { technique: { infrastructure: { value: ['americaine'] } } };
+  const open = buildCriterionFacts(facts, { isOpenSource: true, license: 'MPL-2.0' }).controle;
+  assert.equal(open.length, 3);
+  assert.equal(open[0].key, 'code_source');
+  assert.equal(open[0].tone, 'good');
+  assert.equal(open[0].observed, 'Open source');
+  assert.equal(open[0].detail, 'Licence : MPL-2.0');
+  // isOpenSource à false = valeur par défaut en base : non renseigné, pas « propriétaire ».
+  const closed = buildCriterionFacts(facts, { isOpenSource: false, license: null }).controle[0];
+  assert.equal(closed.tone, 'missing');
+  assert.equal(closed.observed, null);
+  assert.equal(buildCriterionFacts(facts).controle[0].tone, 'missing');
+  // Les données de l'app seules ne suffisent pas à afficher la fiche.
+  assert.equal(buildCriterionFacts({}, { isOpenSource: true }), null);
+});
+
+test('libellés de la ligne code source dans toutes les langues', async () => {
+  for (const lang of ['fr', 'en', 'de', 'es', 'it', 'nl', 'pl', 'pt']) {
+    const { facts } = (await import(`../../src/i18n/locales/${lang}/index.js`)).default.assessment;
+    assert.ok(facts.items.code_source && facts.values.open_source && facts.values.proprietaire && facts.license, lang);
+  }
+});

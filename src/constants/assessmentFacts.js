@@ -107,6 +107,31 @@ export function factTone(itemKey, value) {
 }
 
 /**
+ * Lecture d'une donnée selon le reste de la fiche : « pas de contrôle étranger » n'est favorable
+ * que pour une société européenne (une société américaine non contrôlée reste soumise au CLOUD Act).
+ * @param {string} itemKey
+ * @param {*} value
+ * @param {object|null} facts  assessment.facts complet
+ */
+export function factToneInContext(itemKey, value, facts) {
+  const tone = factTone(itemKey, value);
+  if (itemKey === 'controle_etranger' && tone === 'good') {
+    const siege = facts?.juridique?.siege_pays?.value;
+    if (!siege || !EEA_COUNTRIES.has(siege)) return 'neutral';
+  }
+  return tone;
+}
+
+/**
+ * Données tirées de la fiche de l'app (table applications), hors fiche factuelle du pipeline :
+ * ajoutées en tête du critère indiqué. `is_open_source` vaut FALSE par défaut en base, donc
+ * « faux » veut souvent dire « non renseigné » : seul « vrai » est affiché comme une valeur observée.
+ */
+export const APP_CRITERION_FACTS = {
+  controle: ['code_source'],
+};
+
+/**
  * Rattachement des données de la fiche factuelle aux 5 critères de la grille : chaque critère
  * affiche, sous sa justification, les données qui l'éclairent (« section.donnée »).
  */

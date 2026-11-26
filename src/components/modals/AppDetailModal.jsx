@@ -492,7 +492,7 @@ const AppDetailModal = ({ app, isInMyApps, onToggleMyApp, onClose, onSelectApp, 
           })()}
 
           {/* Détail de l'évaluation TrustiScore (critères, sources) — masqué en mode enfant */}
-          <AssessmentDetail status={assessmentState.status} assessment={assessmentState.assessment} />
+          <AssessmentDetail status={assessmentState.status} assessment={assessmentState.assessment} app={app} />
           <AppEventsList events={assessmentState.events} />
 
           {/* Alternatives */}

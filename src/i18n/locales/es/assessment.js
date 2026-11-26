@@ -81,6 +81,7 @@ export default {
     heading: "Datos verificados",
     notFilled: "Sin datos",
     noneFound: "Ninguna encontrada",
+    license: "Licencia: {license}",
     countries: "Países: {countries}",
     expected: {
       label: "Esperado:",
@@ -103,6 +104,7 @@ export default {
       sauvegardes: "Ubicación de las copias de seguridad",
       infrastructure: "Infraestructura",
       sous_traitants: "Subencargados técnicos",
+      code_source: "Código fuente",
       transferts_internationaux: "Transferencias internacionales",
       politique_confidentialite: "Política de privacidad",
       dpo: "DPD identificado",
@@ -144,6 +146,8 @@ export default {
       aucun: "Ninguno",
       adequat: "País adecuado (fuera de la UE)",
       communautaire: "Proyecto comunitario",
+      open_source: "Código abierto",
+      proprietaire: "Propietario",
     },
   },
 };
