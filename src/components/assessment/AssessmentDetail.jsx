@@ -1,8 +1,10 @@
 import React from 'react';
-import { AlertTriangle, HelpCircle, ExternalLink, Eye, Hourglass, History, Info, Landmark, MapPin, MessageCircle, ShieldCheck, Wrench } from 'lucide-react';
+import { HelpCircle, ExternalLink, Eye, Hourglass, History, Info, Landmark, MapPin, MessageCircle, ShieldCheck, Wrench } from 'lucide-react';
 import { isStrictlyBetterGrade } from '../../utils/alternatives';
 import { formatDate, t } from '../../i18n/index.js';
 import BoldText from '../ui/BoldText';
+import SourceLink from './SourceLink';
+import AssessmentFacts from './AssessmentFacts';
 
 const confidenceLabel = (c) => (c ? t(`assessment.detail.confidence.${c}`) : '');
 
@@ -49,28 +51,6 @@ const LevelBar = ({ points }) => (
     ))}
   </div>
 );
-
-const SourceLink = ({ source }) => {
-  const host = source.url ? source.url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] : null;
-  return (
-    <li className="text-[11px] text-slate-500 leading-snug">
-      {source.url ? (
-        <a href={source.url} target="_blank" rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-semibold break-all">
-          <ExternalLink size={10} className="shrink-0" /> {host}
-        </a>
-      ) : (
-        <span>{t('assessment.detail.generalKnowledge')}</span>
-      )}
-      {source.toConfirm && (
-        <span className="ml-1.5 inline-flex items-center gap-1 text-amber-700 bg-amber-50 border border-amber-200 rounded px-1 py-px font-semibold">
-          <AlertTriangle size={10} /> {t('assessment.detail.unverified')}
-        </span>
-      )}
-      {source.quote && <q className="block mt-0.5 text-slate-400 italic">{source.quote}</q>}
-    </li>
-  );
-};
 
 const CriterionItem = ({ c }) => {
   const { Icon, help } = CRITERION_META[c.key] || FALLBACK_META;
@@ -214,6 +194,8 @@ const AssessmentDetail = ({ status, assessment }) => {
           {criteria.map(c => <CriterionItem key={c.key} c={c} />)}
         </ul>
       )}
+
+      <AssessmentFacts facts={assessment.facts} />
 
       <GradeHistory history={assessment.gradeHistory} />
     </div>

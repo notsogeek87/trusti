@@ -58,6 +58,14 @@ Endpoint principal, backé par PostgreSQL (`service-postgres.js`).
   (changements du plus récent au plus ancien), lu dans `app_assessment_history`
   (voir `server/gradeChanges.js` : `buildGradeTimeline`). La réponse porte aussi
   `events` : événements publiés de l'app (même forme que `/api/app-events`, 20 au plus).
+  `assessment.facts` = fiche factuelle (colonne `facts`, `trustillm/migrations/002_app_assessment_facts.sql`),
+  ou `null` tant qu'elle n'est pas remplie : `{ section: { donnée: { value, countries, detail, confidence,
+  sources[] } } }` pour les sections `juridique`, `technique`, `rgpd`, `certifications`. Les données
+  attendues (21, avec leurs valeurs possibles) sont dans `src/constants/assessmentFacts.js`, copie de
+  `trustillm/trustiscore_pipeline/facts.json`. Affichée par `AssessmentFacts.jsx` sous les critères :
+  pour chaque donnée attendue, la valeur observée (ou « Non renseigné ») et sa source. La requête lit la
+  colonne par `to_jsonb(app_assessments) -> 'facts'` : elle fonctionne avant la migration 002. Pas encore
+  exposée par l'API v1 partenaires.
 - **GET** `?migration_guide_from=:id&migration_guide_to=:id` : guide de migration
   lu dans `app_migration_guides`. Réponse : `{ success: true, guide: { export, import } }`,
   chaque côté `{ summary, steps[], notes[{ text, level }], source, checkedAt, verified }` ou `null`

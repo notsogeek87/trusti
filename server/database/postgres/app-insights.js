@@ -42,7 +42,9 @@ export async function getAssessmentForApp(id) {
     const rows = await sql`
       SELECT app_id, grade, score, computed_grade, overridden, provisional,
              score_range, has_unverified_sources, summary, criteria,
-             assessed_at::text AS assessed_at
+             assessed_at::text AS assessed_at,
+             -- Fiche factuelle (migration 002 de trustillm) : lue ainsi, la requête marche aussi sans la colonne.
+             to_jsonb(app_assessments) -> 'facts' AS facts
       FROM app_assessments
       WHERE app_id = ${String(id)}
       LIMIT 1

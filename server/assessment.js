@@ -44,6 +44,32 @@ function formatCriterion(key, c) {
 }
 
 /**
+ * Fiche factuelle (colonne `facts`, voir trustillm : facts.json et migrations/002) :
+ * {section: {donnée: {value, countries, detail, confidence, sources}}}. Les libellés, l'ordre et les
+ * données attendues sont côté interface (src/constants/assessmentFacts.js). Renvoie null si vide.
+ */
+export function formatFacts(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const out = {};
+  for (const [section, items] of Object.entries(raw)) {
+    if (!items || typeof items !== 'object') continue;
+    const formatted = {};
+    for (const [key, f] of Object.entries(items)) {
+      if (!f || typeof f !== 'object' || f.value === undefined || f.value === null) continue;
+      formatted[key] = {
+        value: f.value,
+        countries: Array.isArray(f.countries) && f.countries.length ? f.countries : null,
+        detail: f.detail || null,
+        confidence: f.confidence || null,
+        sources: (f.sources || []).map(formatSource),
+      };
+    }
+    if (Object.keys(formatted).length) out[section] = formatted;
+  }
+  return Object.keys(out).length ? out : null;
+}
+
+/**
  * @param {object|null} row ligne de app_assessments
  * @returns {object|null} détail prêt pour l'interface, ou null si l'app n'est pas évaluée
  */
@@ -68,5 +94,6 @@ export function formatAssessmentFromDB(row) {
     // il n'est pas destiné au public. L'API /api/v1 renvoie une synthèse générée
     // (server/publicApi/synthesis.js).
     criteria: keys.map(k => formatCriterion(k, raw[k])),
+    facts: formatFacts(row.facts),
   };
 }

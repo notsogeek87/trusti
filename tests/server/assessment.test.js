@@ -61,3 +61,25 @@ test('ne renvoie jamais le résumé interne (note de travail de la chaîne d\'é
   assert.ok(!('summary' in a));
   assert.ok(!JSON.stringify(a).includes('David'));
 });
+
+test('fiche factuelle : absente ou vide -> null', () => {
+  assert.equal(formatAssessmentFromDB(row).facts, null);
+  assert.equal(formatAssessmentFromDB({ ...row, facts: {} }).facts, null);
+  assert.equal(formatAssessmentFromDB({ ...row, facts: { juridique: { cloud_act: { value: null } } } }).facts, null);
+});
+
+test('fiche factuelle : valeurs observées et sources « à confirmer »', () => {
+  const facts = {
+    juridique: {
+      siege_pays: { value: 'FR', confidence: 'high', sources: [{ kind: 'primary', url: 'https://ex.org', quote: 'Paris', to_confirm: false }] },
+      maison_mere_pays: { value: 'aucune', sources: [{ kind: 'background', url: null }] },
+    },
+    technique: { sous_traitants: { value: 'identifies', countries: ['FR', 'US'], detail: 'AWS', sources: [] } },
+  };
+  const f = formatAssessmentFromDB({ ...row, facts }).facts;
+  assert.equal(f.juridique.siege_pays.value, 'FR');
+  assert.equal(f.juridique.siege_pays.sources[0].toConfirm, false);
+  assert.equal(f.juridique.maison_mere_pays.sources[0].toConfirm, true);
+  assert.deepEqual(f.technique.sous_traitants.countries, ['FR', 'US']);
+  assert.equal(f.technique.sous_traitants.detail, 'AWS');
+});
