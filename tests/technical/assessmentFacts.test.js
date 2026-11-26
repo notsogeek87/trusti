@@ -90,6 +90,7 @@ test('données rangées par critère', async () => {
   assert.equal(byCrit.gouvernance.find(r => r.key === 'cloud_act').tone, 'bad');
   assert.equal(byCrit.conformite.find(r => r.key === 'hds').observed, 'Oui');
   assert.equal(byCrit.localisation[0].tone, 'missing');
+  assert.equal(byCrit.localisation.length, 3);
 });
 
 test('contrôle étranger « non » : favorable seulement pour une société européenne', async () => {
@@ -127,4 +128,42 @@ test('libellés de la ligne code source dans toutes les langues', async () => {
     const { facts } = (await import(`../../src/i18n/locales/${lang}/index.js`)).default.assessment;
     assert.ok(facts.items.code_source && facts.values.open_source && facts.values.proprietaire && facts.license, lang);
   }
+});
+
+test('code source : propriétaire seulement si une licence le confirme', async () => {
+  const { codeSourceRow } = await import('../../src/utils/assessmentFacts.js');
+  const closed = codeSourceRow({ isOpenSource: false, license: 'Propriétaire' });
+  assert.equal(closed.tone, 'bad');
+  assert.equal(closed.observed, 'Propriétaire');
+  assert.equal(closed.detail, null);
+  assert.equal(codeSourceRow({ isOpenSource: false, license: 'Propriétaire (basé sur OpenStack)' }).detail, 'Licence : Propriétaire (basé sur OpenStack)');
+  assert.equal(codeSourceRow({ isOpenSource: false, license: null }).tone, 'missing');
+  assert.equal(codeSourceRow({ isOpenSource: false, license: '  ' }).tone, 'missing');
+});
+
+test('localisation : les deux « transferts » ne font qu\'un point', async () => {
+  const { buildCriterionFacts } = await import('../../src/utils/assessmentFacts.js');
+  const loc = (facts) => buildCriterionFacts(facts).localisation;
+  const tr = (rows) => rows.filter(r => r.key.startsWith('transferts'));
+  // Suisse (pays adéquat) : transfert à surveiller, pas rouge.
+  let rows = loc({ technique: { hebergement: { value: ['adequat'] }, transferts_internationaux: { value: 'non' } }, rgpd: { transferts_hors_ue: { value: 'oui', sources: [{ url: 'https://a' }] } } });
+  assert.equal(rows.length, 3);
+  assert.equal(tr(rows).length, 1);
+  assert.equal(tr(rows)[0].tone, 'warn');
+  assert.equal(tr(rows)[0].observed, 'Oui');
+  assert.equal(rows[2].key, 'transferts_hors_ue');
+  // Hébergement déjà hors UE : rouge.
+  rows = loc({ technique: { hebergement: { value: ['ue', 'hors_ue'] }, transferts_internationaux: { value: 'oui', sources: [{ url: 'https://a' }] } }, rgpd: { transferts_hors_ue: { value: 'oui', sources: [{ url: 'https://a' }] } } });
+  assert.equal(tr(rows)[0].tone, 'bad');
+  assert.equal(tr(rows)[0].sources.length, 1);
+  // Non + inconnu : non ; rien : non renseigné.
+  rows = loc({ technique: { hebergement: { value: ['fr'] }, transferts_internationaux: { value: 'non' } }, rgpd: { transferts_hors_ue: { value: 'inconnu' } } });
+  assert.equal(tr(rows)[0].tone, 'good');
+  rows = loc({ technique: { hebergement: { value: ['fr'] } } });
+  assert.equal(tr(rows)[0].tone, 'missing');
+});
+
+test('certifications inconnues : neutres (gris), pas à surveiller', () => {
+  for (const k of ['secnumcloud', 'iso27001', 'hds', 'soc2', 'sectorielles']) assert.equal(factTone(k, 'inconnu'), 'neutral', k);
+  assert.equal(factTone('dpo', 'inconnu'), 'unknown');
 });

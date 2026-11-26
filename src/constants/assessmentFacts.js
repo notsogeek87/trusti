@@ -88,9 +88,13 @@ const BY_VALUE = {
  * @param {*} value  valeur observée (undefined/null : non renseignée)
  * @returns {'good'|'bad'|'warn'|'neutral'|'unknown'|'missing'}
  */
+// Certifications : rarement publiées quand l'app n'en a pas (souvent non pertinentes pour une app
+// grand public). « Inconnu » y est lu comme neutre (gris) plutôt qu'à surveiller (jaune).
+const UNKNOWN_IS_NEUTRAL = new Set(['secnumcloud', 'iso27001', 'hds', 'soc2', 'sectorielles']);
+
 export function factTone(itemKey, value) {
   if (value === undefined || value === null) return 'missing';
-  if (value === FACT_UNKNOWN) return 'unknown';
+  if (value === FACT_UNKNOWN) return UNKNOWN_IS_NEUTRAL.has(itemKey) ? 'neutral' : 'unknown';
   if (itemKey === 'siege_pays' || itemKey === 'maison_mere_pays') {
     if (value === 'aucune' || value === 'communautaire') return 'neutral';
     if (EEA_COUNTRIES.has(value)) return 'good';
@@ -129,6 +133,15 @@ export function factToneInContext(itemKey, value, facts) {
  */
 export const APP_CRITERION_FACTS = {
   controle: ['code_source'],
+};
+
+/**
+ * Données presque identiques fusionnées en une seule ligne (un seul point) dans un critère :
+ * les deux « transferts » disent la même chose et comptaient double. La ligne fusionnée prend
+ * la place de la première donnée et le libellé de `key`.
+ */
+export const MERGED_CRITERION_FACTS = {
+  localisation: { key: 'transferts_hors_ue', from: ['technique.transferts_internationaux', 'rgpd.transferts_hors_ue'] },
 };
 
 /**
