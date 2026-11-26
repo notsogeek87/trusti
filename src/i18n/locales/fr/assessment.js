@@ -31,6 +31,7 @@ export default {
     unchanged: "Note inchangée depuis la première évaluation, le {date}.",
     up: "hausse",
     down: "baisse",
+    howComputed: "Comment la note est calculée",
     title: "Détail de l'évaluation",
     provisionalRange: " (provisoire : entre {min} et {max})",
     teamGrade: "Note fixée par l'équipe Trusti, sans évaluation critère par critère.",

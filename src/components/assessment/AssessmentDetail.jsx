@@ -1,10 +1,11 @@
 import React from 'react';
-import { HelpCircle, ExternalLink, Eye, Hourglass, History, Info, Landmark, MapPin, MessageCircle, ShieldCheck, Wrench } from 'lucide-react';
+import { Calculator, ChevronDown, HelpCircle, ExternalLink, Eye, Hourglass, History, Info, Landmark, MapPin, MessageCircle, ShieldCheck, Wrench } from 'lucide-react';
 import { isStrictlyBetterGrade } from '../../utils/alternatives';
 import { formatDate, t } from '../../i18n/index.js';
 import BoldText from '../ui/BoldText';
 import SourceLink from './SourceLink';
 import AssessmentFacts from './AssessmentFacts';
+import { buildFactSections } from '../../utils/assessmentFacts.js';
 
 const confidenceLabel = (c) => (c ? t(`assessment.detail.confidence.${c}`) : '');
 
@@ -140,6 +141,7 @@ const AssessmentDetail = ({ status, assessment }) => {
 
   const { score, scoreRange, provisional, overridden, computedGrade, grade, hasUnverifiedSources, criteria } = assessment;
   const hasCriteria = criteria.length > 0;
+  const hasFacts = Boolean(buildFactSections(assessment.facts));
 
   return (
     <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm mb-4">
@@ -180,22 +182,29 @@ const AssessmentDetail = ({ status, assessment }) => {
         </p>
       )}
 
-      {hasCriteria && (
-        <p className="flex items-start gap-1.5 text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 mb-3 leading-snug">
-          <Info size={12} className="shrink-0 mt-px text-slate-400" />
-          <span>
-            <BoldText text={t('assessment.detail.disclaimer')} strongClassName="font-semibold" />
-          </span>
-        </p>
-      )}
-
-      {hasCriteria && (
-        <ul className="divide-y divide-slate-100">
-          {criteria.map(c => <CriterionItem key={c.key} c={c} />)}
-        </ul>
-      )}
-
+      {/* La fiche factuelle d'abord ; le détail des 5 critères (calcul de la note) est replié
+          sous elle. Sans fiche, les critères restent ouverts pour ne pas laisser l'écran vide. */}
       <AssessmentFacts facts={assessment.facts} />
+
+      {hasCriteria && (
+        <details open={!hasFacts} className="group mt-3 pt-3 border-t border-slate-100">
+          <summary className="flex items-center justify-between gap-2 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+            <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-tight text-slate-500">
+              <Calculator size={12} /> {t('assessment.detail.howComputed')}
+            </span>
+            <ChevronDown size={14} className="shrink-0 text-slate-400 transition-transform group-open:rotate-180" />
+          </summary>
+          <p className="flex items-start gap-1.5 text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 my-2 leading-snug">
+            <Info size={12} className="shrink-0 mt-px text-slate-400" />
+            <span>
+              <BoldText text={t('assessment.detail.disclaimer')} strongClassName="font-semibold" />
+            </span>
+          </p>
+          <ul className="divide-y divide-slate-100">
+            {criteria.map(c => <CriterionItem key={c.key} c={c} />)}
+          </ul>
+        </details>
+      )}
 
       <GradeHistory history={assessment.gradeHistory} />
     </div>
