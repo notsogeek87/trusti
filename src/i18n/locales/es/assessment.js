@@ -144,6 +144,8 @@ export default {
       en_cours: "En curso",
       local: "En el dispositivo o autoalojado",
       aucun: "Ninguno",
+      adequat: "País adecuado (fuera de la UE)",
+      communautaire: "Proyecto comunitario",
     },
   },
 };

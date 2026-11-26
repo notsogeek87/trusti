@@ -144,6 +144,8 @@ export default {
       en_cours: "W toku",
       local: "Na urządzeniu lub na własnym serwerze",
       aucun: "Brak",
+      adequat: "Kraj odpowiedni (poza UE)",
+      communautaire: "Projekt społecznościowy",
     },
   },
 };

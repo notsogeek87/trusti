@@ -37,7 +37,7 @@ test('lecture des valeurs observées', () => {
 });
 
 test('donnée attendue et valeur observée en texte', () => {
-  assert.equal(expectedLabel(item('hebergement')), "France / UE / Hors UE / Sur l'appareil ou auto-hébergé / Inconnu");
+  assert.equal(expectedLabel(item('hebergement')), "France / UE / Pays adéquat (hors UE) / Hors UE / Sur l'appareil ou auto-hébergé / Inconnu");
   assert.equal(expectedLabel(item('maison_mere_pays')), 'Pays / Aucune (indépendant) / Inconnu');
   assert.equal(observedLabel(item('hebergement'), { value: ['fr', 'ue'] }), 'France, UE');
   assert.equal(observedLabel(item('sectorielles'), { value: ['C5', 'PCI DSS'] }), 'C5, PCI DSS');
@@ -65,4 +65,11 @@ test('app sans serveur : « sur l\'appareil », aucun sous-traitant', () => {
   assert.equal(factTone('hebergement', ['local']), 'good');
   assert.equal(factTone('sous_traitants', 'aucun'), 'good');
   assert.equal(observedLabel(item('hebergement'), { value: ['local'] }), "Sur l'appareil ou auto-hébergé");
+});
+
+test('Suisse et projets communautaires', () => {
+  assert.equal(factTone('hebergement', ['adequat']), 'warn');
+  assert.equal(factTone('hebergement', ['adequat', 'ue']), 'warn');
+  assert.equal(factTone('siege_pays', 'communautaire'), 'neutral');
+  assert.equal(factTone('base_legale', 'non_applicable'), 'neutral');
 });

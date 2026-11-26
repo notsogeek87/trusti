@@ -15,7 +15,7 @@ export const FACT_SECTIONS = [
   {
     key: 'juridique',
     items: [
-      { key: 'siege_pays', type: 'country' },
+      { key: 'siege_pays', type: 'country', values: ['communautaire'] },
       { key: 'maison_mere_pays', type: 'country', values: ['aucune'] },
       { key: 'droit_applicable', type: 'multi', values: ['fr', 'ue', 'us', 'autre'] },
       { key: 'cloud_act', type: 'enum', values: ['expose', 'non_expose'] },
@@ -25,8 +25,8 @@ export const FACT_SECTIONS = [
   {
     key: 'technique',
     items: [
-      { key: 'hebergement', type: 'multi', values: ['fr', 'ue', 'hors_ue', 'local'] },
-      { key: 'sauvegardes', type: 'multi', values: ['fr', 'ue', 'hors_ue', 'local'] },
+      { key: 'hebergement', type: 'multi', values: ['fr', 'ue', 'adequat', 'hors_ue', 'local'] },
+      { key: 'sauvegardes', type: 'multi', values: ['fr', 'ue', 'adequat', 'hors_ue', 'local'] },
       { key: 'infrastructure', type: 'multi', values: ['europeenne', 'americaine', 'autre', 'local'] },
       { key: 'sous_traitants', type: 'enum', values: ['identifies', 'non_identifies', 'aucun'] },
       { key: 'transferts_internationaux', type: 'enum', values: ['oui', 'non'] },
@@ -38,9 +38,9 @@ export const FACT_SECTIONS = [
       { key: 'politique_confidentialite', type: 'enum', values: ['accessible', 'absente'] },
       { key: 'dpo', type: 'enum', values: ['oui', 'non', 'non_applicable'] },
       { key: 'transferts_hors_ue', type: 'enum', values: ['oui', 'non'] },
-      { key: 'base_legale', type: 'enum', values: ['oui', 'non'] },
-      { key: 'duree_conservation', type: 'enum', values: ['precisee', 'non_precisee'] },
-      { key: 'suppression_donnees', type: 'enum', values: ['possible', 'non_documentee'] },
+      { key: 'base_legale', type: 'enum', values: ['oui', 'non', 'non_applicable'] },
+      { key: 'duree_conservation', type: 'enum', values: ['precisee', 'non_precisee', 'non_applicable'] },
+      { key: 'suppression_donnees', type: 'enum', values: ['possible', 'non_documentee', 'non_applicable'] },
     ],
   },
   {
@@ -92,7 +92,7 @@ export function factTone(itemKey, value) {
   if (value === undefined || value === null) return 'missing';
   if (value === FACT_UNKNOWN) return 'unknown';
   if (itemKey === 'siege_pays' || itemKey === 'maison_mere_pays') {
-    if (value === 'aucune') return 'neutral';
+    if (value === 'aucune' || value === 'communautaire') return 'neutral';
     if (EEA_COUNTRIES.has(value)) return 'good';
     return ADEQUACY_COUNTRIES.has(value) ? 'warn' : 'bad';
   }
@@ -100,7 +100,8 @@ export function factTone(itemKey, value) {
     if (itemKey === 'sectorielles') return value.length ? 'good' : 'neutral';
     if (itemKey === 'droit_applicable') return value.includes('us') ? 'bad' : (value.includes('autre') ? 'neutral' : 'good');
     if (itemKey === 'infrastructure') return value.includes('americaine') ? 'bad' : (value.includes('autre') ? 'neutral' : 'good');
-    return value.includes('hors_ue') ? 'bad' : 'good'; // hébergement, sauvegardes
+    if (value.includes('hors_ue')) return 'bad'; // hébergement, sauvegardes
+    return value.includes('adequat') ? 'warn' : 'good';
   }
   return BY_VALUE[itemKey]?.[value] || 'neutral';
 }

@@ -144,6 +144,8 @@ export default {
       en_cours: "Lopend",
       local: "Op het apparaat of zelf gehost",
       aucun: "Geen",
+      adequat: "Adequaat land (buiten de EU)",
+      communautaire: "Gemeenschapsproject",
     },
   },
 };
