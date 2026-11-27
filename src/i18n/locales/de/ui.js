@@ -19,6 +19,28 @@ export default {
   catalogue: {
     popular: "Beliebte Apps",
   },
+  profiles: {
+    title: "Erweiterte Filter",
+    includeUnknown: "Apps mit unbestätigten Daten einbeziehen",
+    count_one: "{count} App passt",
+    count_other: "{count} Apps passen",
+    error: "Filter derzeit nicht verfügbar",
+    share: "Teilen",
+    clear: "Löschen",
+    loading: "Passende Apps werden gesucht...",
+    empty: "Keine App erfüllt alle diese Kriterien",
+    emptyHint: "Entfernen Sie einen Filter oder beziehen Sie unbestätigte Daten ein",
+    disclaimer: "In unseren Bewertungen erhobene Fakten (öffentliche Quellen), keine Konformitätszertifizierung.",
+    shareTitle: "Gefilterte Trusti-Apps",
+    shareText: "Apps, die passen zu: {filters}",
+    items: {
+      hors_cloud_act: { label: "Ohne CLOUD Act", description: "Unternehmen nicht den US-Gesetzen zum Datenzugriff ausgesetzt" },
+      donnees_europe: { label: "Daten in der EU", description: "gehostet in Frankreich, in der EU oder auf dem Gerät, ohne bekannte Übermittlung außerhalb der EU" },
+      vie_privee: { label: "Datenschutzfreundlich", description: "DSB, angegebene Rechtsgrundlage und Datenlöschung möglich, ohne bekannte Übermittlung außerhalb der EU" },
+      open_source: { label: "Open Source", description: "öffentlicher Quellcode" },
+      certifiee: { label: "Zertifiziert", description: "SecNumCloud, ISO 27001, HDS, SOC 2 oder Branchenzertifizierung" },
+    },
+  },
   appCard: {
     loading: "Wird geladen...",
     bestAvailable: [

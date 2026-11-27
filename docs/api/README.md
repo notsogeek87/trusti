@@ -39,6 +39,13 @@ Endpoint principal, backé par PostgreSQL (`service-postgres.js`).
   listes, plus `curatedAlternativeIds` (alternatives choisies une par une dans
   `app_relations`), propre à cette réponse. Pas de pagination.
 - Voir aussi `POST /api/suggest-tool` ci-dessous (suggestion d'outil manquant).
+- **GET** `?profiles=index` : filtres avancés du catalogue. Pour chaque profil
+  (`hors_cloud_act`, `donnees_europe`, `vie_privee`, `open_source`, `certifiee`),
+  les IDs des apps qui y répondent (`match`) et de celles dont des données ne sont
+  pas vérifiées (`unknown`) : `{ success: true, profiles: { [profil]: { match, unknown } } }`.
+  Calculé depuis la fiche factuelle (`app_assessments.facts`) par
+  `src/utils/appProfiles.js`, partagé avec le front (voir
+  [le guide](../guides/filtres-avances.md)).
 - **GET** `?assessment_for=:id` : détail de l'évaluation TrustiScore d'une app,
   lu dans la table `app_assessments` (alimentée depuis le dépôt `trustillm`,
   schéma dans `trustillm/migrations/001_app_assessments.sql`). Réponse :

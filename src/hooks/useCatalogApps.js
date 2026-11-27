@@ -15,9 +15,10 @@ const pageUrl = (limit, offset) => appsUrl(`limit=${limit}&offset=${offset}&sort
 /**
  * Catalogue des apps, chargé par pages (défilement infini). Il est chargé en
  * entier dès qu'une catégorie est choisie ou que « Mes Apps » est ouvert
- * (filtre côté client, et recherche des alternatives).
+ * (filtre côté client, et recherche des alternatives), ainsi qu'avec un filtre avancé
+ * (`needsAllApps`).
  */
-export const useCatalogApps = ({ activeTab, selectedCategory }) => {
+export const useCatalogApps = ({ activeTab, selectedCategory, needsAllApps: forceAll = false }) => {
   const [apps, setApps] = useState([]);
   const [isLoadingApps, setIsLoadingApps] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -60,7 +61,7 @@ export const useCatalogApps = ({ activeTab, selectedCategory }) => {
   // Chargement complet quand une catégorie est choisie ou sur « Mes Apps »
   useEffect(() => {
     const loadAll = async () => {
-      const needsAllApps = selectedCategory !== 'Toutes' || activeTab === TABS.MY_APPS;
+      const needsAllApps = forceAll || selectedCategory !== 'Toutes' || activeTab === TABS.MY_APPS;
       if (!needsAllApps || allAppsLoaded) return;
 
       // `pagination.hasMore` vaut false à l'état initial : tant que la
@@ -106,7 +107,7 @@ export const useCatalogApps = ({ activeTab, selectedCategory }) => {
       }
     };
     loadAll();
-  }, [selectedCategory, activeTab, pagination.total]);
+  }, [selectedCategory, activeTab, pagination.total, forceAll]);
 
   // Fin du chargement initial, avec un petit délai pour une transition fluide
   useEffect(() => {

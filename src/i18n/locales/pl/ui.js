@@ -19,6 +19,30 @@ export default {
   catalogue: {
     popular: "Popularne aplikacje",
   },
+  profiles: {
+    title: "Filtry zaawansowane",
+    includeUnknown: "Uwzględnij aplikacje z niezweryfikowanymi danymi",
+    count_one: "{count} aplikacja pasuje",
+    count_few: "{count} aplikacje pasują",
+    count_many: "{count} aplikacji pasuje",
+    count_other: "{count} aplikacji pasuje",
+    error: "Filtry są chwilowo niedostępne",
+    share: "Udostępnij",
+    clear: "Wyczyść",
+    loading: "Szukanie pasujących aplikacji...",
+    empty: "Żadna aplikacja nie spełnia wszystkich tych kryteriów",
+    emptyHint: "Usuń filtr lub uwzględnij niezweryfikowane dane",
+    disclaimer: "Fakty zebrane w naszych ocenach (źródła publiczne), a nie certyfikat zgodności.",
+    shareTitle: "Przefiltrowane aplikacje Trusti",
+    shareText: "Aplikacje spełniające: {filters}",
+    items: {
+      hors_cloud_act: { label: "Poza CLOUD Act", description: "firma nie podlega amerykańskim przepisom o dostępie do danych" },
+      donnees_europe: { label: "Dane w UE", description: "hostowane we Francji, w UE lub na urządzeniu, bez znanego transferu poza UE" },
+      vie_privee: { label: "Szanuje prywatność", description: "IOD, podana podstawa prawna i możliwe usunięcie danych, bez znanego transferu poza UE" },
+      open_source: { label: "Open source", description: "publiczny kod źródłowy" },
+      certifiee: { label: "Certyfikowana", description: "SecNumCloud, ISO 27001, HDS, SOC 2 lub certyfikat branżowy" },
+    },
+  },
   appCard: {
     loading: "Ładowanie...",
     bestAvailable: [

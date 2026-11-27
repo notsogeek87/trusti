@@ -143,6 +143,8 @@ export const buildMyAppsList = ({ myApps, myAppsData, catalogApps, isLoadingMyAp
  * - Catalogue « Toutes » sans recherche : ordre du serveur conservé (le
  *   localeCompare JS peut différer de Postgres sur les accents ou la casse,
  *   et réordonnerait les cartes déjà affichées à chaque page chargée).
+ * - Catalogue avec filtres avancés (`profileIds`, voir utils/appProfiles.js) : seules les apps
+ *   retenues, catalogue complet trié (recherche comprise).
  */
 export const computeFilteredApps = ({
   activeTab,
@@ -154,6 +156,7 @@ export const computeFilteredApps = ({
   myApps,
   myAppsData,
   isLoadingMyApps,
+  profileIds = null,
 }) => {
   const isSearching = Boolean(searchTerm.trim());
 
@@ -166,8 +169,8 @@ export const computeFilteredApps = ({
   const sourceApps = isSearching ? searchResults : catalogApps;
 
   if (activeTab === TABS.APPLICATIONS) {
-    const list = [...sourceApps];
-    const isServerPaginatedStream = !isSearching && selectedCategory === 'Toutes';
+    const list = profileIds ? sourceApps.filter(app => profileIds.has(String(app.id))) : [...sourceApps];
+    const isServerPaginatedStream = !isSearching && selectedCategory === 'Toutes' && !profileIds;
     return isServerPaginatedStream ? list : sortBestGradeFirst(list);
   }
 

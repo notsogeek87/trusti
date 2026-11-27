@@ -22,6 +22,9 @@ RUN npm ci --omit=dev && npm cache clean --force \
            /opt/yarn-* /usr/local/bin/yarn /usr/local/bin/yarnpkg /root/.npm
 COPY api ./api
 COPY server ./server
+# Logique pure partagée avec le front (filtres avancés : src/utils/appProfiles.js)
+COPY src/constants/assessmentFacts.js ./src/constants/assessmentFacts.js
+COPY src/utils/appProfiles.js ./src/utils/appProfiles.js
 COPY --from=build /app/dist ./dist
 USER node
 EXPOSE 3000

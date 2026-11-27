@@ -49,7 +49,7 @@ async function handleApps(req, res) {
 
   try {
     // Extraire le type depuis l'URL ou le body
-    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, onboarding, categories, ids, grade, alternatives_for, assessment_for, grade_changes_since, migration_guide_from, migration_guide_to, pro } = req.query;
+    const { type, limit, offset, page, search, q, sortBy, awards, showInAwards, onboarding, categories, ids, grade, alternatives_for, assessment_for, profiles, grade_changes_since, migration_guide_from, migration_guide_to, pro } = req.query;
     
     if (req.method === 'GET') {
       // GET /api/apps?type=trusti
@@ -79,6 +79,13 @@ async function handleApps(req, res) {
         });
       }
       
+      // GET /api/apps?profiles=index — filtres avancés : IDs des apps par profil
+      // ({ [profil]: { match: [...], unknown: [...] } }, voir src/utils/appProfiles.js)
+      if (profiles === 'index') {
+        const index = await dbService.getProfileIndex();
+        return res.status(200).json({ success: true, profiles: index });
+      }
+
       // GET /api/apps?assessment_for=:id — détail de l'évaluation TrustiScore (null si non évaluée)
       // Inclut l'historique de la note (gradeHistory : première évaluation + changements).
       if (assessment_for) {

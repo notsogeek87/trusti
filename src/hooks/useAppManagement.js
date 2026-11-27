@@ -18,8 +18,9 @@ import { useAwardsApps, useMyAppsData, useAppSearch } from './useRemoteAppLists'
  * @param {Function} getUserData voir useAuth
  * @param {string} selectedCategory catégorie du catalogue (« Toutes » par défaut)
  * @param {boolean} needsMyAppsData un écran hors onglet a besoin des données de « Mes Apps »
+ * @param {Set<string>|null} profileIds filtres avancés du catalogue : apps retenues (null : pas de filtre), voir useAppProfiles
  */
-export const useAppManagement = (saveUserData, getUserData, selectedCategory = 'Toutes', needsMyAppsData = false) => {
+export const useAppManagement = (saveUserData, getUserData, selectedCategory = 'Toutes', needsMyAppsData = false, profileIds = null) => {
   // Après l'onboarding, la réouverture de l'app tombe directement sur « Mes Apps »
   const [activeTab, setActiveTab] = useState(
     () => (hasCompletedOnboarding() ? TABS.MY_APPS : TABS.APPLICATIONS)
@@ -30,7 +31,7 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
   const selections = useUserSelections(saveUserData, getUserData);
   const { myApps } = selections;
 
-  const catalog = useCatalogApps({ activeTab, selectedCategory });
+  const catalog = useCatalogApps({ activeTab, selectedCategory, needsAllApps: profileIds !== null });
   const { awardsApps, isLoadingAwards } = useAwardsApps(activeTab);
   const { myAppsData, isLoadingMyApps } = useMyAppsData({
     activeTab,
@@ -50,7 +51,8 @@ export const useAppManagement = (saveUserData, getUserData, selectedCategory = '
     myApps,
     myAppsData,
     isLoadingMyApps,
-  }), [activeTab, myApps, searchTerm, searchResults, catalog.apps, awardsApps, myAppsData, isLoadingMyApps, selectedCategory]);
+    profileIds,
+  }), [activeTab, myApps, searchTerm, searchResults, catalog.apps, awardsApps, myAppsData, isLoadingMyApps, selectedCategory, profileIds]);
 
   const catalogSearchApps = useMemo(
     () => computeCatalogSearchApps({ activeTab, searchTerm, searchResults, myApps }),

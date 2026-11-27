@@ -19,6 +19,28 @@ export default {
   catalogue: {
     popular: "Populaire apps",
   },
+  profiles: {
+    title: "Geavanceerde filters",
+    includeUnknown: "Apps met niet-geverifieerde gegevens meenemen",
+    count_one: "{count} app komt overeen",
+    count_other: "{count} apps komen overeen",
+    error: "Filters momenteel niet beschikbaar",
+    share: "Delen",
+    clear: "Wissen",
+    loading: "Overeenkomende apps zoeken...",
+    empty: "Geen enkele app voldoet aan al deze criteria",
+    emptyHint: "Verwijder een filter of neem niet-geverifieerde gegevens mee",
+    disclaimer: "Feiten uit onze beoordelingen (openbare bronnen), geen conformiteitscertificering.",
+    shareTitle: "Gefilterde Trusti-apps",
+    shareText: "Apps die voldoen aan: {filters}",
+    items: {
+      hors_cloud_act: { label: "Buiten CLOUD Act", description: "bedrijf niet onderworpen aan Amerikaanse wetten op gegevenstoegang" },
+      donnees_europe: { label: "Gegevens in de EU", description: "gehost in Frankrijk, in de EU of op het apparaat, zonder bekende doorgifte buiten de EU" },
+      vie_privee: { label: "Privacyvriendelijk", description: "FG, vermelde rechtsgrond en verwijdering van gegevens mogelijk, zonder bekende doorgifte buiten de EU" },
+      open_source: { label: "Open source", description: "openbare broncode" },
+      certifiee: { label: "Gecertificeerd", description: "SecNumCloud, ISO 27001, HDS, SOC 2 of sectorcertificering" },
+    },
+  },
   appCard: {
     loading: "Laden...",
     bestAvailable: [

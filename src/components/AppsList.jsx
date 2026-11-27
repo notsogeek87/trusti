@@ -25,6 +25,8 @@ const AppsList = ({
   onToggleMigrate,
   onSelectApp,
   selectedCategory = 'Toutes',
+  profileFilterActive = false,
+  isLoadingProfiles = false,
   searchTerm = '',
   pagination = { hasMore: false, isLoadingMore: false, total: 0 },
   onLoadMore,
@@ -56,7 +58,7 @@ const AppsList = ({
   
   // Pour l'onglet APPLICATIONS, utiliser la pagination serveur
   // Désactiver la pagination pendant une recherche
-  const showPagination = activeTab === TABS.APPLICATIONS && selectedCategory === 'Toutes' && !searchTerm.trim();
+  const showPagination = activeTab === TABS.APPLICATIONS && selectedCategory === 'Toutes' && !profileFilterActive && !searchTerm.trim();
   const hasMore = showPagination && pagination.hasMore;
   const isLoadingMore = pagination.isLoadingMore;
 
@@ -134,7 +136,16 @@ const AppsList = ({
   // Affichage normal pour les autres onglets
   return (
     <div className={isMobile ? 'space-y-4' : 'grid grid-cols-2 xl:grid-cols-3 gap-4'}>
-      {displayApps.length === 0 && activeTab === TABS.APPLICATIONS && selectedCategory !== 'Toutes' && (
+      {displayApps.length === 0 && activeTab === TABS.APPLICATIONS && profileFilterActive && isLoadingProfiles && (
+        <LoadingSpinner message={t('ui.profiles.loading')} size="medium" />
+      )}
+      {displayApps.length === 0 && activeTab === TABS.APPLICATIONS && profileFilterActive && !isLoadingProfiles && (
+        <div className="text-center py-8 px-4">
+          <p className="text-slate-500 text-sm mb-2">{t('ui.profiles.empty')}</p>
+          <p className="text-slate-400 text-xs">{t('ui.profiles.emptyHint')}</p>
+        </div>
+      )}
+      {displayApps.length === 0 && activeTab === TABS.APPLICATIONS && selectedCategory !== 'Toutes' && !profileFilterActive && (
         <div className="text-center py-8 px-4">
           <p className="text-slate-500 text-sm mb-2">{t('myApps.list.emptyCategory')}</p>
           <p className="text-slate-400 text-xs">{t('myApps.list.emptyCategoryHint')}</p>

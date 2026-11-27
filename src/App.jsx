@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useAppManagement } from './hooks/useAppManagement';
+import { useAppProfiles } from './hooks/useAppProfiles';
 import { useModals } from './hooks/useModals';
 import { useAuth } from './hooks/useAuth';
 import { useAlternativeNudges } from './hooks/useAlternativeNudges';
@@ -38,9 +39,12 @@ import SearchBar from './components/ui/SearchBar';
 import ExplainerPanel from './components/ExplainerPanel';
 import AppsList from './components/AppsList';
 import CategoryFilterBar from './components/CategoryFilterBar';
+import ProfileFilterBar from './components/ProfileFilterBar';
+import { buildProfilesShareUrl } from './utils/appProfiles.js';
+import { getMainCategory } from './constants/categories';
 import SelectionShareBar from './components/SelectionShareBar';
 import { shareText } from './utils/shareUtils';
-import { buildAppsSelectionUrl, buildAppsSelectionText, MAX_SHARED_APPS } from './utils/appShareLink';
+import { buildAppsSelectionUrl, buildAppsSelectionText, MAX_SHARED_APPS, getShareBaseUrl } from './utils/appShareLink';
 import AwardsHeader from './components/AwardsHeader';
 import MyAppsHeader from './components/MyAppsHeader';
 import MyAppsSummary from './components/MyAppsSummary';
@@ -82,6 +86,9 @@ const App = () => {
   // Filtre de catégorie de l'onglet Applications
   const [selectedCategory, setSelectedCategory] = useState('Toutes');
 
+  // Filtres avancés de l'onglet Applications (profils : hors CLOUD Act, open source…), lien ?f=…
+  const profileFilter = useAppProfiles();
+
   // Écran « Espace de stockage » : déclaré avant useAppManagement, qui a
   // besoin de savoir qu'il faut les données complètes de « Mes Apps » même si
   // l'onglet actif est différent.
@@ -122,7 +129,27 @@ const App = () => {
     importMigrations,
     setSelectedApp,
     loadMoreApps,
-  } = useAppManagement(saveUserData, getUserData, selectedCategory, showStorageManager);
+  } = useAppManagement(saveUserData, getUserData, selectedCategory, showStorageManager, profileFilter.matchingIds);
+
+  // Lien partagé avec des filtres (?f=…) : ouvrir directement le catalogue filtré
+  useEffect(() => {
+    if (profileFilter.fromUrl) setActiveTab(TABS.APPLICATIONS);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const isProfileFilterActive = activeTab === TABS.APPLICATIONS && profileFilter.matchingIds !== null;
+  const profileFilterCount = useMemo(() => (
+    isProfileFilterActive
+      ? filteredApps.filter(app => selectedCategory === 'Toutes' || getMainCategory(app.category) === selectedCategory).length
+      : 0
+  ), [isProfileFilterActive, filteredApps, selectedCategory]);
+
+  const handleShareProfiles = async () => {
+    const base = getShareBaseUrl({ isNative: isNativeAndroid, location: window.location });
+    const url = buildProfilesShareUrl(base, { profiles: profileFilter.profiles, includeUnknown: profileFilter.includeUnknown });
+    const names = profileFilter.profiles.map(key => t(`ui.profiles.items.${key}.label`)).join(', ');
+    await shareText(t('ui.profiles.shareTitle'), t('ui.profiles.shareText', { filters: names }), url);
+  };
+
 
   const {
     showExplainer,
@@ -540,6 +567,20 @@ const App = () => {
                 />
               )}
 
+              {activeTab === TABS.APPLICATIONS && (
+                <ProfileFilterBar
+                  profiles={profileFilter.profiles}
+                  includeUnknown={profileFilter.includeUnknown}
+                  onToggleProfile={profileFilter.toggleProfile}
+                  onIncludeUnknownChange={profileFilter.setIncludeUnknown}
+                  onClear={profileFilter.clear}
+                  onShare={handleShareProfiles}
+                  count={profileFilterCount}
+                  isLoading={profileFilter.isLoading || (isProfileFilterActive && isLoadingApps)}
+                  hasError={profileFilter.hasError}
+                />
+              )}
+
               {isMyAppsTab && (
                 <MyAppsHeader
                   count={myApps.size}
@@ -636,6 +677,8 @@ const App = () => {
                 onToggleMigrate={toggleMigrate}
                 onSelectApp={openAppDetail}
                 selectedCategory={selectedCategory}
+                profileFilterActive={isProfileFilterActive}
+                isLoadingProfiles={profileFilter.isLoading || (isProfileFilterActive && isLoadingApps)}
                 searchTerm={searchTerm}
                 pagination={pagination}
                 onLoadMore={loadMoreApps}

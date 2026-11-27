@@ -6,6 +6,7 @@ import { formatAssessmentFromDB } from '../../assessment.js';
 import { collapseGradeChanges, buildGradeTimeline } from '../../gradeChanges.js';
 import { buildTransferGuide } from '../../migrationGuides.js';
 import { sql } from './client.js';
+import { buildProfileIndex } from '../../../src/utils/appProfiles.js';
 
 // Plafond de suggestions distinctes en attente : borne la table si un robot
 // envoie des noms au hasard (une suggestion déjà connue est toujours acceptée).
@@ -120,4 +121,24 @@ export async function getMigrationGuide(fromId, toId) {
     console.error('Error getting migration guide:', error);
     throw error;
   }
+}
+
+/**
+ * Index des filtres avancés (profils, voir src/utils/appProfiles.js) pour tout le catalogue :
+ * pour chaque profil, les IDs des apps qui y répondent et de celles aux données non vérifiées.
+ */
+export async function getProfileIndex() {
+  let rows;
+  try {
+    rows = await sql`
+      SELECT a.id, a.is_open_source, to_jsonb(s) -> 'facts' AS facts
+      FROM applications a
+      LEFT JOIN app_assessments s ON s.app_id = a.id::text
+    `;
+  } catch (error) {
+    // 42P01 : table des évaluations absente -> profils calculés sans fiche factuelle.
+    if (error?.code !== '42P01') throw error;
+    rows = await sql`SELECT id, is_open_source, NULL::jsonb AS facts FROM applications`;
+  }
+  return buildProfileIndex(rows.map(r => ({ id: r.id, isOpenSource: r.is_open_source === true, facts: r.facts })));
 }
