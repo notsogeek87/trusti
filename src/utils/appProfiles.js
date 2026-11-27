@@ -57,7 +57,7 @@ function allOf(statuses) {
 }
 
 /**
- * Profils proposés, dans l'ordre d'affichage. `icon` : nom d'icône Lucide (voir ProfileFilterBar).
+ * Profils proposés, dans l'ordre d'affichage. `icon` : nom d'icône Lucide (voir ProfileFilterOptions).
  * `evaluate(facts, app)` → PROFILE_MATCH | PROFILE_UNKNOWN | PROFILE_NO.
  */
 export const APP_PROFILES = [
