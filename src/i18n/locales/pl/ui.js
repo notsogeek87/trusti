@@ -20,6 +20,8 @@ export default {
     popular: "Popularne aplikacje",
   },
   profiles: {
+    button: "Filtry zaawansowane",
+    done: "Gotowe",
     title: "Filtry zaawansowane",
     includeUnknown: "Uwzględnij aplikacje z niezweryfikowanymi danymi",
     count_one: "{count} aplikacja pasuje",

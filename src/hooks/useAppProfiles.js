@@ -3,11 +3,13 @@ import { API_URL } from '../utils/apiConfig';
 import { cachedFetchJSON } from '../utils/fetchCache';
 import { matchingAppIds, parseProfilesParams, writeProfilesParams } from '../utils/appProfiles.js';
 
+const NO_SELECTION = { profiles: [], includeUnknown: false };
+
 const readFromUrl = () => {
   try {
     return parseProfilesParams(window.location.search);
   } catch {
-    return { profiles: [], includeUnknown: false };
+    return NO_SELECTION;
   }
 };
 
@@ -24,24 +26,26 @@ const writeToUrl = (selection) => {
 };
 
 /**
- * Filtres avancés du catalogue (profils, voir utils/appProfiles.js) : profils choisis, option
- * « inclure les données non vérifiées », lien ?f=… dans l'URL, et index des profils (chargé
- * à la première utilisation, puis en cache).
+ * Filtres avancés par profils (voir utils/appProfiles.js) : profils choisis, option
+ * « inclure les données non vérifiées », et index des profils (chargé à la première
+ * utilisation, puis en cache). Catalogue : `syncUrl` lit et écrit le lien ?f=… ; « Mes Apps »
+ * a sa propre sélection, hors URL.
  *
+ * @param {{syncUrl?: boolean}} [options]
  * @returns {{profiles: string[], includeUnknown: boolean, toggleProfile: Function,
  *   setIncludeUnknown: Function, clear: Function, matchingIds: Set<string>|null,
  *   isLoading: boolean, hasError: boolean, fromUrl: boolean}}
  *   matchingIds : apps qui répondent à tous les profils choisis ; null sans filtre.
  */
-export const useAppProfiles = () => {
-  const [initial] = useState(readFromUrl);
+export const useAppProfiles = ({ syncUrl = false } = {}) => {
+  const [initial] = useState(() => (syncUrl ? readFromUrl() : NO_SELECTION));
   const [selection, setSelection] = useState(initial);
   const [index, setIndex] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
   const isActive = selection.profiles.length > 0;
 
-  useEffect(() => { writeToUrl(selection); }, [selection]);
+  useEffect(() => { if (syncUrl) writeToUrl(selection); }, [syncUrl, selection]);
 
   useEffect(() => {
     if (!isActive || index) return;

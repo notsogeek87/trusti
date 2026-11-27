@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { SlidersHorizontal, ArrowUp, ArrowDown } from 'lucide-react';
 import { SORT_OPTIONS } from '../utils/myAppsSort';
+import ProfileFilterOptions from './ProfileFilterOptions';
 import { t } from '../i18n/index.js';
 
 // Réglages de la liste "Mes Apps" regroupés derrière une seule icône, à côté
@@ -41,6 +42,7 @@ const MyAppsFilterMenu = ({
   onAlternativeFilterChange,
   migrationCounts,
   alternativeCounts,
+  profileFilter = null,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
@@ -65,8 +67,9 @@ const MyAppsFilterMenu = ({
     }
   };
 
+  const hasProfiles = Boolean(profileFilter?.profiles.length);
   const isCustomized =
-    migrationFilter !== DEFAULT_MIGRATION_FILTER || alternativeFilter !== DEFAULT_ALTERNATIVE_FILTER;
+    migrationFilter !== DEFAULT_MIGRATION_FILTER || alternativeFilter !== DEFAULT_ALTERNATIVE_FILTER || hasProfiles;
 
   return (
     <div className="relative shrink-0" ref={containerRef}>
@@ -87,7 +90,7 @@ const MyAppsFilterMenu = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-lg border border-slate-100 p-3 z-20 space-y-3">
+        <div className="absolute right-0 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] max-h-[70vh] overflow-y-auto bg-white rounded-2xl shadow-lg border border-slate-100 p-3 z-20 space-y-3">
           <div>
             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">{t('myApps.filters.show')}</p>
             <div className="space-y-1.5">
@@ -136,12 +139,22 @@ const MyAppsFilterMenu = ({
             </div>
           </div>
 
+          {profileFilter && (
+            <ProfileFilterOptions
+              profiles={profileFilter.profiles}
+              includeUnknown={profileFilter.includeUnknown}
+              onToggleProfile={profileFilter.toggleProfile}
+              onIncludeUnknownChange={profileFilter.setIncludeUnknown}
+            />
+          )}
+
           {isCustomized && (
             <button
               type="button"
               onClick={() => {
                 onMigrationFilterChange(DEFAULT_MIGRATION_FILTER);
                 onAlternativeFilterChange(DEFAULT_ALTERNATIVE_FILTER);
+                profileFilter?.clear();
               }}
               className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 underline underline-offset-2"
             >

@@ -39,7 +39,8 @@ import SearchBar from './components/ui/SearchBar';
 import ExplainerPanel from './components/ExplainerPanel';
 import AppsList from './components/AppsList';
 import CategoryFilterBar from './components/CategoryFilterBar';
-import ProfileFilterBar from './components/ProfileFilterBar';
+import CatalogFilterMenu from './components/CatalogFilterMenu';
+import ProfileFilterNotice from './components/ProfileFilterNotice';
 import { buildProfilesShareUrl } from './utils/appProfiles.js';
 import { getMainCategory } from './constants/categories';
 import SelectionShareBar from './components/SelectionShareBar';
@@ -87,7 +88,9 @@ const App = () => {
   const [selectedCategory, setSelectedCategory] = useState('Toutes');
 
   // Filtres avancés de l'onglet Applications (profils : hors CLOUD Act, open source…), lien ?f=…
-  const profileFilter = useAppProfiles();
+  const profileFilter = useAppProfiles({ syncUrl: true });
+  // Mêmes filtres dans « Mes Apps », avec leur propre sélection (hors URL)
+  const myAppsProfiles = useAppProfiles();
 
   // Écran « Espace de stockage » : déclaré avant useAppManagement, qui a
   // besoin de savoir qu'il faut les données complètes de « Mes Apps » même si
@@ -173,7 +176,7 @@ const App = () => {
     showLandingPage,
   });
 
-  const myAppsView = useMyAppsView({ activeTab, filteredApps, myApps, customMigrations });
+  const myAppsView = useMyAppsView({ activeTab, filteredApps, myApps, customMigrations, profileIds: myAppsProfiles.matchingIds, onResetProfiles: myAppsProfiles.clear });
   const { myAppsSorted, myAppsDisplayed } = myAppsView;
 
   const { openAppDetail, closeAppDetail: closeAppDetailOnly, resumeMigration, resumeMigrationId } = useAppDetail({
@@ -554,8 +557,24 @@ const App = () => {
             ? 'max-w-md mx-auto px-4 py-3 pb-24'
             : 'flex-1 min-w-0 px-6 py-3 pb-6'
           }>
-            {!isMyAppsTab && (
+            {activeTab === TABS.TOP_ALTERNATIVES && (
               <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} isSearching={isSearching} />
+            )}
+
+            {/* Catalogue : recherche + filtres avancés (repliés derrière une icône) sur une ligne */}
+            {activeTab === TABS.APPLICATIONS && (
+              <div className="flex items-start gap-2 mb-3">
+                <div className="flex-1 min-w-0">
+                  <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} isSearching={isSearching} className="" />
+                </div>
+                <CatalogFilterMenu
+                  profiles={profileFilter.profiles}
+                  includeUnknown={profileFilter.includeUnknown}
+                  onToggleProfile={profileFilter.toggleProfile}
+                  onIncludeUnknownChange={profileFilter.setIncludeUnknown}
+                  onClear={profileFilter.clear}
+                />
+              </div>
             )}
 
             <div key={activeTab} style={{ animation: 'tabFadeIn 0.18s ease-out' }}>
@@ -567,17 +586,14 @@ const App = () => {
                 />
               )}
 
-              {activeTab === TABS.APPLICATIONS && (
-                <ProfileFilterBar
+              {isProfileFilterActive && (
+                <ProfileFilterNotice
                   profiles={profileFilter.profiles}
-                  includeUnknown={profileFilter.includeUnknown}
-                  onToggleProfile={profileFilter.toggleProfile}
-                  onIncludeUnknownChange={profileFilter.setIncludeUnknown}
-                  onClear={profileFilter.clear}
-                  onShare={handleShareProfiles}
                   count={profileFilterCount}
-                  isLoading={profileFilter.isLoading || (isProfileFilterActive && isLoadingApps)}
+                  isLoading={profileFilter.isLoading || isLoadingApps}
                   hasError={profileFilter.hasError}
+                  onShare={handleShareProfiles}
+                  onClear={profileFilter.clear}
                 />
               )}
 
@@ -633,6 +649,7 @@ const App = () => {
                       onAlternativeFilterChange={myAppsView.setAlternativeFilter}
                       migrationCounts={myAppsView.migrationCounts}
                       alternativeCounts={myAppsView.alternativeCounts}
+                      profileFilter={myAppsProfiles}
                     />
                   )}
                 </div>
@@ -644,6 +661,7 @@ const App = () => {
                   total={myAppsSorted.length}
                   migrationFilter={myAppsView.migrationFilter}
                   alternativeFilter={myAppsView.effectiveAlternativeFilter}
+                  profiles={myAppsProfiles.profiles}
                   onShowAll={myAppsView.resetFilters}
                 />
               )}

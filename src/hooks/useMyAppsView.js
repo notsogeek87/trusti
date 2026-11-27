@@ -13,9 +13,10 @@ const EMPTY_ALTERNATIVE_COUNTS = { with: 0, without: 0 };
  * - `myAppsSorted` : toutes les apps suivies, triées selon le réglage (sert
  *   aussi au partage, qui doit refléter l'ordre affiché).
  * - `myAppsDisplayed` : la même liste après les filtres migrée / à migrer et
- *   avec / sans alternative (hors « Mes Apps », la liste reçue telle quelle).
+ *   avec / sans alternative et les filtres par profils (`profileIds`, null : aucun ; voir
+ *   useAppProfiles), hors « Mes Apps », la liste reçue telle quelle.
  */
-export const useMyAppsView = ({ activeTab, filteredApps, myApps, customMigrations }) => {
+export const useMyAppsView = ({ activeTab, filteredApps, myApps, customMigrations, profileIds = null, onResetProfiles }) => {
   const isMyAppsTab = activeTab === TABS.MY_APPS;
 
   // TrustiScore décroissant par défaut, persisté en local
@@ -54,16 +55,18 @@ export const useMyAppsView = ({ activeTab, filteredApps, myApps, customMigration
 
   const myAppsDisplayed = useMemo(() => {
     if (!isMyAppsTab) return filteredApps;
-    return filterMyApps(myAppsSorted, {
+    const list = filterMyApps(myAppsSorted, {
       migrationFilter,
       alternativeFilter: effectiveAlternativeFilter,
       customMigrations,
     });
-  }, [isMyAppsTab, filteredApps, myAppsSorted, migrationFilter, effectiveAlternativeFilter, customMigrations]);
+    return profileIds ? list.filter(app => profileIds.has(String(app.id))) : list;
+  }, [isMyAppsTab, filteredApps, myAppsSorted, migrationFilter, effectiveAlternativeFilter, customMigrations, profileIds]);
 
   const resetFilters = () => {
     setMigrationFilter('all');
     setAlternativeFilter('all');
+    onResetProfiles?.();
   };
 
   return {

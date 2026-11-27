@@ -20,6 +20,8 @@ export default {
     popular: "Beliebte Apps",
   },
   profiles: {
+    button: "Erweiterte Filter",
+    done: "Fertig",
     title: "Erweiterte Filter",
     includeUnknown: "Apps mit unbestätigten Daten einbeziehen",
     count_one: "{count} App passt",

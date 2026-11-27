@@ -1,7 +1,9 @@
 # Filtres avancés du catalogue
 
-Pastilles « Filtres avancés » sous les catégories de l'onglet Catalogue : on cumule des **profils**
-(ET logique) avec la recherche et la catégorie.
+Icône de réglages à droite de la recherche, dans le **Catalogue** et dans **Mes Apps** (menu « Trier et
+filtrer ») : on cumule des **profils** (ET logique) avec la recherche, la catégorie ou les autres filtres.
+Dans le catalogue, une ligne de rappel sous les catégories donne le nombre d'apps, les filtres actifs,
+« Partager » et « Effacer ». La sélection de « Mes Apps » est distincte de celle du catalogue (hors URL).
 
 | Profil | Clé | Règle (fiche factuelle `app_assessments.facts`) |
 |---|---|---|
@@ -26,8 +28,10 @@ Pastilles « Filtres avancés » sous les catégories de l'onglet Catalogue : on
   `tests/server/appProfiles.test.js`). Importé par le serveur : le `Dockerfile` copie ce fichier et
   `src/constants/assessmentFacts.js` dans l'image d'exécution.
 - `GET /api/apps?profiles=index` (`getProfileIndex`, `server/database/postgres/app-insights.js`).
-- Front : `useAppProfiles` (état, URL, index en cache), `ProfileFilterBar`, filtrage dans
-  `computeFilteredApps` (le catalogue est chargé en entier dès qu'un filtre est actif).
+- Front : `useAppProfiles` (état, URL avec `syncUrl`, index en cache), `ProfileFilterOptions` (liste des
+  profils, partagée), `CatalogFilterMenu` + `ProfileFilterNotice` (catalogue), `MyAppsFilterMenu`
+  (Mes Apps). Filtrage dans `computeFilteredApps` (catalogue, chargé en entier dès qu'un filtre est
+  actif) et `useMyAppsView` (Mes Apps).
 
-Ajouter un profil : une entrée dans `APP_PROFILES`, une icône dans `ProfileFilterBar`, les libellés
+Ajouter un profil : une entrée dans `APP_PROFILES`, une icône dans `ProfileFilterOptions`, les libellés
 `ui.profiles.items.<clé>` dans les 8 langues, un test.
