@@ -81,6 +81,7 @@ export default {
     heading: "Dados verificados",
     notFilled: "Não preenchido",
     noneFound: "Nenhuma encontrada",
+    siteOnly: "Apenas a política do site do editor, não do software",
     license: "Licença: {license}",
     countries: "Países: {countries}",
     expected: {

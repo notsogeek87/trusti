@@ -33,6 +33,9 @@ const FactRow = ({ item }) => (
         {item.observed ?? t('assessment.facts.notFilled')}
       </span>
     </div>
+    {item.siteOnly && (
+      <p className="text-[10px] font-semibold text-slate-500 mt-0.5">{t('assessment.facts.siteOnly')}</p>
+    )}
     {(item.countries.length > 0 || item.detail) && (
       <p className="text-[11px] text-slate-600 mt-0.5">
         {item.countries.length > 0 && <span>{t('assessment.facts.countries', { countries: item.countries.join(', ') })}</span>}

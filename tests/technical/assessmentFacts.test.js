@@ -173,3 +173,22 @@ test('durée de conservation non chiffrée : à surveiller (orange), pas défavo
   assert.equal(factTone('duree_conservation', 'precisee'), 'good');
   assert.equal(factTone('politique_confidentialite', 'absente'), 'bad');
 });
+
+test('donnée lue sur le site de l\'éditeur seulement : grise, avec mention', async () => {
+  const { buildCriterionFacts } = await import('../../src/utils/assessmentFacts.js');
+  const facts = { rgpd: {
+    dpo: { value: 'oui', scope: 'site' },
+    base_legale: { value: 'oui' },
+    politique_confidentialite: { value: 'inconnu', scope: 'site' },
+  } };
+  const c = buildCriterionFacts(facts);
+  const dpo = c.conformite.find(r => r.key === 'dpo');
+  assert.equal(dpo.tone, 'neutral');
+  assert.equal(dpo.siteOnly, true);
+  assert.equal(c.conformite.find(r => r.key === 'base_legale').tone, 'good');
+  assert.equal(c.transparence.find(r => r.key === 'politique_confidentialite').tone, 'unknown');
+  for (const lang of ['fr', 'en', 'de', 'es', 'it', 'nl', 'pl', 'pt']) {
+    const loc = (await import(`../../src/i18n/locales/${lang}/index.js`)).default.assessment;
+    assert.ok(loc.facts.siteOnly, lang);
+  }
+});

@@ -81,6 +81,7 @@ export default {
     heading: "Geprüfte Angaben",
     notFilled: "Nicht angegeben",
     noneFound: "Keine gefunden",
+    siteOnly: "Nur die Richtlinie der Website des Anbieters, nicht der Software",
     license: "Lizenz: {license}",
     countries: "Länder: {countries}",
     expected: {

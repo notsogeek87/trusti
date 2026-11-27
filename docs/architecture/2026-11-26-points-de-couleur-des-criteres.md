@@ -29,6 +29,7 @@ visiblement. Règles dans `src/constants/assessmentFacts.js` (`factTone`, `factT
 | **Contrôle étranger : non** | vert seulement si le siège est dans l'UE/EEE ; neutre sinon (une société américaine non contrôlée reste soumise au CLOUD Act). |
 | **Transferts** (`transferts_internationaux` et `transferts_hors_ue`) fusionnés en un point en Localisation | orange si l'hébergement reste en UE, en France, sur l'appareil ou en pays adéquat (Suisse) ; rouge si l'hébergement est déjà hors UE. |
 | **Certifications inconnues** | gris (souvent sans objet pour une app grand public), plus jaune. |
+| **Donnée lue sur le site de l'éditeur seulement** (`scope: "site"` dans la fiche, depuis le 2026-11-27) | gris, avec la mention « Politique du site de l'éditeur seulement, pas du logiciel » : la politique du site (formulaires, prospects) ne dit rien du logiciel noté. |
 | **Durée de conservation non chiffrée** | orange (à surveiller) : « tant que nécessaire » reste conforme au RGPD, et presque aucun grand éditeur ne chiffre ses durées. |
 
 Côté données (dépôt `trustillm`) :

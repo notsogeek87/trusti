@@ -61,6 +61,7 @@ export function formatFacts(raw) {
         countries: Array.isArray(f.countries) && f.countries.length ? f.countries : null,
         detail: f.detail || null,
         confidence: f.confidence || null,
+        scope: f.scope === 'site' ? 'site' : null,
         sources: (f.sources || []).map(formatSource),
       };
     }

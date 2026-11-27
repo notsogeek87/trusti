@@ -81,6 +81,7 @@ export default {
     heading: "Gecontroleerde gegevens",
     notFilled: "Niet ingevuld",
     noneFound: "Geen gevonden",
+    siteOnly: "Alleen het beleid van de website van de uitgever, niet van de software",
     license: "Licentie: {license}",
     countries: "Landen: {countries}",
     expected: {

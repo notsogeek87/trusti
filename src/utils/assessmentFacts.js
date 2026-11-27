@@ -37,11 +37,16 @@ export function observedLabel(item, fact) {
 
 /** Une donnée attendue avec sa valeur observée (ou non renseignée), sa lecture et ses sources. */
 function factRow(item, fact, facts = null) {
+  const tone = facts ? factToneInContext(item.key, fact?.value, facts) : factTone(item.key, fact?.value);
+  // Donnée lue dans la politique du site de l'éditeur seulement (pas du logiciel) : neutre, ne doit pas
+  // contredire la note du critère (voir docs/architecture/2026-11-26-points-de-couleur-des-criteres.md).
+  const siteOnly = fact?.scope === 'site';
   return {
     key: item.key,
     expected: expectedLabel(item),
     observed: observedLabel(item, fact),
-    tone: facts ? factToneInContext(item.key, fact?.value, facts) : factTone(item.key, fact?.value),
+    tone: siteOnly && tone !== 'missing' && tone !== 'unknown' ? 'neutral' : tone,
+    siteOnly,
     countries: (fact?.countries || []).map(countryName),
     detail: fact?.detail || null,
     sources: fact?.sources || [],

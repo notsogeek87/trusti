@@ -81,6 +81,7 @@ export default {
     heading: "Verified data",
     notFilled: "Not filled in",
     noneFound: "None found",
+    siteOnly: "Publisher's website policy only, not the software",
     license: "License: {license}",
     countries: "Countries: {countries}",
     expected: {
