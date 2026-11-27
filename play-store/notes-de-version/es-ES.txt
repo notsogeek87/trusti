@@ -1,5 +1,4 @@
 Novedades:
-• ¡Trusti ya está en español! También en italiano, neerlandés, polaco y portugués, además de francés, inglés y alemán.
-• Si el idioma de tu teléfono aún no está disponible, la app se muestra en inglés.
-• Notificaciones en tu idioma.
-• Informe PDF de organizaciones: las letras polacas, checas… ya no se sustituyen por «?».
+• Filtros avanzados: apps fuera de la CLOUD Act, con datos en la UE, que respetan la privacidad, de código abierto o certificadas. Icono junto a la búsqueda, en el Catálogo y en Mis Apps.
+• Enlace para compartir una búsqueda filtrada.
+• Ficha de la app: los hechos recogidos (sede, alojamiento, RGPD, certificaciones) con sus fuentes, antes del detalle de la nota.

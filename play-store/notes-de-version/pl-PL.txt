@@ -1,5 +1,4 @@
 Nowości:
-• Trusti mówi teraz po polsku! Także po hiszpańsku, włosku, niderlandzku i portugalsku, oprócz francuskiego, angielskiego i niemieckiego.
-• Jeśli języka twojego telefonu jeszcze nie ma, aplikacja wyświetla się po angielsku.
-• Powiadomienia w twoim języku.
-• Raport PDF dla organizacji: polskie litery nie są już zastępowane znakiem „?”.
+• Filtry zaawansowane: aplikacje poza CLOUD Act, z danymi w UE, szanujące prywatność, open source lub certyfikowane. Ikona obok wyszukiwania, w Katalogu i w Moich aplikacjach.
+• Link do udostępnienia przefiltrowanego wyszukiwania.
+• Strona aplikacji: zebrane fakty (siedziba, hosting, RODO, certyfikaty) ze źródłami, przed szczegółami oceny.

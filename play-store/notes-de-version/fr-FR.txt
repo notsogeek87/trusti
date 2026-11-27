@@ -1,5 +1,4 @@
 Nouveautés :
-• Trusti parle maintenant espagnol, italien, néerlandais, polonais et portugais, en plus du français, de l'anglais et de l'allemand.
-• Si la langue de ton téléphone n'est pas encore proposée, l'app s'affiche en anglais.
-• Notifications traduites dans ta langue.
-• Rapport PDF des organisations : les lettres polonaises, tchèques… ne sont plus remplacées par « ? ».
+• Filtres avancés : trouve les apps hors CLOUD Act, avec des données dans l'UE, respectueuses de la vie privée, open source ou certifiées. Icône à côté de la recherche, dans le Catalogue et dans Mes Apps.
+• Lien partageable vers une recherche filtrée.
+• Fiche de l'app : les faits relevés (siège, hébergement, RGPD, certifications) avec leurs sources, avant le détail de la note.
