@@ -113,7 +113,7 @@ export function factTone(itemKey, value) {
 
 /**
  * Lecture d'une donnée selon le reste de la fiche : « pas de contrôle étranger » n'est favorable
- * que pour une société européenne (une société américaine non contrôlée reste soumise au CLOUD Act).
+ * que pour une société européenne ; un siège dans l'UE n'est favorable que si la maison mère l'est aussi (une société américaine non contrôlée reste soumise au CLOUD Act).
  * @param {string} itemKey
  * @param {*} value
  * @param {object|null} facts  assessment.facts complet
@@ -123,6 +123,12 @@ export function factToneInContext(itemKey, value, facts) {
   if (itemKey === 'controle_etranger' && tone === 'good') {
     const siege = facts?.juridique?.siege_pays?.value;
     if (!siege || !EEA_COUNTRIES.has(siege)) return 'neutral';
+  }
+  // Siège dans l'UE mais maison mère hors UE (ex. Klaxoon, détenue par Wrike aux États-Unis) : le siège
+  // ne protège pas des lois du pays de la maison mère, il ne doit pas s'afficher en vert.
+  if (itemKey === 'siege_pays' && tone === 'good') {
+    const parent = facts?.juridique?.maison_mere_pays?.value;
+    if (parent && parent !== 'aucune' && parent !== 'communautaire' && parent !== FACT_UNKNOWN && !EEA_COUNTRIES.has(parent)) return 'neutral';
   }
   return tone;
 }

@@ -27,6 +27,7 @@ visiblement. Règles dans `src/constants/assessmentFacts.js` (`factTone`, `factT
 |---|---|
 | **Code source** en tête du Contrôle technique, tiré de la fiche de l'app (`isOpenSource`, `license`) | vert si open source (licence en détail) ; rouge « Propriétaire » **seulement si `license` est renseignée** ; sinon « Non renseigné ». `is_open_source` vaut `false` par défaut en base, ce n'est pas une preuve. |
 | **Contrôle étranger : non** | vert seulement si le siège est dans l'UE/EEE ; neutre sinon (une société américaine non contrôlée reste soumise au CLOUD Act). |
+| **Siège dans l'UE** | vert seulement si la maison mère est européenne, absente ou inconnue ; gris si elle est hors UE (ex. Klaxoon, détenue par Wrike aux États-Unis). |
 | **Transferts** (`transferts_internationaux` et `transferts_hors_ue`) fusionnés en un point en Localisation | orange si l'hébergement reste en UE, en France, sur l'appareil ou en pays adéquat (Suisse) ; rouge si l'hébergement est déjà hors UE. |
 | **Certifications inconnues** | gris (souvent sans objet pour une app grand public), plus jaune. |
 | **Donnée lue sur le site de l'éditeur seulement** (`scope: "site"` dans la fiche, depuis le 2026-11-27) | gris, avec la mention « Politique du site de l'éditeur seulement, pas du logiciel » : la politique du site (formulaires, prospects) ne dit rien du logiciel noté. |

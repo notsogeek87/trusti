@@ -192,3 +192,13 @@ test('donnée lue sur le site de l\'éditeur seulement : grise, avec mention', a
     assert.ok(loc.facts.siteOnly, lang);
   }
 });
+
+test('siège dans l\'UE : vert seulement si la maison mère n\'est pas hors UE', async () => {
+  const { factToneInContext } = await import('../../src/constants/assessmentFacts.js');
+  const j = (siege, parent) => ({ juridique: { siege_pays: { value: siege }, maison_mere_pays: { value: parent } } });
+  assert.equal(factToneInContext('siege_pays', 'FR', j('FR', 'US')), 'neutral');
+  assert.equal(factToneInContext('siege_pays', 'FR', j('FR', 'aucune')), 'good');
+  assert.equal(factToneInContext('siege_pays', 'FR', j('FR', 'DE')), 'good');
+  assert.equal(factToneInContext('siege_pays', 'FR', j('FR', 'inconnu')), 'good');
+  assert.equal(factToneInContext('siege_pays', 'US', j('US', 'US')), 'bad');
+});
