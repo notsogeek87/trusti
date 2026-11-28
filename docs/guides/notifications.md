@@ -97,3 +97,19 @@ Les textes des événements (titre, résumé) sont en français uniquement pour 
 | `tests/server/appEvents.test.js`, `tests/technical/notificationInbox.test.js`, `android/app/src/test/.../NotificationPolicyTest.java` | Tests |
 
 `AlternativeNudgeWorker` et `GradeChangeWorker` ne font plus rien : ils restent pour que les tâches déjà programmées sur les téléphones (versions précédentes) puissent s'instancier, puis s'annuler. Le moteur annule aussi ces tâches au démarrage de Trusti.
+
+## Actualités générales de souveraineté numérique
+
+La veille peut proposer des décisions publiques, des évolutions réglementaires,
+des dépendances stratégiques ou des évolutions majeures du logiciel libre.
+Une proposition générale est identifiée par `#S<id>` dans le récapitulatif.
+Les numéros `#<id>` correspondent aux événements d'applications.
+
+Pour examiner les propositions générales, utiliser
+`GET /api/sovereignty-events?status=proposed` avec le même accès d'administration
+que pour les événements d'applications. Vérifier la source primaire et la date
+d'effet avant de publier. Envoyer `PATCH /api/sovereignty-events` avec
+`{"id":"42","status":"published"}` ou `{"id":"42","status":"rejected"}`.
+Les actualités publiées apparaissent dans le panneau dépliable de l'onglet
+Applications. Les libellés et les dates suivent la langue de l'interface. Les
+titres et résumés sont rédigés en français.

@@ -1,4 +1,13 @@
 export default {
+  sovereigntyNews: {
+    title: "Nachrichten zur digitalen Souveränität",
+    loading: "Nachrichten werden geladen…",
+    error: "Die Nachrichten sind nicht verfügbar.",
+    retry: "Erneut versuchen",
+    empty: "Keine aktuellen Meldungen.",
+    source: "Quelle lesen",
+    sourceLabel: "Quelle zu „{title}“ lesen (neuer Tab)",
+  },
   app: {
     migrationAbandoned: "Wechsel abgebrochen",
     undo: "Rückgängig",

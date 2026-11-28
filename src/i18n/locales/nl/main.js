@@ -1,4 +1,13 @@
 export default {
+  sovereigntyNews: {
+    title: "Nieuws over digitale soevereiniteit",
+    loading: "Nieuws wordt geladen…",
+    error: "Het nieuws is niet beschikbaar.",
+    retry: "Opnieuw proberen",
+    empty: "Geen recente nieuwsberichten.",
+    source: "Lees de bron",
+    sourceLabel: "Lees de bron van ‘{title}’ (nieuw tabblad)",
+  },
   app: {
     migrationAbandoned: "Migratie stopgezet",
     undo: "Ongedaan maken",
