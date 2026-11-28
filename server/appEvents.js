@@ -79,7 +79,7 @@ function isValidDay(value) {
  * Accepte les noms snake_case (app_id, source_url, event_date) ou camelCase.
  * @returns {{ ok: true, value: object } | { ok: false, error: string }}
  */
-export function validateEventProposal(body, now = new Date()) {
+export function validateEventProposal(body, now = new Date(), { requireApp = true } = {}) {
   if (!body || typeof body !== 'object') return { ok: false, error: 'Corps JSON attendu' };
   const appId = cleanText(body.app_id ?? body.appId, 100);
   const type = cleanText(body.type, 40);
@@ -91,7 +91,7 @@ export function validateEventProposal(body, now = new Date()) {
   const eventDate = cleanText(body.event_date ?? body.eventDate ?? body.date, 10);
   const proposedBy = cleanText(body.proposed_by ?? body.proposedBy, 100);
 
-  if (!appId) return { ok: false, error: 'app_id est requis' };
+  if (requireApp && !appId) return { ok: false, error: 'app_id est requis' };
   if (!EVENT_TYPES.includes(type)) return { ok: false, error: `type doit valoir : ${EVENT_TYPES.join(', ')}` };
   if (!EVENT_IMPACTS.includes(impact)) return { ok: false, error: `impact doit valoir : ${EVENT_IMPACTS.join(', ')}` };
   if (!EVENT_SEVERITIES.includes(severity)) return { ok: false, error: `severity doit valoir : ${EVENT_SEVERITIES.join(', ')}` };

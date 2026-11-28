@@ -171,3 +171,25 @@ compte. Corps JSON : `name` (2 à 80 caractères, requis), `website` (facultatif
 est `success: true` sans enregistrement). Réponses : `200 { success: true }`, `400` si invalide,
 `429` si le plafond de suggestions en attente est atteint. Écrit dans la table `tool_suggestions`
 (voir [le guide](../guides/evaluation-organisation.md)).
+
+## `/api/sovereignty-events` — `api/sovereignty-events.js`
+
+Actualités générales de souveraineté numérique. Les écritures portent sur
+`sovereignty_events` et n'affectent aucun TrustiScore.
+
+- `GET /api/sovereignty-events` renvoie les actualités publiées des 90 derniers
+  jours (500 au plus). `since=AAAA-MM-JJ` élargit la fenêtre jusqu'à 365 jours.
+- `GET /api/sovereignty-events?status=proposed` exige `x-api-key` et renvoie les
+  200 propositions les plus anciennes, avec leur statut et leur auteur.
+- `POST` exige `x-api-key`. Il accepte `type`, `impact`, `severity`, `title`,
+  `summary`, `source_url`, `event_date` et `proposed_by`. Aucun identifiant
+  d'application n'est nécessaire. La proposition reste privée. Une insertion
+  renvoie `201` avec `id`. Une URL déjà présente renvoie `200` avec
+  `duplicate: true`, y compris si la proposition a été rejetée.
+- `PATCH` exige `x-api-key` et un corps tel que `{"id":"42","status":"published"}`.
+  Le statut `rejected` retire l'actualité de la liste publique.
+
+Appliquer `server/database/migrations/2026-11-28-sovereignty-events.sql` à la
+base cible avant le déploiement du serveur. La migration crée la table si
+nécessaire et préserve les données d'une table existante. Voir aussi le
+[guide de validation](../guides/notifications.md#actualités-générales-de-souveraineté-numérique).
