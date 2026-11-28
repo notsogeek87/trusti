@@ -51,6 +51,7 @@ import MyAppsHeader from './components/MyAppsHeader';
 import MyAppsSummary from './components/MyAppsSummary';
 import DataHygieneCard from './components/DataHygieneCard';
 import GradeChangesCard from './components/GradeChangesCard';
+import SovereigntyNews from './components/SovereigntyNews';
 import MigrationsInProgressCard from './components/MigrationsInProgressCard';
 import NotificationPermissionCard from './components/NotificationPermissionCard';
 import MyAppsFilterMenu from './components/MyAppsFilterMenu';
@@ -557,6 +558,7 @@ const App = () => {
             ? 'max-w-md mx-auto px-4 py-3 pb-24'
             : 'flex-1 min-w-0 px-6 py-3 pb-6'
           }>
+            {activeTab === TABS.APPLICATIONS && !searchTerm.trim() && <SovereigntyNews />}
             {activeTab === TABS.TOP_ALTERNATIVES && (
               <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} isSearching={isSearching} />
             )}
