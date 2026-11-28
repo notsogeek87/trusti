@@ -1,4 +1,13 @@
 export default {
+  sovereigntyNews: {
+    title: "Aktualności o suwerenności cyfrowej",
+    loading: "Wczytywanie aktualności…",
+    error: "Aktualności są niedostępne.",
+    retry: "Spróbuj ponownie",
+    empty: "Brak ostatnio opublikowanych aktualności.",
+    source: "Przeczytaj źródło",
+    sourceLabel: "Przeczytaj źródło „{title}” (nowa karta)",
+  },
   app: {
     migrationAbandoned: "Migracja przerwana",
     undo: "Cofnij",

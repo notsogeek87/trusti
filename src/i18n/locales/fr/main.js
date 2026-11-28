@@ -1,4 +1,13 @@
 export default {
+  sovereigntyNews: {
+    title: "Actualités de la souveraineté numérique",
+    loading: "Chargement des actualités…",
+    error: "Les actualités sont indisponibles.",
+    retry: "Réessayer",
+    empty: "Aucune actualité publiée récemment.",
+    source: "Lire la source",
+    sourceLabel: "Lire la source de « {title} » (nouvel onglet)",
+  },
   app: {
     migrationAbandoned: "Migration abandonnée",
     undo: "Annuler",
